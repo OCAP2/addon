@@ -10,6 +10,18 @@ addMissionEventHandler ["EntityKilled", {
 	_this call ocap_fnc_eh_killed;
 }];
 
+addMissionEventHandler ["EntityRespawned", {
+	params ["_entity", "_corpse"];
+
+	// Reset unit back to normal
+	_entity setvariable ["ocapIsKilled", false];
+
+	// Stop tracking old unit
+	if (_corpse getVariable ["ocap_isInitialised", false]) then {
+		_corpse setVariable ["ocap_exclude", true];
+	};
+}];
+
 call ocap_fnc_trackAceExplPlace;
 
 if (ocap_saveMissionEnded) then {

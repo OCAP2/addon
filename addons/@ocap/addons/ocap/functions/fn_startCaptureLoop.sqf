@@ -41,7 +41,7 @@ while {ocap_capture} do {
 					_id, //2
 					name _x,  //3
 					groupID (group _x),  //4
-					str side _x,  //5
+					str side group _x,  //5
 					BOOL(isPlayer _x)  //6
 				]] call ocap_fnc_extension;
 				_x spawn ocap_fnc_addEventHandlers;

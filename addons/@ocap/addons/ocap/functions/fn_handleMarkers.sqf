@@ -15,12 +15,11 @@ ocap_markers_handle = ["ocap_handleMarker", {
 
 		case "CREATED":{
 
-				LOG(format["MARKER:CREATE: Processing marker data --
-%1 ",_this]);
+				LOG(ARR2("MARKER:CREATE: Processing marker data -- ", _this));
 
 			private _validate = false;
-			if (_mrk in ocap_markers_tracked) then {
-				LOG(format["MARKER:CREATE: Marker %1 already tracked, exiting", _mrk_name]);
+			if (_mrk_name in ocap_markers_tracked) then {
+				LOG(ARR3("MARKER:CREATE: Marker", _mrk_name, "already tracked, exiting"));
 			} else {
 				private _nameTestArr = [];
 				{
@@ -29,11 +28,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 					};
 				} forEach ocap_excludeMarkerFromRecord;
 				if (count _nameTestArr > 0) then {
-					LOG(format[
-						"MARKER:CREATE: Marker excluded per config: name ""%1"" matched ""%2"" exclusion",
-						_nameTestArr # 0 # 0,
-						_nameTestArr # 0 # 1
-					]);
+					LOG(ARR5("MARKER:CREATE: Marker excluded per config: name ", _nameTestArr # 0 # 0, "matched", _nameTestArr # 0 # 1, "exclusion"));
 				} else {
 					_validate = true;
 				};
@@ -41,7 +36,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 			
 			if (_validate) then {
 
-			LOG(format["MARKER:CREATE: Valid CREATED process of marker from ""%1"" for ""%2""", _mrk_owner, _mrk_name]);
+			LOG(ARR4("MARKER:CREATE: Valid CREATED process of marker from", _mrk_owner, "for", _mrk_name));
 
 			if (_type isEqualTo "") then {_type = "mil_dot"};
 			ocap_markers_tracked pushBackUnique _mrk_name;
@@ -125,9 +120,8 @@ ocap_markers_handle = ["ocap_handleMarker", {
 			} else {if (_dir isEqualTo "") then {_dir = 0}};
 
 
-
-			LOG(format["CREATE:MARKER: Valid CREATED process of ""%1"", sending to extension --
-%2 ", _mrk_name, [_mrk_name, _dir, _type, _text, ocap_captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]]);
+			private _logParams = (str [_mrk_name, _dir, _type, _text, ocap_captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]);
+			LOG(ARR4("CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension -- ", _logParams));
 
 			[":MARKER:CREATE:", [_mrk_name, _dir, _type, _text, ocap_captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call ocap_fnc_extension;
 			};
@@ -140,8 +134,8 @@ ocap_markers_handle = ["ocap_handleMarker", {
 				if (isNil "_dir") then {_dir = 0};
 
 				if (ocap_isDebug) then {
-					LOG(format["MARKER:MOVE: Valid UPDATED process of ""%1"", sending to extension --
-%2 ", _mrk_name, [_mrk_name, ocap_captureFrameNo, _pos, _dir, _alpha]]);
+					private _logParams = str [_mrk_name, ocap_captureFrameNo, _pos, _dir, _alpha];
+					LOG(ARR4("MARKER:MOVE: Valid UPDATED process of", _mrk_name, ", sending to extension -- ", _logParams));
 				};
 
 				[":MARKER:MOVE:", [_mrk_name, ocap_captureFrameNo, _pos, _dir, _alpha]] call ocap_fnc_extension;
@@ -151,7 +145,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		case "DELETED":{
 
 			if (_mrk_name in ocap_markers_tracked) then {
-				LOG(format["MARKER:DELETE: Marker ""%1"" deleted", _mrk_name]);
+				LOG(ARR3("MARKER:DELETE: Marker", _mrk_name, "deleted"));
 				[":MARKER:DELETE:", [_mrk_name, ocap_captureFrameNo]] call ocap_fnc_extension;
 				ocap_markers_tracked = ocap_markers_tracked - [_mrk_name];
 			};
@@ -270,6 +264,6 @@ ocap_markers_handle = ["ocap_handleMarker", {
 
 		} forEach (allMapMarkers);
 
-		LOG(format["GETINITIALMARKERS: Successfully parsed init-scripted and editor-placed markers"]);
+		LOG(["GETINITIALMARKERS: Successfully parsed init-scripted and editor-placed markers"]);
 	}
 ] call CBA_fnc_waitUntilAndExecute;

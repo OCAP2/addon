@@ -26,10 +26,10 @@ switch (count _this) do {
 if (ocap_needToSave) then {
 	if (!isNil "_tag") then {
 		[":SAVE:", [worldName, briefingName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay, ocap_endFrameNo, _tag]] call ocap_fnc_extension;
-		LOG(format["Saved recording of mission ""%1"" with tag ""%2""", briefingName, _tag]);
+		LOG(ARR4("Saved recording of mission", briefingName, "with tag", _tag));
 	} else {
 		[":SAVE:", [worldName, briefingName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay, ocap_endFrameNo]] call ocap_fnc_extension;
-		LOG(format["Saved recording of mission ""%1"" with default tag", briefingName]);
+		LOG(ARR3("Saved recording of mission", briefingName, "with default tag"));
 	};
 } else {
 	LOG(["ocap_needToSave is set to false. Not saving"]);

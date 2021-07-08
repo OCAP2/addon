@@ -54,7 +54,6 @@ while {ocap_capture} do {
 				if (ocap_captureFrameNo % 10 == 0 || _unitRole == "") then {
 					_unitRole = [_x] call ocap_fnc_getUnitType;
 					_x setVariable ["ocap_unitType", _unitRole];
-					"debug_console" callExtension (str _unitRole);
 				};
 
 				_pos = getPosATL _x;

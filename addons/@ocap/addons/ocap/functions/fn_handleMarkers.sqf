@@ -5,17 +5,12 @@ ocap_markers_tracked = []; // Markers which we saves into replay
 
 // create CBA event handler to be called on server
 ocap_markers_handle = ["ocap_handleMarker", {
-
 	params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", "_forceGlobal"];
-
-
-
 
 	switch (_eventType) do {
 
 		case "CREATED":{
-
-				LOG(ARR2("MARKER:CREATE: Processing marker data -- ", _this));
+			LOG(ARR2("MARKER:CREATE: Processing marker data -- ", _this));
 
 			private _validate = false;
 			if (_mrk_name in ocap_markers_tracked) then {
@@ -33,97 +28,94 @@ ocap_markers_handle = ["ocap_handleMarker", {
 					_validate = true;
 				};
 			};
-			
+
 			if (_validate) then {
+				LOG(ARR4("MARKER:CREATE: Valid CREATED process of marker from", _mrk_owner, "for", _mrk_name));
 
-			LOG(ARR4("MARKER:CREATE: Valid CREATED process of marker from", _mrk_owner, "for", _mrk_name));
+				if (_type isEqualTo "") then {_type = "mil_dot"};
+				ocap_markers_tracked pushBackUnique _mrk_name;
 
-			if (_type isEqualTo "") then {_type = "mil_dot"};
-			ocap_markers_tracked pushBackUnique _mrk_name;
-
-			private _mrk_color = "";
-			private _mrk_colorRaw = getarray (configfile >> "CfgMarkerColors" >> _color >> "color");
-			if ((_mrk_colorRaw # 0) isEqualType "" || _color == "Default") then {
-				_typeSplit = _type select [0, 2];
-				if (
-					_color == "ColorEAST" ||
-					_typeSplit == "o_"
-				) then {
-					_mrk_color = "#800000";
-				} else {
+				private _mrk_color = "";
+				private _mrk_colorRaw = getarray (configfile >> "CfgMarkerColors" >> _color >> "color");
+				if ((_mrk_colorRaw # 0) isEqualType "" || _color == "Default") then {
+					_typeSplit = _type select [0, 2];
 					if (
-						_color == "ColorWEST" ||
-						_typeSplit == "b_"
+						_color == "ColorEAST" ||
+						_typeSplit == "o_"
 					) then {
-						_mrk_color = "#004C99";
+						_mrk_color = "#800000";
 					} else {
 						if (
-							_color == "ColorGUER" ||
-							_typeSplit == "n_"
+							_color == "ColorWEST" ||
+							_typeSplit == "b_"
 						) then {
-							_mrk_color = "#008000";
+							_mrk_color = "#004C99";
 						} else {
 							if (
-								_color == "ColorCIV" ||
-								_typeSplit == "c_"
+								_color == "ColorGUER" ||
+								_typeSplit == "n_"
 							) then {
-								_mrk_color = "#660080";
-							} else  {
+								_mrk_color = "#008000";
+							} else {
 								if (
-									_color == "ColorUNKNOWN" ||
-									_typeSplit == "u_"
+									_color == "ColorCIV" ||
+									_typeSplit == "c_"
 								) then {
-									_mrk_color = "#B29900";
-								} else {
-									_mrk_color = "#000000";
+									_mrk_color = "#660080";
+								} else  {
+									if (
+										_color == "ColorUNKNOWN" ||
+										_typeSplit == "u_"
+									) then {
+										_mrk_color = "#B29900";
+									} else {
+										_mrk_color = "#000000";
+									};
 								};
 							};
 						};
 					};
+				} else {
+					_mrk_colorRaw = getarray (configfile >> "CfgMarkerColors" >> _color >> "color");
+					_mrk_color = (_mrk_colorRaw call bis_fnc_colorRGBtoHTML);
 				};
-			} else {
-				_mrk_colorRaw = getarray (configfile >> "CfgMarkerColors" >> _color >> "color");
-				_mrk_color = (_mrk_colorRaw call bis_fnc_colorRGBtoHTML);
-			};
 
-
-			private ["_sideOfMarker"];
-			if (_mrk_owner isEqualTo objNull) then {
-				_forceGlobal = true;
-				_mrk_owner = -1;
-				_sideOfMarker = -1;
-			} else {
-				_sideOfMarker = (side _mrk_owner) call BIS_fnc_sideID;
-				_mrk_owner = _mrk_owner getVariable["ocap_id", 0];
-			};
-
-			if (_sideOfMarker isEqualTo 4 ||
-			(["Projectile#", _mrk_name] call BIS_fnc_inString) ||
-			(["Detonation#", _mrk_name] call BIS_fnc_inString) ||
-			(["Mine#", _mrk_name] call BIS_fnc_inString) ||
-			(["ObjectMarker", _mrk_name] call BIS_fnc_inString) ||
-			(["moduleCoverMap", _mrk_name] call BIS_fnc_inString) ||
-			(!isNil "_forceGlobal")) then {_sideOfMarker = -1};
-
-			private ["_polylinePos"];
-			if (count _pos > 2) then {
-				_polylinePos = [];
-				for [{_i = 0}, {_i < ((count _pos) - 1)}, {_i = _i + 1}] do {
-					_polylinePos pushBack [_pos # (_i), _pos # (_i + 1)];
-					_i = _i + 1;
+				private ["_sideOfMarker"];
+				if (_mrk_owner isEqualTo objNull) then {
+					_forceGlobal = true;
+					_mrk_owner = -1;
+					_sideOfMarker = -1;
+				} else {
+					_sideOfMarker = (side _mrk_owner) call BIS_fnc_sideID;
+					_mrk_owner = _mrk_owner getVariable["ocap_id", 0];
 				};
-				_pos = _polylinePos;
-			};
 
-			if (isNil "_dir") then {
-				_dir = 0;
-			} else {if (_dir isEqualTo "") then {_dir = 0}};
+				if (_sideOfMarker isEqualTo 4 ||
+				(["Projectile#", _mrk_name] call BIS_fnc_inString) ||
+				(["Detonation#", _mrk_name] call BIS_fnc_inString) ||
+				(["Mine#", _mrk_name] call BIS_fnc_inString) ||
+				(["ObjectMarker", _mrk_name] call BIS_fnc_inString) ||
+				(["moduleCoverMap", _mrk_name] call BIS_fnc_inString) ||
+				(!isNil "_forceGlobal")) then {_sideOfMarker = -1};
 
+				private ["_polylinePos"];
+				if (count _pos > 2) then {
+					_polylinePos = [];
+					for [{_i = 0}, {_i < ((count _pos) - 1)}, {_i = _i + 1}] do {
+						_polylinePos pushBack [_pos # (_i), _pos # (_i + 1)];
+						_i = _i + 1;
+					};
+					_pos = _polylinePos;
+				};
 
-			private _logParams = (str [_mrk_name, _dir, _type, _text, ocap_captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]);
-			LOG(ARR4("CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension -- ", _logParams));
+				if (isNil "_dir") then {
+					_dir = 0;
+				} else {if (_dir isEqualTo "") then {_dir = 0}};
 
-			[":MARKER:CREATE:", [_mrk_name, _dir, _type, _text, ocap_captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call ocap_fnc_extension;
+				private _logParams = (str [_mrk_name, _dir, _type, _text, ocap_captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]);
+				LOG(ARR4("CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension -- ", _logParams));
+
+				[":MARKER:CREATE:", [_mrk_name, _dir, _type, _text, ocap_captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call ocap_fnc_extension;
 			};
 
 		};

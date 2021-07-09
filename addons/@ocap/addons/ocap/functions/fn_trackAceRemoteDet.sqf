@@ -1,6 +1,6 @@
 // LOG ACE REMOTE DET EVENTS
 [{
-    params ["_unit", "_range", "_explosive", "_fuzeTime", "_triggerItem"];
+	params ["_unit", "_range", "_explosive", "_fuzeTime", "_triggerItem"];
 
 	_int = random 2000;
 

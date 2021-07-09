@@ -1,4 +1,4 @@
-#define REQUIRED_VERSION	2.0	
+#define REQUIRED_VERSION	2.0
 #define LOG(_args)			[":LOG:", _args] call ocap_fnc_extension
 #define BOOL(_cond)			([0,1] select (_cond))
 

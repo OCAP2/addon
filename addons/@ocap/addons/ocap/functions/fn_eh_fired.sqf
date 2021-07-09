@@ -61,7 +61,7 @@ if (_ammoSimType isEqualTo "shotBullet") then {
 			_markTextLocal = format["%1 - %2", _muzzleDisp, _magDisp];
 		};
 	};
-	
+
 	_markName = format["Projectile#%1", _int];
 	_markColor = "ColorRed";
 	_markerType = "";

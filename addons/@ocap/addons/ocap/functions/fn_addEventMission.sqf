@@ -33,7 +33,7 @@ if (ocap_saveMissionEnded) then {
 // Custom event handler
 ocap_customEvent_handle = ["ocap_handleCustomEvent", {
 	params ["_eventName", "_eventMessage"];
-	[":EVENT:", 
+	[":EVENT:",
 		[ocap_captureFrameNo, _eventName, _eventMessage]
 	] call ocap_fnc_extension;
 }] call CBA_fnc_addEventHandler;

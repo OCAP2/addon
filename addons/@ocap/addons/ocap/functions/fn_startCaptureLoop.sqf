@@ -39,10 +39,11 @@ while {ocap_capture} do {
 				[":NEW:UNIT:", [
 					ocap_captureFrameNo, //1
 					_id, //2
-					name _x,  //3
-					groupID (group _x),  //4
-					str side group _x,  //5
-					BOOL(isPlayer _x)  //6
+					name _x, //3
+					groupID (group _x), //4
+					str side group _x, //5
+					BOOL(isPlayer _x), //6
+					roleDescription _x // 7
 				]] call ocap_fnc_extension;
 				_x spawn ocap_fnc_addEventHandlers;
 				_id = _id + 1;

@@ -36,50 +36,12 @@ ocap_markers_handle = ["ocap_handleMarker", {
 				ocap_markers_tracked pushBackUnique _mrk_name;
 
 				private _mrk_color = "";
-				private _mrk_colorRaw = getarray (configfile >> "CfgMarkerColors" >> _color >> "color");
-				if ((_mrk_colorRaw # 0) isEqualType "" || _color == "Default") then {
-					_typeSplit = _type select [0, 2];
-					if (
-						_color == "ColorEAST" ||
-						_typeSplit == "o_"
-					) then {
-						_mrk_color = "#800000";
-					} else {
-						if (
-							_color == "ColorWEST" ||
-							_typeSplit == "b_"
-						) then {
-							_mrk_color = "#004C99";
-						} else {
-							if (
-								_color == "ColorGUER" ||
-								_typeSplit == "n_"
-							) then {
-								_mrk_color = "#008000";
-							} else {
-								if (
-									_color == "ColorCIV" ||
-									_typeSplit == "c_"
-								) then {
-									_mrk_color = "#660080";
-								} else  {
-									if (
-										_color == "ColorUNKNOWN" ||
-										_typeSplit == "u_"
-									) then {
-										_mrk_color = "#B29900";
-									} else {
-										_mrk_color = "#000000";
-									};
-								};
-							};
-						};
-					};
+				if (_color == "Default") then {
+					_mrk_color = (configfile >> "CfgMarkers" >> _type >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
 				} else {
-					_mrk_colorRaw = getarray (configfile >> "CfgMarkerColors" >> _color >> "color");
-					_mrk_color = (_mrk_colorRaw call bis_fnc_colorRGBtoHTML);
+					_mrk_color = getarray (configfile >> "CfgMarkerColors" >> _color >> "color") call bis_fnc_colorRGBtoHTML;
 				};
-
+				
 				private ["_sideOfMarker"];
 				if (_mrk_owner isEqualTo objNull) then {
 					_forceGlobal = true;

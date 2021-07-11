@@ -3,6 +3,28 @@
 
 ocap_markers_tracked = []; // Markers which we saves into replay
 
+// On the dedicated server, the color of the markers is blue
+{ 
+	_x params ["_name", "_color"]; 
+	profilenamespace setVariable [_name, _color]; 
+} forEach [ 
+	["map_blufor_r", 0], 
+	["map_blufor_g", 0.3], 
+	["map_blufor_b", 0.6], 
+	["map_independent_r", 0], 
+	["map_independent_g", 0.5], 
+	["map_independent_b", 0], 
+	["map_civilian_r", 0.4], 
+	["map_civilian_g", 0], 
+	["map_civilian_b", 0.5], 
+	["map_unknown_r", 0.1], 
+	["map_unknown_g", 0.6], 
+	["map_unknown_b", 0], 
+	["map_opfor_r", 0.5], 
+	["map_opfor_g", 0], 
+	["map_opfor_b", 0] 
+];
+
 // create CBA event handler to be called on server
 ocap_markers_handle = ["ocap_handleMarker", {
 	params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", "_forceGlobal"];

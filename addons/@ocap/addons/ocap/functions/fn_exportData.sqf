@@ -19,7 +19,9 @@ switch (count _this) do {
 		[":EVENT:", [ocap_endFrameNo, "endMission", ["", _side]]] call ocap_fnc_extension;
 	};
 	default {
-		[":EVENT:", [ocap_endFrameNo, "endMission", [str(_side), _message]]] call ocap_fnc_extension;
+		private _sideString = str(_side);
+		if (_side == sideEmpty) then { _sideString = "" };
+		[":EVENT:", [ocap_endFrameNo, "endMission", [_sideString, _message]]] call ocap_fnc_extension;
 	};
 };
 

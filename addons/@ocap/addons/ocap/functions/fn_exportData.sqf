@@ -20,7 +20,7 @@ switch (count _this) do {
 	};
 	default {
 		private _sideString = str(_side);
-		if (_side == sideEmpty) then { _sideString = "" };
+		if (_side == sideUnknown) then { _sideString = "" };
 		[":EVENT:", [ocap_endFrameNo, "endMission", [_sideString, _message]]] call ocap_fnc_extension;
 	};
 };

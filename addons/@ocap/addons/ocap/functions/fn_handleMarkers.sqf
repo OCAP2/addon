@@ -39,7 +39,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 				if (_color == "Default") then {
 					_mrk_color = (configfile >> "CfgMarkers" >> _type >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
 				} else {
-					_mrk_color = getarray (configfile >> "CfgMarkerColors" >> _color >> "color") call bis_fnc_colorRGBtoHTML;
+					_mrk_color = (configfile >> "CfgMarkerColors" >> _color >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
 				};
 				
 				private ["_sideOfMarker"];

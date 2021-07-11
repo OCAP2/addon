@@ -3,6 +3,28 @@
 
 ocap_markers_tracked = []; // Markers which we saves into replay
 
+// On the dedicated server, the color of the markers is blue
+{ 
+	_x params ["_name", "_color"]; 
+	profilenamespace setVariable [_name, _color]; 
+} forEach [ 
+	["map_blufor_r", 0], 
+	["map_blufor_g", 0.3], 
+	["map_blufor_b", 0.6], 
+	["map_independent_r", 0], 
+	["map_independent_g", 0.5], 
+	["map_independent_b", 0], 
+	["map_civilian_r", 0.4], 
+	["map_civilian_g", 0], 
+	["map_civilian_b", 0.5], 
+	["map_unknown_r", 0.1], 
+	["map_unknown_g", 0.6], 
+	["map_unknown_b", 0], 
+	["map_opfor_r", 0.5], 
+	["map_opfor_g", 0], 
+	["map_opfor_b", 0] 
+];
+
 // create CBA event handler to be called on server
 ocap_markers_handle = ["ocap_handleMarker", {
 	params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", "_forceGlobal"];
@@ -36,50 +58,12 @@ ocap_markers_handle = ["ocap_handleMarker", {
 				ocap_markers_tracked pushBackUnique _mrk_name;
 
 				private _mrk_color = "";
-				private _mrk_colorRaw = getarray (configfile >> "CfgMarkerColors" >> _color >> "color");
-				if ((_mrk_colorRaw # 0) isEqualType "" || _color == "Default") then {
-					_typeSplit = _type select [0, 2];
-					if (
-						_color == "ColorEAST" ||
-						_typeSplit == "o_"
-					) then {
-						_mrk_color = "#800000";
-					} else {
-						if (
-							_color == "ColorWEST" ||
-							_typeSplit == "b_"
-						) then {
-							_mrk_color = "#004C99";
-						} else {
-							if (
-								_color == "ColorGUER" ||
-								_typeSplit == "n_"
-							) then {
-								_mrk_color = "#008000";
-							} else {
-								if (
-									_color == "ColorCIV" ||
-									_typeSplit == "c_"
-								) then {
-									_mrk_color = "#660080";
-								} else  {
-									if (
-										_color == "ColorUNKNOWN" ||
-										_typeSplit == "u_"
-									) then {
-										_mrk_color = "#B29900";
-									} else {
-										_mrk_color = "#000000";
-									};
-								};
-							};
-						};
-					};
+				if (_color == "Default") then {
+					_mrk_color = (configfile >> "CfgMarkers" >> _type >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
 				} else {
-					_mrk_colorRaw = getarray (configfile >> "CfgMarkerColors" >> _color >> "color");
-					_mrk_color = (_mrk_colorRaw call bis_fnc_colorRGBtoHTML);
+					_mrk_color = (configfile >> "CfgMarkerColors" >> _color >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
 				};
-
+				
 				private ["_sideOfMarker"];
 				if (_mrk_owner isEqualTo objNull) then {
 					_forceGlobal = true;

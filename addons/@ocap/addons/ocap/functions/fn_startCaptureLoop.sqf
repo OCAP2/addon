@@ -121,6 +121,33 @@ while {ocap_capture} do {
 			};
 			false
 		} count vehicles;
+
+
+		{
+			switch (typeName _x) do {
+				case "OBJECT": {
+					if !(_x getVariable ["ocap_isInitialised", false]) exitWith {false};
+					private _id = _x getVariable "ocap_id";
+					private _remTickets = [_x, nil, true] call BIS_fnc_respawnTickets;
+					["RespawnTickets", _id, _remTickets] call ocap_fnc_extension;
+					false
+				};
+				case "SIDE": {
+					private _remTickets = [_x, nil] call BIS_fnc_respawnTickets;
+					["RespawnTickets", _x, _remTickets] call ocap_fnc_extension;
+					false
+				};
+				case "STRING": {
+					if (_x != "Global") exitWith {
+						LOG(["fn_respawnTickets: Invalid string provided. Accepted values: ""Global"""]);
+						false
+					};
+					private _remTickets = [missionNamespace] call BIS_fnc_respawnTickets;
+					["RespawnTickets", _x, _remTickets] call ocap_fnc_extension;
+					false
+				};
+			};
+		} count ocap_respawnTickets;
 	};
 	sleep (call ocap_fnc_getDelay);
 	ocap_captureFrameNo = ocap_captureFrameNo + 1;

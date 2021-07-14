@@ -4,6 +4,7 @@
 ocap_capture = false;
 ocap_captureFrameNo = 0;
 ocap_needToSave = [false, true] select (ocap_minMissionTime < 10);
+ocap_respawnTickets = [];
 
 // Add event missions
 call ocap_fnc_addEventMission;

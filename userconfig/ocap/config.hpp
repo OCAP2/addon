@@ -6,3 +6,6 @@ ocap_excludeMarkerFromRecord = ["SystemMarker_"]; // excludes markers with any o
 ocap_saveMissionEnded = true;
 ocap_minMissionTime = 90;
 ocap_isDebug = false;
+ocap_trackInitialTime = true; // detect times initial, change to false for using own time setup
+ocap_trackTimes = false; // continously track times
+ocap_trackTimeInterval = 10; // track time every X capture frame

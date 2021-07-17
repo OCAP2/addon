@@ -30,8 +30,6 @@ class CfgFunctions
 			{
 				preInit = 1;
 			};
-			class startCaptureLoop{};
-			class getDelay{};
 			class addEventHandlers{};
 			class addEventMission{};
 			class eh_connected{};
@@ -41,12 +39,15 @@ class CfgFunctions
 			class eh_killed{};
 			class exportData{};
 			class extension{};
-			class handleMarkers{};
-			class trackAceThrowing{};
-			class trackAceExplPlace{};
-			class trackAceExplLife{};
-			class trackAceRemoteDet{};
+			class getDelay{};
 			class getUnitType{};
+			class handleMarkers{};
+			class startCaptureLoop{};
+			class trackAceExplLife{};
+			class trackAceExplPlace{};
+			class trackAceRemoteDet{};
+			class trackAceThrowing{};
+			class updateTime{};
 		};
 	};
 };

@@ -29,15 +29,13 @@ ocap_capture = true;
 ocap_startTime = time;
 LOG(ARR3(__FILE__, "ocap_capture start, time:", ocap_startTime));
 
-if (ocap_trackInitialTime) then {
-	[] call ocap_fnc_updateTime;
-};
+[] call ocap_fnc_updateTime;
 
 private _id = 0;
 while {ocap_capture} do {
 	isNil {
-		if (ocap_trackTimes && ocap_captureFrameNo > 0 && ocap_captureFrameNo % ocap_trackTimeInterval == 0) then {
-			call ocap_fnc_updateTime;
+		if (ocap_captureFrameNo == 10 || (ocap_captureFrameNo > 10 && ocap_trackTimes && ocap_captureFrameNo % ocap_trackTimeInterval == 0)) then {
+			[] call ocap_fnc_updateTime;
 		};
 
 		{

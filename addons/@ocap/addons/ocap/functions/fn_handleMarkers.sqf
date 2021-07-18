@@ -27,7 +27,7 @@ ocap_markers_tracked = []; // Markers which we saves into replay
 
 // create CBA event handler to be called on server
 ocap_markers_handle = ["ocap_handleMarker", {
-	params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", "_forceGlobal", ["_creationTime", 0]];
+	params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", ["_forceGlobal", false], ["_creationTime", 0]];
 
 	switch (_eventType) do {
 
@@ -80,7 +80,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 				(["Mine#", _mrk_name] call BIS_fnc_inString) ||
 				(["ObjectMarker", _mrk_name] call BIS_fnc_inString) ||
 				(["moduleCoverMap", _mrk_name] call BIS_fnc_inString) ||
-				(!isNil "_forceGlobal")) then {_sideOfMarker = -1};
+				!_forceGlobal) then {_sideOfMarker = -1};
 
 				private ["_polylinePos"];
 				if (count _pos > 2) then {

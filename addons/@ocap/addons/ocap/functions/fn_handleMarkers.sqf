@@ -130,7 +130,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		private _isExcluded = false;
 		if (!isNil "ocap_excludeMarkerFromRecord") then {
 			{
-				if ([_x, _marker] call BIS_fnc_inString) exitWith {
+				if ((str _marker) find _x > 0) exitWith {
 					_isExcluded = true;
 				};
 			} forEach ocap_excludeMarkerFromRecord;
@@ -171,7 +171,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		private _isExcluded = false;
 		if (!isNil "ocap_excludeMarkerFromRecord") then {
 			{
-				if ([_x, _marker] call BIS_fnc_inString) exitWith {
+				if ((str _marker) find _x > 0) exitWith {
 					_isExcluded = true;
 				};
 			} forEach ocap_excludeMarkerFromRecord;
@@ -192,7 +192,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		private _isExcluded = false;
 		if (!isNil "ocap_excludeMarkerFromRecord") then {
 			{
-				if ([_x, _marker] call BIS_fnc_inString) exitWith {
+				if ((str _marker) find _x > 0) exitWith {
 					_isExcluded = true;
 				};
 			} forEach ocap_excludeMarkerFromRecord;

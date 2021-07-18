@@ -80,7 +80,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 				(["Mine#", _mrk_name] call BIS_fnc_inString) ||
 				(["ObjectMarker", _mrk_name] call BIS_fnc_inString) ||
 				(["moduleCoverMap", _mrk_name] call BIS_fnc_inString) ||
-				!_forceGlobal) then {_sideOfMarker = -1};
+				_forceGlobal) then {_sideOfMarker = -1};
 
 				private ["_polylinePos"];
 				if (count _pos > 2) then {

@@ -127,15 +127,15 @@ ocap_markers_handle = ["ocap_handleMarker", {
 
 		// check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
 		// if value is undefined, then skip
-		private _nameTestArr = [];
+		private _isExcluded = false;
 		if (!isNil "ocap_excludeMarkerFromRecord") then {
 			{
-				if ([_x, _marker] call BIS_fnc_inString) then {
-					_nameTestArr pushBackUnique [_mrk_name, _x];
+				if ([_x, _marker] call BIS_fnc_inString) exitWith {
+					_isExcluded = true;
 				};
 			} forEach ocap_excludeMarkerFromRecord;
 		};
-		if (count _nameTestArr > 0) exitWith {};
+		if (_isExcluded) exitWith {};
 
 		// wait two seconds in case marker is skipped
 		[{
@@ -168,15 +168,15 @@ ocap_markers_handle = ["ocap_handleMarker", {
 
 		// check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
 		// if value is undefined, then skip
-		private _nameTestArr = [];
+		private _isExcluded = false;
 		if (!isNil "ocap_excludeMarkerFromRecord") then {
 			{
-				if ([_x, _marker] call BIS_fnc_inString) then {
-					_nameTestArr pushBackUnique [_mrk_name, _x];
+				if ([_x, _marker] call BIS_fnc_inString) exitWith {
+					_isExcluded = true;
 				};
 			} forEach ocap_excludeMarkerFromRecord;
 		};
-		if (count _nameTestArr > 0) exitWith {};
+		if (_isExcluded) exitWith {};
 
 		["ocap_handleMarker", ["UPDATED", _marker, player, markerPos _marker, "", "", "", markerDir _marker, "", "", markerAlpha _marker]] call CBA_fnc_serverEvent;
 	}];
@@ -189,15 +189,15 @@ ocap_markers_handle = ["ocap_handleMarker", {
 
 		// check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
 		// if value is undefined, then skip
-		private _nameTestArr = [];
+		private _isExcluded = false;
 		if (!isNil "ocap_excludeMarkerFromRecord") then {
 			{
-				if ([_x, _marker] call BIS_fnc_inString) then {
-					_nameTestArr pushBackUnique [_mrk_name, _x];
+				if ([_x, _marker] call BIS_fnc_inString) exitWith {
+					_isExcluded = true;
 				};
 			} forEach ocap_excludeMarkerFromRecord;
 		};
-		if (count _nameTestArr > 0) exitWith {};
+		if (_isExcluded) exitWith {};
 
 		["ocap_handleMarker", ["DELETED", _marker, player]] call CBA_fnc_serverEvent;
 	}];

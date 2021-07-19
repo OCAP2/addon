@@ -50,7 +50,7 @@ while {ocap_capture} do {
 					BOOL(isPlayer _x), //6
 					roleDescription _x // 7
 				]] call ocap_fnc_extension;
-				_x spawn ocap_fnc_addEventHandlers;
+				[_x] spawn ocap_fnc_addEventHandlers;
 				_id = _id + 1;
 				_x setVariable ["ocap_isInitialised", true];
 			};
@@ -103,7 +103,7 @@ while {ocap_capture} do {
 					_class,  //3
 					getText (configFile >> "CfgVehicles" >> _vehType >> "displayName")  //4
 				]] call ocap_fnc_extension;
-				_x spawn ocap_fnc_addEventHandlers;
+				[_x] spawn ocap_fnc_addEventHandlers;
 				_id = _id + 1;
 				_x setVariable ["ocap_isInitialised", true];
 			};

@@ -1,4 +1,6 @@
+#include "\userconfig\ocap\config.hpp"
 #include "script_macros.hpp"
+
 private _isKindOfApc = {
 	_bool = false;
 	{
@@ -26,9 +28,16 @@ waitUntil{(count(allPlayers) >= ocap_minPlayerCount)};
 ocap_capture = true;
 ocap_startTime = time;
 LOG(ARR3(__FILE__, "ocap_capture start, time:", ocap_startTime));
+
+[] call ocap_fnc_updateTime;
+
 private _id = 0;
 while {ocap_capture} do {
 	isNil {
+		if (ocap_captureFrameNo == 10 || (ocap_captureFrameNo > 10 && ocap_trackTimes && ocap_captureFrameNo % ocap_trackTimeInterval == 0)) then {
+			[] call ocap_fnc_updateTime;
+		};
+
 		{
 			if !(_x getVariable ["ocap_isInitialised", false]) then {
 				if (_x isKindOf "Logic") exitWith {
@@ -45,16 +54,24 @@ while {ocap_capture} do {
 					BOOL(isPlayer _x), //6
 					roleDescription _x // 7
 				]] call ocap_fnc_extension;
-				_x spawn ocap_fnc_addEventHandlers;
+				[_x] spawn ocap_fnc_addEventHandlers;
 				_id = _id + 1;
 				_x setVariable ["ocap_isInitialised", true];
 			};
 			if !(_x getVariable ["ocap_exclude", false]) then {
 				private _unitRole = _x getVariable ["ocap_unitType", ""];
-
 				if (ocap_captureFrameNo % 10 == 0 || _unitRole == "") then {
 					_unitRole = [_x] call ocap_fnc_getUnitType;
 					_x setVariable ["ocap_unitType", _unitRole];
+				};
+
+				private _lifeState = 0;
+				if (alive _x) then {
+					if (ocap_preferACEUnconscious && !isNil "ace_common_fnc_isAwake") then {
+						_lifeState = if ([_x] call ace_common_fnc_isAwake) then {1} else {2};
+					} else {
+						_lifeState = if (lifeState _x isEqualTo "INCAPACITATED") then {2} else {1};
+					};
 				};
 
 				_pos = getPosATL _x;
@@ -63,16 +80,7 @@ while {ocap_capture} do {
 					(_x getVariable "ocap_id"), //1
 					_pos,  //2
 					round getDir _x,  //3
-					if (alive _x) then {
-						// BOOL(_x getVariable ["ACE_isUnconscious", false]) + 1
-						if (isNil "ace_common_fnc_isAwake") then {
-							1
-						} else {
-							if ([_x] call ace_common_fnc_isAwake) then {1} else {2}
-						}
-					} else {
-						0
-					},  //4
+					_lifeState,  //4
 					BOOL(!((vehicle _x) isEqualTo _x)),  //5
 					if (alive _x) then {name _x} else {""}, //6
 					BOOL(isPlayer _x), //7
@@ -98,7 +106,7 @@ while {ocap_capture} do {
 					_class,  //3
 					getText (configFile >> "CfgVehicles" >> _vehType >> "displayName")  //4
 				]] call ocap_fnc_extension;
-				_x spawn ocap_fnc_addEventHandlers;
+				[_x] spawn ocap_fnc_addEventHandlers;
 				_id = _id + 1;
 				_x setVariable ["ocap_isInitialised", true];
 			};

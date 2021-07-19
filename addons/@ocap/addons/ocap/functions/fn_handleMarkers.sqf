@@ -4,30 +4,30 @@
 ocap_markers_tracked = []; // Markers which we saves into replay
 
 // On the dedicated server, the color of the markers is blue
-{ 
-	_x params ["_name", "_color"]; 
-	profilenamespace setVariable [_name, _color]; 
-} forEach [ 
-	["map_blufor_r", 0], 
-	["map_blufor_g", 0.3], 
-	["map_blufor_b", 0.6], 
-	["map_independent_r", 0], 
-	["map_independent_g", 0.5], 
-	["map_independent_b", 0], 
-	["map_civilian_r", 0.4], 
-	["map_civilian_g", 0], 
-	["map_civilian_b", 0.5], 
-	["map_unknown_r", 0.1], 
-	["map_unknown_g", 0.6], 
-	["map_unknown_b", 0], 
-	["map_opfor_r", 0.5], 
-	["map_opfor_g", 0], 
-	["map_opfor_b", 0] 
+{
+	_x params ["_name", "_color"];
+	profilenamespace setVariable [_name, _color];
+} forEach [
+	["map_blufor_r", 0],
+	["map_blufor_g", 0.3],
+	["map_blufor_b", 0.6],
+	["map_independent_r", 0],
+	["map_independent_g", 0.5],
+	["map_independent_b", 0],
+	["map_civilian_r", 0.4],
+	["map_civilian_g", 0],
+	["map_civilian_b", 0.5],
+	["map_unknown_r", 0.1],
+	["map_unknown_g", 0.6],
+	["map_unknown_b", 0],
+	["map_opfor_r", 0.5],
+	["map_opfor_g", 0],
+	["map_opfor_b", 0]
 ];
 
 // create CBA event handler to be called on server
 ocap_markers_handle = ["ocap_handleMarker", {
-	params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", "_forceGlobal"];
+	params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", ["_forceGlobal", false], ["_creationTime", 0]];
 
 	switch (_eventType) do {
 
@@ -63,7 +63,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 				} else {
 					_mrk_color = (configfile >> "CfgMarkerColors" >> _color >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
 				};
-				
+
 				private ["_sideOfMarker"];
 				if (_mrk_owner isEqualTo objNull) then {
 					_forceGlobal = true;
@@ -80,7 +80,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 				(["Mine#", _mrk_name] call BIS_fnc_inString) ||
 				(["ObjectMarker", _mrk_name] call BIS_fnc_inString) ||
 				(["moduleCoverMap", _mrk_name] call BIS_fnc_inString) ||
-				(!isNil "_forceGlobal")) then {_sideOfMarker = -1};
+				_forceGlobal) then {_sideOfMarker = -1};
 
 				private ["_polylinePos"];
 				if (count _pos > 2) then {
@@ -96,10 +96,21 @@ ocap_markers_handle = ["ocap_handleMarker", {
 					_dir = 0;
 				} else {if (_dir isEqualTo "") then {_dir = 0}};
 
-				private _logParams = (str [_mrk_name, _dir, _type, _text, ocap_captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]);
+				private _captureFrameNo = ocap_captureFrameNo;
+				if (_creationTime > 0) then {
+					private _delta = time - _creationTime;
+					private _lastFrameTime = (ocap_captureFrameNo * ocap_frameCaptureDelay) + ocap_startTime;
+					if (_delta > (time - _lastFrameTime)) then { // marker was initially created in some frame(s) before
+						_captureFrameNo = ceil _lastFrameTime - (_delta / ocap_frameCaptureDelay);
+						private _logParams = (str [ocap_captureFrameNo, time, _creationTime, _delta, _lastFrameTime, _captureFrameNo]);
+						LOG(ARR2("CREATE:MARKER: adjust frame ", _logParams));
+					};
+				};
+
+				private _logParams = (str [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]);
 				LOG(ARR4("CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension -- ", _logParams));
 
-				[":MARKER:CREATE:", [_mrk_name, _dir, _type, _text, ocap_captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call ocap_fnc_extension;
+				[":MARKER:CREATE:", [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call ocap_fnc_extension;
 			};
 
 		};
@@ -141,8 +152,11 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		if (!_local) exitWith {};
 		if (isServer && ["ObjectMarker", _marker] call BIS_fnc_inString) exitWith {};
 
+		private _event = _this;
+		_event pushBack time;
+
 		[{
-			params["_marker", "_channelNumber", "_owner", "_local"];
+			params["_marker", "_channelNumber", "_owner", "_local", "_creationTime"];
 			_pos = markerPos _marker;
 			_type = markerType _marker;
 			_shape = markerShape _marker;
@@ -159,8 +173,8 @@ ocap_markers_handle = ["ocap_handleMarker", {
 				_pos resize 2;
 			};
 
-			["ocap_handleMarker", ["CREATED", _marker, _owner, _pos, _type, _shape, _size, _dir, _brush, _color, _alpha, _text]] call CBA_fnc_serverEvent;
-		}, _this, 2] call CBA_fnc_waitAndExecute;
+			["ocap_handleMarker", ["CREATED", _marker, _owner, _pos, _type, _shape, _size, _dir, _brush, _color, _alpha, _text, false, _creationTime]] call CBA_fnc_serverEvent;
+		}, _event, 2] call CBA_fnc_waitAndExecute;
 	}];
 
 	// handle marker moves/updates

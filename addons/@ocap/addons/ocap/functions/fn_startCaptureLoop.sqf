@@ -56,10 +56,18 @@ while {ocap_capture} do {
 			};
 			if !(_x getVariable ["ocap_exclude", false]) then {
 				private _unitRole = _x getVariable ["ocap_unitType", ""];
-
 				if (ocap_captureFrameNo % 10 == 0 || _unitRole == "") then {
 					_unitRole = [_x] call ocap_fnc_getUnitType;
 					_x setVariable ["ocap_unitType", _unitRole];
+				};
+
+				private _lifeState = 0;
+				if (alive _x) then {
+					if (ocap_useACEUnconscious && !isNil "ace_common_fnc_isAwake") {
+						_aliveState = if ([_x] call ace_common_fnc_isAwake) then {1} else {2};
+					} else {
+						_aliveState = if (lifeState _x isEqualTo "INCAPACITATED") then {2} else {1};
+					};
 				};
 
 				_pos = getPosATL _x;
@@ -68,16 +76,7 @@ while {ocap_capture} do {
 					(_x getVariable "ocap_id"), //1
 					_pos,  //2
 					round getDir _x,  //3
-					if (alive _x) then {
-						// BOOL(_x getVariable ["ACE_isUnconscious", false]) + 1
-						if (isNil "ace_common_fnc_isAwake") then {
-							1
-						} else {
-							if ([_x] call ace_common_fnc_isAwake) then {1} else {2}
-						}
-					} else {
-						0
-					},  //4
+					_lifeState,  //4
 					BOOL(!((vehicle _x) isEqualTo _x)),  //5
 					if (alive _x) then {name _x} else {""}, //6
 					BOOL(isPlayer _x), //7

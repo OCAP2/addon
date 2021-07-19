@@ -6,3 +6,4 @@ ocap_excludeMarkerFromRecord = ["SystemMarker_"]; // excludes markers with any o
 ocap_saveMissionEnded = true;
 ocap_minMissionTime = 90;
 ocap_isDebug = false;
+ocap_preferACEUnconscious = true; // if you play with ACE but without the medical system, than you should disable it

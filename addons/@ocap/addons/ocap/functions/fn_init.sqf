@@ -5,6 +5,12 @@ ocap_capture = false;
 ocap_captureFrameNo = 0;
 ocap_needToSave = [false, true] select (ocap_minMissionTime < 10);
 
+if (ocap_excludeMarkerFromRecord isEqualType []) then {
+	publicVariable "ocap_excludeMarkerFromRecord";
+} else {
+	LOG(["excludeMarkerFromRecord in config is not an array, skipping exclusions"]);
+};
+
 // Add event missions
 call ocap_fnc_addEventMission;
 [":START:", [worldName, briefingName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay]] call ocap_fnc_extension;

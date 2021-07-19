@@ -32,87 +32,71 @@ ocap_markers_handle = ["ocap_handleMarker", {
 	switch (_eventType) do {
 
 		case "CREATED":{
-			LOG(ARR2("MARKER:CREATE: Processing marker data -- ", _this));
+			DEBUG(ARR2("MARKER:CREATE: Processing marker data -- ", _this));
 
-			private _validate = false;
-			if (_mrk_name in ocap_markers_tracked) then {
-				LOG(ARR3("MARKER:CREATE: Marker", _mrk_name, "already tracked, exiting"));
+			if (_mrk_name in ocap_markers_tracked) exitWith {
+				DEBUG(ARR3("MARKER:CREATE: Marker", _mrk_name, "already tracked, exiting"));
+			};
+
+			DEBUG(ARR4("MARKER:CREATE: Valid CREATED process of marker from", _mrk_owner, "for", _mrk_name));
+
+			if (_type isEqualTo "") then {_type = "mil_dot"};
+			ocap_markers_tracked pushBackUnique _mrk_name;
+
+			private _mrk_color = "";
+			if (_color == "Default") then {
+				_mrk_color = (configfile >> "CfgMarkers" >> _type >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
 			} else {
-				private _nameTestArr = [];
-				{
-					if ([_x, _mrk_name] call BIS_fnc_inString) then {
-						_nameTestArr pushBackUnique [_mrk_name, _x];
-					};
-				} forEach ocap_excludeMarkerFromRecord;
-				if (count _nameTestArr > 0) then {
-					LOG(ARR5("MARKER:CREATE: Marker excluded per config: name ", _nameTestArr # 0 # 0, "matched", _nameTestArr # 0 # 1, "exclusion"));
-				} else {
-					_validate = true;
+				_mrk_color = (configfile >> "CfgMarkerColors" >> _color >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
+			};
+
+			private ["_sideOfMarker"];
+			if (_mrk_owner isEqualTo objNull) then {
+				_forceGlobal = true;
+				_mrk_owner = -1;
+				_sideOfMarker = -1;
+			} else {
+				_sideOfMarker = (side _mrk_owner) call BIS_fnc_sideID;
+				_mrk_owner = _mrk_owner getVariable["ocap_id", 0];
+			};
+
+			if (_sideOfMarker isEqualTo 4 ||
+			(["Projectile#", _mrk_name] call BIS_fnc_inString) ||
+			(["Detonation#", _mrk_name] call BIS_fnc_inString) ||
+			(["Mine#", _mrk_name] call BIS_fnc_inString) ||
+			(["ObjectMarker", _mrk_name] call BIS_fnc_inString) ||
+			(["moduleCoverMap", _mrk_name] call BIS_fnc_inString) ||
+			_forceGlobal) then {_sideOfMarker = -1};
+
+			private ["_polylinePos"];
+			if (count _pos > 2) then {
+				_polylinePos = [];
+				for [{_i = 0}, {_i < ((count _pos) - 1)}, {_i = _i + 1}] do {
+					_polylinePos pushBack [_pos # (_i), _pos # (_i + 1)];
+					_i = _i + 1;
+				};
+				_pos = _polylinePos;
+			};
+
+			if (isNil "_dir") then {
+				_dir = 0;
+			} else {if (_dir isEqualTo "") then {_dir = 0}};
+
+			private _captureFrameNo = ocap_captureFrameNo;
+			if (_creationTime > 0) then {
+				private _delta = time - _creationTime;
+				private _lastFrameTime = (ocap_captureFrameNo * ocap_frameCaptureDelay) + ocap_startTime;
+				if (_delta > (time - _lastFrameTime)) then { // marker was initially created in some frame(s) before
+					_captureFrameNo = ceil _lastFrameTime - (_delta / ocap_frameCaptureDelay);
+					private _logParams = (str [ocap_captureFrameNo, time, _creationTime, _delta, _lastFrameTime, _captureFrameNo]);
+					LOG(ARR2("CREATE:MARKER: adjust frame ", _logParams));
 				};
 			};
 
-			if (_validate) then {
-				LOG(ARR4("MARKER:CREATE: Valid CREATED process of marker from", _mrk_owner, "for", _mrk_name));
+			private _logParams = (str [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]);
+			DEBUG(ARR4("CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension -- ", _logParams));
 
-				if (_type isEqualTo "") then {_type = "mil_dot"};
-				ocap_markers_tracked pushBackUnique _mrk_name;
-
-				private _mrk_color = "";
-				if (_color == "Default") then {
-					_mrk_color = (configfile >> "CfgMarkers" >> _type >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
-				} else {
-					_mrk_color = (configfile >> "CfgMarkerColors" >> _color >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
-				};
-
-				private ["_sideOfMarker"];
-				if (_mrk_owner isEqualTo objNull) then {
-					_forceGlobal = true;
-					_mrk_owner = -1;
-					_sideOfMarker = -1;
-				} else {
-					_sideOfMarker = (side _mrk_owner) call BIS_fnc_sideID;
-					_mrk_owner = _mrk_owner getVariable["ocap_id", 0];
-				};
-
-				if (_sideOfMarker isEqualTo 4 ||
-				(["Projectile#", _mrk_name] call BIS_fnc_inString) ||
-				(["Detonation#", _mrk_name] call BIS_fnc_inString) ||
-				(["Mine#", _mrk_name] call BIS_fnc_inString) ||
-				(["ObjectMarker", _mrk_name] call BIS_fnc_inString) ||
-				(["moduleCoverMap", _mrk_name] call BIS_fnc_inString) ||
-				_forceGlobal) then {_sideOfMarker = -1};
-
-				private ["_polylinePos"];
-				if (count _pos > 2) then {
-					_polylinePos = [];
-					for [{_i = 0}, {_i < ((count _pos) - 1)}, {_i = _i + 1}] do {
-						_polylinePos pushBack [_pos # (_i), _pos # (_i + 1)];
-						_i = _i + 1;
-					};
-					_pos = _polylinePos;
-				};
-
-				if (isNil "_dir") then {
-					_dir = 0;
-				} else {if (_dir isEqualTo "") then {_dir = 0}};
-
-				private _captureFrameNo = ocap_captureFrameNo;
-				if (_creationTime > 0) then {
-					private _delta = time - _creationTime;
-					private _lastFrameTime = (ocap_captureFrameNo * ocap_frameCaptureDelay) + ocap_startTime;
-					if (_delta > (time - _lastFrameTime)) then { // marker was initially created in some frame(s) before
-						_captureFrameNo = ceil _lastFrameTime - (_delta / ocap_frameCaptureDelay);
-						private _logParams = (str [ocap_captureFrameNo, time, _creationTime, _delta, _lastFrameTime, _captureFrameNo]);
-						LOG(ARR2("CREATE:MARKER: adjust frame ", _logParams));
-					};
-				};
-
-				private _logParams = (str [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]);
-				LOG(ARR4("CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension -- ", _logParams));
-
-				[":MARKER:CREATE:", [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call ocap_fnc_extension;
-			};
-
+			[":MARKER:CREATE:", [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call ocap_fnc_extension;
 		};
 
 		case "UPDATED":{
@@ -132,7 +116,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		case "DELETED":{
 
 			if (_mrk_name in ocap_markers_tracked) then {
-				LOG(ARR3("MARKER:DELETE: Marker", _mrk_name, "deleted"));
+				DEBUG(ARR3("MARKER:DELETE: Marker", _mrk_name, "deleted"));
 				[":MARKER:DELETE:", [_mrk_name, ocap_captureFrameNo]] call ocap_fnc_extension;
 				ocap_markers_tracked = ocap_markers_tracked - [_mrk_name];
 			};
@@ -150,7 +134,18 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		params["_marker", "_channelNumber", "_owner", "_local"];
 
 		if (!_local) exitWith {};
-		if (isServer && ["ObjectMarker", _marker] call BIS_fnc_inString) exitWith {};
+
+		// check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
+		// if value is undefined, then skip
+		private _isExcluded = false;
+		if (!isNil "ocap_excludeMarkerFromRecord") then {
+			{
+				if ((str _marker) find _x >= 0) exitWith {
+					_isExcluded = true;
+				};
+			} forEach ocap_excludeMarkerFromRecord;
+		};
+		if (_isExcluded) exitWith {};
 
 		private _event = _this;
 		_event pushBack time;
@@ -182,6 +177,19 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		params["_marker", "_local"];
 
 		if (!_local) exitWith {};
+
+		// check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
+		// if value is undefined, then skip
+		private _isExcluded = false;
+		if (!isNil "ocap_excludeMarkerFromRecord") then {
+			{
+				if ((str _marker) find _x >= 0) exitWith {
+					_isExcluded = true;
+				};
+			} forEach ocap_excludeMarkerFromRecord;
+		};
+		if (_isExcluded) exitWith {};
+
 		["ocap_handleMarker", ["UPDATED", _marker, player, markerPos _marker, "", "", "", markerDir _marker, "", "", markerAlpha _marker]] call CBA_fnc_serverEvent;
 	}];
 
@@ -190,14 +198,26 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		params["_marker", "_local"];
 
 		if (!_local) exitWith {};
+
+		// check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
+		// if value is undefined, then skip
+		private _isExcluded = false;
+		if (!isNil "ocap_excludeMarkerFromRecord") then {
+			{
+				if ((str _marker) find _x > 0) exitWith {
+					_isExcluded = true;
+				};
+			} forEach ocap_excludeMarkerFromRecord;
+		};
+		if (_isExcluded) exitWith {};
+
 		["ocap_handleMarker", ["DELETED", _marker, player]] call CBA_fnc_serverEvent;
 	}];
 } remoteExec["call", 0, true];
 
 
 
-// wait 10 seconds for any scripted init markers to finalize
-// then collect all initial markers & add event handlers to clients
+// collect all initial markers & add event handlers to clients
 [
 	{count allPlayers > 0},
 	{
@@ -237,15 +257,6 @@ ocap_markers_handle = ["ocap_handleMarker", {
 			if (isNil "_dir") then {
 				_dir = 0;
 			} else {if (_dir isEqualTo "") then {_dir = 0}};
-
-			if (["ObjectMarker", _marker] call BIS_fnc_inString) then {
-				_type = "ObjectMarker";
-				_colour = "ColorBlack";
-			};
-			if (["moduleCoverMap_dot", _marker] call BIS_fnc_inString) then {
-				_type = "moduleCoverMap";
-				_colour = "ColorBlack";
-			};
 
 			_forceGlobal = true;
 

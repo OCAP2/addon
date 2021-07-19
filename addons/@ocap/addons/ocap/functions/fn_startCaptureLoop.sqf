@@ -1,4 +1,6 @@
+#include "\userconfig\ocap\config.hpp"
 #include "script_macros.hpp"
+
 private _isKindOfApc = {
 	_bool = false;
 	{
@@ -27,13 +29,15 @@ ocap_capture = true;
 ocap_startTime = time;
 LOG(ARR3(__FILE__, "ocap_capture start, time:", ocap_startTime));
 
-private _timeFormat = ["%1-%2-%3T%4:%5:%6.%7"];
-_timeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} else {str _x}});
-[":TIME:", [format _timeFormat]] call ocap_fnc_extension;
+[] call ocap_fnc_updateTime;
 
 private _id = 0;
 while {ocap_capture} do {
 	isNil {
+		if (ocap_captureFrameNo == 10 || (ocap_captureFrameNo > 10 && ocap_trackTimes && ocap_captureFrameNo % ocap_trackTimeInterval == 0)) then {
+			[] call ocap_fnc_updateTime;
+		};
+
 		{
 			if !(_x getVariable ["ocap_isInitialised", false]) then {
 				if (_x isKindOf "Logic") exitWith {

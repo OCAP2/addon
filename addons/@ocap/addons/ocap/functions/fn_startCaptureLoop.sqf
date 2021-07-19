@@ -63,7 +63,7 @@ while {ocap_capture} do {
 
 				private _lifeState = 0;
 				if (alive _x) then {
-					if (ocap_useACEUnconscious && !isNil "ace_common_fnc_isAwake") {
+					if (ocap_preferACEUnconscious && !isNil "ace_common_fnc_isAwake") {
 						_aliveState = if ([_x] call ace_common_fnc_isAwake) then {1} else {2};
 					} else {
 						_aliveState = if (lifeState _x isEqualTo "INCAPACITATED") then {2} else {1};

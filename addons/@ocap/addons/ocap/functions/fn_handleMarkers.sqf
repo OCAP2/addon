@@ -171,7 +171,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		private _isExcluded = false;
 		if (!isNil "ocap_excludeMarkerFromRecord") then {
 			{
-				if ((str _marker) find _x > 0) exitWith {
+				if ((str _marker) find _x >= 0) exitWith {
 					_isExcluded = true;
 				};
 			} forEach ocap_excludeMarkerFromRecord;

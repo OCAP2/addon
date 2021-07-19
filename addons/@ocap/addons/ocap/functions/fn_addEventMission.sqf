@@ -19,6 +19,8 @@ addMissionEventHandler ["EntityRespawned", {
 	// Stop tracking old unit
 	if (_corpse getVariable ["ocap_isInitialised", false]) then {
 		_corpse setVariable ["ocap_exclude", true];
+
+		_entity spawn ocap_fnc_addEventHandlers;
 	};
 }];
 

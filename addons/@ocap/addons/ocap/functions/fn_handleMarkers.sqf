@@ -32,13 +32,13 @@ ocap_markers_handle = ["ocap_handleMarker", {
 	switch (_eventType) do {
 
 		case "CREATED":{
-			if (ocap_isDebug) then {LOG(ARR2("MARKER:CREATE: Processing marker data -- ", _this))};
+			DEBUG(ARR2("MARKER:CREATE: Processing marker data -- ", _this));
 
 			if (_mrk_name in ocap_markers_tracked) exitWith {
-				if (ocap_isDebug) then {LOG(ARR3("MARKER:CREATE: Marker", _mrk_name, "already tracked, exiting"))};
+				DEBUG(ARR3("MARKER:CREATE: Marker", _mrk_name, "already tracked, exiting"));
 			};
 
-			if (ocap_isDebug) then {LOG(ARR4("MARKER:CREATE: Valid CREATED process of marker from", _mrk_owner, "for", _mrk_name))};
+			DEBUG(ARR4("MARKER:CREATE: Valid CREATED process of marker from", _mrk_owner, "for", _mrk_name));
 
 			if (_type isEqualTo "") then {_type = "mil_dot"};
 			ocap_markers_tracked pushBackUnique _mrk_name;
@@ -94,7 +94,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 			};
 
 			private _logParams = (str [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]);
-			if (ocap_isDebug) then {LOG(ARR4("CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension -- ", _logParams))};
+			DEBUG(ARR4("CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension -- ", _logParams));
 
 			[":MARKER:CREATE:", [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call ocap_fnc_extension;
 		};
@@ -116,7 +116,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		case "DELETED":{
 
 			if (_mrk_name in ocap_markers_tracked) then {
-				if (ocap_isDebug) then {LOG(ARR3("MARKER:DELETE: Marker", _mrk_name, "deleted"))};
+				DEBUG(ARR3("MARKER:DELETE: Marker", _mrk_name, "deleted"));
 				[":MARKER:DELETE:", [_mrk_name, ocap_captureFrameNo]] call ocap_fnc_extension;
 				ocap_markers_tracked = ocap_markers_tracked - [_mrk_name];
 			};

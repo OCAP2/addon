@@ -10,7 +10,37 @@ if (!isNull _causedBy) then {
 			getText (configFile >> "CfgWeapons" >> currentWeapon _causedBy >> "displayName")
 		];
 	} else {
-		_causedByInfo = [_causedBy getVariable "ocap_id"];
+		if (!isNull _instigator && _causedBy != _instigator && _instigator isKindOf "CAManBase") then {
+			// pilot/driver doesn't return a value, so check for this
+			private _turPath = [];
+			if (count (assignedVehicleRole _instigator) > 1) then {
+				_turPath = assignedVehicleRole _instigator select 1;
+			} else {
+				_turPath = [-1];
+			};
+
+			private _curVic = getText(configFile >> "CfgVehicles" >> (typeOf vehicle _instigator) >> "displayName");
+			(weaponstate [vehicle _causedBy, _turPath]) params ["_curWep", "_curMuzzle", "_curFiremode", "_curMag"];
+			private _curWepDisplayName = getText(configFile >> "CfgWeapons" >> _curWep >> "displayName");
+			private _curMagDisplayName = getText(configFile >> "CfgMagazines" >> _curMag >> "displayName");
+			private _text = "";
+			if (count _curMagDisplayName < 22) then {
+				_text = _curVic + " [" + _curWepDisplayName + " / " + _curMagDisplayName + "]";
+			} else {
+				if (_curWep != _curMuzzle) then {
+					_text = _curVic + " [" + _curWepDisplayName + " / " + _curMuzzle + "]";
+				} else {
+					_text = _curVic + " [" + _curWepDisplayName + "]";
+				};
+			};
+
+			_causedByInfo = [
+				_instigator getVariable "ocap_id",
+				_text
+			];
+		} else {
+			_causedByInfo = [_causedBy getVariable "ocap_id"];
+		};
 	};
 	_eventData = [
 		ocap_captureFrameNo,

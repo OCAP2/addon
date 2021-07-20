@@ -55,8 +55,7 @@ if !(_victim getvariable ["ocapIsKilled",false]) then {
 						};
 
 						private _curVic = getText(configFile >> "CfgVehicles" >> (typeOf vehicle _instigator) >> "displayName");
-						private _curWepInfo = weaponstate [vehicle _instigator, _turPath];
-						_curWepInfo params ["_curWep", "_curMuzzle", "_curFiremode", "_curMag"];
+						(weaponstate [vehicle _instigator, _turPath]) params ["_curWep", "_curMuzzle", "_curFiremode", "_curMag"];
 						private _curWepDisplayName = getText(configFile >> "CfgWeapons" >> _curWep >> "displayName");
 						private _curMagDisplayName = getText(configFile >> "CfgMagazines" >> _curMag >> "displayName");
 						private _text = "";

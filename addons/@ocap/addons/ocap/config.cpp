@@ -41,6 +41,7 @@ class CfgFunctions
 			class extension{};
 			class getDelay{};
 			class getInstigator{};
+			class getEventWeaponText{};
 			class getUnitType{};
 			class handleMarkers{};
 			class startCaptureLoop{};

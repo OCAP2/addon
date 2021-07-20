@@ -14,22 +14,26 @@ params ["_unit", "_causedBy", "_damage", "_instigator"];
 
 	if (!isNull _instigator) then {
 		_causedById = _causedBy getVariable ["ocap_id", -1];
+		_instigatorId = _instigator getVariable ["ocap_id", -1];
 
 		private _causedByInfo = [];
-		if (_causedBy isKindOf "CAManBase" && !(_causedById == -1)) then {
+		private _distanceInfo = 0;
+		if (_causedBy isKindOf "CAManBase" && _causedById > -1) then {
 			_causedByInfo = [
 				_causedById,
-				getText (configFile >> "CfgWeapons" >> currentWeapon _causedBy >> "displayName")
+				([_causedBy] call ocap_fnc_getEventWeaponText)
 			];
+			_distanceInfo = round (_unit distance _causedBy);
 		} else {
-			if (!isNull _instigator && _causedBy != _instigator && _instigator isKindOf "CAManBase") then {
-				_text = [_instigator] call ocap_fnc_getVicWeaponText;
+			if (!isNull _instigator && _causedBy != _instigator && _instigator isKindOf "CAManBase" && _instigatorId > -1) then {
 				_causedByInfo = [
-					_killerId,
-					_text
+					_instigatorId,
+					([_instigator] call ocap_fnc_getEventWeaponText)
 				];
+				_distanceInfo = round (_unit distance _instigator);
 			} else {
-				_causedByInfo = [_causedBy getVariable "ocap_id"];
+				_causedByInfo = [_causedById];
+				_distanceInfo = round (_unit distance _causedBy);
 			};
 		};
 		_eventData = [
@@ -37,7 +41,7 @@ params ["_unit", "_causedBy", "_damage", "_instigator"];
 			"hit",
 			_unitID,
 			_causedByInfo,
-			round (_unit distance _causedBy)
+			_distanceInfo
 		];
 	};
 

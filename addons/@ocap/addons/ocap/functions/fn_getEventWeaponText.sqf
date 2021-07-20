@@ -1,6 +1,10 @@
 
 params ["_instigator"];
 
+if (vehicle _instigator isEqualTo _instigator) exitWith {
+	getText (configFile >> "CfgWeapons" >> currentWeapon _instigator >> "displayName");
+};
+
 // pilot/driver doesn't return a value, so check for this
 private _turPath = [];
 if (count (assignedVehicleRole _instigator) > 1) then {

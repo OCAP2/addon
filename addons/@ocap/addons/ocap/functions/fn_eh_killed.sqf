@@ -31,18 +31,10 @@ if !(_victim getvariable ["ocapIsKilled",false]) then {
 
 			private _killerInfo = [];
 			if (_instigator isKindOf "CAManBase") then {
-				if (vehicle _instigator != _instigator) then {
-					_text = [_instigator] call ocap_fnc_getVicWeaponText;
-					_causedByInfo = [
-						_killerId,
-						_text
-					];
-				} else {
-					_causedByInfo = [
-						_killerId,
-						getText (configFile >> "CfgWeapons" >> currentWeapon _instigator >> "displayName")
-					];
-				};
+				_causedByInfo = [
+					_instigatorId,
+					([_instigator] call ocap_fnc_getEventWeaponText)
+				];
 			} else {
 				_causedByInfo = [_killerId];
 			};

@@ -89,7 +89,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 				if (_delta > (time - _lastFrameTime)) then { // marker was initially created in some frame(s) before
 					_captureFrameNo = ceil _lastFrameTime - (_delta / ocap_frameCaptureDelay);
 					private _logParams = (str [ocap_captureFrameNo, time, _creationTime, _delta, _lastFrameTime, _captureFrameNo]);
-					LOG(ARR2("CREATE:MARKER: adjust frame ", _logParams));
+					DEBUG(ARR2("CREATE:MARKER: adjust frame ", _logParams));
 				};
 			};
 
@@ -106,7 +106,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 
 				if (ocap_isDebug) then {
 					private _logParams = str [_mrk_name, ocap_captureFrameNo, _pos, _dir, _alpha];
-					LOG(ARR4("MARKER:MOVE: Valid UPDATED process of", _mrk_name, ", sending to extension -- ", _logParams));
+					DEBUG(ARR4("MARKER:MOVE: Valid UPDATED process of", _mrk_name, ", sending to extension -- ", _logParams));
 				};
 
 				[":MARKER:MOVE:", [_mrk_name, ocap_captureFrameNo, _pos, _dir, _alpha]] call ocap_fnc_extension;

@@ -1,23 +1,23 @@
-params ["_victim", "_hitter"];
-_victimId = _victim getVariable "ocap_id";
+params ["_unit", "_causedBy", "_damage", "_instigator"];
+_unitID = _unit getVariable "ocap_id";
 
-private _eventData = [ocap_captureFrameNo, "hit", _victimId, ["null"], -1];
-if (!isNull _hitter) then {
-	_hitterInfo = [];
-	if (_hitter isKindOf "CAManBase") then {
-		_hitterInfo = [
-			_hitter getVariable "ocap_id",
-			getText (configFile >> "CfgWeapons" >> currentWeapon _hitter >> "displayName")
+private _eventData = [ocap_captureFrameNo, "hit", _unitID, ["null"], -1];
+if (!isNull _causedBy) then {
+	_causedByInfo = [];
+	if (_causedBy isKindOf "CAManBase") then {
+		_causedByInfo = [
+			_causedBy getVariable "ocap_id",
+			getText (configFile >> "CfgWeapons" >> currentWeapon _causedBy >> "displayName")
 		];
 	} else {
-		_hitterInfo = [_hitter getVariable "ocap_id"];
+		_causedByInfo = [_causedBy getVariable "ocap_id"];
 	};
 	_eventData = [
 		ocap_captureFrameNo,
 		"hit",
-		_victimId,
-		_hitterInfo,
-		round (_victim distance _hitter)
+		_unitID,
+		_causedByInfo,
+		round (_unit distance _causedBy)
 	];
 };
 

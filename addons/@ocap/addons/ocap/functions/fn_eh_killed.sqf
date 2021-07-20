@@ -15,23 +15,9 @@ if !(_victim getvariable ["ocapIsKilled",false]) then {
 		} else {
 			_killer
 		};
+
 		if (isNull _instigator) then {
-			_instigator = UAVControl vehicle _killer select 0
-		};
-		if ((isNull _instigator) || (_instigator == _victim)) then {
-			_instigator = _killer
-		};
-		if (_instigator isKindOf "AllVehicles") then {
-			// _instigator =  effectiveCommander _instigator
-			_instigator = call {
-				if(alive(gunner _instigator))exitWith{gunner _instigator};
-				if(alive(commander _instigator))exitWith{commander _instigator};
-				if(alive(driver _instigator))exitWith{driver _instigator};
-				effectiveCommander _instigator
-			};
-		};
-		if (isNull _instigator) then {
-			_instigator = _killer
+			_instigator = [_victim, _killer] call ocap_fnc_getInstigator;
 		};
 
 		// [ocap_captureFrameNo, "killed", _victimId, ["null"], -1];

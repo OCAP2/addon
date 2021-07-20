@@ -40,6 +40,7 @@ class CfgFunctions
 			class exportData{};
 			class extension{};
 			class getDelay{};
+			class getInstigator{};
 			class getUnitType{};
 			class handleMarkers{};
 			class startCaptureLoop{};

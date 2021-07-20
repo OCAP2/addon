@@ -104,8 +104,19 @@ if (_ammoSimType isEqualTo "shotBullet") then {
 	_firerPos resize 2;
 	["ocap_handleMarker", ["CREATED", _markName, _firer, _firerPos, _markerType, "ICON", [1,1], 0, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
 
-	if (isNull _projectile) then {
-		_projectile = nearestObject [_firer, _ammo];
+	if (_ammoSimType isEqualTo "shotSubmunitions") then {
+		_subTypes = getArray(configFile >> "CfgAmmo" >> _ammo >> "submunitionAmmo") select {_x isEqualType ""};
+		waitUntil {isNull _projectile};
+		while {isNull _projectile} do {
+			{
+				_projSearch = nearestObject [_firer, _x];
+				if !(isNull _projSearch) exitWith {_projectile = _projSearch};
+			} forEach _subTypes;
+		};
+	} else {
+		if (isNull _projectile) then {
+			_projectile = nearestObject [_firer, _ammo];
+		};
 	};
 
 	private _lastPos = [];

@@ -102,21 +102,35 @@ if (_ammoSimType isEqualTo "shotBullet") then {
 
 	_firerPos = getPosATL _firer;
 	_firerPos resize 2;
-	["ocap_handleMarker", ["CREATED", _markName, _firer, _firerPos, _markerType, "ICON", [1,1], 0, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
+	["ocap_handleMarker", ["CREATED", _markName, _firer, _firerPos, _markerType, "ICON", [1,1], getDirVisual _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
 
-	if (isNull _projectile) then {
-		_projectile = nearestObject [_firer, _ammo];
+	if (_ammoSimType isEqualTo "shotSubmunitions") then {
+		_subTypes = getArray(configFile >> "CfgAmmo" >> _ammo >> "submunitionAmmo") select {_x isEqualType ""};
+		waitUntil {isNull _projectile};
+		while {isNull _projectile} do {
+			{
+				_projSearch = nearestObject [_firer, _x];
+				if !(isNull _projSearch) exitWith {_projectile = _projSearch};
+			} forEach _subTypes;
+		};
+	} else {
+		if (isNull _projectile) then {
+			_projectile = nearestObject [_firer, _ammo];
+		};
 	};
 
 	private _lastPos = [];
+	private _lastDir = 0;
 	waitUntil {
 		_pos = getPosATL _projectile;
+		_dir = getDirVisual _projectile;
 		if (((_pos select 0) isEqualTo 0) || isNull _projectile) exitWith {
 			true
 		};
 		_lastPos = _pos;
+		_lastDir = _dir;
 		// params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", "_forceGlobal"];
-		["ocap_handleMarker", ["UPDATED", _markName, _firer, [_pos # 0, _pos # 1], "", "", "", 0, "", "", 1]] call CBA_fnc_localEvent;
+		["ocap_handleMarker", ["UPDATED", _markName, _firer, [_pos # 0, _pos # 1], "", "", "", _dir, "", "", 1]] call CBA_fnc_localEvent;
 		sleep 0.1;
 		false;
 	};
@@ -125,7 +139,7 @@ if (_ammoSimType isEqualTo "shotBullet") then {
 	// if (count _lastPos == 3) then {
 		_lastPos resize 2;
 		// params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", "_forceGlobal"];
-		["ocap_handleMarker", ["UPDATED", _markName, _firer, _lastPos, "", "", "", 0, "", "", 1]] call CBA_fnc_localEvent;
+		["ocap_handleMarker", ["UPDATED", _markName, _firer, _lastPos, "", "", "", _lastDir, "", "", 1]] call CBA_fnc_localEvent;
 	};
 	sleep 10;
 	// deleteMarkerLocal _markName;

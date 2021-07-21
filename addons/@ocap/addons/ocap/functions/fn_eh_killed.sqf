@@ -1,10 +1,10 @@
+#include "script_macros.hpp";
 params ["_victim", "_killer", "_instigator"];
 if !(_victim getvariable ["ocapIsKilled",false]) then {
 	_victim setvariable ["ocapIsKilled",true];
 
 	[_victim, _killer, _instigator] spawn {
 		params ["_victim", "_killer", "_instigator"];
-		private _frame = ocap_captureFrameNo;
 		if (_killer == _victim) then {
 			private _time = diag_tickTime;
 			[_victim, {
@@ -23,62 +23,32 @@ if !(_victim getvariable ["ocapIsKilled",false]) then {
 		// [ocap_captureFrameNo, "killed", _victimId, ["null"], -1];
 		private _victimId = _victim getVariable ["ocap_id", -1];
 		if (_victimId == -1) exitWith {};
-		private _eventData = [_frame, "killed", _victimId, ["null"], -1];
+		private _eventData = [ocap_captureFrameNo, "killed", _victimId, ["null"], -1];
 
 		if (!isNull _instigator) then {
 			_killerId = _instigator getVariable ["ocap_id", -1];
-			if (_killerId != -1) then {
-				private _killerInfo = [];
-				if (_instigator isKindOf "CAManBase") then {
-					if (vehicle _instigator != _instigator) then {
+			if (_killerId == -1) exitWith {};
 
-						// pilot/driver doesn't return a value, so check for this
-						private _turPath = [];
-						if (count (assignedVehicleRole _instigator) > 1) then {
-							_turPath = assignedVehicleRole _instigator select 1;
-						} else {
-							_turPath = [-1];
-						};
-
-						private _curVic = getText(configFile >> "CfgVehicles" >> (typeOf vehicle _instigator) >> "displayName");
-						(weaponstate [vehicle _instigator, _turPath]) params ["_curWep", "_curMuzzle", "_curFiremode", "_curMag"];
-						private _curWepDisplayName = getText(configFile >> "CfgWeapons" >> _curWep >> "displayName");
-						private _curMagDisplayName = getText(configFile >> "CfgMagazines" >> _curMag >> "displayName");
-						private _text = "";
-						if (count _curMagDisplayName < 22) then {
-							_text = _curVic + " [" + _curWepDisplayName + " / " + _curMagDisplayName + "]";
-						} else {
-							if (_curWep != _curMuzzle) then {
-								_text = _curVic + " [" + _curWepDisplayName + " / " + _curMuzzle + "]";
-							} else {
-								_text = _curVic + " [" + _curWepDisplayName + "]";
-							};
-						};
-
-						_killerInfo = [
-							_killerId,
-							_text
-						];
-					} else {
-						_killerInfo = [
-							_killerId,
-							getText (configFile >> "CfgWeapons" >> currentWeapon _instigator >> "displayName")
-						];
-					};
-				} else {
-					_killerInfo = [_killerId];
-				};
-
-				_eventData = [
-					_frame,
-					"killed",
-					_victimId,
-					_killerInfo,
-					round(_instigator distance _victim)
+			private _killerInfo = [];
+			if (_instigator isKindOf "CAManBase") then {
+				_killerInfo = [
+					_killerId,
+					([_instigator] call ocap_fnc_getEventWeaponText)
 				];
+			} else {
+				_killerInfo = [_killerId];
 			};
+
+			_eventData = [
+				ocap_captureFrameNo,
+				"killed",
+				_victimId,
+				_killerInfo,
+				round(_instigator distance _victim)
+			];
 		};
 
+		DEBUG(_eventData);
 		[":EVENT:", _eventData] call ocap_fnc_extension;
 	};
 };

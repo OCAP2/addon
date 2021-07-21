@@ -1,3 +1,4 @@
+#include "script_macros.hpp";
 params ["_unit", "_causedBy", "_damage", "_instigator"];
 
 [_unit, _causedBy, _instigator] spawn {
@@ -9,8 +10,7 @@ params ["_unit", "_causedBy", "_damage", "_instigator"];
 
 	_unitID = _unit getVariable ["ocap_id", -1];
 	if (_unitID == -1) exitWith {};
-	private _eventData = [];
-	// [ocap_captureFrameNo, "hit", _unitID, ["null"], -1];
+	private _eventData = [ocap_captureFrameNo, "hit", _unitID, ["null"], -1];
 
 	if (!isNull _instigator) then {
 		_causedById = _causedBy getVariable ["ocap_id", -1];
@@ -45,5 +45,6 @@ params ["_unit", "_causedBy", "_damage", "_instigator"];
 		];
 	};
 
+	DEBUG(_eventData);
 	[":EVENT:", _eventData] call ocap_fnc_extension;
 };

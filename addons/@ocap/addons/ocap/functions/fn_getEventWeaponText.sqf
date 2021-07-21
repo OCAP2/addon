@@ -30,7 +30,7 @@ if (count _curMagDisplayName < 22) then {
 } else {
 	if !(_curWepDisplayName isEqualTo "") then {
 		_text = _text + " [" + _curWepDisplayName;
-		if (_curWep != _curMuzzle && !(_curMuzzleDisplayName isEqualTo "")) then {
+		if (_curWep != _curMuzzle && !(_curMuzzle isEqualTo "")) then {
 			_text = _text + " / " + _curMuzzle + "]";
 		} else {
 			_text = _text + "]";

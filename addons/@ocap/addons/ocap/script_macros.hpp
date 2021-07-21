@@ -1,3 +1,4 @@
+#include "\userconfig\ocap\config.hpp"
 #define REQUIRED_VERSION	2.0
 #define LOG(_args)			[":LOG:", _args] call ocap_fnc_extension
 #if ocap_isDebug

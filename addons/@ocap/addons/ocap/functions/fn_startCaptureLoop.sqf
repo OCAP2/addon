@@ -78,9 +78,9 @@ while {ocap_capture} do {
 				_pos resize 2;
 				[":UPDATE:UNIT:", [
 					(_x getVariable "ocap_id"), //1
-					_pos,  //2
-					round getDir _x,  //3
-					_lifeState,  //4
+					_pos, //2
+					round getDir _x, //3
+					_lifeState, //4
 					BOOL(!((vehicle _x) isEqualTo _x)),  //5
 					if (alive _x) then {name _x} else {""}, //6
 					BOOL(isPlayer _x), //7
@@ -103,8 +103,8 @@ while {ocap_capture} do {
 				[":NEW:VEH:", [
 					ocap_captureFrameNo, //1
 					_id, //2
-					_class,  //3
-					getText (configFile >> "CfgVehicles" >> _vehType >> "displayName")  //4
+					_class, //3
+					getText (configFile >> "CfgVehicles" >> _vehType >> "displayName") //4
 				]] call ocap_fnc_extension;
 				[_x] spawn ocap_fnc_addEventHandlers;
 				_id = _id + 1;
@@ -121,10 +121,11 @@ while {ocap_capture} do {
 				_pos set [2, round(_pos select 2)];
 				[":UPDATE:VEH:", [
 					(_x getVariable "ocap_id"), //1
-					_pos,  //2
-					round getDir _x,  //3
-					BOOL(alive _x),  //4
-					_crew  //5
+					_pos, //2
+					round getDir _x, //3
+					BOOL(alive _x), //4
+					_crew, //5
+					ocap_captureFrameNo // 6
 				]] call ocap_fnc_extension;
 			};
 			false

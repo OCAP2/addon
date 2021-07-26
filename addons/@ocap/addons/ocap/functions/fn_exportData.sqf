@@ -42,7 +42,7 @@ if (ocap_needToSave) then {
 			[
 				"Status",
 				(
-					"OCAP2 capture of " + briefingName + " has been exported with " + str(ocap_endFrameNo) + " frames saved." +
+					"<font color='#33FF33'>OCAP2 capture of " + briefingName + " has been exported with " + str(ocap_endFrameNo) + " frames saved.</font>" +
 					"<br/><br/>" +
 					"Upload results have been logged."
 				)
@@ -52,7 +52,7 @@ if (ocap_needToSave) then {
 			"OCAP2Info",
 			"\A3\ui_f\data\igui\cfg\simpleTasks\types\upload_ca.paa"
 		];
-	} remoteExec ["call", 0, true];
+	} remoteExec ["call", 0, false];
 } else {
 	LOG(["ocap_needToSave is set to false. Not saving"]);
 	{
@@ -61,7 +61,7 @@ if (ocap_needToSave) then {
 			[
 				"Status",
 				(
-					"OCAP2 capture of " + briefingName + " has not been saved, as the configured criteria have not been met." +
+					"<font color='#FFFF33'>OCAP2 capture of " + briefingName + " has not been saved, as the configured criteria have not been met.</font>"
 				)
 			]
 		];
@@ -69,5 +69,5 @@ if (ocap_needToSave) then {
 			"OCAP2Info",
 			"\A3\ui_f\data\igui\cfg\simpleTasks\types\danger_ca.paa"
 		];
-	} remoteExec ["call", 0, true];
+	} remoteExec ["call", 0, false];
 };

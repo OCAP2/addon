@@ -16,13 +16,6 @@ publicVariable ocap_addon_ver;
 
 {
 	player createDiarySubject ["OCAP2Info", "OCAP2", "\A3\ui_f\data\igui\cfg\simpleTasks\types\whiteboard_ca.paa"];
-	ocap_diaryStatus = player createDiaryRecord [
-		"OCAP2Info",
-		[
-			"Status",
-			"OCAP2 initialized. Awaiting capture conditions to be met."
-		]
-	];
 
 	ocap_fnc_copyGitHubToClipboard = {copyToClipboard "https://github.com/OCAP2/OCAP"; systemChat "OCAP2 GitHub link copied to clipboard";};
 	ocap_diaryAbout = player createDiaryRecord [
@@ -37,13 +30,22 @@ publicVariable ocap_addon_ver;
 				"<br/><br/>" +
 				"OCAP2 is a server-side Arma 3 recording suite that provides web-based playback of all units, vehicles, markers, and projectiles present, placed, and fired during a mission." +
 				"<br/><br/>" +
-				"Recording status can be found in the " + (createDiaryLink ["OCAP2Info", ocap_diaryStatus, "Status"]) + " section." +
+				"Recording status can be found in the Status section." +
 				"<br/><br/>" +
 				"DISCLAIMER: This mission may be recorded and made publicly available at the discretion of the server administrators. Please be aware that your actions during this mission will be tracked and attributed to your in-game username."
 			)
 		]
 	];
 } remoteExecCall ["call", 0, true];
+{
+	ocap_diaryStatus = player createDiaryRecord [
+		"OCAP2Info",
+		[
+			"Status",
+			"OCAP2 initialized. Awaiting capture conditions to be met."
+		]
+	];
+} remoteExecCall ["call", 0, false];
 
 // Add event missions
 call ocap_fnc_addEventMission;

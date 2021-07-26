@@ -36,7 +36,7 @@ publicVariable ocap_addon_ver;
 				"<execute expression='call ocap_fnc_copyGitHubToClipboard;'>https://github.com/OCAP2/OCAP</execute>" +
 				"<br/><br/>" +
 				"OCAP2 is a server-side Arma 3 recording suite that provides web-based playback of all units, vehicles, markers, and projectiles present, placed, and fired during a mission." +
-				"<br/>" +
+				"<br/><br/>" +
 				"Recording status can be found in the " + (createDiaryLink ["OCAP2Info", ocap_diaryStatus, "Status"]) + " section." +
 				"<br/><br/>" +
 				"DISCLAIMER: This mission may be recorded and made publicly available at the discretion of the server administrators. Please be aware that your actions during this mission will be tracked and attributed to your in-game username."

@@ -29,6 +29,21 @@ ocap_capture = true;
 ocap_startTime = time;
 LOG(ARR3(__FILE__, "ocap_capture start, time:", ocap_startTime));
 
+[{
+	player createDiaryRecord [
+		"OCAP2Info",
+		[
+			"Status",
+			"OCAP2 recording conditions met -- beginning capture."
+		]
+	];
+	player setDiarySubjectPicture [
+		"OCAP2Info",
+		"\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
+	];
+}] remoteExec ["call", 0, true];
+
+
 [] call ocap_fnc_updateTime;
 
 private _id = 0;
@@ -36,6 +51,19 @@ while {ocap_capture} do {
 	isNil {
 		if (ocap_captureFrameNo == 10 || (ocap_captureFrameNo > 10 && ocap_trackTimes && ocap_captureFrameNo % ocap_trackTimeInterval == 0)) then {
 			[] call ocap_fnc_updateTime;
+		};
+
+		if (ocap_captureFrameNo % 60 == 0) then {
+			publicVariable "ocap_captureFrameNo";
+			{
+				player createDiaryRecord [
+					"OCAP2Info",
+					[
+						"Status",
+						("Capture frame: " + str(ocap_captureFrameNo))
+					]
+				];
+			} remoteExecCall ["call", 0, true];
 		};
 
 		{

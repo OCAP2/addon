@@ -1,12 +1,13 @@
 #include "\userconfig\ocap\config.hpp"
-#define REQUIRED_VERSION	2.0
-#define LOG(_args)			[":LOG:", _args] call ocap_fnc_extension
+#define REQUIRED_VERSION 2.04
+#define OCAP_ADDON_VERSION "1.1.0"
+#define LOG(_args) [":LOG:", _args] call ocap_fnc_extension
 #if ocap_isDebug
-	#define DEBUG(_args)		[":LOG:", _args] call ocap_fnc_extension
+	#define DEBUG(_args) [":LOG:", _args] call ocap_fnc_extension
 #else
-	#define DEBUG(_args)		/* disabled */
+	#define DEBUG(_args) /* disabled */
 #endif
-#define BOOL(_cond)			([0,1] select (_cond))
+#define BOOL(_cond) ([0,1] select (_cond))
 
 #define ARR2(_arg1, _arg2) [_arg1, _arg2]
 #define ARR3(_arg1, _arg2, _arg3) [_arg1, _arg2, _arg3]

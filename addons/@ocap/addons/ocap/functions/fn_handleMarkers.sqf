@@ -54,7 +54,7 @@ ocap_markers_tracked = []; // Markers which we saves into replay
 	["map_civilian_r", 0.4],
 	["map_civilian_g", 0],
 	["map_civilian_b", 0.5],
-	["map_unknown_r", 0.1],
+	["map_unknown_r", 0.7],
 	["map_unknown_g", 0.6],
 	["map_unknown_b", 0],
 	["map_opfor_r", 0.5],

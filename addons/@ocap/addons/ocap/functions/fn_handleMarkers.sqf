@@ -106,7 +106,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 			_forceGlobal) then {_sideOfMarker = -1};
 
 			private ["_polylinePos"];
-			if (_pos select 0 isEqualType []) then {
+			if (count _pos > 3) then {
 				_polylinePos = [];
 				for [{_i = 0}, {_i < ((count _pos) - 1)}, {_i = _i + 1}] do {
 					_polylinePos pushBack [_pos # (_i), _pos # (_i + 1)];

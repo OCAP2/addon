@@ -9,7 +9,7 @@
 
 class CfgPatches
 {
-	class OCAP2
+	class OCAP
 	{
 
 		name = "OCAP2";

@@ -1,4 +1,3 @@
-ocap_nameServer = 'TvT';
 ocap_minPlayerCount = 15; // recording will only begin if this many players are in the server
 ocap_minMissionTime = 20; // missions must last at least this many minutes to be saved
 ocap_frameCaptureDelay = 1;

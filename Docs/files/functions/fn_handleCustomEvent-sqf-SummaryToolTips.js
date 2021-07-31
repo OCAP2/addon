@@ -1,1 +1,0 @@
-﻿NDSummary.OnToolTipsLoaded("File:functions/fn_handleCustomEvent.sqf",{21:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Used for applying global event handlers.</div></div>"});

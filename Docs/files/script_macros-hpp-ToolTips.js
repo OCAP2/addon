@@ -1,1 +1,0 @@
-﻿NDContentPage.OnToolTipsLoaded({40:"<div class=\"NDToolTip TMacro LSQF\"><div class=\"TTSummary\">Used for logging messages via the extension.</div></div>"});

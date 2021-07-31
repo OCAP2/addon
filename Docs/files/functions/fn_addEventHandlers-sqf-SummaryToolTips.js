@@ -1,1 +1,0 @@
-﻿NDSummary.OnToolTipsLoaded("File:functions/fn_addEventHandlers.sqf",{35:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Used for applying unit-specific event handlers to units during initialization. These event handlers will trigger on the server.</div></div>"});

@@ -1,1 +1,0 @@
-﻿NDFramePage.OnPageTitleLoaded("File:functions/fn_trackAceExplLife.sqf","fn_trackAceExplLife.sqf");NDSummary.OnSummaryLoaded("File:functions/fn_trackAceExplLife.sqf",[["SQF","SQF"]],[["Files","File"]],[[4,0,0,"ocap_fnc_trackAceExplLife","ocap_fnc_trackAceExplLife"]]);

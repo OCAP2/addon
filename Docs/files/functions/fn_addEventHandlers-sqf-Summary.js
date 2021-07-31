@@ -1,1 +1,0 @@
-﻿NDFramePage.OnPageTitleLoaded("File:functions/fn_addEventHandlers.sqf","fn_addEventHandlers.sqf");NDSummary.OnSummaryLoaded("File:functions/fn_addEventHandlers.sqf",[["SQF","SQF"]],[["Files","File"]],[[35,0,0,"ocap_fnc_addEventHandlers","ocap_fnc_addEventHandlers"]]);

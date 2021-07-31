@@ -1,1 +1,0 @@
-﻿NDFramePage.OnPageTitleLoaded("File:functions/fn_getEventWeaponText.sqf","fn_getEventWeaponText.sqf");NDSummary.OnSummaryLoaded("File:functions/fn_getEventWeaponText.sqf",[["SQF","SQF"]],[["Files","File"]],[[29,0,0,"ocap_fnc_getEventWeaponText","ocap_fnc_getEventWeaponText"]]);

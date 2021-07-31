@@ -1,1 +1,0 @@
-﻿NDSearch.OnPrefixDataLoaded("deb",["Macro"],[["DEBUG",,[[,,,,0,"File:script_macros.hpp:DEBUG"]]]]);

@@ -1,1 +1,0 @@
-﻿NDSummary.OnToolTipsLoaded("File:functions/fn_eh_killed.sqf",{31:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Tracks when a unit is killed. This is the code triggered by the &quot;MPKilled&quot; Event Handler applied to units during ocap_fnc_addEventHandlers.</div></div>"});

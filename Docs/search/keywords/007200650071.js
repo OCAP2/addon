@@ -1,1 +1,0 @@
-﻿NDSearch.OnPrefixDataLoaded("req",["Macro"],[["REQUIRED_VERSION",,[[,,,,0,"File:script_macros.hpp:REQUIRED_VERSION"]]]]);

@@ -1,1 +1,0 @@
-﻿NDSummary.OnToolTipsLoaded("File:functions/fn_getDelay.sqf",{27:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Determines the the appropriate interval at which to loop the ocap_fnc_startCaptureLoop function.</div></div>"});

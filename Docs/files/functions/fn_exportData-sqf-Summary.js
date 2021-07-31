@@ -1,1 +1,0 @@
-﻿NDFramePage.OnPageTitleLoaded("File:functions/fn_exportData.sqf","fn_exportData.sqf");NDSummary.OnSummaryLoaded("File:functions/fn_exportData.sqf",[["SQF","SQF"]],[["Files","File"]],[[30,0,0,"ocap_fnc_exportData","ocap_fnc_exportData"]]);

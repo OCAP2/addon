@@ -1,1 +1,0 @@
-﻿NDFramePage.OnPageTitleLoaded("File:functions/fn_eh_killed.sqf","fn_eh_killed.sqf");NDSummary.OnSummaryLoaded("File:functions/fn_eh_killed.sqf",[["SQF","SQF"]],[["Files","File"]],[[31,0,0,"ocap_fnc_eh_killed","ocap_fnc_eh_killed"]]);

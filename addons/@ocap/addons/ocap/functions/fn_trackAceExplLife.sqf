@@ -1,3 +1,27 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_trackAceExplLife
+
+Description:
+	Triggered in <ocap_fnc_trackAceExplPlace> and monitors the status of a mine to ensure markers during playback reflect arm/disarm/detonation of mines.
+
+Parameters:
+	_unarmedPlacement - The CfgMagazines item that was placed. [Object]
+	_placedPos - The position it was placed at. [PositionAGLS]
+
+Returns:
+	Nothing
+
+Examples:
+	--- Code
+	[(_this # 0), _placedPos] spawn ocap_fnc_trackAceExplLife;
+	---
+
+Public:
+	No
+
+Author:
+	IndigoFox
+---------------------------------------------------------------------------- */
 
 waitUntil {isNull (_this # 0)};
 sleep 1;
@@ -19,8 +43,7 @@ if (_nearMines isEqualTo []) then {
 	_explosiveMag = getText(configFile >> "CfgAmmo" >> _explType >> "defaultMagazine");
 	_explosiveDisp = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "displayName");
 
-	_placedPos = getPos _armedMine;
-	_placedPos resize 2;
+	_placedPos = getPosASL _armedMine;
 	_placer = _placedPos nearestObject "Man";
 	_placer addOwnedMine _armedMine;
 

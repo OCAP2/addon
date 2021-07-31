@@ -9,16 +9,23 @@
 
 class CfgPatches
 {
-	class OCAP
+	class OCAP2
 	{
-		name = "OCAP";
-		author = "Dell, Zealot, Kurt, IndigoFox";
+
+		name = "OCAP2";
+		author = "Dell, Zealot, Kurt, IndigoFox, Fank";
+		authors[] = {"Dell", "Zealot", "Kurt", "IndigoFox", "Fank"};
+		url = "https://github.com/OCAP2/OCAP";
+		version = 1.1;
+		versionStr = "1.1.0";
+		versionAr[] = {1, 1, 0};
 		requiredAddons[] = {"A3_Functions_F","cba_main"};
-		requiredVersion = 2.4;
+		requiredVersion = 2.04;
 		units[] = {};
 		weapons[] = {};
 	};
 };
+
 class CfgFunctions
 {
 	class OCAP
@@ -44,6 +51,7 @@ class CfgFunctions
 			class getEventWeaponText{};
 			class getUnitType{};
 			class handleMarkers{};
+			class handleCustomEvent{};
 			class startCaptureLoop{};
 			class trackAceExplLife{};
 			class trackAceExplPlace{};
@@ -58,11 +66,16 @@ class CfgRemoteExec
 {
 	class Functions
 	{
-		class ocap_fnc_handleMarkers
+		class handleMarkers
 		{
 			allowedTargets = 2;
 		};
-		class trackAceThrowing{
+		class handleCustomEvent
+		{
+			allowedTargets = 2;
+		};
+		class trackAceThrowing
+		{
 			allowedTargets = 0;
 		};
 	};

@@ -13,8 +13,7 @@
 	_markName = format["Detonation#%1", _int];
 	_markColor = "ColorRed";
 	_markerType = "waypoint";
-	_pos = getPos _explosive;
-	_pos resize 2;
+	_pos = getPosASL _explosive;
 
 	["ocap_handleMarker", ["CREATED", _markName, _unit, _pos, _markerType, "ICON", [1,1], 0, "Solid", "ColorRed", 1, _markTextLocal, true]] call CBA_fnc_serverEvent;
 

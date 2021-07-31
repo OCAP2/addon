@@ -1,3 +1,42 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_exportData
+
+Description:
+	This function facilitates the actual endMission and save events in the extension, prompting it to pack the mission and upload it to the web component.
+
+	This function MUST be called in order to save a mission recording. A boolean true in the correct option of userconfig.hpp will automatically execute this function when the "MPEnded" Event Handler triggers.
+
+Parameters:
+	_side - The winning side [optional, Side]
+	_message - A custom description of how the victory was achieved [optional, String]
+	_tag - A custom tag to override that which is defined in userconfig.hpp that will make it filterable in web [optional, String]
+
+Returns:
+	Nothing
+
+Examples:
+	--- Code
+	// "Mission ended"
+	[] call ocap_fnc_exportData;
+
+	// "BLUFOR Win."
+	[west] call ocap_fnc_exportData;
+
+	// "OPFOR Win. OPFOR controlled all sectors!
+	[east, "OPFOR controlled all sectors!"] call ocap_fnc_exportData;
+
+	// "Independent Win. INDFOR stole the intel!"
+	// Mission is saved under filterable "SnatchAndGrab" tag on web
+	[independent, "INDFOR stole the intel!", "SnatchAndGrab"] call ocap_fnc_exportData;
+	---
+
+Public:
+	Yes
+
+Author:
+	Dell, Zealot, IndigoFox
+---------------------------------------------------------------------------- */
+
 #include "script_macros.hpp"
 if (!ocap_capture) exitWith {LOG(["fnc_exportData.sqf called, but recording hasn't started."]);};
 

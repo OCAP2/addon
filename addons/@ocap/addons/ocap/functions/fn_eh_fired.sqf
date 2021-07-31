@@ -1,3 +1,33 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_eh_fired
+
+Description:
+	Tracks bullet and non-bullet projectiles. This is the code triggered when a unit firing is detected by the "FiredMan" Event Handler applied to units during <ocap_fnc_addEventHandlers>.
+
+Parameters:
+	_firer - Unit the event handler is assigned to (the instigator) [Object]
+	_weapon - Fired weapon [String]
+	_muzzle - Muzzle that was used [String]
+	_mode - Current mode of the fired weapon [String]
+	_ammo - Ammo used [String]
+	_magazine - Magazine name which was used [String]
+	_projectile - Object of the projectile that was shot out [Object]
+	_vehicle - if weapon is vehicle weapon, otherwise objNull [Object]
+
+Returns:
+	Nothing
+
+Examples:
+	--- Code
+	---
+
+Public:
+	No
+
+Author:
+	IndigoFox, Dell
+---------------------------------------------------------------------------- */
+
 params ["_firer", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile", "_vehicle"];
 
 _frame = ocap_captureFrameNo;
@@ -15,7 +45,7 @@ if (_ammoSimType isEqualTo "shotBullet") then {
 		};
 		private _lastPos = [];
 		waitUntil {
-			_pos = getPosATL _projectile;
+			_pos = getPosASL _projectile;
 			if (((_pos select 0) isEqualTo 0) || isNull _projectile) exitWith {
 				true
 			};
@@ -26,7 +56,8 @@ if (_ammoSimType isEqualTo "shotBullet") then {
 		if !((count _lastPos) isEqualTo 0) then {
 			[":FIRED:", [
 				(_firer getVariable "ocap_id"),
-				_frame, [_lastPos select 0, _lastPos select 1]
+				_frame,
+				_lastPos
 			]] call ocap_fnc_extension;
 		};
 	};
@@ -100,8 +131,7 @@ if (_ammoSimType isEqualTo "shotBullet") then {
 	// _mark setMarkerShapeLocal "ICON";
 	// _mark setMarkerTextLocal format["%1 - %2", _firer, _markTextLocal];
 
-	_firerPos = getPosATL _firer;
-	_firerPos resize 2;
+	_firerPos = getPosASL _firer;
 	["ocap_handleMarker", ["CREATED", _markName, _firer, _firerPos, _markerType, "ICON", [1,1], getDirVisual _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
 
 	if (_ammoSimType isEqualTo "shotSubmunitions") then {
@@ -124,7 +154,7 @@ if (_ammoSimType isEqualTo "shotBullet") then {
 	private _lastPos = [];
 	private _lastDir = 0;
 	waitUntil {
-		_pos = getPosATL _projectile;
+		_pos = getPosASL _projectile;
 		_dir = getDirVisual _projectile;
 		if (((_pos select 0) isEqualTo 0) || isNull _projectile) exitWith {
 			true
@@ -132,14 +162,13 @@ if (_ammoSimType isEqualTo "shotBullet") then {
 		_lastPos = _pos;
 		_lastDir = _dir;
 		// params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", "_forceGlobal"];
-		["ocap_handleMarker", ["UPDATED", _markName, _firer, [_pos # 0, _pos # 1], "", "", "", _dir, "", "", 1]] call CBA_fnc_localEvent;
-		sleep 0.1;
+		["ocap_handleMarker", ["UPDATED", _markName, _firer, _pos, "", "", "", _dir, "", "", 1]] call CBA_fnc_localEvent;
+		sleep 0.3;
 		false;
 	};
 
 	if !((count _lastPos) isEqualTo 0) then {
 	// if (count _lastPos == 3) then {
-		_lastPos resize 2;
 		// params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", "_forceGlobal"];
 		["ocap_handleMarker", ["UPDATED", _markName, _firer, _lastPos, "", "", "", _lastDir, "", "", 1]] call CBA_fnc_localEvent;
 	};

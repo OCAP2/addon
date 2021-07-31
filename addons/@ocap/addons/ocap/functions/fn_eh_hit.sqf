@@ -1,3 +1,29 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_eh_hit
+
+Description:
+	Tracks when a unit is hit/takes damage. This is the code triggered by the "MPHit" Event Handler applied to units during <ocap_fnc_addEventHandlers>.
+
+Parameters:
+	_unit - Object the event handler is assigned to. [Object]
+	_causedBy - Object that caused the damage. Contains the unit itself in case of collisions. [Object]
+	_damage - Level of damage caused by the hit. [Number]
+	_instigator - Object - Person who pulled the trigger. [Object]
+
+Returns:
+	Nothing
+
+Examples:
+	--- Code
+	---
+
+Public:
+	No
+
+Author:
+	IndigoFox, Fank
+---------------------------------------------------------------------------- */
+
 #include "script_macros.hpp";
 params ["_unit", "_causedBy", "_damage", "_instigator"];
 

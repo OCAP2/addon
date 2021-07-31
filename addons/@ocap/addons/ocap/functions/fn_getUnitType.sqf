@@ -1,3 +1,27 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_getUnitType
+
+Description:
+	Identifies the role of a unit using similar methodology to Arma 3's. Used in <ocap_fnc_startCaptureLoop>.
+
+Parameters:
+	_unitToCheck - Unit to evaluate. [Object]
+
+Returns:
+	The role text. [String]
+
+Examples:
+	--- Code
+	[_x] call ocap_fnc_getUnitType;
+	---
+
+Public:
+	No
+
+Author:
+	IndigoFox
+---------------------------------------------------------------------------- */
+
 params ["_unitToCheck"];
 
 private _role = "Man";

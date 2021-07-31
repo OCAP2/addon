@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("_is",["Function"],[["_isKindOfApc",,[[,,,,0,"File:functions/fn_startCaptureLoop.sqf:_isKindOfApc"]]]]);

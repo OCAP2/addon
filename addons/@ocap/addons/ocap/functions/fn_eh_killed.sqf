@@ -1,3 +1,29 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_eh_killed
+
+Description:
+	Tracks when a unit is killed. This is the code triggered by the "MPKilled" Event Handler applied to units during <ocap_fnc_addEventHandlers>.
+
+Parameters:
+	_unit - Object the event handler is assigned to. [Object]
+	_killer - Object that killed the unit. [Object]
+	_instigator - Person who pulled the trigger. [Object]
+	_useEffects - same as useEffects in setDamage alt syntax. [Boolean]
+
+Returns:
+	Nothing
+
+Examples:
+	--- Code
+	---
+
+Public:
+	No
+
+Author:
+	Dell, IndigoFox, Fank
+---------------------------------------------------------------------------- */
+
 #include "script_macros.hpp";
 params ["_victim", "_killer", "_instigator"];
 if !(_victim getvariable ["ocapIsKilled",false]) then {

@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("File:functions/fn_getUnitType.sqf","fn_getUnitType.sqf");NDSummary.OnSummaryLoaded("File:functions/fn_getUnitType.sqf",[["SQF","SQF"]],[["Files","File"]],[[22,0,0,"ocap_fnc_getUnitType","ocap_fnc_getUnitType"]]);

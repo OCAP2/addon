@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("File:functions/fn_getEventWeaponText.sqf",{29:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Used to identify the current weapon a unit is using that has injured or killed another. Will determine the handheld weapon or vehicle weapon they\'re using.</div></div>"});

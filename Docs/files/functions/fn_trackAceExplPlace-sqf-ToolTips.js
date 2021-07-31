@@ -1,0 +1,1 @@
+﻿NDContentPage.OnToolTipsLoaded({4:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Triggered in ocap_fnc_trackAceExplPlace and monitors the status of a mine to ensure markers during playback reflect arm/disarm/detonation of mines.</div></div>"});

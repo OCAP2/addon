@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("File:functions/fn_trackAceThrowing.sqf",{2:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Adds a local CBA event listener on units that will trigger when a projectile is thrown using ACE Advanced Throwing and add markers to playback that trace its path. Added to units in ocap_fnc_addEventHandlers.</div></div>"});

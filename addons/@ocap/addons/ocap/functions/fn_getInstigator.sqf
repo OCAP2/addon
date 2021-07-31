@@ -1,3 +1,29 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_getInstigator
+
+Description:
+	Attempts to identify who truly pulled the trigger on a kill event.
+
+Parameters:
+	_victim - Who was killed. [Object]
+	_killer - What caused the damage. [Object, default objNull]
+	_instigator - Who pulled the trigger, as reported by Arma. [Object, default objNull]
+
+Returns:
+	The true killer. [Object]
+
+Examples:
+	--- Code
+	[_victim, _killer] call ocap_fnc_getInstigator;
+	---
+
+Public:
+	No
+
+Author:
+	Dell
+---------------------------------------------------------------------------- */
+
 params ["_victim", ["_killer", objNull], ["_instigator", objNull]];
 
 if (isNull _instigator) then {

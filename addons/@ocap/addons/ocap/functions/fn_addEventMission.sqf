@@ -1,3 +1,29 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_addEventMission
+
+Description:
+	Used for applying mission event handlers.
+
+	* Applied during initialization of OCAP2 in <ocap_fnc_init>.
+
+Parameters:
+	None
+
+Returns:
+	Nothing
+
+Examples:
+	--- Code
+	call ocap_fnc_addEventMission;
+	---
+
+Public:
+	No
+
+Author:
+	IndigoFox, Dell
+---------------------------------------------------------------------------- */
+
 addMissionEventHandler["HandleDisconnect", {
 	_this call ocap_fnc_eh_disconnected;
 }];
@@ -24,7 +50,9 @@ addMissionEventHandler ["EntityRespawned", {
 	};
 }];
 
-call ocap_fnc_trackAceExplPlace;
+if (isClass (configFile >> "CfgPatches" >> "ace_explosives")) then {
+	call ocap_fnc_trackAceExplPlace;
+};
 
 if (ocap_saveMissionEnded) then {
 	addMissionEventHandler ["MPEnded", {
@@ -34,17 +62,11 @@ if (ocap_saveMissionEnded) then {
 
 // Custom event handler
 ocap_customEvent_handle = ["ocap_handleCustomEvent", {
-	params ["_eventName", "_eventMessage"];
-	[":EVENT:",
-		[ocap_captureFrameNo, _eventName, _eventMessage]
-	] call ocap_fnc_extension;
+	_this call ocap_fnc_handleCustomEvent;
 }] call CBA_fnc_addEventHandler;
-// to call, run
-// ["ocap_handleCustomEvent", ["eventType", "eventMessage"]] call CBA_fnc_serverEvent;
 
 // Add event saving markers
 call ocap_fnc_handleMarkers;
-
 
 ["WMT_fnc_EndMission", {
 	_this call ocap_fnc_exportData;

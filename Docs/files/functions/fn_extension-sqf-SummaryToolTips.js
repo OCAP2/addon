@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("File:functions/fn_extension.sqf",{28:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Manages raw extension calls and returns values / logs errors where relevant.</div></div>"});

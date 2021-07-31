@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("File:functions/fn_getInstigator.sqf","fn_getInstigator.sqf");NDSummary.OnSummaryLoaded("File:functions/fn_getInstigator.sqf",[["SQF","SQF"]],[["Files","File"]],[[26,0,0,"ocap_fnc_getInstigator","ocap_fnc_getInstigator"]]);

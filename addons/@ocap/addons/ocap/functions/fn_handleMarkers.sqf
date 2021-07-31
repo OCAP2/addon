@@ -1,6 +1,43 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_handleMarkers
+
+Description:
+	Used for tracking all markers in the vanilla Arma 3 system.
+
+	This function creates a server-side CBA listener as well as local Event Handlers on the server and all clients. It facilitates marker creation, modification, and deletion that occurs across any machine or on the server.
+
+	Delays are integrated into the system to allow for multi-line scripted marker creations during a mission to reflect correctly in the created marker during playback. These delays are accounted for so that playback reflects the true creation time.
+
+	Due to the nature of locality and single-view playback, markers of the same name which exist in different states on different clients may display odd behavior during playback.
+
+	Marker exclusion as configured in userconfig.hpp is handled client-side for performance reasons.
+
+	* Applied during mission event handler application in <ocap_fnc_addEventMission>.
+
+Parameters:
+	None
+
+Returns:
+	Nothing
+
+Examples:
+	--- Code
+	call ocap_fnc_handleMarkers;
+	---
+
+Public:
+	Yes
+
+Author:
+	IndigoFox, Fank
+---------------------------------------------------------------------------- */
+
 #include "\userconfig\ocap\config.hpp"
 #include "script_macros.hpp"
 
+// array: ocap_markers_tracked
+// Persistent global variable on server that defines unique marker names currently being tracked.
+// Entries are added at marker create events and removed at marker delete events to avoid duplicate processing.
 ocap_markers_tracked = []; // Markers which we saves into replay
 
 // On the dedicated server, the color of the markers is blue
@@ -69,7 +106,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 			_forceGlobal) then {_sideOfMarker = -1};
 
 			private ["_polylinePos"];
-			if (count _pos > 2) then {
+			if (_pos select 0 isEqualType []) then {
 				_polylinePos = [];
 				for [{_i = 0}, {_i < ((count _pos) - 1)}, {_i = _i + 1}] do {
 					_polylinePos pushBack [_pos # (_i), _pos # (_i + 1)];
@@ -152,7 +189,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 
 		[{
 			params["_marker", "_channelNumber", "_owner", "_local", "_creationTime"];
-			_pos = markerPos _marker;
+			_pos = getTerrainHeightASL (markerPos _marker);
 			_type = markerType _marker;
 			_shape = markerShape _marker;
 			_size = markerSize _marker;
@@ -164,8 +201,6 @@ ocap_markers_handle = ["ocap_handleMarker", {
 			_polyline = markerPolyline _marker;
 			if (count _polyline != 0) then {
 				_pos = _polyline;
-			} else {
-				_pos resize 2;
 			};
 
 			["ocap_handleMarker", ["CREATED", _marker, _owner, _pos, _type, _shape, _size, _dir, _brush, _color, _alpha, _text, false, _creationTime]] call CBA_fnc_serverEvent;
@@ -190,7 +225,9 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		};
 		if (_isExcluded) exitWith {};
 
-		["ocap_handleMarker", ["UPDATED", _marker, player, markerPos _marker, "", "", "", markerDir _marker, "", "", markerAlpha _marker]] call CBA_fnc_serverEvent;
+		private _pos = getTerrainHeightASL (markerPos _marker);
+
+		["ocap_handleMarker", ["UPDATED", _marker, player, _pos, "", "", "", markerDir _marker, "", "", markerAlpha _marker]] call CBA_fnc_serverEvent;
 	}];
 
 	// handle marker deletions
@@ -221,24 +258,11 @@ ocap_markers_handle = ["ocap_handleMarker", {
 [
 	{count allPlayers > 0},
 	{
-		private _exclude = [
-			"bis_fnc_moduleCoverMap_0",
-			"bis_fnc_moduleCoverMap_90",
-			"bis_fnc_moduleCoverMap_180",
-			"bis_fnc_moduleCoverMap_270",
-			"bis_fnc_moduleCoverMap_border",
-			"respawn",
-			"respawn_west",
-			"respawn_east",
-			"respawn_guerrila",
-			"respawn_civilian"
-		];
-
 		{
 			private _marker = _x;
 			// "Started polling starting markers" remoteExec ["hint", 0];
 			// get intro object markers
-			_pos = markerPos _marker;
+			_pos = getTerrainHeightASL (markerPos _marker);
 			_type = markerType _marker;
 			_shape = markerShape _marker;
 			_size = markerSize _marker;
@@ -250,8 +274,6 @@ ocap_markers_handle = ["ocap_handleMarker", {
 			_polyline = markerPolyline _marker;
 			if (count _polyline != 0) then {
 				_pos = _polyline;
-			} else {
-				_pos resize 2;
 			};
 
 			if (isNil "_dir") then {

@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("File:functions/fn_trackAceExplPlace.sqf",{1:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Adds Init code for any ACE_Explosives_Place object that is created, i.e. when a unit uses ACE self-interaction to place down an explosive.</div></div>"});

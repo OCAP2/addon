@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("File:functions/fn_getUnitType.sqf",{22:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Identifies the role of a unit using similar methodology to Arma 3\'s. Used in ocap_fnc_startCaptureLoop.</div></div>"});

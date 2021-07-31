@@ -1,3 +1,28 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_getEventWeaponText
+
+Description:
+	Used to identify the current weapon a unit is using that has injured or killed another. Will determine the handheld weapon or vehicle weapon they're using.
+
+	Called during <ocap_fnc_eh_hit> and <ocap_fnc_eh_killed>.
+
+Parameters:
+	_instigator - The unit to evaluate [Object]
+
+Returns:
+	The description of weapon or vehicle > weapon. [String]
+
+Examples:
+	--- Code
+	[_instigator] call ocap_fnc_getEventWeaponText
+	---
+
+Public:
+	No
+
+Author:
+	IndigoFox
+---------------------------------------------------------------------------- */
 
 params ["_instigator"];
 

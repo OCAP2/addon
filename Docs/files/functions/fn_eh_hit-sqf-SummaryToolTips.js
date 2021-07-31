@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("File:functions/fn_eh_hit.sqf",{32:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Tracks when a unit is hit/takes damage. This is the code triggered by the &quot;MPHit&quot; Event Handler applied to units during ocap_fnc_addEventHandlers.</div></div>"});

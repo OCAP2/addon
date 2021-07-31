@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("File:functions/fn_getInstigator.sqf",{26:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Attempts to identify who truly pulled the trigger on a kill event.</div></div>"});

@@ -1,6 +1,36 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_startCaptureLoop
+
+Description:
+	Iterates through units, declares they exist, and conditional records their state at an interval defined in userconfig.hpp.
+
+	This is the core processing loop that determines when new units enter the world, all the details about them, classifies which to exclude, and determines their health/life status. It has both unit and vehicle tracking.
+
+	This is spawned during <ocap_fnc_init>.
+
+Parameters:
+	None
+
+Returns:
+	Nothing
+
+Examples:
+	--- Code
+	0 spawn ocap_fnc_startCaptureLoop;
+	---
+
+Public:
+	No
+
+Author:
+	Dell, Zealot, IndigoFox, Fank
+---------------------------------------------------------------------------- */
+
 #include "\userconfig\ocap\config.hpp"
 #include "script_macros.hpp"
 
+// Function: _isKindOfApc
+// Determines whether the vehicle is an APC by checking class inheritance
 private _isKindOfApc = {
 	_bool = false;
 	{
@@ -9,6 +39,9 @@ private _isKindOfApc = {
 	"APC_Wheeled_03_base_F","APC_Tracked_01_base_F","APC_Tracked_02_base_F","APC_Tracked_03_base_F"];
 	_bool
 };
+
+// Function: _getClass
+// Gets generalized 'class' of vehicle to determine what icon to assign during playback
 private _getClass = {
 	if (_this isKindOf "Truck_F") exitWith {"truck"}; // Should be higher than Car
 	if (_this call _isKindOfApc) exitWith {"apc"};
@@ -24,24 +57,31 @@ private _getClass = {
 	"unknown"
 };
 
+
+
+
 waitUntil{(count(allPlayers) >= ocap_minPlayerCount)};
+
+// bool: ocap_capture
 ocap_capture = true;
 ocap_startTime = time;
 LOG(ARR3(__FILE__, "ocap_capture start, time:", ocap_startTime));
 
-[{
-	player createDiaryRecord [
-		"OCAP2Info",
-		[
-			"Status",
-			"<font color='#33FF33'>OCAP2 recording conditions met -- beginning capture.</font>"
-		]
-	];
-	player setDiarySubjectPicture [
-		"OCAP2Info",
-		"\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
-	];
-}] remoteExec ["call", 0, false];
+{
+	[{!isNull player}, {
+		player createDiaryRecord [
+			"OCAP2Info",
+			[
+				"Status",
+				"<font color='#33FF33'>OCAP2 recording conditions met -- beginning capture.</font>"
+			], taskNull, "", false
+		];
+		player setDiarySubjectPicture [
+			"OCAP2Info",
+			"\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
+		];
+	}] call CBA_fnc_waitUntilAndExecute;
+} remoteExecCall ["call", 0, true];
 
 
 [] call ocap_fnc_updateTime;
@@ -102,8 +142,7 @@ while {ocap_capture} do {
 					};
 				};
 
-				_pos = getPosATL _x;
-				_pos resize 2;
+				_pos = getPosASL _x;
 				[":UPDATE:UNIT:", [
 					(_x getVariable "ocap_id"), //1
 					_pos, //2
@@ -122,11 +161,21 @@ while {ocap_capture} do {
 			if !(_x getVariable ["ocap_isInitialised", false]) then {
 				_vehType = typeOf _x;
 				_class = _vehType call _getClass;
-				if ((_class isEqualTo "unknown") || (_vehType in ocap_excludeClassFromRecord)) exitWith {
+				_toExcludeKind = false;
+				if (count ocap_excludeKindFromRecord > 0) then {
+					private _vic = _x;
+					{
+						if (_vic isKindOf _x) exitWith {
+							_toExcludeKind = true;
+						};
+					} forEach ocap_excludeKindFromRecord;
+				};
+				if ((_class isEqualTo "unknown") || (_vehType in ocap_excludeClassFromRecord) || _toExcludeKind) exitWith {
 					LOG(ARR2("WARNING: vehicle is defined as 'unknown' or exclude:", _vehType));
 					_x setVariable ["ocap_isInitialised", true];
 					_x setVariable ["ocap_exclude", true];
 				};
+
 				_x setVariable ["ocap_id", _id];
 				[":NEW:VEH:", [
 					ocap_captureFrameNo, //1
@@ -145,8 +194,8 @@ while {ocap_capture} do {
 						_crew pushBack (_x getVariable "ocap_id");
 					}; false
 				} count (crew _x);
-				_pos = getPosATL _x;
-				_pos set [2, round(_pos select 2)];
+				_pos = getPosASL _x;
+				// _pos set [2, round(_pos select 2)];
 				[":UPDATE:VEH:", [
 					(_x getVariable "ocap_id"), //1
 					_pos, //2

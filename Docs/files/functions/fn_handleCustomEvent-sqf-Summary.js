@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("File:functions/fn_handleCustomEvent.sqf","fn_handleCustomEvent.sqf");NDSummary.OnSummaryLoaded("File:functions/fn_handleCustomEvent.sqf",[["SQF","SQF"]],[["Files","File"]],[[21,0,0,"ocap_fnc_handleCustomEvent","ocap_fnc_handleCustomEvent"]]);

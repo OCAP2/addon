@@ -1,0 +1,1 @@
+﻿NDContentPage.OnToolTipsLoaded({14:"<div class=\"NDToolTip TFunction LSQF\"><div class=\"TTSummary\">Iterates through units, declares they exist, and conditional records their state at an interval defined in userconfig.hpp.</div></div>"});

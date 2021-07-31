@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("File:functions/fn_addEventMission.sqf",{34:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Used for applying mission event handlers.</div></div>"});

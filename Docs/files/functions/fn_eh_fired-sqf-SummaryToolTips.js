@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("File:functions/fn_eh_fired.sqf",{33:"<div class=\"NDToolTip TFile LSQF\"><div class=\"TTSummary\">Tracks bullet and non-bullet projectiles. This is the code triggered when a unit firing is detected by the &quot;FiredMan&quot; Event Handler applied to units during ocap_fnc_addEventHandlers.</div></div>"});

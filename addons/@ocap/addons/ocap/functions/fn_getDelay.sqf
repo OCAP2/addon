@@ -1,10 +1,29 @@
-/*
-	Author: Dell
-	Description: Устанавливает точную задержку между кадрами
-	Parameters: none
-	Return: number
-	Syntax: call ocap_fnc_getDelay
-*/
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_exportData
+
+Description:
+	Determines the the appropriate interval at which to loop the <ocap_fnc_startCaptureLoop> function.
+
+	Устанавливает точную задержку между кадрами
+
+Parameters:
+	None
+
+Returns:
+	Sleep duration [Number]
+
+Examples:
+	--- Code
+	call ocap_fnc_getDelay;
+	---
+
+Public:
+	No
+
+Author:
+	Dell
+---------------------------------------------------------------------------- */
+
 #include "script_macros.hpp"
 private "_sleep";
 isNil {

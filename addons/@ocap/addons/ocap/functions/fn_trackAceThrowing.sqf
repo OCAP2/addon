@@ -1,3 +1,27 @@
+/* ----------------------------------------------------------------------------
+Script: ocap_fnc_trackAceThrowing
+
+Description:
+	Adds a local CBA event listener on units that will trigger when a projectile is thrown using ACE Advanced Throwing and add markers to playback that trace its path. Added to units in <ocap_fnc_addEventHandlers>.
+
+Parameters:
+	None
+
+Returns:
+	Nothing
+
+Examples:
+	--- Code
+	ocap_fnc_trackAceThrowing remoteExec ["call", _entity];
+	---
+
+Public:
+	No
+
+Author:
+	IndigoFox
+---------------------------------------------------------------------------- */
+
 trackThrows = ["ace_throwableThrown", {
 	_this spawn {
 
@@ -90,14 +114,13 @@ trackThrows = ["ace_throwableThrown", {
 			_markTextLocal = format["%1", _magDisp];
 			_markName = format["Projectile#%1", _int];
 
-			_throwerPos = getPos _unit;
-			_throwerPos resize 2;
+			_throwerPos = getPosASL _unit;
 
 			["ocap_handleMarker", ["CREATED", _markName, _unit, _throwerPos, _markerType, "ICON", [1,1], 0, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_serverEvent;
 
 			private _lastPos = [];
 			waitUntil {
-				_pos = getPosATL _projectile;
+				_pos = getPosASL _projectile;
 				if (((_pos select 0) isEqualTo 0) || isNull _projectile) exitWith {
 					true
 				};
@@ -109,7 +132,6 @@ trackThrows = ["ace_throwableThrown", {
 
 			if !((count _lastPos) isEqualTo 0) then {
 				// if (count _lastPos == 3) then {
-				_lastPos resize 2;
 				["ocap_handleMarker", ["UPDATED", _markName, _unit, _lastPos, "", "", "", 0, "", "", 1]] call CBA_fnc_serverEvent;
 			};
 

@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("_ge",["Function"],[["_getClass",,[[,,,,0,"File:functions/fn_startCaptureLoop.sqf:_getClass"]]]]);

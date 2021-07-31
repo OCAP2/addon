@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("File:functions/fn_extension.sqf","fn_extension.sqf");NDSummary.OnSummaryLoaded("File:functions/fn_extension.sqf",[["SQF","SQF"]],[["Files","File"]],[[28,0,0,"ocap_fnc_extension","ocap_fnc_extension"]]);

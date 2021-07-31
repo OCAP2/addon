@@ -195,7 +195,6 @@ while {ocap_capture} do {
 					}; false
 				} count (crew _x);
 				_pos = getPosASL _x;
-				// _pos set [2, round(_pos select 2)];
 				[":UPDATE:VEH:", [
 					(_x getVariable "ocap_id"), //1
 					_pos, //2

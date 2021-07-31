@@ -189,7 +189,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 
 		[{
 			params["_marker", "_channelNumber", "_owner", "_local", "_creationTime"];
-			_pos = getTerrainHeightASL (markerPos _marker);
+			_pos = ATLToASL (markerPos [_marker, true]);
 			_type = markerType _marker;
 			_shape = markerShape _marker;
 			_size = markerSize _marker;
@@ -225,7 +225,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 		};
 		if (_isExcluded) exitWith {};
 
-		private _pos = getTerrainHeightASL (markerPos _marker);
+		private _pos = ATLToASL (markerPos [_marker, true]);
 
 		["ocap_handleMarker", ["UPDATED", _marker, player, _pos, "", "", "", markerDir _marker, "", "", markerAlpha _marker]] call CBA_fnc_serverEvent;
 	}];
@@ -262,7 +262,7 @@ ocap_markers_handle = ["ocap_handleMarker", {
 			private _marker = _x;
 			// "Started polling starting markers" remoteExec ["hint", 0];
 			// get intro object markers
-			_pos = getTerrainHeightASL (markerPos _marker);
+			_pos = ATLToASL (markerPos [_marker, true]);
 			_type = markerType _marker;
 			_shape = markerShape _marker;
 			_size = markerSize _marker;

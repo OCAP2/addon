@@ -8,7 +8,7 @@
 #define REQUIRED_VERSION 2.04
 // define: OCAP_ADDON_VERSION
 // The current version of OCAP2.
-#define OCAP_ADDON_VERSION "1.1.0"
+#define OCAP_ADDON_VERSION "1.2.0-alpha"
 // define: LOG
 // Used for logging messages via the extension.
 #define LOG(_args) [":LOG:", _args] call ocap_fnc_extension

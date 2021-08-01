@@ -17,7 +17,7 @@ class CfgPatches
 		authors[] = {"Dell", "Zealot", "Kurt", "IndigoFox", "Fank"};
 		url = "https://github.com/OCAP2/OCAP";
 		version = 1.1;
-		versionStr = "1.1.0";
+		versionStr = "1.2.0-alpha";
 		versionAr[] = {1, 1, 0};
 		requiredAddons[] = {"A3_Functions_F","cba_main"};
 		requiredVersion = 2.04;

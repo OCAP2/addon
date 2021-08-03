@@ -125,7 +125,7 @@ trackThrows = ["ace_throwableThrown", {
 					true
 				};
 				_lastPos = _pos;
-				["ocap_handleMarker", ["UPDATED", _markName, _unit, [_pos # 0, _pos # 1], "", "", "", 0, "", "", 1]] call CBA_fnc_serverEvent;
+				["ocap_handleMarker", ["UPDATED", _markName, _unit, _pos, "", "", "", 0, "", "", 1]] call CBA_fnc_serverEvent;
 				sleep 0.1;
 				false;
 			};

@@ -25,8 +25,7 @@ Author:
 params ["_unitToCheck"];
 
 private _role = "Man";
-private _type = typeOf _unitToCheck;
-private _typePic = getText(configFile >> "CfgVehicles" >> (_type) >> "icon");
+private _typePic = getText (configOf _unitToCheck >> "icon");
 
 
 switch (true) do {
@@ -53,43 +52,25 @@ if (_role == "Man") then {
 };
 
 if (_role == "Man") then {
+	private _weaponPicture = toLower getText (configFile >> "CfgWeapons" >> secondaryWeapon _unitToCheck >> "UiPicture");
 	switch (true) do {
-		case (
-			["_MG_", getText(configFile >> "CfgWeapons" >> (secondaryWeapon _unitToCheck) >> "UiPicture")] call BIS_fnc_inString
-		): {_role = "MG"};
-		case (
-			["_GL_", getText(configFile >> "CfgWeapons" >> (secondaryWeapon _unitToCheck) >> "UiPicture")] call BIS_fnc_inString
-		): {_role = "GL"};
-		case (
-			["_AT_", getText(configFile >> "CfgWeapons" >> (secondaryWeapon _unitToCheck) >> "UiPicture")] call BIS_fnc_inString
-		): {_role = "AT"};
-		case (
-			["_Sniper_", getText(configFile >> "CfgWeapons" >> (secondaryWeapon _unitToCheck) >> "UiPicture")] call BIS_fnc_inString
-		): {_role = "Sniper"};
-		case (
-			["_AA_", getText(configFile >> "CfgWeapons" >> (secondaryWeapon _unitToCheck) >> "UiPicture")] call BIS_fnc_inString
-		): {_role = "AA"};
+		case ("_mg_" in _weaponPicture):	{_role = "MG"};
+		case ("_gl_" in _weaponPicture):	{_role = "GL"};
+		case ("_at_" in _weaponPicture):	{_role = "AT"};
+		case ("_sniper_" in _weaponPicture):{_role = "Sniper"};
+		case ("_aa_" in _weaponPicture):	{_role = "AA"};
 	};
 };
 
 if (_role == "Man") then {
+	private _weaponPicture = toLower getText (configFile >> "CfgWeapons" >> primaryWeapon _unitToCheck >> "UiPicture");
 	switch (true) do {
-		case (
-			["_MG_", getText(configFile >> "CfgWeapons" >> (primaryWeapon _unitToCheck) >> "UiPicture")] call BIS_fnc_inString
-		): {_role = "MG"};
-		case (
-			["_GL_", getText(configFile >> "CfgWeapons" >> (primaryWeapon _unitToCheck) >> "UiPicture")] call BIS_fnc_inString
-		): {_role = "GL"};
-		case (
-			["_AT_", getText(configFile >> "CfgWeapons" >> (primaryWeapon _unitToCheck) >> "UiPicture")] call BIS_fnc_inString
-		): {_role = "AT"};
-		case (
-			["_Sniper_", getText(configFile >> "CfgWeapons" >> (primaryWeapon _unitToCheck) >> "UiPicture")] call BIS_fnc_inString
-		): {_role = "Sniper"};
-		case (
-			["_AA_", getText(configFile >> "CfgWeapons" >> (primaryWeapon _unitToCheck) >> "UiPicture")] call BIS_fnc_inString
-		): {_role = "AA"};
+		case ("_mg_" in _weaponPicture):	{_role = "MG"};
+		case ("_gl_" in _weaponPicture):	{_role = "GL"};
+		case ("_at_" in _weaponPicture):	{_role = "AT"};
+		case ("_sniper_" in _weaponPicture):{_role = "Sniper"};
+		case ("_aa_" in _weaponPicture):	{_role = "AA"};
 	};
 };
 
-_role;
+_role

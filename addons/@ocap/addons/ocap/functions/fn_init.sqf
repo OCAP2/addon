@@ -83,9 +83,15 @@ publicVariable "ocap_extension_ver";
 	}] call CBA_fnc_waitUntilAndExecute;
 } remoteExecCall ["call", 0, true];
 
+// Support both methods of setting mission name.
+ocap_missionName = getMissionConfigValue ["onLoadName", ""];
+if (ocap_missionName == "") then {
+    ocap_missionName = briefingName;
+};
+
 // Add event missions
 call ocap_fnc_addEventMission;
-[":START:", [worldName, briefingName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay]] call ocap_fnc_extension;
+[":START:", [worldName, ocap_missionName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay]] call ocap_fnc_extension;
 0 spawn ocap_fnc_startCaptureLoop;
 
 [":SET:VERSION:", [OCAP_ADDON_VERSION]] call ocap_fnc_extension;

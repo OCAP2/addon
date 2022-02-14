@@ -34,7 +34,7 @@ Public:
 	Yes
 
 Author:
-	Dell, Zealot, IndigoFox
+	Dell, Zealot, IndigoFox, TyroneMF
 ---------------------------------------------------------------------------- */
 
 #include "script_macros.hpp"
@@ -68,11 +68,11 @@ switch (count _this) do {
 
 if (ocap_needToSave) then {
 	if (!isNil "_tag") then {
-		[":SAVE:", [worldName, briefingName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay, ocap_endFrameNo, _tag]] call ocap_fnc_extension;
-		LOG(ARR4("Saved recording of mission", briefingName, "with tag", _tag));
+		[":SAVE:", [worldName, ocap_missionName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay, ocap_endFrameNo, _tag]] call ocap_fnc_extension;
+		LOG(ARR4("Saved recording of mission", ocap_missionName, "with tag", _tag));
 	} else {
-		[":SAVE:", [worldName, briefingName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay, ocap_endFrameNo]] call ocap_fnc_extension;
-		LOG(ARR3("Saved recording of mission", briefingName, "with default tag"));
+		[":SAVE:", [worldName, ocap_missionName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay, ocap_endFrameNo]] call ocap_fnc_extension;
+		LOG(ARR3("Saved recording of mission", ocap_missionName, "with default tag"));
 	};
 
 	{
@@ -81,7 +81,7 @@ if (ocap_needToSave) then {
 			[
 				"Status",
 				(
-					"<font color='#33FF33'>OCAP2 capture of " + briefingName + " has been exported with " + str(ocap_endFrameNo) + " frames saved.</font>" +
+					"<font color='#33FF33'>OCAP2 capture of " + ocap_missionName + " has been exported with " + str(ocap_endFrameNo) + " frames saved.</font>" +
 					"<br/><br/>" +
 					"Upload results have been logged."
 				)
@@ -100,7 +100,7 @@ if (ocap_needToSave) then {
 			[
 				"Status",
 				(
-					"<font color='#FFFF33'>OCAP2 capture of " + briefingName + " has not been saved, as the configured criteria have not been met.</font>"
+					"<font color='#FFFF33'>OCAP2 capture of " + ocap_missionName + " has not been saved, as the configured criteria have not been met.</font>"
 				)
 			]
 		];

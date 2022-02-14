@@ -75,13 +75,14 @@ if (ocap_needToSave) then {
 		LOG(ARR3("Saved recording of mission", ocap_missionName, "with default tag"));
 	};
 
+	// briefingName is used here, no need for publicVariable for a simple confirmation log.
 	{
 		player createDiaryRecord [
 			"OCAP2Info",
 			[
 				"Status",
 				(
-					"<font color='#33FF33'>OCAP2 capture of " + ocap_missionName + " has been exported with " + str(ocap_endFrameNo) + " frames saved.</font>" +
+					"<font color='#33FF33'>OCAP2 capture of " + briefingName + " has been exported with " + str(ocap_endFrameNo) + " frames saved.</font>" +
 					"<br/><br/>" +
 					"Upload results have been logged."
 				)
@@ -100,7 +101,7 @@ if (ocap_needToSave) then {
 			[
 				"Status",
 				(
-					"<font color='#FFFF33'>OCAP2 capture of " + ocap_missionName + " has not been saved, as the configured criteria have not been met.</font>"
+					"<font color='#FFFF33'>OCAP2 capture of " + briefingName + " has not been saved, as the configured criteria have not been met.</font>"
 				)
 			]
 		];

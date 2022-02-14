@@ -2,8 +2,7 @@
 Script: ocap_fnc_init
 
 Description:
-	Automatic Start: Called from ocap_fnc_autoStart.
-	Manual Start: Server execution to begin.
+	Run during preInit and used to start OCAP2 processes.
 
 Parameters:
 	None

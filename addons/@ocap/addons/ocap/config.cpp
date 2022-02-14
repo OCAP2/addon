@@ -33,10 +33,10 @@ class CfgFunctions
 		class null
 		{
 			file = "ocap\functions";
-            class autostart {
-                preInit = 1;
-            };
-			class init{};
+			class init
+			{
+				preInit = 1;
+			};
 			class addEventHandlers{};
 			class addEventMission{};
 			class eh_connected{};

@@ -34,7 +34,7 @@ Public:
 	Yes
 
 Author:
-	Dell, Zealot, IndigoFox
+	Dell, Zealot, IndigoFox, TyroneMF
 ---------------------------------------------------------------------------- */
 
 #include "script_macros.hpp"
@@ -68,13 +68,14 @@ switch (count _this) do {
 
 if (ocap_needToSave) then {
 	if (!isNil "_tag") then {
-		[":SAVE:", [worldName, briefingName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay, ocap_endFrameNo, _tag]] call ocap_fnc_extension;
-		LOG(ARR4("Saved recording of mission", briefingName, "with tag", _tag));
+		[":SAVE:", [worldName, ocap_missionName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay, ocap_endFrameNo, _tag]] call ocap_fnc_extension;
+		LOG(ARR4("Saved recording of mission", ocap_missionName, "with tag", _tag));
 	} else {
-		[":SAVE:", [worldName, briefingName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay, ocap_endFrameNo]] call ocap_fnc_extension;
-		LOG(ARR3("Saved recording of mission", briefingName, "with default tag"));
+		[":SAVE:", [worldName, ocap_missionName, getMissionConfigValue ["author", ""], ocap_frameCaptureDelay, ocap_endFrameNo]] call ocap_fnc_extension;
+		LOG(ARR3("Saved recording of mission", ocap_missionName, "with default tag"));
 	};
 
+	// briefingName is used here, no need for publicVariable for a simple confirmation log.
 	{
 		player createDiaryRecord [
 			"OCAP2Info",

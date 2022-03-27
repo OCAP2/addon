@@ -72,6 +72,7 @@ TRACE_7("Save attempted. Elapsed Time =", _elapsedTime," Frame Count * Delay Dur
 if (_frameTimeDuration < EGVAR(settings,minMissionTime) && !_overrideLimits) exitWith {
   // if the total duration in minutes is not met based on how many frames have been recorded & the frame capture delay,
   // then we won't save, but will continue recording in case admins want to save once that threshold is met.
+  // allow this restriction to be overriden
   LOG("Save attempted, but the minimum recording duration hasn't been met. Not saving, continuing to record.");
   {
     player createDiaryRecord [
@@ -90,7 +91,7 @@ if (_frameTimeDuration < EGVAR(settings,minMissionTime) && !_overrideLimits) exi
   } remoteExec ["call", 0, false];
 };
 
-GVAR(capturing) = false;
+GVAR(recording) = false;
 GVAR(endFrameNumber) = GVAR(captureFrameNo);
 
 publicVariable QGVAR(endFrameNumber);

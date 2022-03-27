@@ -31,9 +31,10 @@ Author:
 if (!isNil QGVAR(PFHObject)) then {
   [GVAR(PFHObject)] call CBA_fnc_deletePerFrameHandlerObject;
   GVAR(PFHObject) = nil;
-} else {
+};
+if (isNil QGVAR(startTime)) then {
   GVAR(startTime) = time;
-  LOG(ARR3(__FILE__, QGVAR(capturing) + " started, time:", GVAR(startTime)));
+  LOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
 };
 
 GVAR(PFHObject) = [
@@ -42,7 +43,7 @@ GVAR(PFHObject) = [
       if (EGVAR(settings,frameCaptureDelay) != _private#0) exitWith {
         OCAPEXTLOG(ARR_3("Frame capture delay changed", _private#0, EGVAR(settings,frameCaptureDelay)));
         TRACE_3("Frame capture delay changed", _private#0, EGVAR(settings,frameCaptureDelay));
-        GVAR(capturing) = false;
+        GVAR(recording) = false;
         [{call FUNC(startCaptureLoop)}, [], EGVAR(settings,frameCaptureDelay) + _private#0] call CBA_fnc_waitAndExecute;
       };
     };
@@ -53,7 +54,8 @@ GVAR(PFHObject) = [
       [] call FUNC(updateTime);
     };
 
-    if (GVAR(captureFrameNo) % (60 / EGVAR(settings,frameCaptureDelay)) == 0) then {
+    // update diary record every 320 frames
+    if (GVAR(captureFrameNo) % (320 / EGVAR(settings,frameCaptureDelay)) == 0) then {
       publicVariable QGVAR(captureFrameNo);
       {
         player createDiaryRecord [
@@ -72,7 +74,7 @@ GVAR(PFHObject) = [
           _x setVariable [QGVARMAIN(exclude), true];
           _x setVariable [QGVARMAIN(isInitialized), true];
         };
-        _x setVariable [QGVARMAIN(id), _id];
+        _x setVariable [QGVARMAIN(id), GVAR(nextId)];
         [":NEW:UNIT:", [
           GVAR(captureFrameNo), //1
           GVAR(nextId), //2
@@ -82,7 +84,7 @@ GVAR(PFHObject) = [
           BOOL(isPlayer _x), //6
           roleDescription _x // 7
         ]] call EFUNC(extension,sendData);
-        [_x] spawn ocap_fnc_addEventHandlers;
+        [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(isInitialized), true];
       };
@@ -143,7 +145,7 @@ GVAR(PFHObject) = [
           _class, //3
           getText (configFile >> "CfgVehicles" >> _vehType >> "displayName") //4
         ]] call EFUNC(extension,sendData);
-        [_x] spawn ocap_fnc_addEventHandlers;
+        [_x] spawn FUNC(addUnitEventHandlers);
         _id = _id + 1;
         _x setVariable [QGVARMAIN(isInitialized), true];
       };
@@ -172,7 +174,7 @@ GVAR(PFHObject) = [
   EGVAR(settings,frameCaptureDelay), // delay
   [], // args
   {
-    GVAR(capturing) = true;
+    GVAR(recording) = true;
 
     { // add diary entry for clients on recording start
       [{!isNull player}, {
@@ -191,7 +193,7 @@ GVAR(PFHObject) = [
     } remoteExecCall ["call", 0, true];
   }, // code, executed when added
   {
-    GVAR(capturing) = false;
+    GVAR(recording) = false;
 
     { // add diary entry for clients on recording start
       [{!isNull player}, {
@@ -209,32 +211,7 @@ GVAR(PFHObject) = [
       }] call CBA_fnc_waitUntilAndExecute;
     } remoteExecCall ["call", 0, true];
   }, // code, executed when removed
-  {GVAR(capturing)}, // if true, execute PFH cycle
-  {!GVAR(capturing) || !GVARMAIN(enabled)}, // if true, delete object
+  {GVAR(recording)}, // if true, execute PFH cycle
+  {!GVAR(recording) || !GVARMAIN(enabled)}, // if true, delete object
   ["_frameCaptureDelay"]
 ] call CBA_fnc_createPerFrameHandlerObject;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-waitUntil{(count(allPlayers) >= EGVAR(settings,minPlayerCount))};

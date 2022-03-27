@@ -18,6 +18,7 @@
 // define: LOG
 // Used for logging messages via the extension.
 #define OCAPEXTLOG(_args) [":LOG:", _args] call EFUNC(extension,sendData)
+#define SYSCHAT remoteExec ["systemChat", [0, -2] select isDedicated]
 
 // #define DEBUG_MODE_NORMAL
 #define DEBUG_MODE_FULL

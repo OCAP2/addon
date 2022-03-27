@@ -26,33 +26,33 @@ Author:
 #include "script_component.hpp"
 
 addMissionEventHandler["HandleDisconnect", {
-  _this call ocap_fnc_eh_disconnected;
+  _this call FUNC(eh_disconnected);
 }];
 
 addMissionEventHandler["PlayerConnected", {
-  _this call ocap_fnc_eh_connected;
+  _this call FUNC(eh_connected);
 }];
 
 addMissionEventHandler ["EntityKilled", {
-  _this call ocap_fnc_eh_killed;
+  _this call FUNC(eh_killed);
 }];
 
 addMissionEventHandler ["EntityRespawned", {
   params ["_entity", "_corpse"];
 
   // Reset unit back to normal
-  _entity setvariable ["ocapIsKilled", false];
+  _entity setvariable [QGVARMAIN(isKilled), false];
 
   // Stop tracking old unit
   if (_corpse getVariable [QGVARMAIN(isInitialized), false]) then {
     _corpse setVariable [QGVARMAIN(exclude), true];
 
-    [_entity, true] spawn ocap_fnc_addEventHandlers;
+    [_entity, true] spawn FUNC(addUnitEventHandlers);
   };
 }];
 
 if (isClass (configFile >> "CfgPatches" >> "ace_explosives")) then {
-  call ocap_fnc_trackAceExplPlace;
+  call FUNC(aceExplosives);
 };
 
 addMissionEventHandler ["MPEnded", {
@@ -62,7 +62,7 @@ addMissionEventHandler ["MPEnded", {
 }];
 
 // Add event saving markers
-call ocap_fnc_handleMarkers;
+call FUNC(handleMarkers);
 
 // Custom event handler with key "ocap2_customEvent"
 // Used for showing custom events in playback events list
@@ -70,7 +70,22 @@ EGVAR(listener,customEvent) = [QGVARMAIN(customEvent), {
   _this call FUNC(handleCustomEvent);
 }] call CBA_fnc_addEventHandler;
 
+// Custom event handler with key "ocap2_record"
+// This will START OR RESUME recording if not already.
+EGVAR(listener,exportData) = [QGVARMAIN(record), {
+  call FUNC(startRecording);
+}] call CBA_fnc_addEventHandler;
+
+// Custom event handler with key "ocap2_pause"
+// This will PAUSE recording
+EGVAR(listener,exportData) = [QGVARMAIN(pause), {
+  GVAR(recording) = false;
+}] call CBA_fnc_addEventHandler;
+
 // Custom event handler with key "ocap2_exportData"
+// This will export the mission immediately regardless of restrictions.
+// params ["_side", "_message", "_tag"];
 EGVAR(listener,exportData) = [QGVARMAIN(exportData), {
+  _this set [3, true];
   _this call FUNC(exportData);
 }] call CBA_fnc_addEventHandler;

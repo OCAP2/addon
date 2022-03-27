@@ -25,8 +25,8 @@ Author:
 
 #include "script_component.hpp"
 
-// bool: GVAR(capturing)
-GVAR(capturing) = false;
+// bool: GVAR(recording)
+GVAR(recording) = false;
 // int: GVAR(captureFrameNo)
 GVAR(captureFrameNo) = 0;
 // bool: GVAR(shouldSave)
@@ -84,12 +84,15 @@ if (GVAR(missionName) == "") then {
     GVAR(missionName) = briefingName;
 };
 
-// Add event missions
-call FUNC(addEventMission);
-[":START:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], EGVAR(settings,frameCaptureDelay)]] call EFUNC(extension,sendData);
-[] call FUNC(updateTime);
-GVAR(nextId) = 0;
-0 spawn FUNC(captureLoop);
 
 
-[":SET:VERSION:", [GVARMAIN(version)]] call EFUNC(extension,sendData);
+/*
+  Conditional Start Recording
+  We'll wait to see if auto-start is enabled and minPlayercount setting is met. This covers scenarios where someone changes the autostart setting during the mission as well, and excludes cases where autostart is disabled.
+  On execution, we'll also check if recording has already started by other means via whether GVAR(startTime) has been declared or not.
+  If recording hasn't started already, we'll initialize it here assuming the above conditions are met.
+*/
+[
+  {((count allPlayers) >= EGVAR(settings,minPlayerCount) && EGVAR(settings,autoStart)) || !isNil QGVAR(startTime)},
+  {call FUNC(startRecording)},
+] call CBA_fnc_waitUntilAndExecute;

@@ -1,3 +1,5 @@
+#include "script_component.hpp"
+
 params ["_unit", "_id", "_uid", "_name"];
 
 [":EVENT:",

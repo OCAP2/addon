@@ -25,6 +25,8 @@ Author:
 
 EGVAR(listener,aceThrowing) = ["ace_throwableThrown", {
 
+  if (!SHOULDSAVEEVENTS) exitWith {};
+
   _this spawn {
 
     params["_unit", "_projectile"];
@@ -43,9 +45,9 @@ EGVAR(listener,aceThrowing) = ["ace_throwableThrown", {
     _projConfig = configOf _projectile;
     _projName = getText(configFile >> "CfgAmmo" >> _projType >> "displayName");
 
-    TRACE_2("Detected ACE throwing of ", _projName);
     if (GVARMAIN(isDebug)) then {
-      ("Detected ACE throwing of " + _projName) SYSCHAT;
+      format["Detected ACE throwing of %1", _projName] SYSCHAT;
+      OCAPEXTLOG(ARR2("Detected ACE throwing of ", _projName));
     };
 
     // systemChat format["Config name: %1", configOf _projectile];
@@ -135,12 +137,20 @@ EGVAR(listener,aceThrowing) = ["ace_throwableThrown", {
         [QGVARMAIN(handleMarker), ["UPDATED", _markName, _unit, _pos, "", "", "", 0, "", "", 1]] call CBA_fnc_serverEvent;
 
         // here, monitor fast moving missiles/rockets/shells every 0.3 seconds. monitor smokes, grenades, flares, mines in line with the configured frame capture delay
-        sleep ([0.3, EGVAR(settings,frameCaptureDelay)] select {_ammoSimType in ["ShotSmokeX","ShotGrenade","ShotIlluminating","ShotMine"]});
+        sleep (([0.3, GVAR(frameCaptureDelay)] select {_ammoSimType in ["ShotSmokeX","ShotGrenade","ShotIlluminating","ShotMine"]})#0);
         false;
       };
 
       if !((count _lastPos) isEqualTo 0) then {
-        // if (count _lastPos == 3) then {
+        isNil {
+          // for non-bullets, set the last fired variable of the soldier so hits/kills are recorded accurately
+          if (_ammoSimType == "shotGrenade") then {
+            _unit setVariable [
+              QGVARMAIN(lastFired),
+              _projName
+            ];
+          };
+        };
         [QGVARMAIN(handleMarker), ["UPDATED", _markName, _unit, _lastPos, "", "", "", 0, "", "", 1]] call CBA_fnc_serverEvent;
       };
 

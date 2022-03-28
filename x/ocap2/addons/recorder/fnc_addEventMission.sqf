@@ -51,12 +51,24 @@ addMissionEventHandler ["EntityRespawned", {
   };
 }];
 
+// Listen for global ACE Explosive placement events
 if (isClass (configFile >> "CfgPatches" >> "ace_explosives")) then {
   call FUNC(aceExplosives);
 };
 
+// Listen for local ACE Throwing events, for any units owned by the server
+if (isClass (configFile >> "CfgPatches" >> "ace_advanced_throwing")) then {
+  call FUNC(aceThrowing);
+};
+
 addMissionEventHandler ["MPEnded", {
-  if (EGVAR(settings,saveMissionEnded)) then {
+  if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) >= GVAR(minMissionTime)) then {
+    ["Mission ended automatically"] call FUNC(exportData);
+  };
+}];
+
+addMissionEventHandler ["Ended", {
+  if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) >= GVAR(minMissionTime)) then {
     ["Mission ended automatically"] call FUNC(exportData);
   };
 }];
@@ -80,6 +92,7 @@ EGVAR(listener,exportData) = [QGVARMAIN(record), {
 // This will PAUSE recording
 EGVAR(listener,exportData) = [QGVARMAIN(pause), {
   GVAR(recording) = false;
+  publicVariable QGVAR(recording);
 }] call CBA_fnc_addEventHandler;
 
 // Custom event handler with key "ocap2_exportData"

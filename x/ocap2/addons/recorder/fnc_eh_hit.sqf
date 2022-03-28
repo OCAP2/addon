@@ -25,6 +25,8 @@ Author:
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
+if (!SHOULDSAVEEVENTS) exitWith {};
+
 params ["_unit", "_causedBy", "_damage", "_instigator"];
 
 [_unit, _causedBy, _instigator] spawn {
@@ -34,9 +36,11 @@ params ["_unit", "_causedBy", "_damage", "_instigator"];
     _instigator = [_unit, _causedBy] call FUNC(getInstigator);
   };
 
+  private _hitFrame = GVAR(captureFrameNo);
+
   _unitID = _unit getVariable [QGVARMAIN(id), -1];
   if (_unitID == -1) exitWith {};
-  private _eventData = [GVAR(captureFrameNo), "hit", _unitID, ["null"], -1];
+  private _eventData = [_hitFrame, "hit", _unitID, ["null"], -1];
 
   if (!isNull _instigator) then {
     _causedById = _causedBy getVariable [QGVARMAIN(id), -1];
@@ -50,6 +54,10 @@ params ["_unit", "_causedBy", "_damage", "_instigator"];
         ([_causedBy] call FUNC(getEventWeaponText))
       ];
       _distanceInfo = round (_unit distance _causedBy);
+
+      if (GVARMAIN(isDebug)) then {
+        OCAPEXTLOG(ARR4("HIT EVENT", _hitFrame, _unitID, _causedById));
+      };
     } else {
       if (!isNull _instigator && _causedBy != _instigator && _instigator isKindOf "CAManBase" && _instigatorId > -1) then {
         _causedByInfo = [
@@ -57,13 +65,17 @@ params ["_unit", "_causedBy", "_damage", "_instigator"];
           ([_instigator] call FUNC(getEventWeaponText))
         ];
         _distanceInfo = round (_unit distance _instigator);
+
+        if (GVARMAIN(isDebug)) then {
+          OCAPEXTLOG(ARR4("HIT EVENT", _hitFrame, _unitID, _instigatorId));
+        };
       } else {
         _causedByInfo = [_causedById];
         _distanceInfo = round (_unit distance _causedBy);
       };
     };
     _eventData = [
-      GVAR(captureFrameNo),
+      _hitFrame,
       "hit",
       _unitID,
       _causedByInfo,
@@ -71,6 +83,5 @@ params ["_unit", "_causedBy", "_damage", "_instigator"];
     ];
   };
 
-  OCAPEXTLOG(_eventData);
   [":EVENT:", _eventData] call EFUNC(extension,sendData);
 };

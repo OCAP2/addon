@@ -25,7 +25,10 @@ Author:
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
+if (!SHOULDSAVEEVENTS) exitWith {};
+
 params ["_victim", "_killer", "_instigator"];
+
 if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
   _victim setvariable [QGVARMAIN(isKilled),true];
 
@@ -34,7 +37,7 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
 
     private _killedFrame = GVAR(captureFrameNo);
 
-    if (_killer == _victim) then {
+    if (_killer == _victim && owner _victim != 2 && EGVAR(settings,preferACEUnconscious) && isClass(configFile >> "CfgPatches" >> "ace_medical_status")) then {
       private _time = diag_tickTime;
       [_victim, {
         _this setVariable ["ace_medical_lastDamageSource", (_this getVariable "ace_medical_lastDamageSource"), 2];
@@ -75,11 +78,13 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
         _killerInfo,
         round(_instigator distance _victim)
       ];
+
+      if (GVARMAIN(isDebug)) then {
+        OCAPEXTLOG(ARR4("KILLED EVENT", _killedFrame, _victimId, _killerId));
+      };
     };
 
-    if (GVARMAIN(isDebug)) then {
-      OCAPEXTLOG(_eventData);
-    };
+
 
     [":EVENT:", _eventData] call EFUNC(extension,sendData);
   };

@@ -48,6 +48,8 @@ Author:
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
+if (!SHOULDSAVEEVENTS) exitWith {};
+
 params ["_eventName", "_eventMessage"];
 [":EVENT:",
   [GVAR(captureFrameNo), _eventName, _eventMessage]

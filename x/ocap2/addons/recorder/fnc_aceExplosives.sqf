@@ -31,7 +31,10 @@ Author:
 #include "script_component.hpp"
 
 EGVAR(listener,aceExplosives) = ["ace_explosives_place", {
-  params [_explosive, _dir, _pitch, _unit];
+
+  if (!SHOULDSAVEEVENTS) exitWith {};
+
+  params ["_explosive", "_dir", "_pitch", "_unit"];
 
   private _int = random(2000);
 
@@ -47,50 +50,57 @@ EGVAR(listener,aceExplosives) = ["ace_explosives_place", {
   _markColor = "ColorRed";
   _markerType = "Minefield";
 
+  if (GVARMAIN(isDebug)) then {
+    format["Created explosive placed marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
+    OCAPEXTLOG(ARR3("Created explosive placed marker", _markName, _explosiveDisp));
+  };
+
   [QGVARMAIN(handleMarker), [
     "CREATED", _markName, _unit, _placedPos, _markerType, "ICON", [1,1], 0, "Solid", "ColorRed", 1, _markTextLocal, true
   ]] call CBA_fnc_localEvent;
-
-  TRACE_2("Created explosive placed marker ", _markName);
-  if (GVARMAIN(isDebug)) then {
-    ("Created explosive placed marker " + _markName) SYSCHAT;
-  };
 
 
   [{isNull (_this#0)}, { // wait until the mine is null (exploded), and mark this for playback
 
     params ["_explosive", "_explosiveDisp", "_unit", "_placedPos", "_markName", "_int"];
 
-    // remove previous marker
-    ["ocap_handleMarker", ["DELETED", _markName]] call CBA_fnc_localEvent;
+    // set unit who placed's lastFired var as the explosive so kills are registered to the explosive
+    _unit setVariable [
+      QGVARMAIN(lastFired),
+      _explosiveDisp
+    ];
 
-    TRACE_2("Removed explosive placed marker ", _markName);
+    // remove previous marker
     if (GVARMAIN(isDebug)) then {
-      ("Removed explosive placed marker " + _markName) SYSCHAT;
+      format["Removed explosive placed marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
+      OCAPEXTLOG(ARR3("Removed explosive placed marker", _markName, _explosiveDisp));
     };
+
+    [QGVARMAIN(handleMarker), ["DELETED", _markName]] call CBA_fnc_localEvent;
 
     _markTextLocal = format["%1", _explosiveDisp];
     _markName = format["Detonation#%1", _int];
     _markColor = "ColorRed";
     _markerType = "waypoint";
 
+    if (GVARMAIN(isDebug)) then {
+      format["Created explosive explosion marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
+      OCAPEXTLOG(ARR3("Created explosive explosion marker", _markName, _explosiveDisp));
+    };
+
     [QGVARMAIN(handleMarker), [
       "CREATED", _markName, _unit, _placedPos, _markerType, "ICON", [1,1], 0, "Solid", "ColorRed", 1, _markTextLocal, true
     ]] call CBA_fnc_localEvent;
 
-    TRACE_2("Created explosive explosion marker ", _markName);
-    if (GVARMAIN(isDebug)) then {
-      ("Created explosive explosion " + _markName) SYSCHAT;
-    };
 
     [{
-      params ["_markName"];
-      [QGVARMAIN(handleMarker), ["DELETED", _markName]] call CBA_fnc_localEvent;
-      TRACE_2("Removed explosive explosion marker ", _markName);
+      params ["_markName", "_explosiveDisp"];
       if (GVARMAIN(isDebug)) then {
-        ("Removed explosive explosion marker " + _markName) SYSCHAT;
+        format["Removed explosive explosion marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
+        OCAPEXTLOG(ARR3("Removed explosive explosion marker", _markName, _explosiveDisp));
       };
-    }, [_markName], 10] call CBA_fnc_waitAndExecute;
+      [QGVARMAIN(handleMarker), ["DELETED", _markName]] call CBA_fnc_localEvent;
+    }, [_markName, _explosiveDisp], 10] call CBA_fnc_waitAndExecute;
 
   }, [_explosive, _explosiveDisp, _unit, _placedPos, _markName, _int]] call CBA_fnc_waitUntilAndExecute;
 

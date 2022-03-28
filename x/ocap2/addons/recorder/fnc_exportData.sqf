@@ -65,11 +65,11 @@ if (isNil QGVAR(startTime)) exitWith {
 
 
 _elapsedTime = time - GVAR(startTime);
-_frameTimeDuration = EGVAR(settings,frameCaptureDelay) * GVAR(captureFrameNo);
+_frameTimeDuration = GVAR(frameCaptureDelay) * GVAR(captureFrameNo);
 TRACE_7("Save attempted. Elapsed Time =", _elapsedTime," Frame Count * Delay Duration =", _frameTimeDuration," delta =", _elapsedTime - _frameTimeDuration);
 
 
-if (_frameTimeDuration < EGVAR(settings,minMissionTime) && !_overrideLimits) exitWith {
+if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {
   // if the total duration in minutes is not met based on how many frames have been recorded & the frame capture delay,
   // then we won't save, but will continue recording in case admins want to save once that threshold is met.
   // allow this restriction to be overriden
@@ -92,32 +92,31 @@ if (_frameTimeDuration < EGVAR(settings,minMissionTime) && !_overrideLimits) exi
 };
 
 GVAR(recording) = false;
+publicVariable QGVAR(recording);
 GVAR(endFrameNumber) = GVAR(captureFrameNo);
 
 publicVariable QGVAR(endFrameNumber);
 
 
-switch (count _this) do {
-  case 0: {
-    [":EVENT:", [GVAR(endFrameNumber), "endMission", ["", "Mission ended"]]] call EFUNC(extension,sendData);
-  };
-  case 1: {
-    [":EVENT:", [GVAR(endFrameNumber), "endMission", ["", _side]]] call EFUNC(extension,sendData);
-  };
-  default {
-    private _sideString = str(_side);
-    if (_side == sideUnknown) then { _sideString = "" };
-    [":EVENT:", [GVAR(endFrameNumber), "endMission", [_sideString, _message]]] call EFUNC(extension,sendData);
-  };
+if (isNil "_side") then {
+  [":EVENT:", [GVAR(endFrameNumber), "endMission", ["", "Mission ended"]]] call EFUNC(extension,sendData);
+};
+if (!isNil "_side" && isNil "_message") then {
+  [":EVENT:", [GVAR(endFrameNumber), "endMission", ["", _side]]] call EFUNC(extension,sendData);
+};
+if (!isNil "_side" && !isNil "_message") then {
+  private _sideString = str(_side);
+  if (_side == sideUnknown) then { _sideString = "" };
+  [":EVENT:", [GVAR(endFrameNumber), "endMission", [_sideString, _message]]] call EFUNC(extension,sendData);
 };
 
 
 if (!isNil "_tag") then {
-  [":SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], EGVAR(settings,frameCaptureDelay), GVAR(endFrameNumber), _tag]] call EFUNC(extension,sendData);
-  LOG(ARR4("Saved recording of mission", GVAR(missionName), "with tag", _tag));
-} else {
-  [":SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], EGVAR(settings,frameCaptureDelay), GVAR(endFrameNumber)]] call EFUNC(extension,sendData);
-  LOG(ARR3("Saved recording of mission", GVAR(missionName), "with default tag"));
+  [":SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), GVAR(endFrameNumber), _tag]] call EFUNC(extension,sendData);
+  OCAPEXTLOG(ARR4("Saved recording of mission", GVAR(missionName), "with tag", _tag));
+} else {// default tag to configured setting
+  [":SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), GVAR(endFrameNumber), EGVAR(settings,saveTag)]] call EFUNC(extension,sendData);
+  OCAPEXTLOG(ARR3("Saved recording of mission", GVAR(missionName), "with default tag"));
 };
 
 // briefingName is used here, no need for publicVariable for a simple confirmation log.

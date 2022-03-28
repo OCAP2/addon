@@ -28,10 +28,10 @@ Author:
 private "_sleep";
 isNil {
   _elapsedTime = time - GVAR(startTime);
-  _sleep = (GVAR(captureFrameNo) + 1) * EGVAR(settings,frameCaptureDelay) - _elapsedTime;
+  _sleep = (GVAR(captureFrameNo) + 1) * GVAR(frameCaptureDelay) - _elapsedTime;
 
   if ((GVAR(captureFrameNo) % 10) isEqualTo 0) then {
-    LOG(ARR4("DEBUG: Frame", GVAR(captureFrameNo), "is created in ~", EGVAR(settings,frameCaptureDelay) - _sleep));
+    LOG(ARR4("DEBUG: Frame", GVAR(captureFrameNo), "is created in ~", GVAR(frameCaptureDelay) - _sleep));
   };
   if (_sleep < 0) then {
     LOG(ARR3("ERROR: Frame delay is negative", GVAR(captureFrameNo), _sleep));

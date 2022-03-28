@@ -9,17 +9,17 @@
 if (!GVARMAIN(enabled)) exitWith {};
 
 // if recording started earlier and startTime has been noted, only restart the capture loop with any updated settings.
-if (!isNil QGVAR(startTime)) then {
-  if (GVAR(recording)) exitWith {
-    OCAPEXTLOG(["OCAP2 was asked to record and is already recording!"]);
-  };
-  if (!GVAR(recording)) exitWith {
-    call FUNC(captureLoop);
-  };
+if (!isNil QGVAR(startTime) && GVAR(recording)) exitWith {
+  OCAPEXTLOG(["OCAP2 was asked to record and is already recording!"]);
+};
+if (!isNil QGVAR(startTime) && !GVAR(recording)) exitWith {
+  call FUNC(captureLoop);
 };
 
-[":START:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], EGVAR(settings,frameCaptureDelay)]] call EFUNC(extension,sendData);
+// Notify the extension
+[":START:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay)]] call EFUNC(extension,sendData);
 [":SET:VERSION:", [GVARMAIN(version)]] call EFUNC(extension,sendData);
+
 // Add mission event handlers
 call FUNC(addEventMission);
 // Track initial times

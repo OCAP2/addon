@@ -63,6 +63,9 @@ GVAR(trackedMarkers) = []; // Markers which we saves into replay
 
 // create CBA event handler to be called on server with key "ocap2_handleMarker"
 EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
+
+  if (!SHOULDSAVEEVENTS) exitWith {};
+
   params["_eventType", "_mrk_name", "_mrk_owner", "_pos", "_type", "_shape", "_size", "_dir", "_brush", "_color", "_alpha", "_text", ["_forceGlobal", false], ["_creationTime", 0]];
 
   switch (_eventType) do {
@@ -70,7 +73,7 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
     case "CREATED":{
 
       if (GVARMAIN(isDebug)) then {
-        OCAPEXTLOG(ARR2("MARKER:CREATE: Processing marker data -- ", _this));
+        OCAPEXTLOG(ARR2("MARKER:CREATE: Processing marker data -- ", _mrk_name));
       };
 
       if (_mrk_name in GVAR(trackedMarkers)) exitWith {
@@ -80,7 +83,8 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
       };
 
       if (GVARMAIN(isDebug)) then {
-        OCAPEXTLOG(ARR4("MARKER:CREATE: Valid CREATED process of marker from", _mrk_owner, "for", _mrk_name));
+        format["CREATE:MARKER: Valid CREATED process of %1, sending to extension", _mrk_name] SYSCHAT;
+        OCAPEXTLOG(ARR3("CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension"));
       };
 
       if (_type isEqualTo "") then {_type = "mil_dot"};
@@ -128,9 +132,9 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
       private _captureFrameNo = GVAR(captureFrameNo);
       if (_creationTime > 0) then {
         private _delta = time - _creationTime;
-        private _lastFrameTime = (GVAR(captureFrameNo) * EGVAR(settings,frameCaptureDelay)) + GVAR(startTime);
+        private _lastFrameTime = (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) + GVAR(startTime);
         if (_delta > (time - _lastFrameTime)) then { // marker was initially created in some frame(s) before
-          _captureFrameNo = ceil _lastFrameTime - (_delta / EGVAR(settings,frameCaptureDelay));
+          _captureFrameNo = ceil _lastFrameTime - (_delta / GVAR(frameCaptureDelay));
           private _logParams = (str [GVAR(captureFrameNo), time, _creationTime, _delta, _lastFrameTime, _captureFrameNo]);
 
           if (GVARMAIN(isDebug)) then {
@@ -140,11 +144,6 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
       };
 
       private _logParams = (str [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]);
-
-      if (GVARMAIN(isDebug)) then {
-        str ["CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension -- ", _logParams select [0, 5]] remoteExec ["systemChat", [0, -2] select isDedicated];
-        OCAPEXTLOG(ARR4("CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension -- ", _logParams));
-      };
 
       [":MARKER:CREATE:", [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call EFUNC(extension,sendData);
     };
@@ -162,7 +161,7 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
       if (_mrk_name in GVAR(trackedMarkers)) then {
 
         if (GVARMAIN(isDebug)) then {
-          str ["MARKER:DELETE: Marker", _mrk_name, "deleted"] remoteExec ["systemChat", [0, -2] select isDedicated];
+          format["MARKER:DELETE: Marker %1", _mrk_name] SYSCHAT;
           OCAPEXTLOG(ARR3("MARKER:DELETE: Marker", _mrk_name, "deleted"));
         };
 
@@ -268,7 +267,7 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
 
 // collect all initial markers & add event handlers to clients
 [
-  {getClientState > 8 && !isNil QGVAR(startTime)},
+  {getClientStateNumber > 8 && !isNil QGVAR(startTime)},
   {
     {
       private _marker = _x;

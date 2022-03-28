@@ -28,7 +28,14 @@ Author:
 params ["_instigator"];
 
 if (vehicle _instigator isEqualTo _instigator) exitWith {
-  _instigator getVariable [QGVARMAIN(lastFired), getText (configFile >> "CfgWeapons" >> currentWeapon _instigator >> "displayName")];
+  _instigator getVariable [
+    QGVARMAIN(lastFired),
+    format[
+      "%1 [%2]",
+      getText (configFile >> "CfgWeapons" >> currentWeapon _instigator >> "displayName"),
+      getText (configFile >> "CfgWeapons" >> currentMuzzle _instigator >> "displayName")
+    ]
+  ]
 };
 
 // pilot/driver doesn't return a value, so check for this

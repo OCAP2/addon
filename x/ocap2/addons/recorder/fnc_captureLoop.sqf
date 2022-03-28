@@ -34,35 +34,27 @@ if (!isNil QGVAR(PFHObject)) then {
 };
 if (isNil QGVAR(startTime)) then {
   GVAR(startTime) = time;
+  OCAPEXTLOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
   LOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
 };
 
 GVAR(PFHObject) = [
   {
-    if (!isNil {_private#0}) then {
-      if (EGVAR(settings,frameCaptureDelay) != _private#0) exitWith {
-        OCAPEXTLOG(ARR_3("Frame capture delay changed", _private#0, EGVAR(settings,frameCaptureDelay)));
-        TRACE_3("Frame capture delay changed", _private#0, EGVAR(settings,frameCaptureDelay));
-        GVAR(recording) = false;
-        [{call FUNC(startCaptureLoop)}, [], EGVAR(settings,frameCaptureDelay) + _private#0] call CBA_fnc_waitAndExecute;
-      };
-    };
-    _frameCaptureDelay = EGVAR(settings,frameCaptureDelay);
+    private _loopStart = diag_tickTime;
 
-    TRACE_2("Frame", _frameCaptureDelay);
     if (GVAR(captureFrameNo) == 10 || (GVAR(captureFrameNo) > 10 && EGVAR(settings,trackTimes) && GVAR(captureFrameNo) % EGVAR(settings,trackTimeInterval) == 0)) then {
       [] call FUNC(updateTime);
     };
 
     // update diary record every 320 frames
-    if (GVAR(captureFrameNo) % (320 / EGVAR(settings,frameCaptureDelay)) == 0) then {
+    if (GVAR(captureFrameNo) % (320 / GVAR(frameCaptureDelay)) == 0) then {
       publicVariable QGVAR(captureFrameNo);
       {
         player createDiaryRecord [
           "OCAP2Info",
           [
             "Status",
-            ("<font color='#CCCCCC'>Capture frame: " + QGVAR(captureFrameNo) + "</font>")
+            ("<font color='#CCCCCC'>Capture frame: " + str (missionNamespace getVariable [QGVAR(captureFrameNo), "[not yet received]"]) + "</font>")
           ]
         ];
       } remoteExecCall ["call", 0, false];
@@ -138,15 +130,15 @@ GVAR(PFHObject) = [
           _x setVariable [QGVARMAIN(exclude), true];
         };
 
-        _x setVariable [QGVARMAIN(id), _id];
+        _x setVariable [QGVARMAIN(id), GVAR(nextId)];
         [":NEW:VEH:", [
           GVAR(captureFrameNo), //1
-          _id, //2
+          GVAR(nextId), //2
           _class, //3
           getText (configFile >> "CfgVehicles" >> _vehType >> "displayName") //4
         ]] call EFUNC(extension,sendData);
         [_x] spawn FUNC(addUnitEventHandlers);
-        _id = _id + 1;
+        GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(isInitialized), true];
       };
       if !(_x getVariable [QGVARMAIN(exclude), false]) then {
@@ -170,11 +162,19 @@ GVAR(PFHObject) = [
     } count vehicles;
 
     GVAR(captureFrameNo) = GVAR(captureFrameNo) + 1;
+    publicVariable QGVAR(captureFrameNo);
+
+    if (GVARMAIN(isDebug)) then {
+      private _logStr = format["Frame %1 processed in %2ms", GVAR(captureFrameNo), diag_tickTime - _loopStart];
+      OCAPEXTLOG([_logStr]);
+      _logStr SYSCHAT;
+    };
   },
-  EGVAR(settings,frameCaptureDelay), // delay
+  GVAR(frameCaptureDelay), // delay
   [], // args
   {
     GVAR(recording) = true;
+    publicVariable QGVAR(recording);
 
     { // add diary entry for clients on recording start
       [{!isNull player}, {
@@ -194,6 +194,7 @@ GVAR(PFHObject) = [
   }, // code, executed when added
   {
     GVAR(recording) = false;
+    publicVariable QGVAR(recording);
 
     { // add diary entry for clients on recording start
       [{!isNull player}, {
@@ -212,6 +213,5 @@ GVAR(PFHObject) = [
     } remoteExecCall ["call", 0, true];
   }, // code, executed when removed
   {GVAR(recording)}, // if true, execute PFH cycle
-  {!GVAR(recording) || !GVARMAIN(enabled)}, // if true, delete object
-  ["_frameCaptureDelay"]
+  {!GVAR(recording) || !GVARMAIN(enabled)} // if true, delete object
 ] call CBA_fnc_createPerFrameHandlerObject;

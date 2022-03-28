@@ -36,7 +36,8 @@
 #define ARR6(_arg1, _arg2, _arg3, _arg4, _arg5, _arg6) [_arg1, _arg2, _arg3, _arg4, _arg5, _arg6]
 
 
-
-
 #include "\x\cba\addons\main\script_macros_common.hpp"
 #include "\x\cba\addons\xeh\script_xeh.hpp"
+
+#define SHOULDSAVEEVENTS ((missionNamespace getVariable [QGVAR(recording), false]) && missionNamespace getVariable [QGVAR(startTime), -1] > -1)
+

@@ -1,11 +1,11 @@
-name			= "OCAP";										// Name of your mod
+name			= "OCAP2";										// Name of your mod
 picture			= "logo_ocap.paa";								// Picture displayed from the expansions menu. Optimal size is 2048x1024
 //logoSmall		= "\Samples_F\Data_01\Logos\logo_small.paa";	// Display next to the item added by the mod
 //logo			= "\Samples_F\Data_01\Logos\logo.paa";			// Logo displayed in the main menu
 //logoOver		= "\Samples_F\Data_01\Logos\logoOver.paa";		// When the mouse is over, in the main menu
 actionName		= "Github";										// Text displayed on the "website" button
-action			= "https://github.com/OCAPv2";					// Website URL, that can accessed from the expansions menu
-tooltipOwned	= "Operation Capture and Playback v2";			// Tool tip displayed when the mouse is left over, in the main menu
+action			= "https://github.com/OCAP2/OCAP";					// Website URL, that can accessed from the expansions menu
+tooltipOwned	= "Operation Capture and Playback 2";			// Tool tip displayed when the mouse is left over, in the main menu
 
 // Color used for DLC stripes and backgrounds (RGBA)
 dlcColor[] =

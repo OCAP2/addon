@@ -116,20 +116,6 @@ GVAR(allSettings) = [
   ],
 
   [
-    QEGVAR(settings,pauseOnEmpty),
-    "CHECKBOX", // setting type
-    [
-      "Auto-Save When No Players", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      "Will automatically save recording when there are 0 players on the server and existing data accounts for more time than the minumum save duration setting. Default: true"
-    ],
-    [COMPONENT_NAME, "Recording Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
-    true, // default enabled
-    true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
-    {}, // function that will be executed once on mission start and every time the setting is changed.
-    false // requires restart to apply
-  ],
-
-  [
     QEGVAR(settings,trackTimes),
     "CHECKBOX", // setting type
     [
@@ -188,6 +174,20 @@ GVAR(allSettings) = [
       "If true, automatically save and export the mission when the MPEnded event fires. Default: true"
     ],
     [COMPONENT_NAME, "Save/Export Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    true, // default enabled
+    true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
+    {}, // function that will be executed once on mission start and every time the setting is changed.
+    false // requires restart to apply
+  ],
+
+  [
+    QEGVAR(settings,saveOnEmpty),
+    "CHECKBOX", // setting type
+    [
+      "Auto-Save When No Players", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      "Will automatically save recording when there are 0 players on the server and existing data accounts for more time than the minimum save duration setting. Default: true"
+    ],
+    [COMPONENT_NAME, "Recording Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.

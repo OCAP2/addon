@@ -1,13 +1,9 @@
-params ["_firer", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile", "_vehicle"];
+#include "script_component.hpp"
+
+params ["_weapon", "_muzzle", "_ammo", "_magazine", "_projectile", "_vehicle", "_ammoSimType"];
 
 _int = random 2000;
-_muzzleDisp = getText(configFile >> "CfgWeapons" >> _weapon >> _muzzle >> "displayName");
-if (_muzzleDisp == "") then {_muzzleDisp = getText(configFile >> "CfgWeapons" >> _weapon >> "displayNameShort")};
-if (_muzzleDisp == "") then {_muzzleDisp = getText(configFile >> "CfgWeapons" >> _weapon >> "displayName")};
-_magDisp = getText(configFile >> "CfgMagazines" >> _magazine >> "displayNameShort");
-if (_magDisp == "") then {_magDisp = getText(configFile >> "CfgMagazines" >> _magazine >> "displayName")};
-if (_magDisp == "") then {_magDisp = getText(configFile >> "CfgAmmo" >> _ammo >> "displayNameShort")};
-if (_magDisp == "") then {_magDisp = getText(configFile >> "CfgAmmo" >> _ammo >> "displayName")};
+([_weapon, _muzzle, _magazine, _ammo] call FUNC(getWeaponDisplayData)) params ["_muzzleDisp", "_magDisp"];
 
 // non-bullet handling
 private ["_markTextLocal"];

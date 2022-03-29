@@ -48,7 +48,7 @@ params ["_unit", "_causedBy", "_damage", "_instigator"];
 
     private _causedByInfo = [];
     private _distanceInfo = 0;
-    if (_causedBy isKindOf "CAManBase" && _causedById > -1) then {
+    if (_causedById > -1 && _causedBy isEqualTo _instigator) then {
       _causedByInfo = [
         _causedById,
         ([_causedBy] call FUNC(getEventWeaponText))
@@ -59,19 +59,14 @@ params ["_unit", "_causedBy", "_damage", "_instigator"];
         OCAPEXTLOG(ARR4("HIT EVENT", _hitFrame, _unitID, _causedById));
       };
     } else {
-      if (!isNull _instigator && _causedBy != _instigator && _instigator isKindOf "CAManBase" && _instigatorId > -1) then {
-        _causedByInfo = [
-          _instigatorId,
-          ([_instigator] call FUNC(getEventWeaponText))
-        ];
-        _distanceInfo = round (_unit distance _instigator);
+      _causedByInfo = [
+        _instigatorId,
+        ([_instigator] call FUNC(getEventWeaponText))
+      ];
+      _distanceInfo = round (_unit distance _instigator);
 
-        if (GVARMAIN(isDebug)) then {
-          OCAPEXTLOG(ARR4("HIT EVENT", _hitFrame, _unitID, _instigatorId));
-        };
-      } else {
-        _causedByInfo = [_causedById];
-        _distanceInfo = round (_unit distance _causedBy);
+      if (GVARMAIN(isDebug)) then {
+        OCAPEXTLOG(ARR4("HIT EVENT", _hitFrame, _unitID, _instigatorId));
       };
     };
     _eventData = [

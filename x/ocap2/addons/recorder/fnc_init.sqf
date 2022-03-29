@@ -43,6 +43,7 @@ publicVariable QGVAR(captureFrameNo);
 GVAR(frameCaptureDelay) = EGVAR(settings,frameCaptureDelay);
 GVAR(autoStart) = EGVAR(settings,autoStart);
 GVAR(minMissionTime) = EGVAR(settings,minMissionTime);
+GVAR(projectileMonitorMultiplier) = 1;
 
 // macro: GVARMAIN(version)SION
 GVARMAIN(version) = QUOTE(VERSION_STR);
@@ -50,7 +51,6 @@ publicVariable QGVARMAIN(version);
 
 EGVAR(extension,version) = ([":VERSION:", []] call EFUNC(extension,sendData));
 publicVariable QEGVAR(extension,version);
-
 
 // remoteExec diary creation commands to clients listing version numbers and waiting start state
 {
@@ -87,7 +87,7 @@ publicVariable QEGVAR(extension,version);
       ]
     ];
   }] call CBA_fnc_waitUntilAndExecute;
-} remoteExecCall ["call", 0, true];
+} remoteExecCall ["call", [0, -2] select isDedicated, true];
 
 
 // Support both methods of setting mission name.
@@ -95,6 +95,31 @@ GVAR(missionName) = getMissionConfigValue ["onLoadName", ""];
 if (GVAR(missionName) == "") then {
     GVAR(missionName) = briefingName;
 };
+
+
+// On the dedicated server, the color of the markers is blue
+// This overrides it with client data so it's saved properly
+{
+  _x params ["_name", "_color"];
+  profilenamespace setVariable [_name, _color];
+} forEach [
+  ["map_blufor_r", 0],
+  ["map_blufor_g", 0.3],
+  ["map_blufor_b", 0.6],
+  ["map_independent_r", 0],
+  ["map_independent_g", 0.5],
+  ["map_independent_b", 0],
+  ["map_civilian_r", 0.4],
+  ["map_civilian_g", 0],
+  ["map_civilian_b", 0.5],
+  ["map_unknown_r", 0.7],
+  ["map_unknown_g", 0.6],
+  ["map_unknown_b", 0],
+  ["map_opfor_r", 0.5],
+  ["map_opfor_g", 0],
+  ["map_opfor_b", 0]
+];
+
 
 /*
   Conditional Start Recording
@@ -110,82 +135,22 @@ if (GVAR(missionName) == "") then {
 // When the server progresses past briefing and enters the mission, save an event to the timeline if recording
 [{getClientStateNumber > 9}, {
   if (!SHOULDSAVEEVENTS) exitWith {};
-  [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
+  if (time < 20) then {
+    [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
+  } else {
+    _timeArr = [time, "HH:MM:SS", true] call BIS_fnc_secondsToString;
+    [QGVARMAIN(customEvent), ["generalEvent", format["Recording began %1H %2M %3S into the mission", _timeArr#0, _timeArr#1, _timeArr#2]]] call CBA_fnc_serverEvent;
+  }
 }] call CBA_fnc_waitUntilAndExecute;
 
-
-
-// PFH to track bullets
+// Auto-save on empty - checked every 30 seconds
+// If a recording has been started, exceeds min mission time, and no players are on the server, auto-save
 [{
-  {
-    if (isNull (_x#0)) then {
-      _x params ["_obj", "_firerId", "_frame", "_pos"];
-      [":FIRED:", [
-        _firerId,
-        _frame,
-        _pos
-      ]] call EFUNC(extension,sendData);
+  if (!isNil QGVAR(startTime) && (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime) && count allPlayers == 0) then {
+      [nil, "Mission ended due to server being empty"] call FUNC(exportData);
+  };
+}, 30] call CBA_fnc_addPerFrameHandler;
 
-      if (GVARMAIN(isDebug)) then {
-        OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", _frame, _firerId, str _pos));
-      };
-      GVAR(liveBullets) = GVAR(liveBullets) - [_x];
-    } else {
-      _x set [3, getPosASL (_x#0)];
-    };
-  } forEach GVAR(liveBullets);
-}] call CBA_fnc_addPerFrameHandler;
-
-// PFH to track missiles, rockets, shells
-[{
-  {
-    _x params ["_obj", "_magazine", "_firer", "_pos", "_markName"];
-    if (isNull (_x#0)) then {
-
-      _firer setVariable [
-        QGVARMAIN(lastFired),
-        getText(configFile >> "CfgMagazines" >> _magazine >> "displayName")
-      ];
-
-      if (GVARMAIN(isDebug)) then {
-        OCAPEXTLOG(ARR4("FIRED EVENT: SHELL-ROCKET-MISSILE", _frame, _firerId, str _pos));
-      };
-
-      [{[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent}, _markName, 10] call CBA_fnc_waitAndExecute;
-      GVAR(liveMissiles) = GVAR(liveMissiles) - [_x];
-
-    } else {
-      _nowPos = getPosASL (_x#0);
-      _x set [3, _nowPos];
-      [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _nowPos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
-    };
-  } forEach GVAR(liveMissiles);
-}, GVAR(frameCaptureDelay) * 0.3] call CBA_fnc_addPerFrameHandler;
-
-// PFH to track grenades, flares, thrown charges
-[{
-  {
-    _x params ["_obj", "_magazine", "_firer", "_pos", "_markName", "_ammoSimType"];
-    if (isNull (_x#0)) then {
-
-      if !(_ammoSimType in ["shotSmokeX", "shotIlluminating"]) then {
-        _firer setVariable [
-          QGVARMAIN(lastFired),
-          getText(configFile >> "CfgMagazines" >> _magazine >> "displayName")
-        ];
-      };
-
-      if (GVARMAIN(isDebug)) then {
-        OCAPEXTLOG(ARR4("FIRED EVENT: GRENADE-FLARE-SMOKE", _frame, _firerId, str _pos));
-      };
-
-      [{[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent}, _markName, 10] call CBA_fnc_waitAndExecute;
-      GVAR(liveGrenades) = GVAR(liveGrenades) - [_x];
-
-    } else {
-      _nowPos = getPosASL (_x#0);
-      _x set [3, _nowPos];
-      [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _nowPos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
-    };
-  } forEach GVAR(liveGrenades);
-}, GVAR(frameCaptureDelay)] call CBA_fnc_addPerFrameHandler;
+if (isNil QGVAR(projectileMonitorsInitialized)) then {
+  call FUNC(projectileMonitors);
+};

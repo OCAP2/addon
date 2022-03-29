@@ -27,48 +27,29 @@ Author:
 
 params ["_instigator"];
 
-if (vehicle _instigator isEqualTo _instigator) exitWith {
+if (isNull _instigator) exitWith {""};
+
+if !(_instigator call CBA_fnc_isPerson) then {
+  _instigator = _instigator call {
+    if(alive(gunner _this))exitWith{gunner _this};
+    if(alive(commander _this))exitWith{commander _this};
+    if(alive(driver _this))exitWith{driver _this};
+    effectiveCommander _this
+  };
+};
+
+if (_instigator call CBA_fnc_isPerson) then {
+  (weaponstate _instigator) params ["_weapon", "_muzzle", "_mode", "_magazine"];
+  ([_weapon, _muzzle, _magazine] call FUNC(getWeaponDisplayData)) params ["_muzDisp", "_magDisp"];
+
   _instigator getVariable [
     QGVARMAIN(lastFired),
-    format[
+    format [
       "%1 [%2]",
-      getText (configFile >> "CfgWeapons" >> currentWeapon _instigator >> "displayName"),
-      getText (configFile >> "CfgWeapons" >> currentMuzzle _instigator >> "displayName")
+      _muzDisp,
+      _magDisp
     ]
-  ]
-};
-
-// pilot/driver doesn't return a value, so check for this
-private _turPath = [];
-if (count (assignedVehicleRole _instigator) > 1) then {
-  _turPath = assignedVehicleRole _instigator select 1;
+  ];
 } else {
-  _turPath = [-1];
+  getText(configFile >> "CfgVehicles" >> (typeOf vehicle _instigator) >> "displayName");
 };
-
-private _curVic = getText(configFile >> "CfgVehicles" >> (typeOf vehicle _instigator) >> "displayName");
-(weaponstate [vehicle _instigator, _turPath]) params ["_curWep", "_curMuzzle", "_curFiremode", "_curMag"];
-private _curWepDisplayName = getText(configFile >> "CfgWeapons" >> _curWep >> "displayName");
-private _curMagDisplayName = getText(configFile >> "CfgMagazines" >> _curMag >> "displayName");
-private _text = _curVic;
-if (count _curMagDisplayName < 22) then {
-  if !(_curWepDisplayName isEqualTo "") then {
-    _text = _text + " [" + _curWepDisplayName;
-    if !(_curMagDisplayName isEqualTo "") then {
-      _text = _text + " / " + _curMagDisplayName + "]";
-    } else {
-      _text = _text + "]"
-    };
-  };
-} else {
-  if !(_curWepDisplayName isEqualTo "") then {
-    _text = _text + " [" + _curWepDisplayName;
-    if (_curWep != _curMuzzle && !(_curMuzzle isEqualTo "")) then {
-      _text = _text + " / " + _curMuzzle + "]";
-    } else {
-      _text = _text + "]";
-    };
-  };
-};
-
-_text;

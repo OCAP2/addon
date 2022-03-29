@@ -37,6 +37,10 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
 
     private _killedFrame = GVAR(captureFrameNo);
 
+    // allow some time for last-fired variable on killer to be updated
+    // namely for explosives, shells, grenades explosions, which are updated on impact
+    sleep GVAR(frameCaptureDelay);
+
     if (_killer == _victim && owner _victim != 2 && EGVAR(settings,preferACEUnconscious) && isClass(configFile >> "CfgPatches" >> "ace_medical_status")) then {
       private _time = diag_tickTime;
       [_victim, {
@@ -62,14 +66,14 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
       if (_killerId == -1) exitWith {};
 
       private _killerInfo = [];
-      if (_instigator isKindOf "CAManBase") then {
+      // if (_instigator isKindOf "CAManBase") then {
         _killerInfo = [
           _killerId,
           ([_instigator] call FUNC(getEventWeaponText))
         ];
-      } else {
-        _killerInfo = [_killerId];
-      };
+      // } else {
+      //   _killerInfo = [_killerId];
+      // };
 
       _eventData = [
         _killedFrame,

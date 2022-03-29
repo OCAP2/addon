@@ -41,6 +41,7 @@ EGVAR(listener,aceExplosives) = ["ace_explosives_place", {
   _explType = typeOf _explosive;
   _explosiveMag = getText(configFile >> "CfgAmmo" >> _explType >> "defaultMagazine");
   _explosiveDisp = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "displayName");
+  _explosivePic = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "picture");
 
   _placedPos = getPosASL _explosive;
   _unit addOwnedMine _explosive;
@@ -50,14 +51,16 @@ EGVAR(listener,aceExplosives) = ["ace_explosives_place", {
   _markColor = "ColorRed";
   _markerType = "Minefield";
 
-  if (GVARMAIN(isDebug)) then {
-    format["Created explosive placed marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
-    OCAPEXTLOG(ARR3("Created explosive placed marker", _markName, _explosiveDisp));
-  };
-
   [QGVARMAIN(handleMarker), [
     "CREATED", _markName, _unit, _placedPos, _markerType, "ICON", [1,1], 0, "Solid", "ColorRed", 1, _markTextLocal, true
   ]] call CBA_fnc_localEvent;
+
+  if (GVARMAIN(isDebug)) then {
+    // add to map draw array
+    private _debugArr = [_explosive, _explosivePic, format["%1 %2 - %3", str side group _unit, name _unit, _markTextLocal], [side group _unit] call BIS_fnc_sideColor];
+    GVAR(liveDebugMagIcons) pushBack _debugArr;
+    publicVariable QGVAR(liveDebugMagIcons);
+  };
 
 
   [{isNull (_this#0)}, { // wait until the mine is null (exploded), and mark this for playback

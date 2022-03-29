@@ -23,8 +23,10 @@ PREP(eh_hit);
 PREP(eh_killed);
 PREP(getInstigator);
 PREP(getEventWeaponText);
-PREP(getAmmoData);
+PREP(getAmmoMarkerData);
+PREP(getWeaponDisplayData);
 
+PREP(projectileMonitors);
 PREP(aceThrowing);
 PREP(aceExplosives);
 

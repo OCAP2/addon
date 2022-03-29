@@ -65,7 +65,7 @@ if (isNil QGVAR(startTime)) exitWith {
 
 
 _elapsedTime = time - GVAR(startTime);
-_frameTimeDuration = GVAR(frameCaptureDelay) * GVAR(captureFrameNo);
+_frameTimeDuration = (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) * 60;
 TRACE_7("Save attempted. Elapsed Time =", _elapsedTime," Frame Count * Delay Duration =", _frameTimeDuration," delta =", _elapsedTime - _frameTimeDuration);
 
 
@@ -93,29 +93,36 @@ if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {
 
 GVAR(recording) = false;
 publicVariable QGVAR(recording);
-GVAR(endFrameNumber) = GVAR(captureFrameNo);
+private _endFrameNumber = GVAR(captureFrameNo);
 
-publicVariable QGVAR(endFrameNumber);
+// reset vars in case a new recording is started
+GVAR(captureFrameNo) = nil;
+GVAR(startTime) = nil;
+
+// TO DO HEREEEEEE
 
 
 if (isNil "_side") then {
-  [":EVENT:", [GVAR(endFrameNumber), "endMission", ["", "Mission ended"]]] call EFUNC(extension,sendData);
+  [":EVENT:", [_endFrameNumber, "endMission", ["", "Mission ended"]]] call EFUNC(extension,sendData);
+};
+if (isNil "_side" && !isNil "_message") then {
+  [":EVENT:", [_endFrameNumber, "endMission", ["", _message]]] call EFUNC(extension,sendData);
 };
 if (!isNil "_side" && isNil "_message") then {
-  [":EVENT:", [GVAR(endFrameNumber), "endMission", ["", _side]]] call EFUNC(extension,sendData);
+  [":EVENT:", [_endFrameNumber, "endMission", ["", _side]]] call EFUNC(extension,sendData);
 };
 if (!isNil "_side" && !isNil "_message") then {
   private _sideString = str(_side);
   if (_side == sideUnknown) then { _sideString = "" };
-  [":EVENT:", [GVAR(endFrameNumber), "endMission", [_sideString, _message]]] call EFUNC(extension,sendData);
+  [":EVENT:", [_endFrameNumber, "endMission", [_sideString, _message]]] call EFUNC(extension,sendData);
 };
 
 
 if (!isNil "_tag") then {
-  [":SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), GVAR(endFrameNumber), _tag]] call EFUNC(extension,sendData);
+  [":SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, _tag]] call EFUNC(extension,sendData);
   OCAPEXTLOG(ARR4("Saved recording of mission", GVAR(missionName), "with tag", _tag));
 } else {// default tag to configured setting
-  [":SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), GVAR(endFrameNumber), EGVAR(settings,saveTag)]] call EFUNC(extension,sendData);
+  [":SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, EGVAR(settings,saveTag)]] call EFUNC(extension,sendData);
   OCAPEXTLOG(ARR3("Saved recording of mission", GVAR(missionName), "with default tag"));
 };
 

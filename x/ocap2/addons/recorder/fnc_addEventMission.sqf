@@ -25,80 +25,118 @@ Author:
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
-addMissionEventHandler["HandleDisconnect", {
-  _this call FUNC(eh_disconnected);
-}];
+if (isNil QEGVAR(EH,HandleDisconnect)) then {
+  addMissionEventHandler["HandleDisconnect", {
+    _this call FUNC(eh_disconnected);
+  }];
+  OCAPEXTLOG(["Initialized HandleDisconnect EH"]);
+};
 
-addMissionEventHandler["PlayerConnected", {
-  _this call FUNC(eh_connected);
-}];
+if (isNil QEGVAR(EH,PlayerConnected)) then {
+  addMissionEventHandler["PlayerConnected", {
+    _this call FUNC(eh_connected);
+  }];
+  OCAPEXTLOG(["Initialized PlayerConnected EH"]);
+};
 
-addMissionEventHandler ["EntityKilled", {
-  _this call FUNC(eh_killed);
-}];
+if (isNil QEGVAR(EH,EntityKilled)) then {
+  addMissionEventHandler ["EntityKilled", {
+    _this call FUNC(eh_killed);
+  }];
+  OCAPEXTLOG(["Initialized EntityKilled EH"]);
+};
 
-addMissionEventHandler ["EntityRespawned", {
-  params ["_entity", "_corpse"];
+if (isNil QEGVAR(EH,EntityRespawned)) then {
+  EGVAR(EH,EntityRespawned) = addMissionEventHandler ["EntityRespawned", {
+    params ["_entity", "_corpse"];
 
-  // Reset unit back to normal
-  _entity setvariable [QGVARMAIN(isKilled), false];
+    // Reset unit back to normal
+    _entity setvariable [QGVARMAIN(isKilled), false];
 
-  // Stop tracking old unit
-  if (_corpse getVariable [QGVARMAIN(isInitialized), false]) then {
-    _corpse setVariable [QGVARMAIN(exclude), true];
+    // Stop tracking old unit
+    if (_corpse getVariable [QGVARMAIN(isInitialized), false]) then {
+      _corpse setVariable [QGVARMAIN(exclude), true];
 
-    [_entity, true] spawn FUNC(addUnitEventHandlers);
-  };
-}];
+      [_entity, true] spawn FUNC(addUnitEventHandlers);
+    };
+  }];
+  OCAPEXTLOG(["Initialized EntityRespawned EH"]);
+};
 
 // Listen for global ACE Explosive placement events
 if (isClass (configFile >> "CfgPatches" >> "ace_explosives")) then {
-  call FUNC(aceExplosives);
+  if (isNil QEGVAR(listener,aceExplosives)) then {
+    call FUNC(aceExplosives);
+    OCAPEXTLOG(["Initialized ACE Explosives listener"]);
+  };
 };
 
-// Listen for local ACE Throwing events, for any units owned by the server
+// Listen for global ACE Throwing events that take place when a throwable is primed. use existing firedMan code, since identical args
 if (isClass (configFile >> "CfgPatches" >> "ace_advanced_throwing")) then {
-  call FUNC(aceThrowing);
+  if (isNil QEGVAR(listener,aceThrowing)) then {
+    ["ace_advanced_throwing_throwFiredXEH", {_this call FUNC(eh_firedMan)}] call CBA_fnc_addEventHandler;
+    OCAPEXTLOG(["Initialized ACE Throwing listener"]);
+  };
 };
 
-addMissionEventHandler ["MPEnded", {
-  if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) >= GVAR(minMissionTime)) then {
-    ["Mission ended automatically"] call FUNC(exportData);
-  };
-}];
+if (isNil QEGVAR(EH,MPEnded)) then {
+  EGVAR(EH,MPEnded) = addMissionEventHandler ["MPEnded", {
+    if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) >= GVAR(minMissionTime)) then {
+      ["Mission ended automatically"] call FUNC(exportData);
+    };
+  }];
+  OCAPEXTLOG(["Initialized MPEnded EH"]);
+};
 
-addMissionEventHandler ["Ended", {
-  if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) >= GVAR(minMissionTime)) then {
-    ["Mission ended automatically"] call FUNC(exportData);
-  };
-}];
+if (isNil QEGVAR(EH,Ended)) then {
+  EGVAR(EH,Ended) = addMissionEventHandler ["Ended", {
+    if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) >= GVAR(minMissionTime)) then {
+      ["Mission ended automatically"] call FUNC(exportData);
+    };
+  }];
+  OCAPEXTLOG(["Initialized Ended EH"]);
+};
 
 // Add event saving markers
-call FUNC(handleMarkers);
+if (isNil QEGVAR(listener,markers)) then {
+  call FUNC(handleMarkers);
+};
 
 // Custom event handler with key "ocap2_customEvent"
 // Used for showing custom events in playback events list
-EGVAR(listener,customEvent) = [QGVARMAIN(customEvent), {
-  _this call FUNC(handleCustomEvent);
-}] call CBA_fnc_addEventHandler;
+if (isNil QEGVAR(listener,customEvent)) then {
+  EGVAR(listener,customEvent) = [QGVARMAIN(customEvent), {
+    _this call FUNC(handleCustomEvent);
+  }] call CBA_fnc_addEventHandler;
+  OCAPEXTLOG(["Initialized customEvent listener"]);
+};
 
 // Custom event handler with key "ocap2_record"
 // This will START OR RESUME recording if not already.
-EGVAR(listener,exportData) = [QGVARMAIN(record), {
-  call FUNC(startRecording);
-}] call CBA_fnc_addEventHandler;
+if (isNil QEGVAR(listener,record)) then {
+  EGVAR(listener,record) = [QGVARMAIN(record), {
+    call FUNC(startRecording);
+  }] call CBA_fnc_addEventHandler;
+  OCAPEXTLOG(["Initialized record listener"]);
+};
 
 // Custom event handler with key "ocap2_pause"
 // This will PAUSE recording
-EGVAR(listener,exportData) = [QGVARMAIN(pause), {
-  GVAR(recording) = false;
-  publicVariable QGVAR(recording);
-}] call CBA_fnc_addEventHandler;
+if (isNil QEGVAR(listener,pause)) then {
+  EGVAR(listener,pause) = [QGVARMAIN(pause), {
+    GVAR(recording) = false;
+    publicVariable QGVAR(recording);
+  }] call CBA_fnc_addEventHandler;
+  OCAPEXTLOG(["Initialized pause listener"]);
+};
 
 // Custom event handler with key "ocap2_exportData"
 // This will export the mission immediately regardless of restrictions.
 // params ["_side", "_message", "_tag"];
-EGVAR(listener,exportData) = [QGVARMAIN(exportData), {
-  _this set [3, true];
-  _this call FUNC(exportData);
-}] call CBA_fnc_addEventHandler;
+if (isNil QEGVAR(listener,exportData)) then {
+  EGVAR(listener,exportData) = [QGVARMAIN(exportData), {
+    _this set [3, true];
+    _this call FUNC(exportData);
+  }] call CBA_fnc_addEventHandler;
+  OCAPEXTLOG(["Initialized exportData listener"]);
+};

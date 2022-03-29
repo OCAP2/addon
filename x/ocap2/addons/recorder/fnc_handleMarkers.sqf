@@ -38,28 +38,7 @@ Author:
 // Entries are added at marker create events and removed at marker delete events to avoid duplicate processing.
 GVAR(trackedMarkers) = []; // Markers which we saves into replay
 
-// On the dedicated server, the color of the markers is blue
-// This overrides it with client data so it's saved properly
-{
-  _x params ["_name", "_color"];
-  profilenamespace setVariable [_name, _color];
-} forEach [
-  ["map_blufor_r", 0],
-  ["map_blufor_g", 0.3],
-  ["map_blufor_b", 0.6],
-  ["map_independent_r", 0],
-  ["map_independent_g", 0.5],
-  ["map_independent_b", 0],
-  ["map_civilian_r", 0.4],
-  ["map_civilian_g", 0],
-  ["map_civilian_b", 0.5],
-  ["map_unknown_r", 0.7],
-  ["map_unknown_g", 0.6],
-  ["map_unknown_b", 0],
-  ["map_opfor_r", 0.5],
-  ["map_opfor_g", 0],
-  ["map_opfor_b", 0]
-];
+
 
 // create CBA event handler to be called on server with key "ocap2_handleMarker"
 EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {

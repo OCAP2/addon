@@ -33,22 +33,27 @@ if (!SHOULDSAVEEVENTS) exitWith {};
 
 params ["_firer", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile", "_vehicle"];
 
+// not sent in ACE Throwing events
+if (isNil "_vehicle") then {_vehicle = objNull};
+
 private _frame = GVAR(captureFrameNo);
 
 private _firerId = (_firer getVariable [QGVARMAIN(id), -1]);
 if (_firerId == -1) exitWith {};
 
 // set the firer's lastFired var as this weapon, so subsequent kills are logged accurately
-isNil {
-  _firer setVariable [
-    QGVARMAIN(lastFired),
-    format[
-      "%1 [%2]",
-      getText (configFile >> "CfgWeapons" >> _weapon >> "displayName"),
-      getText (configFile >> "CfgWeapons" >> _muzzle >> "displayName")
-    ]
-  ];
+([_weapon, _muzzle, _magazine, _ammo] call FUNC(getWeaponDisplayData)) params ["_muzzleDisp", "_magDisp"];
+
+private _wepString = "";
+if (_muzzleDisp find _magDisp == 1 && _magDisp isNotEqualTo "") then {
+  _wepString = format["%1 [%2]", _muzzleDisp, _magDisp];
+} else {
+  _wepString = _muzzleDisp;
 };
+if (vehicle _firer != _firer) then {
+  _wepString = format["%1 [%2]", (configOf (vehicle _firer)) call BIS_fnc_displayName, _wepString];
+};
+_firer setVariable [QGVARMAIN(lastFired), _wepString];
 
 _ammoSimType = getText(configFile >> "CfgAmmo" >> _ammo >> "simulation");
 // _ammoSimType
@@ -60,39 +65,56 @@ _ammoSimType = getText(configFile >> "CfgAmmo" >> _ammo >> "simulation");
 // "ShotIlluminating" // 40mm_green Flare
 // "ShotSmokeX"; // M18 Smoke
 
+#define LOGBULLET GVAR(liveBullets) pushBack [_projectile, _firerId, _firer, getPosASL _projectile]
+#define LOGMISSILE GVAR(liveMissiles) pushBack [_projectile, _wepString, _firer, getPosASL _projectile, _markName, _markTextLocal]
+#define LOGGRENADE GVAR(liveGrenades) pushBack [_projectile, _wepString, _firer, getPosASL _projectile, _markName, _markTextLocal, _ammoSimType];
 
-switch (_ammoSimType) do {
+switch (true) do {
   case (_ammoSimType isEqualTo "shotBullet"): {
     // [_projectile, _firer, _frame, _ammoSimType, _ammo] spawn {
     //   params["_projectile", "_firer", "_frame", "_ammoSimType", "_ammo"];
     if (isNull _projectile) then {
       _projectile = nearestObject [_firer, _ammo];
     };
-    GVAR(liveBullets) pushBack [_projectile, _firerId, _frame, getPosASL _projectile];
+    if (isNil "_projectile") exitWith {};
+    LOGBULLET;
   };
 
 
   case (_ammoSimType isNotEqualTo "shotSubmunitions"): {
 
+    if (isNull _projectile) then {
+      _projectile = nearestObject [_firer, _ammo];
+      _this set [6, _projectile];
+    };
+
+    ([_weapon, _muzzle, _ammo, _magazine, _projectile, _vehicle, _ammoSimType] call FUNC(getAmmoMarkerData)) params ["_markTextLocal","_markName","_markColor","_markerType"];
+    private _magIcon = getText(configFile >> "CfgMagazines" >> _magazine >> "picture");
+
     // MAKE MARKER FOR PLAYBACK
     _firerPos = getPosASL _firer;
     [QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, _firerPos, _markerType, "ICON", [1,1], getDirVisual _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
 
-    if (isNull _projectile) then {
-      _projectile = nearestObject [_firer, _ammo];
-    };
-
     switch (true) do {
-      case (_ammoSimType isEqualTo "shotBullet"): {
-        GVAR(liveBullets) pushBack [_projectile, _firerId, _frame, getPosASL _projectile];
-      };
       case (_ammoSimType in ["shotMissile", "shotRocket", "shotShell"]): {
-        GVAR(liveMissiles) pushBack [_projectile, _magazine, _firer, getPosASL _projectile, _markName];
+        LOGMISSILE;
+
+        if (GVARMAIN(isDebug)) then {
+          // add to map draw array
+          private _debugArr = [_projectile, _magIcon, format["%1 %2 - %3", str side group _firer, name _firer, _markTextLocal], [side group _firer] call BIS_fnc_sideColor];
+          [QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
+        };
       };
       case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX"]): {
-        GVAR(liveGrenades) pushBack [_projectile, _magazine, _firer, getPosASL _projectile, _markName, _ammoSimType];
+        LOGGRENADE;
+
+        if (GVARMAIN(isDebug)) then {
+          // add to map draw array
+          private _debugArr = [_projectile, _magIcon, format["%1 %2 - %3", str side group _firer, name _firer, _markTextLocal], [side group _firer] call BIS_fnc_sideColor];
+          [QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
+        };
       };
-      default {OCAPEXTLOG(ARR3("Invalid ammo sim type, check it", _projectile, _newAmmoSimType))};
+      default {OCAPEXTLOG(ARR3("Invalid ammo sim type, check it", _projectile, _ammoSimType))};
     };
   };
 
@@ -106,34 +128,77 @@ switch (_ammoSimType) do {
     // once we have that, we'll add it to the bullet tracking array for positions so a fireline is drawn in playback
     private _simDelay = (configFile >> "CfgAmmo" >> _ammo >> "simulationStep") call BIS_fnc_getCfgData;
     private _subTypes = ((configFile >> "CfgAmmo" >> _ammo >> "submunitionAmmo") call BIS_fnc_getCfgDataArray) select {_x isEqualType ""};
-    [{
-      params ["_EHData", "_subTypes", "_magazine", "_firer", "_firerId", "_firerPos", "_frame"];
-      private _projectile = objNull;
-      while {isNull _projectile} do {
-        {
-          _projSearch = nearestObject [_firer, _x];
-          if !(isNull _projSearch) exitWith {_projectile = _projSearch};
-        } forEach _subTypes;
-      };
+    private _subTypesAmmoSimType = _subTypes apply {(configFile >> "CfgAmmo" >> _x >> "simulation") call BIS_fnc_getCfgData};
+    if (count _subTypesAmmoSimType > 0) then {
+      _subTypesAmmoSimType = selectRandom(_subTypesAmmoSimType);
+    };
+    [
+      {
+        params ["_EHData", "_subTypes", "_magazine", "_wepString", "_firer", "_firerId", "_firerPos", "_frame", "_subTypesAmmoSimType"];
+        private _projectile = _EHData # 6;
 
-      // get marker details based on original EH data
-      (_EHData call FUNC(getAmmoData)) params ["_markTextLocal","_markName","_markColor","_markerType"];
-      // create our marker record in the timeline
-      [QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, getPosASL _firer, _markerType, "ICON", [1,1], getDir _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
+        // if submunitions are NOT bullets, wait until the original projectile deploys then search for submunitions and 're-fire' them to appear in playback
+        // if !(_subTypesAmmoSimType == "shotBullet") exitWith {
+        // if (_magazine isKindOf "VehicleMagazine") then {
+        //   [_EHData, _projectile, _subTypes] spawn {
+        //     params ["_EHData", "_projectile", "_subTypes"];
+        //     private _ogPos = getPos _firer;
+        //     while {!isNull _projectile} do {_ogPos = getPosASL _projectile; sleep 0.1;};
+        //     isNil {
+        //       _projSearch = nearestObjects [ASLtoAGL _ogPos, _subTypes, 50, false];
+        //       {
+        //         _EHData set [6, _x];
+        //         _EHData spawn FUNC(eh_firedMan);
+        //       } forEach _projSearch;
+        //     };
+        //   };
+        // };
 
-      private _newAmmoSimType = getText(configFile >> "CfgAmmo" >> _projectile >> "simulation");
-      switch (true) do {
-        case (_newAmmoSimType isEqualTo "shotBullet"): {
-          GVAR(liveBullets) pushBack [_projectile, _firerId, _frame, getPosASL _projectile];
+        // if submunitions ARE bullets, process normally and just look for one item
+        while {isNull _projectile} do {
+          {
+            _projSearch = nearestObject [_firer, _x];
+            if !(isNull _projSearch) exitWith {_projectile = _projSearch};
+          } forEach _subTypes;
+          sleep 0.1
         };
-        case (_newAmmoSimType in ["shotMissile", "shotRocket", "shotShell"]): {
-          GVAR(liveMissiles) pushBack [_projectile, _magazine, _firer, getPosASL _projectile, _markName];
+
+        // get marker details based on original EH data
+        ([_weapon, _muzzle, _ammo, _magazine, _projectile, _vehicle, _ammoSimType] call FUNC(getAmmoMarkerData)) params ["_markTextLocal","_markName","_markColor","_markerType"];
+        private _magIcon = getText(configFile >> "CfgMagazines" >> _magazine >> "picture");
+
+        // create our marker record in the timeline
+        [QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, getPosASL _firer, _markerType, "ICON", [1,1], getDir _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
+
+        // then get data of submunition to determine how to track it
+        private _ammoSimType = getText(configFile >> "CfgAmmo" >> (typeOf _projectile) >> "simulation");
+        switch (true) do {
+          case (_ammoSimType isEqualTo "shotBullet"): {
+            LOGBULLET;
+          };
+          case (_ammoSimType in ["shotMissile", "shotRocket", "shotShell"]): {
+            LOGMISSILE;
+
+            if (GVARMAIN(isDebug)) then {
+              // add to clients' map draw array
+              private _debugArr = [_projectile, _magIcon, format["%1 %2 - %3", str side group _firer, name _firer, _markTextLocal], [side group _firer] call BIS_fnc_sideColor];
+              [QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
+            };
+          };
+          case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX"]): {
+            LOGGRENADE;
+
+            if (GVARMAIN(isDebug)) then {
+              // add to map draw array
+              private _debugArr = [_projectile, _magIcon, format["%1 %2 - %3", str side group _firer, name _firer, _markTextLocal], [side group _firer] call BIS_fnc_sideColor];
+              [QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
+            };
+          };
+          default {OCAPEXTLOG(ARR3("Invalid ammo sim type, check it", _projectile, _ammoSimType))};
         };
-        case (_newAmmoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX"]): {
-          GVAR(liveGrenades) pushBack [_projectile, _magazine, _firer, getPosASL _projectile, _markName, _newAmmoSimType];
-        };
-        default {OCAPEXTLOG(ARR3("Invalid ammo sim type, check it", _projectile, _newAmmoSimType))};
-      };
-    }, [_this, _subTypes, _magazine, _firer, _firerId, _firerPos, _frame], _simDelay] call CBA_fnc_waitAndExecute;
+      },
+      [_this, _subTypes, _magazine, _wepString, _firer, _firerId, _firerPos, _frame, _subTypesAmmoSimType],
+      _simDelay
+    ] call CBA_fnc_waitAndExecute;
   };
 };

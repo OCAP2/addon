@@ -5,6 +5,7 @@ PREP(init);
 PREP(updateTime);
 
 PREP(startRecording);
+PREP(stopRecording);
 PREP(captureLoop);
 PREP(isKindOfApc);
 PREP(getClass);

@@ -124,8 +124,7 @@ if (isNil QEGVAR(listener,record)) then {
 // This will PAUSE recording
 if (isNil QEGVAR(listener,pause)) then {
   EGVAR(listener,pause) = [QGVARMAIN(pause), {
-    GVAR(recording) = false;
-    publicVariable QGVAR(recording);
+    call FUNC(stopRecording);
   }] call CBA_fnc_addEventHandler;
   OCAPEXTLOG(["Initialized pause listener"]);
 };

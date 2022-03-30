@@ -172,46 +172,8 @@ GVAR(PFHObject) = [
   },
   GVAR(frameCaptureDelay), // delay
   [], // args
-  {
-    GVAR(recording) = true;
-    publicVariable QGVAR(recording);
-
-    { // add diary entry for clients on recording start
-      [{!isNull player}, {
-        player createDiaryRecord [
-          "OCAP2Info",
-          [
-            "Status",
-            "<font color='#33FF33'>OCAP2 began recording.</font>"
-          ], taskNull, "", false
-        ];
-        player setDiarySubjectPicture [
-          "OCAP2Info",
-          "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
-        ];
-      }] call CBA_fnc_waitUntilAndExecute;
-    } remoteExecCall ["call", 0, true];
-  }, // code, executed when added
-  {
-    GVAR(recording) = false;
-    publicVariable QGVAR(recording);
-
-    { // add diary entry for clients on recording start
-      [{!isNull player}, {
-        player createDiaryRecord [
-          "OCAP2Info",
-          [
-            "Status",
-            "<font color='#33FF33'>OCAP2 stopped recording.</font>"
-          ], taskNull, "", false
-        ];
-        player setDiarySubjectPicture [
-          "OCAP2Info",
-          "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
-        ];
-      }] call CBA_fnc_waitUntilAndExecute;
-    } remoteExecCall ["call", 0, true];
-  }, // code, executed when removed
-  {GVAR(recording)}, // if true, execute PFH cycle
-  {!GVAR(recording) || !GVARMAIN(enabled)} // if true, delete object
+  {}, // code, executed when added
+  {}, // code, executed when removed
+  {SHOULDSAVEEVENTS}, // if true, execute PFH cycle
+  {false} // if true, delete object
 ] call CBA_fnc_createPerFrameHandlerObject;

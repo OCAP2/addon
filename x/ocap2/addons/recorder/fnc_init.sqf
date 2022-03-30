@@ -38,6 +38,7 @@ publicVariable QGVAR(recording);
 // int: GVAR(captureFrameNo)
 GVAR(captureFrameNo) = 0;
 publicVariable QGVAR(captureFrameNo);
+GVAR(nextId) = 0;
 
 // save static setting values so changes during a mission don't interrupt timeline
 GVAR(frameCaptureDelay) = EGVAR(settings,frameCaptureDelay);
@@ -51,6 +52,9 @@ publicVariable QGVARMAIN(version);
 
 EGVAR(extension,version) = ([":VERSION:", []] call EFUNC(extension,sendData));
 publicVariable QEGVAR(extension,version);
+
+// Add mission event handlers
+call FUNC(addEventMission);
 
 // remoteExec diary creation commands to clients listing version numbers and waiting start state
 {
@@ -135,12 +139,7 @@ if (GVAR(missionName) == "") then {
 // When the server progresses past briefing and enters the mission, save an event to the timeline if recording
 [{getClientStateNumber > 9}, {
   if (!SHOULDSAVEEVENTS) exitWith {};
-  if (time < 20) then {
-    [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
-  } else {
-    _timeArr = [time, "HH:MM:SS", true] call BIS_fnc_secondsToString;
-    [QGVARMAIN(customEvent), ["generalEvent", format["Recording began %1H %2M %3S into the mission", _timeArr#0, _timeArr#1, _timeArr#2]]] call CBA_fnc_serverEvent;
-  }
+  [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
 }] call CBA_fnc_waitUntilAndExecute;
 
 // Auto-save on empty - checked every 30 seconds

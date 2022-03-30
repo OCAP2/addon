@@ -25,21 +25,21 @@ Author:
 #include "script_component.hpp"
 
 params [
-	["_date", []]
+  ["_date", []]
 ];
 
 private _systemTimeFormat = ["%1-%2-%3T%4:%5:%6.%7"];
 _systemTimeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];
 if (_date isEqualTo []) then {
-	_date = date;
+  _date = date;
 };
 _missionDateFormat append (_date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 
 [":TIME:", [
-	GVAR(captureFrameNo),
-	format _systemTimeFormat,
-	format _missionDateFormat,
-	timeMultiplier,
-	time
+  GVAR(captureFrameNo),
+  format _systemTimeFormat,
+  format _missionDateFormat,
+  timeMultiplier,
+  time
 ]] call EFUNC(extension,sendData);

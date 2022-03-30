@@ -91,15 +91,25 @@ if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {
   } remoteExec ["call", 0, false];
 };
 
-GVAR(recording) = false;
-publicVariable QGVAR(recording);
+
+call FUNC(stopRecording);
 private _endFrameNumber = GVAR(captureFrameNo);
 
-// reset vars in case a new recording is started
-GVAR(captureFrameNo) = nil;
-GVAR(startTime) = nil;
+if (!isNil QGVAR(PFHObject)) then {
+  [GVAR(PFHObject)] call CBA_fnc_deletePerFrameHandlerObject;
+  GVAR(PFHObject) = nil;
+};
 
-// TO DO HEREEEEEE
+// reset vars in case a new recording is started
+GVAR(captureFrameNo) = 0;
+GVAR(startTime) = nil;
+{
+  _x setVariable [QGVARMAIN(isInitialized), nil];
+  _x setVariable [QGVARMAIN(exclude), nil];
+  _x setVariable [QGVARMAIN(id), nil];
+  _x setVariable [QGVARMAIN(unitType), nil];
+} count (allUnits + allDeadMen + vehicles);
+GVAR(nextId) = 0;
 
 
 if (isNil "_side") then {

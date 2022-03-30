@@ -9,21 +9,42 @@
 if (!GVARMAIN(enabled)) exitWith {};
 
 // if recording started earlier and startTime has been noted, only restart the capture loop with any updated settings.
-if (!isNil QGVAR(startTime) && GVAR(recording)) exitWith {
+if (GVAR(recording)) exitWith {
   OCAPEXTLOG(["OCAP2 was asked to record and is already recording!"]);
 };
-if (!isNil QGVAR(startTime) && !GVAR(recording)) exitWith {
+
+GVAR(recording) = true;
+publicVariable QGVAR(recording);
+
+private _systemTimeFormat = ["%1-%2-%3T%4:%5:%6.%7"];
+_systemTimeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} else {str _x}});
+private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];
+_missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
+
+[QGVARMAIN(customEvent), ["generalEvent", "Recording started."]] call CBA_fnc_serverEvent;
+
+[[cba_missionTime, format _missionDateFormat, format _systemTimeFormat], { // add diary entry for clients on recording start
+  [{!isNull player}, {
+    player createDiaryRecord [
+      "OCAP2Info",
+      [
+        "Status",
+        format["<font color='#33FF33'>OCAP2 started recording.<br/>In-Mission Time Elapsed: %1<br/>Mission World Time: %2<br/>System Time UTC: %3</font>", _this#0, _this#1, _this#2]
+      ], taskNull, "", false
+    ];
+    player setDiarySubjectPicture [
+      "OCAP2Info",
+      "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
+    ];
+  }, _this] call CBA_fnc_waitUntilAndExecute;
+}] remoteExecCall ["call", 0, true];
+
+if (GVAR(captureFrameNo) == 0) then {
+  // Notify the extension
+  [":START:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay)]] call EFUNC(extension,sendData);
+  [":SET:VERSION:", [GVARMAIN(version)]] call EFUNC(extension,sendData);
   call FUNC(captureLoop);
 };
 
-// Notify the extension
-[":START:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay)]] call EFUNC(extension,sendData);
-[":SET:VERSION:", [GVARMAIN(version)]] call EFUNC(extension,sendData);
-
-// Add mission event handlers
-call FUNC(addEventMission);
-// Track initial times
+// Log times
 [] call FUNC(updateTime);
-
-GVAR(nextId) = 0;
-call FUNC(captureLoop);

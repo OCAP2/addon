@@ -67,8 +67,8 @@ GVAR(liveMissiles) = [];
 // PFH to track grenades, flares, thrown charges
 GVAR(liveGrenades) = [];
 [{
-  private _processNow = GVAR(liveMissiles) select {isNull (_x#0)};
-  GVAR(liveMissiles) = GVAR(liveMissiles) select {!isNull (_x#0)};
+  private _processNow = GVAR(liveGrenades) select {isNull (_x#0)};
+  GVAR(liveGrenades) = GVAR(liveGrenades) select {!isNull (_x#0)};
 
   // _processNow
   // for grenades that have hit something and become null, trigger FIRED events in timeline and add to clients for debug draw

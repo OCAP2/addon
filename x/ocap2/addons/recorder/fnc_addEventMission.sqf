@@ -111,6 +111,34 @@ if (isNil QEGVAR(listener,customEvent)) then {
   OCAPEXTLOG(["Initialized customEvent listener"]);
 };
 
+// Custom event handler with key "ocap2_counterInit"
+// Used for tracking scores or counts per side
+if (isNil QEGVAR(listener,counterInit)) then {
+  EGVAR(listener,counterInit) = [QGVARMAIN(counterInit), {
+    EGVAR(counter,sides) = _this apply {_x#0};
+    [QGVARMAIN(customEvent), ["counterInit", EGVAR(counter,sides)]] call CBA_fnc_localEvent;
+    {
+      [QGVARMAIN(counterEvent), _x] call CBA_fnc_serverEvent;
+    } forEach _this;
+    [_thisType, _thisId] call CBA_fnc_removeEventHandler;
+  }] call CBA_fnc_addEventHandlerArgs;
+  OCAPEXTLOG(["Initialized counterInit listener"]);
+};
+if (isNil QEGVAR(listener,counterEvent)) then {
+  EGVAR(listener,counterEvent) = [QGVARMAIN(counterEvent), {
+    if (isNil QEGVAR(counter,sides)) exitWith {};
+    if (typeName (_this#0) != "SIDE") exitWith {};
+    if !((_this#0) in EGVAR(counter,sides)) exitWith {};
+
+    private _scores = [];
+    {
+      if ((_this#0) isEqualTo _x) then {_scores pushBack (_this#1)} else {_scores pushBack -1};
+    } forEach EGVAR(counter,sides);
+    [QGVARMAIN(customEvent), ["counterSet", _scores]] call CBA_fnc_localEvent;
+  }] call CBA_fnc_addEventHandler;
+  OCAPEXTLOG(["Initialized counterEvent listener"]);
+};
+
 // Custom event handler with key "ocap2_record"
 // This will START OR RESUME recording if not already.
 if (isNil QEGVAR(listener,record)) then {

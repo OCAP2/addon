@@ -153,3 +153,7 @@ if (GVAR(missionName) == "") then {
 if (isNil QGVAR(projectileMonitorsInitialized)) then {
   call FUNC(projectileMonitors);
 };
+
+if (isNil QGVAR(entityMonitorsInitialized)) then {
+  call FUNC(entityMonitors);
+};

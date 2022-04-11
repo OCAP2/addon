@@ -33,13 +33,15 @@ if (!SHOULDSAVEEVENTS) exitWith {};
 
 params ["_firer", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile", "_vehicle"];
 
-private "_who";
-{
-  if (_firer == _x getVariable ["BIS_fnc_moduleRemoteControl_owner", objNull]) then {
-    _who = _x;
-  };
-} forEach (allUnits select {!isNull (_firer getVariable ["BIS_fnc_moduleRemoteControl_owner", objNull])});
-if (!isNil "_who") then {_firer = _who};
+private _initialProjPos = getPos _projectile;
+if (getPos _firer distance _initialProjPos > 50) then {
+  // if projectile in unscheduled environment is > 50m from FiredMan then likely remote controlled
+  // we should find the actual firing entity
+  _nearest = [_initialProjPos, allUnits select {!isPlayer _x}, 5] call CBA_fnc_getNearest;
+  _firer = _nearest#0;
+};
+// missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", _firer];
+// _unit getVariable ["BIS_fnc_moduleRemoteControl_owner", objNull];
 
 // not sent in ACE Throwing events
 if (isNil "_vehicle") then {_vehicle = objNull};

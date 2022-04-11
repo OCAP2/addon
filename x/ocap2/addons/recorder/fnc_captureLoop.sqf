@@ -46,6 +46,15 @@ GVAR(PFHObject) = [
       [] call FUNC(updateTime);
     };
 
+    // every 15 frames of recording check respawn ticket state of each of three sides
+    if (GVAR(captureFrameNo) % (30 / GVAR(frameCaptureDelay)) == 0 && EGVAR(settings,trackTickets)) then {
+      private _scores = [];
+      {
+        _scores pushBack ([_x] call BIS_fnc_respawnTickets);
+      } forEach [missionNamespace, east, west, independent];
+      ["ocap2_customEvent", ["respawnTickets", _scores]] call CBA_fnc_localEvent;
+    };
+
     // update diary record every 320 frames
     if (GVAR(captureFrameNo) % (320 / GVAR(frameCaptureDelay)) == 0) then {
       publicVariable QGVAR(captureFrameNo);
@@ -63,8 +72,8 @@ GVAR(PFHObject) = [
     {
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
         if (_x isKindOf "Logic") exitWith {
-          _x setVariable [QGVARMAIN(exclude), true];
-          _x setVariable [QGVARMAIN(isInitialized), true];
+          _x setVariable [QGVARMAIN(exclude), true, true];
+          _x setVariable [QGVARMAIN(isInitialized), true, true];
         };
         _x setVariable [QGVARMAIN(id), GVAR(nextId)];
         [":NEW:UNIT:", [
@@ -78,7 +87,7 @@ GVAR(PFHObject) = [
         ]] call EFUNC(extension,sendData);
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
-        _x setVariable [QGVARMAIN(isInitialized), true];
+        _x setVariable [QGVARMAIN(isInitialized), true, true];
       };
       if !(_x getVariable [QGVARMAIN(exclude), false]) then {
         private _unitRole = _x getVariable [QGVARMAIN(unitType), ""];
@@ -126,8 +135,8 @@ GVAR(PFHObject) = [
         };
         if ((_class isEqualTo "unknown") || (_vehType in (parseSimpleArray EGVAR(settings,excludeClassFromRecord))) || _toExcludeKind) exitWith {
           LOG(ARR2("WARNING: vehicle is defined as 'unknown' or exclude:", _vehType));
-          _x setVariable [QGVARMAIN(isInitialized), true];
-          _x setVariable [QGVARMAIN(exclude), true];
+          _x setVariable [QGVARMAIN(isInitialized), true, true];
+          _x setVariable [QGVARMAIN(exclude), true, true];
         };
 
         _x setVariable [QGVARMAIN(id), GVAR(nextId)];
@@ -139,7 +148,7 @@ GVAR(PFHObject) = [
         ]] call EFUNC(extension,sendData);
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
-        _x setVariable [QGVARMAIN(isInitialized), true];
+        _x setVariable [QGVARMAIN(isInitialized), true, true];
       };
       if !(_x getVariable [QGVARMAIN(exclude), false]) then {
         private _crew = [];

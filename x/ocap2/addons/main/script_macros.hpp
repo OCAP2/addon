@@ -10,9 +10,9 @@
 #endif
 
 // The current version of OCAP2.
-#define VERSION 1.0
-#define VERSION_STR 1.0.0
-#define VERSION_AR 1,0,0
+#define VERSION 2.0
+#define VERSION_STR 2.0.0-RC2
+#define VERSION_AR 2,0,0
 #define VERSION_REQUIRED 2.08
 
 // define: LOG

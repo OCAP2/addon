@@ -74,6 +74,7 @@ if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {
   // then we won't save, but will continue recording in case admins want to save once that threshold is met.
   // allow this restriction to be overriden
   LOG("Save attempted, but the minimum recording duration hasn't been met. Not saving, continuing to record.");
+  ["OCAP2 attempted to save, but the minimum recording duration hasn't been met. Recording will continue.", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
   {
     player createDiaryRecord [
       "OCAP2Info",
@@ -137,6 +138,7 @@ if (!isNil "_tag") then {
 };
 
 // briefingName is used here, no need for publicVariable for a simple confirmation log.
+[format["OCAP2 saved %1 frames successfully", _endFrameNumber], 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
 {
   player createDiaryRecord [
     "OCAP2Info",

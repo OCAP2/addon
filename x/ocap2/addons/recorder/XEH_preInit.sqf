@@ -38,7 +38,7 @@ GVAR(allSettings) = [
   ],
 
 
-  // RECORDING SETTINGS
+  // CORE
   [
     QEGVAR(settings,frameCaptureDelay),
     "SLIDER", // setting type
@@ -46,7 +46,7 @@ GVAR(allSettings) = [
       "Frame Capture Delay", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
       "Positioning, medical status, and crew states of units and vehicles will be captured every X amount of seconds. Default: 1"
     ],
-    [COMPONENT_NAME, "Recording Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, "Core"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     [
         0.25, // min
         10, // max
@@ -66,13 +66,18 @@ GVAR(allSettings) = [
       "Use ACE3 Medical", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
       "If true, will check ACE3 medical status on units. If false, or ACE3 isn't loaded, fall back to vanilla. Default: true"
     ],
-    [COMPONENT_NAME, "Recording Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, "Core"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
     false // requires restart to apply
   ],
 
+
+
+
+
+  // EXCLUSIONS
   [
     QEGVAR(settings,excludeClassFromRecord),
     "EDITBOX", // setting type
@@ -80,7 +85,7 @@ GVAR(allSettings) = [
       "Classnames to Exclude", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
       "Array of object classnames that should be excluded from recording. Use single quotes! Default: ['ACE_friesAnchorBar', 'GroundWeaponHolder', 'WeaponHolderSimulated']"
     ],
-    [COMPONENT_NAME, "Recording Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, "Exclusions"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     "['ACE_friesAnchorBar', 'GroundWeaponHolder', 'WeaponHolderSimulated']", // default string value
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -94,7 +99,7 @@ GVAR(allSettings) = [
       "Object KindOfs to Exclude", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
       "Array of classnames which, along with all child classes, should be excluded from recording. Use single quotes! Default: []"
     ],
-    [COMPONENT_NAME, "Recording Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, "Exclusions"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     "[]", // default string value
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -108,13 +113,17 @@ GVAR(allSettings) = [
       "Marker Prefixes to Exclude", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
       "Array of prefixes - any markers matching these prefixes will be excluded from recording. Use single quotes! Default: ['SystemMarker_','ACE_BFT_']"
     ],
-    [COMPONENT_NAME, "Recording Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, "Exclusions"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     "['SystemMarker_','ACE_BFT_']", // default string value
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
     false // requires restart to apply
   ],
 
+
+
+
+  // TRACKING EXTRA
   [
     QEGVAR(settings,trackTickets),
     "CHECKBOX", // setting type
@@ -122,11 +131,11 @@ GVAR(allSettings) = [
       "Enable Ticket Tracking", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
       "Will track respawn ticket counts for missionNamespace and each playable faction every 30th frame. Default: true"
     ],
-    [COMPONENT_NAME, "Recording Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, "Extra Tracking"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
-    true // requires restart to apply
+    false // requires restart to apply
   ],
 
   [
@@ -136,7 +145,7 @@ GVAR(allSettings) = [
       "Enable Mission Time Tracking", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
       "Will continuously track in-game world time during a mission. Useful for accelerated/skipped time scenarios. Default: false"
     ],
-    [COMPONENT_NAME, "Recording Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, "Extra Tracking"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     false, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -150,7 +159,7 @@ GVAR(allSettings) = [
       "Mission Time Tracking Interval", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
       "If time tracking is enabled, it will be checked every X capture frames. Default: 10"
     ],
-    [COMPONENT_NAME, "Recording Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, "Extra Tracking"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     [
         5, // min
         25, // max
@@ -201,7 +210,7 @@ GVAR(allSettings) = [
       "Auto-Save When No Players", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
       "Will automatically save recording when there are 0 players on the server and existing data accounts for more time than the minimum save duration setting. Default: true"
     ],
-    [COMPONENT_NAME, "Recording Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, "Save/Export Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.

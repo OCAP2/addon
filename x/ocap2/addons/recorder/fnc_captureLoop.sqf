@@ -106,7 +106,8 @@ GVAR(PFHObject) = [
         };
 
         _pos = getPosASL _x;
-        [":UPDATE:UNIT:", [
+
+        _unitData = [
           (_x getVariable QGVARMAIN(id)), //1
           _pos, //2
           round getDir _x, //3
@@ -115,7 +116,12 @@ GVAR(PFHObject) = [
           if (alive _x) then {name _x} else {""}, //6
           BOOL(isPlayer _x), //7
           _unitRole //8
-        ]] call EFUNC(extension,sendData);
+        ];
+
+        if (_x getVariable ["unitData", []] isNotEqualTo _unitData) then {
+          [":UPDATE:UNIT:", _unitData] call EFUNC(extension,sendData);
+        };
+        _x setVariable [QGVARMAIN(unitData), _unitData];
       };
       false
     } count (allUnits + allDeadMen);

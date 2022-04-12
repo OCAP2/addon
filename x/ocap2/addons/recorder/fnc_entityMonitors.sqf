@@ -12,7 +12,7 @@
         {
           // _x params ["_startPos", "_endPos", "_color", "_timeHit"];
           (_this#0) drawIcon [
-            ["iconMan"] call BIS_fnc_textureVehicleIcon, // Custom images can also be used: getMissionPath "\myFolder\myIcon.paa"
+            [getText((configOf _x) >> "icon")] call BIS_fnc_textureVehicleIcon, // Custom images can also be used: getMissionPath "\myFolder\myIcon.paa"
             [side group _x] call BIS_fnc_sideColor,
             getPos _x,
             1,

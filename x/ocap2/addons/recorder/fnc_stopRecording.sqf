@@ -6,6 +6,7 @@ private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];
 _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 
 [QGVARMAIN(customEvent), ["generalEvent", "Recording paused."]] call CBA_fnc_serverEvent;
+["OCAP2 stopped recording", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
 
 GVAR(recording) = false;
 publicVariable QGVAR(recording);

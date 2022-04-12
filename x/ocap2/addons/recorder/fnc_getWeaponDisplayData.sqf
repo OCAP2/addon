@@ -8,4 +8,8 @@ if (_magDisp == "") then {_magDisp = getText(configFile >> "CfgMagazines" >> _ma
 if (_magDisp == "" && !isNil "_ammo") then {_magDisp = getText(configFile >> "CfgAmmo" >> _ammo >> "displayNameShort")};
 if (_magDisp == "" && !isNil "_ammo") then {_magDisp = getText(configFile >> "CfgAmmo" >> _ammo >> "displayName")};
 
+if (_muzzleDisp find _magDisp > -1 && _magDisp isNotEqualTo "") then {
+  _muzzleDisp = getText(configFile >> "CfgWeapons" >> _weapon >> "displayName");
+};
+
 [_muzzleDisp, _magDisp];

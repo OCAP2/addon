@@ -11,7 +11,10 @@ if (!GVARMAIN(enabled)) exitWith {};
 // if recording started earlier and startTime has been noted, only restart the capture loop with any updated settings.
 if (GVAR(recording)) exitWith {
   OCAPEXTLOG(["OCAP2 was asked to record and is already recording!"]);
-  ["OCAP2 was asked to record and is already recording", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+  [
+    ["OCAP2 was asked to record", 1, [1, 1, 1, 1]],
+    ["and is already recording", 1, [1, 1, 1, 1]]
+  ] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
 };
 
 GVAR(recording) = true;
@@ -39,7 +42,7 @@ _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {st
       "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
     ];
   }, _this] call CBA_fnc_waitUntilAndExecute;
-}] remoteExecCall ["call", 0, true];
+}] remoteExecCall ["call", [0, -2] select isDedicated, true];
 
 if (GVAR(captureFrameNo) == 0) then {
   // Notify the extension

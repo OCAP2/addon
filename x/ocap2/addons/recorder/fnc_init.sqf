@@ -30,7 +30,12 @@ if (is3DEN) exitWith {};
 // if OCAP is disabled do nothing
 if (!GVARMAIN(enabled)) exitWith {};
 // if recording has already initialized this session then just start recording, don't re-init
-if (!isNil QGVAR(startTime)) exitWith {call FUNC(startRecording)};
+if (!isNil QGVAR(startTime)) exitWith {
+  if (!SHOULDSAVEEVENTS) exitWith {};
+  call FUNC(startRecording)
+};
+
+// "debug_console" callExtension format["clientState: %1 (%2) | %3", getClientState, getClientStateNumber, __FILE__];
 
 // bool: GVAR(recording)
 GVAR(recording) = false;
@@ -61,7 +66,7 @@ call FUNC(addEventMission);
   [{!isNil QGVARMAIN(version) && !isNil QEGVAR(extension,version)}, {
     player createDiarySubject ["OCAP2Info", "OCAP2 AAR", "\A3\ui_f\data\igui\cfg\simpleTasks\types\whiteboard_ca.paa"];
 
-    ocap_fnc_copyGitHubToClipboard = {copyToClipboard "https://github.com/OCAP2/OCAP"; systemChat "OCAP2 GitHub link copied to clipboard";};
+    ocap2_fnc_copyGitHubToClipboard = {copyToClipboard "https://github.com/OCAP2/OCAP"; systemChat "OCAP2 GitHub link copied to clipboard";};
     EGVAR(diary,about) = player createDiaryRecord [
       "OCAP2Info",
       [
@@ -72,7 +77,7 @@ call FUNC(addEventMission);
           "<br/>" +
           "Extension version: " + (EGVAR(extension,version) # 0) + " (built " + (EGVAR(extension,version) # 1) + ")" +
           "<br/>" +
-          "<execute expression='call ocap_fnc_copyGitHubToClipboard;'>https://github.com/OCAP2/OCAP</execute>" +
+          "<execute expression='call ocap2_fnc_copyGitHubToClipboard;'>https://github.com/OCAP2/OCAP</execute>" +
           "<br/><br/>" +
           "OCAP2 is a server-side Arma 3 recording suite that provides web-based playback of all units, vehicles, markers, and projectiles present, placed, and fired during a mission." +
           "<br/><br/>" +
@@ -132,8 +137,10 @@ if (GVAR(missionName) == "") then {
   The startRecording function checks internally if recording has already started by other means via whether GVAR(startTime) has been declared or not.
 */
 [
-  {((count allPlayers) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
-  {call FUNC(startRecording)}
+  {(getClientStateNumber > 8 && (count allPlayers) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
+  {
+    call FUNC(startRecording)
+  }
 ] call CBA_fnc_waitUntilAndExecute;
 
 // When the server progresses past briefing and enters the mission, save an event to the timeline if recording
@@ -146,7 +153,7 @@ if (GVAR(missionName) == "") then {
 // If a recording has been started, exceeds min mission time, and no players are on the server, auto-save
 [{
   if (!isNil QGVAR(startTime) && (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime) && count allPlayers == 0) then {
-      [nil, "Mission ended due to server being empty"] call FUNC(exportData);
+      [nil, "Recording ended due to server being empty"] call FUNC(exportData);
   };
 }, 30] call CBA_fnc_addPerFrameHandler;
 

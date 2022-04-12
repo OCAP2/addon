@@ -25,7 +25,7 @@ publicVariable QGVAR(recording);
       "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
     ];
   }, _this] call CBA_fnc_waitUntilAndExecute;
-}] remoteExecCall ["call", 0, true];
+}] remoteExecCall ["call", [0, -2] select isDedicated, true];
 
 // Log times
 [] call FUNC(updateTime);

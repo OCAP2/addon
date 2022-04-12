@@ -242,8 +242,4 @@ GVAR(allSettings) = [
   _x call CBA_fnc_addSetting;
 } forEach GVAR(allSettings);
 
-if (!is3DEN) then {
-  call FUNC(init);
-};
-
 ADDON = true;

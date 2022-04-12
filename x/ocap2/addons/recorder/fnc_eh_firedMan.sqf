@@ -42,11 +42,17 @@ if (getPos _firer distance _initialProjPos > 50 || vehicle _firer isKindOf "Air"
     _firer = _nearest#0;
   };
 };
+
 // missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", _firer];
 // _unit getVariable ["BIS_fnc_moduleRemoteControl_owner", objNull];
 
 // not sent in ACE Throwing events
 if (isNil "_vehicle") then {_vehicle = objNull};
+if (!isNull _vehicle) then {
+  _projectile setShotParents [_vehicle, _firer];
+} else {
+  _projectile setShotParents [_firer, _firer];
+};
 
 private _frame = GVAR(captureFrameNo);
 
@@ -66,6 +72,7 @@ if (!isNull _vehicle) then {
   _wepString = format["%1 [%2]", (configOf _vehicle) call BIS_fnc_displayName, _wepString];
 };
 _firer setVariable [QGVARMAIN(lastFired), _wepString];
+(vehicle _firer) setVariable [QGVARMAIN(lastFired), _wepString];
 
 _ammoSimType = getText(configFile >> "CfgAmmo" >> _ammo >> "simulation");
 // _ammoSimType

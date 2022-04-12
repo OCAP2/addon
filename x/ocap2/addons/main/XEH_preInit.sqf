@@ -16,11 +16,7 @@ GVAR(allSettings) = [
     [COMPONENT_NAME, "Core"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
-    {
-      params ["_value"];
-      if (!isServer) exitWith {};
-      if (_value) then {call EFUNC(recorder,init)};
-    }, // function that will be executed once on mission start and every time the setting is changed.
+    {}, // function that will be executed once on mission start and every time the setting is changed.
     false // requires restart to apply
   ],
 

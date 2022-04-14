@@ -52,7 +52,7 @@ GVAR(PFHObject) = [
       {
         _scores pushBack ([_x] call BIS_fnc_respawnTickets);
       } forEach [missionNamespace, east, west, independent];
-      ["ocap2_customEvent", ["respawnTickets", _scores]] call CBA_fnc_localEvent;
+      [QGVARMAIN(customEvent), ["respawnTickets", _scores]] call CBA_fnc_localEvent;
     };
 
     // update diary record every 320 frames
@@ -139,7 +139,7 @@ GVAR(PFHObject) = [
             };
           } forEach (parseSimpleArray EGVAR(settings,excludeKindFromRecord));
         };
-        if ((_class isEqualTo "unknown") || (_vehType in (parseSimpleArray EGVAR(settings,excludeClassFromRecord))) || _toExcludeKind) exitWith {
+        if ((_class isEqualTo "unknown") || _toExcludeKind) exitWith {
           LOG(ARR2("WARNING: vehicle is defined as 'unknown' or exclude:", _vehType));
           _x setVariable [QGVARMAIN(isInitialized), true, true];
           _x setVariable [QGVARMAIN(exclude), true, true];
@@ -154,6 +154,7 @@ GVAR(PFHObject) = [
         ]] call EFUNC(extension,sendData);
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
+        _x setVariable [QGVARMAIN(vehicleClass), _class];
         _x setVariable [QGVARMAIN(isInitialized), true, true];
       };
       if !(_x getVariable [QGVARMAIN(exclude), false]) then {

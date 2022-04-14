@@ -20,6 +20,8 @@
 #define OCAPEXTLOG(_args) [":LOG:", _args] call EFUNC(extension,sendData)
 #define SYSCHAT remoteExec ["systemChat", [0, -2] select isDedicated]
 
+#define SHOULDSAVEEVENTS ((missionNamespace getVariable [QGVAR(recording), false]) && missionNamespace getVariable [QGVAR(startTime), -1] > -1)
+
 // #define DEBUG_MODE_NORMAL
 #define DEBUG_MODE_FULL
 
@@ -39,5 +41,4 @@
 #include "\x\cba\addons\main\script_macros_common.hpp"
 #include "\x\cba\addons\xeh\script_xeh.hpp"
 
-#define SHOULDSAVEEVENTS ((missionNamespace getVariable [QGVAR(recording), false]) && missionNamespace getVariable [QGVAR(startTime), -1] > -1)
 

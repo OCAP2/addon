@@ -32,10 +32,22 @@ GVAR(allSettings) = [
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
     false // requires restart to apply
+  ],
+
+  [
+    QGVARMAIN(administratorList),
+    "EDITBOX", // setting type
+    [
+      "Administrators", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      "An array or server-visible variable referencing one that is a list of playerUIDs. Additional briefing diary or UI elements may be available for more accessible control over OCAP2's features. Takes effect on player server connection. Format: [] OR myAdminPUIDs | Default: []"
+    ],
+    [COMPONENT_NAME, "Core"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    "[]", // default enabled
+    true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
+    {}, // function that will be executed once on mission start and every time the setting is changed.
+    false // requires restart to apply
   ]
 ];
-
-
 
 {
   _x call CBA_fnc_addSetting;

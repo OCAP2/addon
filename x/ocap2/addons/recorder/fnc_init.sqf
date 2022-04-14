@@ -25,8 +25,8 @@ Author:
 
 #include "script_component.hpp"
 
-// exit if in 3DEN editor (when loaded in PreInit XEH
-if (is3DEN) exitWith {};
+// exit if in 3DEN editor (when loaded in PreInit XEH)
+if (is3DEN || !isMultiplayer) exitWith {};
 // if OCAP is disabled do nothing
 if (!GVARMAIN(enabled)) exitWith {};
 // if recording has already initialized this session then just start recording, don't re-init
@@ -135,24 +135,23 @@ if (GVAR(missionName) == "") then {
   We'll wait to see if auto-start is enabled and minPlayercount setting is met. This covers scenarios where someone changes the autostart setting during the mission as well, and excludes cases where autostart is disabled.
   If recording hasn't started already, we'll initialize it here assuming the above conditions are met.
   The startRecording function checks internally if recording has already started by other means via whether GVAR(startTime) has been declared or not.
+  Start recording AFTER Briefing screen, so the beginning of the recording matches the start of the actual mission session.
 */
 [
-  {(getClientStateNumber > 8 && (count allPlayers) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
+  {(getClientStateNumber > 9 && (count allPlayers) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
   {
     call FUNC(startRecording)
+    [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
   }
 ] call CBA_fnc_waitUntilAndExecute;
-
-// When the server progresses past briefing and enters the mission, save an event to the timeline if recording
-[{getClientStateNumber > 9}, {
-  if (!SHOULDSAVEEVENTS) exitWith {};
-  [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
-}] call CBA_fnc_waitUntilAndExecute;
 
 // Auto-save on empty - checked every 30 seconds
 // If a recording has been started, exceeds min mission time, and no players are on the server, auto-save
 [{
-  if (!isNil QGVAR(startTime) && (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime) && count allPlayers == 0) then {
+  if (
+    QEGVAR(settings,saveOnEmpty) &&
+    !isNil QGVAR(startTime) && (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime) && count allPlayers == 0
+  ) then {
       [nil, "Recording ended due to server being empty"] call FUNC(exportData);
   };
 }, 30] call CBA_fnc_addPerFrameHandler;

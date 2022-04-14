@@ -18,6 +18,8 @@ PREP(addUnitEventHandlers);
 
 PREP(eh_connected);
 PREP(eh_disconnected);
+PREP(eh_onUserAdminStateChanged);
+PREP(adminUIcontrol);
 
 PREP(eh_firedMan);
 PREP(eh_hit);

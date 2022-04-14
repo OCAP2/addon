@@ -26,17 +26,25 @@ Author:
 #include "script_component.hpp"
 
 if (isNil QEGVAR(EH,HandleDisconnect)) then {
-  addMissionEventHandler["HandleDisconnect", {
+  EGVAR(EH,HandleDisconnect) = addMissionEventHandler["HandleDisconnect", {
     _this call FUNC(eh_disconnected);
+    false; // ensure we're not overriding disabledAI and persisting an AI unit to replace the player's
   }];
   OCAPEXTLOG(["Initialized HandleDisconnect EH"]);
 };
 
 if (isNil QEGVAR(EH,PlayerConnected)) then {
-  addMissionEventHandler["PlayerConnected", {
+  EGVAR(EH,PlayerConnected) = addMissionEventHandler["PlayerConnected", {
     _this call FUNC(eh_connected);
   }];
   OCAPEXTLOG(["Initialized PlayerConnected EH"]);
+};
+
+if (isNil QEGVAR(EH,OnUserAdminStateChanged)) then {
+  EGVAR(EH,OnUserAdminStateChanged) = addMissionEventHandler ["OnUserAdminStateChanged", {
+    _this call FUNC(eh_onUserAdminStateChanged);
+  }];
+  OCAPEXTLOG(["Initialized OnUserAdminStateChanged EH"]);
 };
 
 if (isNil QEGVAR(EH,EntityKilled)) then {

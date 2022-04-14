@@ -19,6 +19,7 @@
 // Used for logging messages via the extension.
 #define OCAPEXTLOG(_args) [":LOG:", _args] call EFUNC(extension,sendData)
 #define SYSCHAT remoteExec ["systemChat", [0, -2] select isDedicated]
+#define ACMI(_data) ["flashback.saveString", [EGVAR(tacview,filename), _data]] call py3_fnc_callExtension
 
 #define SHOULDSAVEEVENTS ((missionNamespace getVariable [QGVAR(recording), false]) && missionNamespace getVariable [QGVAR(startTime), -1] > -1)
 

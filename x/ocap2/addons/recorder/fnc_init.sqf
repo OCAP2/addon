@@ -106,6 +106,11 @@ if (GVAR(missionName) == "") then {
 };
 
 
+if (GVARMAIN(tacviewEnabled)) then {
+  call EFUNC(tacview,worldInit);
+};
+
+
 // On the dedicated server, the color of the markers is blue
 // This overrides it with client data so it's saved properly
 {

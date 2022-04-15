@@ -150,7 +150,7 @@ if (GVAR(missionName) == "") then {
 [{
   if (
     QEGVAR(settings,saveOnEmpty) &&
-    !isNil QGVAR(startTime) && (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime) && count allPlayers == 0
+    !isNil QGVAR(startTime) && (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime) && count (call BIS_fnc_listPlayers) == 0
   ) then {
       [nil, "Recording ended due to server being empty"] call FUNC(exportData);
   };

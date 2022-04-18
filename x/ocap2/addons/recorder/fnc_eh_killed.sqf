@@ -86,10 +86,22 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
       if (GVARMAIN(isDebug)) then {
         OCAPEXTLOG(ARR4("KILLED EVENT", _killedFrame, _victimId, _killerId));
       };
+
     };
 
-
-
     [":EVENT:", _eventData] call EFUNC(extension,sendData);
+
+    if (GVAR(tacviewEnabled)) then {
+      format[
+        "0,Event=Message|%1|Killed by %2",
+        _victimId+1,
+        [_instigator] call EFUNC(tacview,getName)
+      ] call EFUNC(tacview,sendData);
+      format[
+        "0,Event=Destroyed|%1|Killed by %2",
+        _victimId+1,
+        [_instigator] call EFUNC(tacview,getName)
+      ] call EFUNC(tacview,sendData);
+    };
   };
 };

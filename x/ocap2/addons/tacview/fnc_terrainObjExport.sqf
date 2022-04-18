@@ -8,19 +8,16 @@
 // <Objects MapID=""Real World"">
 
 // " + "~0000");
-["
-<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes""?>
-<Objects MapID=""Real World"">
-
-"] call FUNC(sendData);
+("<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes""?>" + EOL + "<Objects MapID=""Real World"">") call FUNC(sendData);
 
 
-private _origin = position ((allUnits select {isPlayer _x}) # 0);
+// private _origin = position ((allUnits select {isPlayer _x}) # 0);
+private _origin = [worldSize / 2, worldSize / 2];
 private _size = sqrt(worldSize * worldSize);
 {
   _x call FUNC(terrainObjProcess)
 } forEach [
-  [
+    [
     _origin,
     _size,
     [
@@ -37,8 +34,8 @@ private _size = sqrt(worldSize * worldSize);
       "SHIPWRECK"
     ],
     "Cube",
-    "#888888FF",
-    2
+    "#888888BB",
+    1
   ],
   [
     _origin,
@@ -48,8 +45,8 @@ private _size = sqrt(worldSize * worldSize);
       "VIEW-TOWER"
     ],
     "Cube",
-    "#006600FF",
-    3
+    "#006600BB",
+    1
   ],
   [
     _origin,
@@ -62,8 +59,8 @@ private _size = sqrt(worldSize * worldSize);
       "WATERTOWER"
     ],
     "Cube",
-    "#0000660F",
-    3
+    "#000066BB",
+    1
   ],
   [
     _origin,
@@ -76,28 +73,29 @@ private _size = sqrt(worldSize * worldSize);
       "HOSPITAL"
     ],
     "Cube",
-    "#FFFFFFFF",
-    3
+    "#FFFFFFBB",
+    1
   ],
-  // [
-  // 	_origin,
-  // 	_size,
-  // 	[
-  // 		"WALL",
-  // 		"FENCE"
-  // 	],
-  // 	"Cube",
-  // 	"#4444448EF",
-  // 	3,
-  // 	nil,
-  // 	"Border"
-  // ],
+  [
+    _origin,
+    _size,
+    [
+      "WALL",
+      "FENCE"
+    ],
+    "Cube",
+    "#4444448BB",
+    2//,
+    // nil,
+    // "Border"
+  ],
   [
     _origin,
     _size,
     [
       "SMALL TREE",
-      "TREE"
+      "TREE",
+      "BUSH"
     ],
     "Cone",
     "#22992250",
@@ -196,16 +194,14 @@ GREEN
 
 */
 
-// [_origin, _size] call fnc_getRoads;
+[_origin, _size] call FUNC(terrainObjRoads);
 
 //tail
 //   "debug_console" callExtension ("
 // </Objects>
 // " + "~0000");
 
-["
-</Objects>
-"] call FUNC(sendData);
+"</Objects>" call FUNC(sendData);
 
 
 

@@ -10,13 +10,17 @@ GVAR(liveBullets) = [];
   // _processNow
   // for bullets that have hit something and become null, trigger FIRED events in timeline and add to clients for debug draw
   {
-    _x params ["_obj", "_firerId", "_firer", "_pos"];
+    _x params ["_obj", "_firerId", "_firer", "_pos","_projId"];
 
     [":FIRED:", [
       _firerId,
       GVAR(captureFrameNo),
       _pos
     ]] call EFUNC(extension,sendData);
+
+    if (GVAR(tacviewEnabled)) then {
+      [GVAR(captureFrameNo), _projId, _firerId, _pos] call EFUNC(tacview,writeBullet);
+    };
 
     if (GVARMAIN(isDebug)) then {
       OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _pos));
@@ -42,14 +46,19 @@ GVAR(liveMissiles) = [];
   // _processNow
   // for missiles that have hit something and become null, trigger FIRED events in timeline and add to clients for debug draw
   {
-    _x params ["_obj", "_wepString", "_firer", "_pos", "_markName", "_markTextLocal"];
+    _x params ["_obj", "_wepString", "_firerId", "_firer", "_pos", "_markName", "_markTextLocal", "_projId", "_projType", "_ammoSimType"];
+
     _firer setVariable [
       QGVARMAIN(lastFired),
-      getText(configFile >> "CfgMagazines" >> _magazine >> "displayName")
+      _wepString
     ];
 
+    if (GVAR(tacviewEnabled)) then {
+      [GVAR(captureFrameNo), 1, _projId, _firer, _firerId, _pos, _projType, _ammoSimType, _wepString] call EFUNC(tacview,writeProjectile);
+    };
+
     if (GVARMAIN(isDebug)) then {
-      OCAPEXTLOG(ARR4("FIRED EVENT: SHELL-ROCKET-MISSILE", GVAR(captureFrameNo), _firer getVariable QGVARMAIN(id), str _pos));
+      OCAPEXTLOG(ARR4("FIRED EVENT: SHELL-ROCKET-MISSILE", GVAR(captureFrameNo), _firerId, str _pos));
     };
 
     [{[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent}, _markName, 10] call CBA_fnc_waitAndExecute;
@@ -57,12 +66,15 @@ GVAR(liveMissiles) = [];
 
   // for missiles that still exist, update positions
   {
-    _x params ["_obj", "_wepString", "_firer", "_pos", "_markName", "_markTextLocal"];
+    _x params ["_obj", "_wepString", "_firerId", "_firer", "_pos", "_markName", "_markTextLocal", "_projId", "_projType", "_ammoSimType"];
     _nowPos = getPosASL (_x#0);
-    _x set [3, _nowPos];
+    _x set [4, _nowPos];
     [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _nowPos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
+    if (GVAR(tacviewEnabled)) then {
+      [GVAR(captureFrameNo), 0, _projId, _firer, _firerId, _pos, _projType, _ammoSimType, _wepString] call EFUNC(tacview,writeProjectile);
+    };
   } forEach GVAR(liveMissiles);
-}, 0.1 * GVAR(projectileMonitorMultiplier)] call CBA_fnc_addPerFrameHandler;
+}, 0.5 * GVAR(projectileMonitorMultiplier)] call CBA_fnc_addPerFrameHandler;
 
 // PFH to track grenades, flares, thrown charges
 GVAR(liveGrenades) = [];
@@ -73,17 +85,21 @@ GVAR(liveGrenades) = [];
   // _processNow
   // for grenades that have hit something and become null, trigger FIRED events in timeline and add to clients for debug draw
   {
-    _x params ["_obj", "_magazine", "_firer", "_pos", "_markName", "_markTextLocal", "_ammoSimType"];
+    _x params ["_obj", "_wepString", "_firerId", "_firer", "_pos", "_markName", "_markTextLocal", "_projId", "_projType", "_ammoSimType"];
 
     if !(_ammoSimType in ["shotSmokeX", "shotIlluminating"]) then {
       _firer setVariable [
         QGVARMAIN(lastFired),
-        getText(configFile >> "CfgMagazines" >> _magazine >> "displayName")
+        _wepString
       ];
     };
 
+    if (GVAR(tacviewEnabled)) then {
+      [GVAR(captureFrameNo), 1, _projId, _firer, _firerId, _pos, _projType, _ammoSimType, _wepString] call EFUNC(tacview,writeProjectile);
+    };
+
     if (GVARMAIN(isDebug)) then {
-      OCAPEXTLOG(ARR4("FIRED EVENT: GRENADE-FLARE-SMOKE", GVAR(captureFrameNo), _firer getVariable QGVARMAIN(id), str _pos));
+      OCAPEXTLOG(ARR4("FIRED EVENT: GRENADE-FLARE-SMOKE", GVAR(captureFrameNo), _firerId, str _pos));
     };
 
     [{[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent}, _markName, 10] call CBA_fnc_waitAndExecute;
@@ -91,12 +107,15 @@ GVAR(liveGrenades) = [];
 
   // for grenades that still exist, update positions
   {
-    _x params ["_obj", "_magazine", "_firer", "_pos", "_markName", "_markTextLocal", "_ammoSimType"];
+    _x params ["_obj", "_wepString", "_firerId", "_firer", "_pos", "_markName", "_markTextLocal", "_projId", "_projType", "_ammoSimType"];
     _nowPos = getPosASL (_x#0);
-    _x set [3, _nowPos];
+    _x set [4, _nowPos];
     [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _nowPos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
+    if (GVAR(tacviewEnabled)) then {
+      [GVAR(captureFrameNo), 0, _projId, _firer, _firerId, _pos, _projType, _ammoSimType, _wepString] call EFUNC(tacview,writeProjectile);
+    };
   } forEach GVAR(liveGrenades);
-}, GVAR(frameCaptureDelay)] call CBA_fnc_addPerFrameHandler;
+}, GVAR(frameCaptureDelay) + 1] call CBA_fnc_addPerFrameHandler;
 
 
 

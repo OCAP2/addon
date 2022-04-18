@@ -32,7 +32,7 @@ if (!GVARMAIN(enabled)) exitWith {};
 // if recording has already initialized this session then just start recording, don't re-init
 if (!isNil QGVAR(startTime)) exitWith {
   if (!SHOULDSAVEEVENTS) exitWith {};
-  call FUNC(startRecording)
+  call FUNC(startRecording);
 };
 
 // "debug_console" callExtension format["clientState: %1 (%2) | %3", getClientState, getClientStateNumber, __FILE__];
@@ -47,8 +47,13 @@ GVAR(nextId) = 0;
 
 // save static setting values so changes during a mission don't interrupt timeline
 GVAR(frameCaptureDelay) = EGVAR(settings,frameCaptureDelay);
+publicVariable QGVAR(frameCaptureDelay);
 GVAR(autoStart) = EGVAR(settings,autoStart);
+publicVariable QGVAR(autoStart);
 GVAR(minMissionTime) = EGVAR(settings,minMissionTime);
+publicVariable QGVAR(minMissionTime);
+GVAR(tacviewEnabled) = GVARMAIN(tacviewEnabled);
+publicVariable QGVAR(tacviewEnabled);
 GVAR(projectileMonitorMultiplier) = 1;
 
 // macro: GVARMAIN(version)SION
@@ -60,6 +65,7 @@ publicVariable QEGVAR(extension,version);
 
 // Add mission event handlers
 call FUNC(addEventMission);
+call EFUNC(tacview,worldInit);
 
 // remoteExec diary creation commands to clients listing version numbers and waiting start state
 {
@@ -92,7 +98,12 @@ call FUNC(addEventMission);
       "OCAP2Info",
       [
         "Status",
-        "OCAP2 initialized."
+        (
+          "OCAP2 initialized.<br/>" +
+          "Auto-start is " + str(["OFF", "ON"] select GVAR(autoStart)) + "<br/>" +
+          "Minimum duration for auto-save is " + str(GVAR(minMissionTime)) + " minutes<br/>" +
+          "Tacview recording is " + str(["OFF", "ON"] select GVAR(tacviewEnabled)) + "<br/>"
+        )
       ]
     ];
   }] call CBA_fnc_waitUntilAndExecute;
@@ -103,11 +114,6 @@ call FUNC(addEventMission);
 GVAR(missionName) = getMissionConfigValue ["onLoadName", ""];
 if (GVAR(missionName) == "") then {
     GVAR(missionName) = briefingName;
-};
-
-
-if (GVARMAIN(tacviewEnabled)) then {
-  call EFUNC(tacview,worldInit);
 };
 
 
@@ -135,6 +141,10 @@ if (GVARMAIN(tacviewEnabled)) then {
 ];
 
 
+GVAR(weaponDisplayDataCache) = createHashMap;
+GVAR(ammoMarkerDataCache) = createHashMap;
+
+
 /*
   Conditional Start Recording
   We'll wait to see if auto-start is enabled and minPlayercount setting is met. This covers scenarios where someone changes the autostart setting during the mission as well, and excludes cases where autostart is disabled.
@@ -145,7 +155,7 @@ if (GVARMAIN(tacviewEnabled)) then {
 [
   {(getClientStateNumber > 9 && (count allPlayers) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
   {
-    call FUNC(startRecording)
+    call FUNC(startRecording);
     [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
   }
 ] call CBA_fnc_waitUntilAndExecute;
@@ -154,7 +164,7 @@ if (GVARMAIN(tacviewEnabled)) then {
 // If a recording has been started, exceeds min mission time, and no players are on the server, auto-save
 [{
   if (
-    QEGVAR(settings,saveOnEmpty) &&
+    EGVAR(settings,saveOnEmpty) &&
     !isNil QGVAR(startTime) && (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime) && count allPlayers == 0
   ) then {
       [nil, "Recording ended due to server being empty"] call FUNC(exportData);

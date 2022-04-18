@@ -7,21 +7,43 @@ _centerLng = getNumber(configFile >> "CfgWorlds" >> worldName >> "longitude");
 GVAR(filename) = format["%1-%2-%3T%4:%5:%6Z_%7",_sysyear, _sysmonth, _sysday, _syshours, _sysminutes, _sysseconds];
 ["FileType=text/acmi/tacview"] call FUNC(sendData);
 ["FileVersion=2.1"] call FUNC(sendData);
-_missionDate = format["ReferenceTime=%1-%2-%3T%4:%5:00Z",_year, _month, _day, _hours, _minutes];
-_systemDate = format["RecordingTime=%1-%2-%3T%4:%5:%6Z",_sysyear, _sysmonth, _sysday, _syshours, _sysminutes, _sysseconds];
-["0", _missionDate, _systemDate] call FUNC(sendData);
-["0", "DataSource=Arma 3"] call FUNC(sendData);
-["0", "DataRecorder=OCAP"] call FUNC(sendData);
-["0", "Title=" + GVAR(missionName] call FUNC(sendData);
-["0", "Category=Testing"] call FUNC(sendData);
-private _missionAuthor = (getMissionConfigValue ["Author", ""]);
-private _missionBrief = (getMissionConfigValue ["OverviewText", ""]);
-["0", "Author=" + _missionAuthor] call FUNC(sendData);
-["0", "Briefing=" + _missionBrief] call FUNC(sendData);
+_missionDate = format["%1-%2-%3T%4:%5:00Z",_year, _month, _day, _hours, _minutes];
+// _systemDate = format["RecordingTime=%1-%2-%3T%4:%5:%6Z",_sysyear, _sysmonth, _sysday, _syshours, _sysminutes, _sysseconds];
+// format["0,%1,%2", _missionDate, _systemDate] call FUNC(sendData);
+format["0,RecordingTime=%1,ReferenceTime=%2", __DATE_STR_ISO8601__, _missionDate] call FUNC(sendData);
+format["0,DataSource=Arma 3 %1", QUOTE(__GAME_VER__)] call FUNC(sendData);
+format["0,DataRecorder=OCAP2 v%1", QUOTE(GVARMAIN(version))] call FUNC(sendData);
+format["0,Title=%1", GVAR(missionName)] call FUNC(sendData);
+format["0,Category=%1", EGVAR(settings,saveTag)] call FUNC(sendData);
+format["0,Author=%1", (getMissionConfigValue ["Author", ""])] call FUNC(sendData);
+format["0,Briefing=%1", (getMissionConfigValue ["OverviewText", ""])] call FUNC(sendData);
 
 
 
+GVAR(sideToCoalitionCache) = createHashMapFromArray [
+  [blufor, "BLUFOR"],
+  [opfor, "OPFOR"],
+  [independent, "INDFOR"],
+  [civilian, "CIV"]
+];
 
+GVAR(sideToColorCache) = createHashMapFromArray [
+  [blufor, "Blue"],
+  [opfor, "Red"],
+  [independent, "Green"],
+  [civilian, "Violet"]
+];
+
+// simulation of cfgammo, [tacviewType, hasExplosion]
+GVAR(projectileTypeCache) = createHashMapFromArray [
+  ["shotgrenade", ["Misc+Minor", 1]],
+  ["shotrocket", ["Weapon+Rocket", 1]],
+  ["shotmissile", ["Weapon+Missile", 1]],
+  ["shotshell", ["Weapon+Projectile", 1]],
+  ["shotmine", ["Misc+Minor", 1]],
+  ["shotilluminating", ["Misc+Decoy+Flare", 0]],
+  ["shotsmokex", ["Misc+Decoy+SmokeGrenade", 2]]
+];
 
 
 
@@ -126,7 +148,11 @@ mapGrid data from ACE Common + MicroDAGR
 
 // grid zone, 100km sq, longstring, saved to ace_common_MGRS_data
 [worldName] call ace_common_fnc_getMGRSdata;
-GVAR(mapData) = [worldName] call ace_common_fnc_getMapData;
+
+// GVAR(mapData) = [worldName] call ace_common_fnc_getMapData;
+GVAR(altitudeOffset) = -1 * getNumber(configfile >> "CfgWorlds" >> worldName >> "outsideHeight");
+
+
 GVAR(mapGrid) = getNumber(configFile >> "CfgWorlds" >> worldName >> "mapZone");
 // mapGrid = (parseNumber(ace_common_MGRS_data # 0)) call BIS_fnc_numberDigits;
 // mapGrid = parseNumber((mapGrid select {_x isEqualType 2}) joinString '');
@@ -134,29 +160,39 @@ GVAR(mapGrid) = getNumber(configFile >> "CfgWorlds" >> worldName >> "mapZone");
 // this is our starting grid, 0,0
 // need to get 39 N 25 E as lower left
 // GVAR(latitudeBase) = mapData select 0;
-GVAR(latitudeBase) = 39;
-GVAR(longitudeBase) = 25;
-GVAR(altitudeOffset) = mapData select 1;
+private _lat = getNumber(configfile >> "CfgWorlds" >> worldName >> "latitude");
+private _lon = getNumber(configfile >> "CfgWorlds" >> worldName >> "longitude");
+if (_lat == 0) then {
+  GVAR(latitudeBase) = 39;
+  GVAR(longitudeBase) = 26;
+} else {
+  GVAR(latitudeBase) = _lat;
+  GVAR(longitudeBase) = _lon;
+};
 
 // now we find our coords in lnglat
 _getOffset = [0, 0, GVAR(mapGrid) ] call FUNC(UTMtoDeg);
-"debug_console" callExtension ("_getOffset = " + str(_getOffset));
+
 // add Latitude base -- longitude is taken care of by mapGrid param
 _getOffset set [0, _getOffset # 0];
 _getOffset set [1, _getOffset # 1 + GVAR(latitudeBase)];
 // get the decimal positioning offset to make all coords based off of the bottom left corner of grid
+
 GVAR(longitudeOffset) = ((_getOffset # 0) % floor(_getOffset # 0));
 GVAR(latitudeOffset) = ((_getOffset # 1) % floor(_getOffset # 1));
-"debug_console" callExtension ("GVAR(longitudeOffset) = " + str(GVAR(longitudeOffset)));
-"debug_console" callExtension ("GVAR(latitudeOffset) = " + str(GVAR(latitudeOffset)));
 
 
 
+GVAR(botLeftLngLat) = [[0,0]] call FUNC(getInitialLonLat);
+GVAR(topRightLngLat) = [[worldSize, worldSize]] call FUNC(getInitialLonLat);
+GVAR(lonMin) = GVAR(botLeftLngLat) select 0;
+GVAR(latMin) = GVAR(botLeftLngLat) select 1;
+GVAR(lonMax) = GVAR(topRightLngLat) select 0;
+GVAR(latMax) = GVAR(topRightLngLat) select 1;
 
+GVAR(latScale) = (GVAR(latMax) - GVAR(latMin)) / worldSize;
+GVAR(lonScale) = (GVAR(lonMax) - GVAR(lonMin)) / worldSize;
 
-GVAR(botLeftLngLat) = [[0,0]] call FUNC(getPosLngLat);
-GVAR(topRightLngLat) = [[worldSize, worldSize]] call FUNC(getPosLngLat);
-"debug_console" callExtension str([GVAR(botLeftLngLat), GVAR(topRightLngLat)]);
 
 
 // BELOW IS ONLY USED IF STRETCHING ACROSS FULL LATLON GRID OR FINDING PIXEL DIMENSIONS OF TERRAIN TO CALCULATE MAP IMAGE SIZE
@@ -169,10 +205,10 @@ _kmNorth = [GVAR(latitudeBase), GVAR(longitudeBase), GVAR(latitudeBase) + 1, GVA
 GVAR(botLeftLngLat) params ["_tempLon", "_tempLat"];
 GVAR(topRightLngLat) params ["_tempLon2", "_tempLat2"];
 // measure the map in km from west [0, 0] to east [worldSize, 0]
-_arg = [_tempLat, _tempLon, _tempLat, _tempLon2] apply {parseNumber(_x)};
+_arg = [_tempLat, _tempLon, _tempLat, _tempLon2] apply {(_x)};
 _kmMapEast = _arg call FUNC(getLatLonDistance);
 // measure the map in km from south [0, 0] to north [0, worldSize]
-_arg = [_tempLat, _tempLon, _tempLat2, _tempLon] apply {parseNumber(_x)};
+_arg = [_tempLat, _tempLon, _tempLat2, _tempLon] apply {(_x)};
 _kmMapNorth = _arg call FUNC(getLatLonDistance);
 
 // ONLY FOR STRETCHING
@@ -196,6 +232,10 @@ _mMultiplier = {
 	};
 };
 
+"debug_console" callExtension ("_getOffset = " + str(_getOffset));
+"debug_console" callExtension ("GVAR(longitudeOffset) = " + str(GVAR(longitudeOffset)));
+"debug_console" callExtension ("GVAR(latitudeOffset) = " + str(GVAR(latitudeOffset)));
+"debug_console" callExtension str([GVAR(botLeftLngLat), GVAR(topRightLngLat)]);
 "debug_console" callExtension ("_kmEast = " + ([_kmEast] call _mMultiplier));
 "debug_console" callExtension ("_kmNorth = " + ([_kmNorth] call _mMultiplier));
 // FOR NORMAL IMAGE
@@ -252,4 +292,5 @@ _mMultiplier = {
 
 
 
-
+// for exporting static objects XML
+// call FUNC(terrainObjExport);

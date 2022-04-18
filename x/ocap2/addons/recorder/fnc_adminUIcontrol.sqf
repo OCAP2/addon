@@ -1,3 +1,5 @@
+#include "script_component.hpp"
+
 params ["_PID"];
 
 if (isNil "_PID") exitWith {};
@@ -23,7 +25,7 @@ if !(_playerUID in _adminUIDs) exitWith {};
 
     if (player getVariable [QGVARMAIN(hasAdminControls), false]) exitWith {};
 
-    QEGVAR(diary,adminControls) = player createDiarySubject [
+    EGVAR(diary,adminControls) = player createDiarySubject [
       QEGVAR(diary,adminControls_subject),
       PREFIX + " Admin",
       "\A3\ui_f\data\igui\cfg\simpleTasks\types\interact_ca.paa"

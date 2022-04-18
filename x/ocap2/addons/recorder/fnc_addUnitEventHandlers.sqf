@@ -111,5 +111,12 @@ if ((_entity call BIS_fnc_objectType) # 0 == "Soldier") then {
 
     [":EVENT:", _eventData] remoteExecCall [QEFUNC(extension,sendData), 2];
 
+    if (GVAR(tacviewEnabled)) then {
+      format[
+        "0,Event=Message|%1|Hit by %2",
+        _targetID+1,
+        [_shooter] call EFUNC(tacview,getName)
+      ] remoteExecCall [QEFUNC(tacview,sendData), 2];
+    };
   }
 ]] remoteExec ["addEventHandler", [0, -2] select isDedicated, true];

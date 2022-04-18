@@ -6,7 +6,7 @@ params[
     [worldSize / 2, worldSize / 2]
   ],[
     "_sizeOfArea",
-    1000
+    sqrt(worldSize * worldSize)
   ], [
     "_color",
     "#FFFFFFFF"
@@ -104,8 +104,7 @@ _checkedRoads = [];
   ];
 
   if !(_objectId in _checkedRoads) then {
-    _data pushBack (_toSave joinString '
-');
+    _data pushBack (_toSave joinString EOL);
     _checkedRoads pushBackUnique _objectId;
   };
 
@@ -114,8 +113,7 @@ _checkedRoads = [];
   if (count _data > 30) then {
 //       "debug_console" callExtension ((_data joinString '
 // ') + "~0000");
-    [_data joinString '
-'] call FUNC(sendData);
+    {_x call FUNC(sendData)} forEach _data;
     _data = nil;
     _data = [];
   };
@@ -126,8 +124,7 @@ _checkedRoads = [];
 if (count _data > 0) then {
 //     "debug_console" callExtension ((_data joinString '
 // ') + "~0000");
-  [_data joinString '
-'] call FUNC(sendData);
+  {_x call FUNC(sendData)} forEach _data;
   _data = nil;
   _data = [];
 };

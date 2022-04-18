@@ -17,20 +17,27 @@ if (!isNull _vehicle) then {
   };
 };
 
-_markName = format["Projectile#%1", _int];
-_markColor = "ColorRed";
-_markerType = "";
-_magPic = (getText(configfile >> "CfgMagazines" >> _magazine >> "picture"));
-if (_magPic == "") then {
-  _markerType = "mil_triangle";
-} else {
-  _magPicSplit = _magPic splitString "\";
-  _magPic = _magPicSplit # ((count _magPicSplit) -1);
-  _markerType = format["magIcons/%1", _magPic];
-  _markColor = "ColorWhite";
+private _array = GVAR(ammoMarkerDataCache) get _markTextLocal;
+
+if (isNil "_array") then {
+  _markName = format["Projectile#%1", _int];
+  _markColor = "ColorRed";
+  _markerType = "";
+  _magPic = (getText(configfile >> "CfgMagazines" >> _magazine >> "picture"));
+  if (_magPic == "") then {
+    _markerType = "mil_triangle";
+  } else {
+    _magPicSplit = _magPic splitString "\";
+    _magPic = _magPicSplit # ((count _magPicSplit) -1);
+    _markerType = format["magIcons/%1", _magPic];
+    _markColor = "ColorWhite";
+  };
+
+  _array = [_markTextLocal,_markName,_markColor,_markerType];
+  GVAR(ammoMarkerDataCache) set [_markTextLocal, _array];
 };
 
-[_markTextLocal,_markName,_markColor,_markerType];
+_array;
 
 
   // _markStr = format["|%1|%2|%3|%4|%5|%6|%7|%8|%9|%10",

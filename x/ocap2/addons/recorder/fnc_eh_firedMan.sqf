@@ -33,6 +33,8 @@ if (!SHOULDSAVEEVENTS) exitWith {};
 
 params ["_firer", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile", "_vehicle"];
 
+if (_ammo isEqualTo "M_battery") exitWith {};
+
 private _initialProjPos = getPos _projectile;
 if (getPos _firer distance _initialProjPos > 50 || vehicle _firer isKindOf "Air") then {
   // if projectile in unscheduled environment is > 50m from FiredMan then likely remote controlled
@@ -59,6 +61,9 @@ private _frame = GVAR(captureFrameNo);
 private _firerId = (_firer getVariable [QGVARMAIN(id), -1]);
 if (_firerId == -1) exitWith {};
 
+_projId = GVAR(nextId);
+GVAR(nextId) = GVAR(nextId) + 1;
+
 // set the firer's lastFired var as this weapon, so subsequent kills are logged accurately
 ([_weapon, _muzzle, _magazine, _ammo] call FUNC(getWeaponDisplayData)) params ["_muzzleDisp", "_magDisp"];
 
@@ -84,9 +89,9 @@ _ammoSimType = getText(configFile >> "CfgAmmo" >> _ammo >> "simulation");
 // "ShotIlluminating" // 40mm_green Flare
 // "ShotSmokeX"; // M18 Smoke
 
-#define LOGBULLET GVAR(liveBullets) pushBack [_projectile, _firerId, _firer, getPosASL _projectile]
-#define LOGMISSILE GVAR(liveMissiles) pushBack [_projectile, _wepString, _firer, getPosASL _projectile, _markName, _markTextLocal]
-#define LOGGRENADE GVAR(liveGrenades) pushBack [_projectile, _wepString, _firer, getPosASL _projectile, _markName, _markTextLocal, _ammoSimType];
+#define LOGBULLET GVAR(liveBullets) pushBack [_projectile, _firerId, _firer, getPosASL _projectile, _projId]
+#define LOGMISSILE GVAR(liveMissiles) pushBack [_projectile, _wepString, _firerId, _firer, getPosASL _projectile, _markName, _markTextLocal, _projId, _projType, _ammoSimType]
+#define LOGGRENADE GVAR(liveGrenades) pushBack [_projectile, _wepString, _firerId, _firer, getPosASL _projectile, _markName, _markTextLocal, _projId, _projType, _ammoSimType]
 
 switch (true) do {
   case (_ammoSimType isEqualTo "shotBullet"): {
@@ -96,7 +101,13 @@ switch (true) do {
       _projectile = nearestObject [_firer, _ammo];
     };
     if (isNil "_projectile") exitWith {};
+
+
     LOGBULLET;
+
+    if (GVAR(tacviewEnabled)) then {
+      [GVAR(captureFrameNo), _projId, _firerId, getPosASL _projectile] call EFUNC(tacview,writeBullet);
+    };
   };
 
 
@@ -107,12 +118,19 @@ switch (true) do {
       _this set [6, _projectile];
     };
 
+    _projType = typeOf _projectile;
+
     ([_weapon, _muzzle, _ammo, _magazine, _projectile, _vehicle, _ammoSimType] call FUNC(getAmmoMarkerData)) params ["_markTextLocal","_markName","_markColor","_markerType"];
     private _magIcon = getText(configFile >> "CfgMagazines" >> _magazine >> "picture");
 
     // MAKE MARKER FOR PLAYBACK
     _firerPos = getPosASL _firer;
     [QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, _firerPos, _markerType, "ICON", [1,1], getDirVisual _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
+
+    if (GVAR(tacviewEnabled)) then {
+      [GVAR(captureFrameNo), 0, _projId, _firer, _firerId, _firerPos, _projType, _ammoSimType, _wepString] call EFUNC(tacview,writeProjectile);
+    };
+
 
     switch (true) do {
       case (_ammoSimType in ["shotMissile", "shotRocket", "shotShell"]): {
@@ -196,6 +214,7 @@ switch (true) do {
           isNil {
             {
               private _projectile = _x;
+              _projType = typeOf _projectile;
 
               // get marker details based on original EH data
               ([_weapon, _muzzle, _ammo, _magazine, _projectile, _vehicle, _ammoSimType] call FUNC(getAmmoMarkerData)) params ["_markTextLocal","_markName","_markColor","_markerType"];
@@ -206,12 +225,20 @@ switch (true) do {
               switch (true) do {
                 case (_ammoSimType isEqualTo "shotBullet"): {
                   LOGBULLET;
+                  if (GVAR(tacviewEnabled)) then {
+                    [GVAR(captureFrameNo), _projId, _firerId, _firerPos] call EFUNC(tacview,writeBullet);
+                  };
                 };
                 case (_ammoSimType in ["shotMissile", "shotRocket", "shotShell"]): {
+                  systemChat format["sub - %1", _firer];
                   LOGMISSILE;
 
+                  if (GVAR(tacviewEnabled)) then {
+                    [GVAR(captureFrameNo), 0, _projId, _firer, _firerId, _firerPos, _projType, _ammoSimType, _wepString] call EFUNC(tacview,writeProjectile);
+                  };
+
                   // create our marker record in the timeline
-                  [QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, getPosASL _firer, _markerType, "ICON", [1,1], getDir _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
+                  [QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, _firerPos, _markerType, "ICON", [1,1], getDir _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
 
                   if (GVARMAIN(isDebug)) then {
                     // add to clients' map draw array
@@ -221,6 +248,10 @@ switch (true) do {
                 };
                 case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX"]): {
                   LOGGRENADE;
+
+                  if (GVAR(tacviewEnabled)) then {
+                    [GVAR(captureFrameNo), 0, _projId, _firer, _firerId, _firerPos, _projType, _ammoSimType, _wepString] call EFUNC(tacview,writeProjectile);
+                  };
 
                   // create our marker record in the timeline
                   [QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, getPosASL _firer, _markerType, "ICON", [1,1], getDir _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;

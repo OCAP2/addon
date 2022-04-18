@@ -1,3 +1,5 @@
+#include "script_component.hpp"
+
 params ["_networkId", "_loggedIn", "_votedIn"];
 
 _object = (getUserInfo _networkId) select 10;

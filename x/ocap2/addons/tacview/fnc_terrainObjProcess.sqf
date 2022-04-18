@@ -6,7 +6,7 @@ params[
     [worldSize / 2, worldSize / 2]
   ],[
     "_sizeOfArea",
-    1000
+    sqrt(worldSize * worldSize)
   ],
   ["_typesToGather", []],
   "_shapeParam",
@@ -21,7 +21,7 @@ _shouldIgnore = {
   params ["_obj"];
   private _size = (boundingBox _obj) select 2;
 
-  _size < 3
+  _size < 2
 };
 _objects = nearestTerrainObjects[
   // [worldSize / 2, worldSize / 2],
@@ -66,7 +66,8 @@ if(!isNil "_objects") then {
       _maxs = _t # 1;
     };
 
-    (_maxs apply {_x * _objectScale}) params ["_xMax", "_yMax", "_zMax"];
+    (_maxs apply {(_x * _objectScale) * 2}) params ["_xMax", "_yMax", "_zMax"];
+    // (_maxs apply {_x * 2}) params ["_xMax", "_yMax", "_zMax"];
 
     _save = true;
     // if (
@@ -101,6 +102,7 @@ if(!isNil "_objects") then {
 
     if (_xmlType == "Border") then {
       _toSave = [
+        "<" + _xmlType + " ID=""" + _ID + """>",
         "	<Color>" + _color + "</Color>",
         "	<Height>" + str(_height) + "</Height>",
         "	<Point>",
@@ -158,14 +160,13 @@ if(!isNil "_objects") then {
           "		<Pitch>" + str(_inclination) + "</Pitch>",
           "		<Yaw>" + str(_azimuth) + "</Yaw>",
           "	</Orientation>",
-          "</Object>"
+          "</" + _xmlType + ">"
         ];
       };
     };
 
     if (_save) then {
-      _data pushBack (_toSave joinString '
-');
+      _data pushBack (_toSave joinString EOL);
     };
 
     // progressLoadingScreen (_forEachIndex / count _objects);
@@ -173,7 +174,7 @@ if(!isNil "_objects") then {
     if (count _data > 30) then {
       // "debug_console" callExtension ((_data joinString '
 // ') + "~0000");
-      _data call FUNC(sendData);
+      {_x call FUNC(sendData)} forEach _data;
       _data = nil;
       _data = [];
     };

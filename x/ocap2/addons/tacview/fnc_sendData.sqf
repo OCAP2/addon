@@ -24,10 +24,23 @@ Author:
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
-params ["_data", [], [[]]];
+params [["_data", [], ["", []]]];
 
-_r = _data joinString ",";
-ACMI(_r);
+private "_success";
+switch (typeName _data) do {
+  case "STRING": {
+    ACMI(_data);
+    _success = true;
+  };
+  case "ARRAY": {
+    if (count _data == 0) exitWith {diag_log format["%1 > %2: improper data", _fnc_scriptNameParent, _fnc_scriptName]};
+    _r = _data joinString EOL;
+    ACMI(_r);
+    _success = false;
+  };
+};
+
+_success;
 
 // params ["_command","_args"];
 
@@ -45,3 +58,7 @@ ACMI(_r);
 // 	_command isEqualTo ":VERSION:" &&
 // 	_result isEqualType ""
 // ) then {parseSimpleArray _result};
+
+
+// _r = _data joinString (toString [0x0A])
+// "debug_console" callExtension ((_r) + "~0000");

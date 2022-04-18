@@ -33,7 +33,7 @@ if (!isNil QGVAR(PFHObject)) then {
   GVAR(PFHObject) = nil;
 };
 if (isNil QGVAR(startTime)) then {
-  GVAR(startTime) = time;
+  GVAR(startTime) = [time, serverTime] select isMultiplayer;
   OCAPEXTLOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
   LOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
 };
@@ -41,6 +41,8 @@ if (isNil QGVAR(startTime)) then {
 GVAR(PFHObject) = [
   {
     private _loopStart = diag_tickTime;
+    private _gameTime = [time, serverTime] select isMultiplayer;
+    format ["#%1", _gametime - GVAR(startTime)] call EFUNC(tacview,sendData);
 
     if (GVAR(captureFrameNo) == 10 || (GVAR(captureFrameNo) > 10 && EGVAR(settings,trackTimes) && GVAR(captureFrameNo) % EGVAR(settings,trackTimeInterval) == 0)) then {
       [] call FUNC(updateTime);
@@ -76,6 +78,7 @@ GVAR(PFHObject) = [
           _x setVariable [QGVARMAIN(isInitialized), true, true];
         };
         _x setVariable [QGVARMAIN(id), GVAR(nextId)];
+        _x setVariable [QGVARMAIN(displayName), getText (configFile >> "CfgVehicles" >> _vehType >> "displayName")];
         [":NEW:UNIT:", [
           GVAR(captureFrameNo), //1
           GVAR(nextId), //2
@@ -105,6 +108,8 @@ GVAR(PFHObject) = [
           };
         };
 
+        _x setVariable [QGVARMAIN(lifestate), _lifestate];
+
         _pos = getPosASL _x;
 
         _unitData = [
@@ -123,6 +128,13 @@ GVAR(PFHObject) = [
         };
         _x setVariable [QGVARMAIN(unitData), _unitData];
       };
+
+
+      if (GVAR(tacviewEnabled)) then {
+        _x call EFUNC(tacview,writeUnit);
+      };
+
+
       false
     } count (allUnits + allDeadMen);
 
@@ -130,6 +142,7 @@ GVAR(PFHObject) = [
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
         _vehType = typeOf _x;
         _class = _vehType call FUNC(getClass);
+        _tvClass = _x call EFUNC(tacview,getClass);
         _toExcludeKind = false;
         if (count (parseSimpleArray EGVAR(settings,excludeKindFromRecord)) > 0) then {
           private _vic = _x;
@@ -146,15 +159,18 @@ GVAR(PFHObject) = [
         };
 
         _x setVariable [QGVARMAIN(id), GVAR(nextId)];
+        _x setVariable [QGVARMAIN(displayName), getText (configFile >> "CfgVehicles" >> _vehType >> "displayName")];
+
         [":NEW:VEH:", [
           GVAR(captureFrameNo), //1
           GVAR(nextId), //2
           _class, //3
-          getText (configFile >> "CfgVehicles" >> _vehType >> "displayName") //4
+          _x getVariable [QGVARMAIN(displayName), ""] //4
         ]] call EFUNC(extension,sendData);
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(vehicleClass), _class];
+        _x setVariable [QGVARMAIN(vehicleClass_tvClass), _tvClass];
         _x setVariable [QGVARMAIN(isInitialized), true, true];
       };
       if !(_x getVariable [QGVARMAIN(exclude), false]) then {
@@ -174,11 +190,20 @@ GVAR(PFHObject) = [
           GVAR(captureFrameNo) // 6
         ]] call EFUNC(extension,sendData);
       };
+
+
+      if (GVAR(tacviewEnabled)) then {
+        _x call EFUNC(tacview,writeVehicle);
+      };
+
+
+
       false
     } count vehicles;
 
     GVAR(captureFrameNo) = GVAR(captureFrameNo) + 1;
     publicVariable QGVAR(captureFrameNo);
+
 
     if (GVARMAIN(isDebug)) then {
       private _logStr = format["Frame %1 processed in %2ms", GVAR(captureFrameNo), diag_tickTime - _loopStart];

@@ -124,7 +124,7 @@ switch (true) do {
           [QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
         };
       };
-      case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX"]): {
+      case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX", "shotCM"]): {
         LOGGRENADE;
 
         if (GVARMAIN(isDebug)) then {
@@ -219,7 +219,7 @@ switch (true) do {
                     [QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
                   };
                 };
-                case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX"]): {
+                case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX", "shotCM"]): {
                   LOGGRENADE;
 
                   // create our marker record in the timeline

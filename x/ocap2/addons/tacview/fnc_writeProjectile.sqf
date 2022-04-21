@@ -50,14 +50,6 @@ if !([false, true] select _isEnd) then {
     };
     case 2: {
       // smoke
-      [[
-        _id + 1,
-        format ["T=%1|%2|%3|%4|%5", _lon toFixed 10, _lat toFixed 10, _z + GVAR(altitudeOffset), _x, _y],
-        "Type=Misc+Decoy",
-        format["Parent=%1", _firerId + 1],
-        format["Radius=%1", [_projType, _ammoSimType] call FUNC(getAmmoRadius)]
-      ] joinString ","] call FUNC(sendData);
-
       [{
         [[
           _this + 1,

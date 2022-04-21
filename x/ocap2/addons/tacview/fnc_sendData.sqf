@@ -26,21 +26,50 @@ Author:
 
 params [["_data", [], ["", []]]];
 
-private "_success";
+///////////////////////////////////////////////
+// Send to debug_console/Macro
+
+// private "_success";
+// switch (typeName _data) do {
+//   case "STRING": {
+//     ACMI(_data);
+//     _success = true;
+//   };
+//   case "ARRAY": {
+//     if (count _data == 0) exitWith {diag_log format["%1 > %2: improper data", _fnc_scriptNameParent, _fnc_scriptName]};
+//     _r = _data joinString EOL;
+//     ACMI(_r);
+//     _success = false;
+//   };
+// };
+
+// _success;
+
+
+///////////////////////////////////////////////
+// Save to giant array for all at once output
+private _success = false;
 switch (typeName _data) do {
   case "STRING": {
-    ACMI(_data);
+    GVAR(recordingData) pushBack _data;
     _success = true;
   };
   case "ARRAY": {
     if (count _data == 0) exitWith {diag_log format["%1 > %2: improper data", _fnc_scriptNameParent, _fnc_scriptName]};
     _r = _data joinString EOL;
-    ACMI(_r);
-    _success = false;
+    GVAR(recordingData) pushBack _r;
+    _success = true;
   };
 };
 
 _success;
+
+
+
+
+
+
+///////////////////////////////////
 
 // params ["_command","_args"];
 

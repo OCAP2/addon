@@ -4,6 +4,8 @@ params ["_vehicle"];
 _id = _vehicle getVariable QGVARMAIN(id);
 if (isNil "_id") exitWith {};
 
+(_vehicle call BIS_fnc_objectType) params ["_vehCategory", "_vehType"];
+
 _basicAttributes = [
   _id + 1,
   format ["Name=%1", _vehicle getVariable [QGVARMAIN(displayName), ""]],
@@ -13,14 +15,22 @@ _basicAttributes = [
   format ["Coalition=%1", [_vehicle] call FUNC(getCoalition)],
   format ["Color=%1", [_vehicle] call FUNC(getColor)],
   format ["Group=%1", [group _vehicle, ""] select (isNull (group _vehicle))],
-  format ["Health=%1", 1 - (damage _vehicle)],
+  format ["Health=%1", [0, 1 - (damage _vehicle)] select (alive _x)],
   format ["A3_Fuel=%1", fuel _vehicle],
   format ["A3_IsEngineOn=%1", [0, 1] select (isEngineOn _vehicle)],
   format ["A3_NetId=%1", _vehicle call BIS_fnc_netId],
   if (isServer) then { format ["A3_OwnerId=%1", owner _vehicle] } else { "" }
 ];
 
-_planeAttributes = if ((_vehicle call BIS_fnc_objectType) select 1 == "Plane") then {
+_nonAirAttributes = if !(_vehicle isKindOf "Air") then {
+  ([_vehicle, [0], true] call CBA_fnc_turretDir) params ["_yaw", "_pitch"];
+  [
+    format ["PilotHeadYaw=%1", _yaw],
+    format ["PilotHeadPitch=%1", _pitch]
+  ]
+} else {[]};
+
+_planeAttributes = if (_vehType == "Plane") then {
   ([currentPilot _vehicle] call CBA_fnc_modelHeadDir) params ["_dir", "_yaw", "_pitch"];
   [
     format ["Throttle=%1", airplaneThrottle _vehicle],
@@ -29,7 +39,7 @@ _planeAttributes = if ((_vehicle call BIS_fnc_objectType) select 1 == "Plane") t
   ];
 } else {[]};
 
-_helicopterAttributes = if ((_vehicle call BIS_fnc_objectType) select 1 == "Helicopter") then {
+_helicopterAttributes = if (_vehType == "Helicopter") then {
   ([currentPilot _vehicle] call CBA_fnc_modelHeadDir) params ["_dir", "_yaw", "_pitch"];
   _basics = [
     format ["A3_IsAutoHoverOn=%1", [0, 1] select (isAutoHoverOn _vehicle)],
@@ -59,4 +69,4 @@ _helicopterAttributes = if ((_vehicle call BIS_fnc_objectType) select 1 == "Heli
   _basics + _afm;
 } else {[]};
 
-((_basicAttributes + _planeAttributes + _helicopterAttributes) joinString ",") call FUNC(sendData);
+((_basicAttributes + _nonAirAttributes + _planeAttributes + _helicopterAttributes) joinString ",") call FUNC(sendData);

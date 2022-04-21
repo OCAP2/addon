@@ -29,8 +29,8 @@ if (!SHOULDSAVEEVENTS) exitWith {};
 
 params ["_unit", "_causedBy", "_damage", "_instigator"];
 
-[_unit, _causedBy, _instigator] spawn {
-  params ["_unit", "_causedBy", "_instigator"];
+// [_unit, _causedBy, _instigator] spawn {
+//   params ["_unit", "_causedBy", "_instigator"];
 
   if (isNull _instigator) then {
     _instigator = [_unit, _causedBy] call FUNC(getInstigator);
@@ -79,4 +79,4 @@ params ["_unit", "_causedBy", "_damage", "_instigator"];
   };
 
   [":EVENT:", _eventData] call EFUNC(extension,sendData);
-};
+// };

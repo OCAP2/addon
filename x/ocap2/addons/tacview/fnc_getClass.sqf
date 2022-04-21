@@ -5,7 +5,7 @@ params ["_vehicle"];
 switch (_type) do {
   case "Car": { "Ground+Vehicle" };
   case "Helicopter": { "Air+Rotorcraft" };
-  case "Motorcycle": { "Ground+Vehicle" };
+  case "Motorcycle": { "Ground+Light+Vehicle" };
   case "Plane": { "Air+FixedWing" };
   case "Ship": { "Sea+Watercraft" };
   case "StaticWeapon": { "Weapon+Static" };

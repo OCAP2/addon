@@ -4,8 +4,8 @@
 GVAR(liveBullets) = [];
 [{
 
-  private _processNow = GVAR(liveBullets) select {isNull (_x#0)};
-  GVAR(liveBullets) = GVAR(liveBullets) select {!isNull (_x#0)};
+  private _processNow = GVAR(liveBullets) select {isNull (_x#0) || !(alive (_x#0))};
+  GVAR(liveBullets) = GVAR(liveBullets) - _processNow;
 
   // _processNow
   // for bullets that have hit something and become null, trigger FIRED events in timeline and add to clients for debug draw
@@ -34,14 +34,14 @@ GVAR(liveBullets) = [];
   // for bullets that still exist, update positions
   {
     _x set [3, getPosASL (_x#0)];
-  } forEach GVAR(liveBullets);
-}, 0.1 * GVAR(projectileMonitorMultiplier)] call CBA_fnc_addPerFrameHandler;
+  } forEach (GVAR(liveBullets) select [0, 50]);
+}, 0.5 * GVAR(projectileMonitorMultiplier)] call CBA_fnc_addPerFrameHandler;
 
 // PFH to track missiles, rockets, shells
 GVAR(liveMissiles) = [];
 [{
-  private _processNow = GVAR(liveMissiles) select {isNull (_x#0)};
-  GVAR(liveMissiles) = GVAR(liveMissiles) select {!isNull (_x#0)};
+  private _processNow = GVAR(liveMissiles) select {isNull (_x#0) || !(alive (_x#0))};
+  GVAR(liveMissiles) = GVAR(liveMissiles) - _processNow;
 
   // _processNow
   // for missiles that have hit something and become null, trigger FIRED events in timeline and add to clients for debug draw
@@ -70,17 +70,19 @@ GVAR(liveMissiles) = [];
     _nowPos = getPosASL (_x#0);
     _x set [4, _nowPos];
     [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _nowPos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
-    if (GVAR(tacviewEnabled)) then {
-      [GVAR(captureFrameNo), 0, _projId, _firer, _firerId, _pos, _projType, _ammoSimType, _wepString] call EFUNC(tacview,writeProjectile);
-    };
+
+    // don't update shell/rocket/missile per tick for tacview, let TV extrapolate
+    // if (GVAR(tacviewEnabled)) then {
+    //   [GVAR(captureFrameNo), 0, _projId, _firer, _firerId, _pos, _projType, _ammoSimType, _wepString] call EFUNC(tacview,writeProjectile);
+    // };
   } forEach GVAR(liveMissiles);
 }, 0.5 * GVAR(projectileMonitorMultiplier)] call CBA_fnc_addPerFrameHandler;
 
 // PFH to track grenades, flares, thrown charges
 GVAR(liveGrenades) = [];
 [{
-  private _processNow = GVAR(liveGrenades) select {isNull (_x#0)};
-  GVAR(liveGrenades) = GVAR(liveGrenades) select {!isNull (_x#0)};
+  private _processNow = GVAR(liveGrenades) select {isNull (_x#0) || !(alive (_x#0))};
+  GVAR(liveGrenades) = GVAR(liveGrenades) - _processNow;
 
   // _processNow
   // for grenades that have hit something and become null, trigger FIRED events in timeline and add to clients for debug draw
@@ -111,6 +113,8 @@ GVAR(liveGrenades) = [];
     _nowPos = getPosASL (_x#0);
     _x set [4, _nowPos];
     [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _nowPos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
+
+    // do track pos per tick for grenade/flare/smoke, as start/final pos are rarely a straight line
     if (GVAR(tacviewEnabled)) then {
       [GVAR(captureFrameNo), 0, _projId, _firer, _firerId, _pos, _projType, _ammoSimType, _wepString] call EFUNC(tacview,writeProjectile);
     };

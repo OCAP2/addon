@@ -142,7 +142,7 @@ switch (true) do {
           [QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
         };
       };
-      case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX"]): {
+      case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX", "shotCM"]): {
         LOGGRENADE;
 
         if (GVARMAIN(isDebug)) then {
@@ -171,7 +171,7 @@ switch (true) do {
     };
     [
       {
-        _this spawn {
+        // _this spawn {
           params ["_EHData", "_subTypes", "_magazine", "_wepString", "_firer", "_firerId", "_firerPos", "_frame", "_ammoSimType", "_subTypesAmmoSimType"];
           // private _projectile = _EHData # 6;
 
@@ -202,16 +202,16 @@ switch (true) do {
           //   } forEach _subTypes;
           // };
 
-          while {isNull _projectile} do {
-            {
-              _projSearch = nearestObject [_firer, _x];
-              if !(isNull _projSearch) exitWith {_projectile = _projSearch};
-            } forEach _subTypes;
-          };
+          // while {isNull _projectile} do {
+          //   {
+          //     _projSearch = nearestObject [_firer, _x];
+          //     if !(isNull _projSearch) exitWith {_projectile = _projSearch};
+          //   } forEach _subTypes;
+          // };
           _newSubs = nearestObjects [_projectile, _subTypes, 50];
 
 
-          isNil {
+          // isNil {
             {
               private _projectile = _x;
               _projType = typeOf _projectile;
@@ -246,7 +246,7 @@ switch (true) do {
                     [QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
                   };
                 };
-                case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX"]): {
+                case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX", "shotCM"]): {
                   LOGGRENADE;
 
                   if (GVAR(tacviewEnabled)) then {
@@ -266,8 +266,8 @@ switch (true) do {
               };
             } forEach _newSubs;
             nil;
-          };
-        };
+          // };
+        // };
       },
       [_this, _subTypes, _magazine, _wepString, _firer, _firerId, _firerPos, _frame, _ammoSimType, _subTypesAmmoSimType],
       _simDelay

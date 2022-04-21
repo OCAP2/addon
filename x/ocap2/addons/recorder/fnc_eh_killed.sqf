@@ -92,16 +92,30 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
     [":EVENT:", _eventData] call EFUNC(extension,sendData);
 
     if (GVAR(tacviewEnabled)) then {
-      format[
-        "0,Event=Message|%1|Killed by %2",
-        _victimId+1,
-        [_instigator] call EFUNC(tacview,getName)
-      ] call EFUNC(tacview,sendData);
-      format[
-        "0,Event=Destroyed|%1|Killed by %2",
-        _victimId+1,
-        [_instigator] call EFUNC(tacview,getName)
-      ] call EFUNC(tacview,sendData);
+      [{
+        params ["_victimId", "_instigator"];
+        format[
+          "0,Event=Message|%1|Killed by %2",
+          _victimId+1,
+          [_instigator] call EFUNC(tacview,getName)
+        ] call EFUNC(tacview,sendData);
+
+        [[
+          _victimId+1,
+          format ["Disabled=1"],
+          format ["Color=%1", "Yellow"],
+          format ["Health=%1", 0]
+        ] joinString ','] call EFUNC(tacview,sendData);
+
+        // format[
+        //   "0,Event=Destroyed|%1|",
+        //   _victimId+1
+        // ] call EFUNC(tacview,sendData);
+        format[
+          "-%1",
+          _victimId+1
+        ] call EFUNC(tacview,sendData);
+      }, [_victimId, _instigator], GVAR(frameCaptureDelay)] call CBA_fnc_waitAndExecute;
     };
   };
 };

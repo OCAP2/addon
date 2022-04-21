@@ -28,3 +28,4 @@ PREP(terrainObjProcess);
 PREP(terrainObjRoads);
 
 PREP(worldInit);
+PREP(exportData);

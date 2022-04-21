@@ -18,7 +18,7 @@ format["0,Category=%1", EGVAR(settings,saveTag)] call FUNC(sendData);
 format["0,Author=%1", (getMissionConfigValue ["Author", ""])] call FUNC(sendData);
 format["0,Briefing=%1", (getMissionConfigValue ["OverviewText", ""])] call FUNC(sendData);
 
-
+GVAR(recordingData) = "";
 
 GVAR(sideToCoalitionCache) = createHashMapFromArray [
   [blufor, "BLUFOR"],
@@ -42,7 +42,8 @@ GVAR(projectileTypeCache) = createHashMapFromArray [
   ["shotshell", ["Weapon+Projectile", 1]],
   ["shotmine", ["Misc+Minor", 1]],
   ["shotilluminating", ["Misc+Decoy+Flare", 0]],
-  ["shotsmokex", ["Misc+Decoy+SmokeGrenade", 2]]
+  ["shotsmokex", ["Misc+Decoy+SmokeGrenade", 2]],
+  ["shotcm", ["Misc+Decoy+Flare", 0]]
 ];
 
 

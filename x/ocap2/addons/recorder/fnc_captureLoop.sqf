@@ -127,13 +127,12 @@ GVAR(PFHObject) = [
           [":UPDATE:UNIT:", _unitData] call EFUNC(extension,sendData);
         };
         _x setVariable [QGVARMAIN(unitData), _unitData];
+
+        // if (GVAR(tacviewEnabled) && !(_x getVariable [QEGVAR(tacview,killed), false])) then {
+        if (GVAR(tacviewEnabled)) then {
+            [_x] spawn EFUNC(tacview,writeUnit);
+        };
       };
-
-
-      if (GVAR(tacviewEnabled)) then {
-        _x call EFUNC(tacview,writeUnit);
-      };
-
 
       false
     } count (allUnits + allDeadMen);
@@ -189,11 +188,12 @@ GVAR(PFHObject) = [
           _crew, //5
           GVAR(captureFrameNo) // 6
         ]] call EFUNC(extension,sendData);
-      };
 
 
-      if (GVAR(tacviewEnabled)) then {
-        _x call EFUNC(tacview,writeVehicle);
+        // if (GVAR(tacviewEnabled) && !(_x getVariable [QEGVAR(tacview,killed), false])) then {
+        if (GVAR(tacviewEnabled)) then {
+          [_x] spawn EFUNC(tacview,writeVehicle);
+        };
       };
 
 

@@ -2,15 +2,18 @@
 
 params ["_object"];
 
-_color = _object getVariable QGVAR(objectColor);
+_color = GVAR(sideToColorCache) getOrDefault [side (group _object), "Violet"];
 
-if (isNil "_color") then {
-  if ((_object call BIS_fnc_objectType) # 0 == "Soldier") then {
-    _color = GVAR(sideToColorCache) getOrDefault [side (group _object), "Violet"];
+if ((_object call BIS_fnc_objectType) # 0 == "Soldier") then {
+  _color = GVAR(sideToColorCache) getOrDefault [side (group _object), "Violet"];
+  if (EGVAR(settings,preferACEUnconscious) && !isNil "ace_common_fnc_isAwake") then {
+    if !([_object] call ace_common_fnc_isAwake) then {_color = "Orange"};
   } else {
-    _color = GVAR(sideToColorCache) getOrDefault [[_object] call BIS_fnc_objectSide, "Violet" ];
+    if (lifeState _object isEqualTo "INCAPACITATED") then {_color = "Orange"};
   };
-  _object setVariable [QGVAR(objectColor), _color];
+  if (!alive _object) then {_color = "Yellow"};
+} else {
+  _color = GVAR(sideToColorCache) getOrDefault [[_object] call BIS_fnc_objectSide, "Cyan"];
 };
 
 _color;

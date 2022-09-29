@@ -64,11 +64,11 @@ call FUNC(addEventMission);
 // remoteExec diary creation commands to clients listing version numbers and waiting start state
 {
   [{!isNil QGVARMAIN(version) && !isNil QEGVAR(extension,version)}, {
-    player createDiarySubject ["OCAP2Info", "OCAP2 AAR", "\A3\ui_f\data\igui\cfg\simpleTasks\types\whiteboard_ca.paa"];
+    player createDiarySubject ["OCAPInfo", "OCAP AAR", "\A3\ui_f\data\igui\cfg\simpleTasks\types\whiteboard_ca.paa"];
 
-    ocap2_fnc_copyGitHubToClipboard = {copyToClipboard "https://github.com/OCAP2/OCAP"; systemChat "OCAP2 GitHub link copied to clipboard";};
+    ocap_fnc_copyGitHubToClipboard = {copyToClipboard "https://github.com/OCAP2/OCAP"; systemChat "OCAP GitHub link copied to clipboard";};
     EGVAR(diary,about) = player createDiaryRecord [
-      "OCAP2Info",
+      "OCAPInfo",
       [
         "About",
         (
@@ -77,9 +77,9 @@ call FUNC(addEventMission);
           "<br/>" +
           "Extension version: " + (EGVAR(extension,version) # 0) + " (built " + (EGVAR(extension,version) # 1) + ")" +
           "<br/>" +
-          "<execute expression='call ocap2_fnc_copyGitHubToClipboard;'>https://github.com/OCAP2/OCAP</execute>" +
+          "<execute expression='call ocap_fnc_copyGitHubToClipboard;'>https://github.com/OCAP2/OCAP</execute>" +
           "<br/><br/>" +
-          "OCAP2 is a server-side Arma 3 recording suite that provides web-based playback of all units, vehicles, markers, and projectiles present, placed, and fired during a mission." +
+          "OCAP is a server-side Arma 3 recording suite that provides web-based playback of all units, vehicles, markers, and projectiles present, placed, and fired during a mission." +
           "<br/><br/>" +
           "Recording status can be found in the Status section." +
           "<br/><br/>" +
@@ -89,10 +89,10 @@ call FUNC(addEventMission);
     ];
 
     EGVAR(diary,status) = player createDiaryRecord [
-      "OCAP2Info",
+      "OCAPInfo",
       [
         "Status",
-        "OCAP2 initialized."
+        "OCAP initialized."
       ]
     ];
   }] call CBA_fnc_waitUntilAndExecute;

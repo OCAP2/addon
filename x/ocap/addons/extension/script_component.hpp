@@ -1,4 +1,4 @@
 #define COMPONENT extension
 #define COMPONENT_BEAUTIFIED Extension
 
-#include "\x\ocap2\addons\main\script_macros.hpp"
+#include "\x\ocap\addons\main\script_macros.hpp"

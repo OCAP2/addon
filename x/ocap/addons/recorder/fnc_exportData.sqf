@@ -49,14 +49,14 @@ if (isNil QGVAR(startTime)) exitWith {
   {
     [{!isNull player}, {
       player createDiaryRecord [
-        "OCAP2Info",
+        "OCAPInfo",
         [
           "Status",
-          "<font color='#33FF33'>OCAP2 was asked to save, but recording hasn't started yet.</font>"
+          "<font color='#33FF33'>OCAP was asked to save, but recording hasn't started yet.</font>"
         ], taskNull, "", false
       ];
       player setDiarySubjectPicture [
-        "OCAP2Info",
+        "OCAPInfo",
         "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
       ];
     }] call CBA_fnc_waitUntilAndExecute;
@@ -74,19 +74,19 @@ if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {
   // then we won't save, but will continue recording in case admins want to save once that threshold is met.
   // allow this restriction to be overriden
   LOG("Save attempted, but the minimum recording duration hasn't been met. Not saving, continuing to record.");
-  ["OCAP2 attempted to save, but the minimum recording duration hasn't been met. Recording will continue.", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+  ["OCAP attempted to save, but the minimum recording duration hasn't been met. Recording will continue.", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
   {
     player createDiaryRecord [
-      "OCAP2Info",
+      "OCA2Info",
       [
         "Status",
         (
-          "<font color='#FFFF33'>OCAP2 capture of " + briefingName + " has not yet reached the minimum duration to save it. Recording will continue.</font>"
+          "<font color='#FFFF33'>OCAP capture of " + briefingName + " has not yet reached the minimum duration to save it. Recording will continue.</font>"
         )
       ]
     ];
     player setDiarySubjectPicture [
-      "OCAP2Info",
+      "OCAPInfo",
       "\A3\ui_f\data\igui\cfg\simpleTasks\types\danger_ca.paa"
     ];
   } remoteExec ["call", 0, false];
@@ -138,21 +138,21 @@ if (!isNil "_tag") then {
 };
 
 // briefingName is used here, no need for publicVariable for a simple confirmation log.
-[format["OCAP2 saved %1 frames successfully", _endFrameNumber], 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+[format["OCAP saved %1 frames successfully", _endFrameNumber], 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
 {
   player createDiaryRecord [
-    "OCAP2Info",
+    "OCAPInfo",
     [
       "Status",
       (
-        "<font color='#33FF33'>OCAP2 capture of " + briefingName + " has been exported with " + str(GVAR(endFrameNumber)) + " frames saved.</font>" +
+        "<font color='#33FF33'>OCAP capture of " + briefingName + " has been exported with " + str(GVAR(endFrameNumber)) + " frames saved.</font>" +
         "<br/><br/>" +
         "Upload results have been logged."
       )
     ]
   ];
   player setDiarySubjectPicture [
-    "OCAP2Info",
+    "OCAPInfo",
     "\A3\ui_f\data\igui\cfg\simpleTasks\types\upload_ca.paa"
   ];
 } remoteExec ["call", 0, false];

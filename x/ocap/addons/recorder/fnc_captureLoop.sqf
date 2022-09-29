@@ -60,7 +60,7 @@ GVAR(PFHObject) = [
       publicVariable QGVAR(captureFrameNo);
       {
         player createDiaryRecord [
-          "OCAP2Info",
+          "OCAPInfo",
           [
             "Status",
             ("<font color='#CCCCCC'>Capture frame: " + str (missionNamespace getVariable [QGVAR(captureFrameNo), "[not yet received]"]) + "</font>")

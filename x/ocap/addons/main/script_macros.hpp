@@ -1,7 +1,7 @@
 // Header: script_macros.hpp
 // Defines macros imported to other functions
 
-#define PREFIX OCAP2
+#define PREFIX OCAP
 
 #ifdef COMPONENT_BEAUTIFIED
     #define COMPONENT_NAME QUOTE(PREFIX - COMPONENT_BEAUTIFIED)
@@ -9,7 +9,7 @@
     #define COMPONENT_NAME QUOTE(PREFIX - COMPONENT)
 #endif
 
-// The current version of OCAP2.
+// The current version of OCAP.
 #define VERSION 2.0
 #define VERSION_STR 2.0.0-RC2
 #define VERSION_AR 2,0,0

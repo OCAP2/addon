@@ -39,7 +39,7 @@ GVAR(allSettings) = [
     "EDITBOX", // setting type
     [
       "Administrators", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      "An array or server-visible variable referencing one that is a list of playerUIDs. Additional briefing diary or UI elements may be available for more accessible control over OCAP2's features. Takes effect on player server connection. Format: [] OR myAdminPUIDs | Default: []"
+      "An array or server-visible variable referencing one that is a list of playerUIDs. Additional briefing diary or UI elements may be available for more accessible control over OCAP's features. Takes effect on player server connection. Format: [] OR myAdminPUIDs | Default: []"
     ],
     [COMPONENT_NAME, "Core"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     "[]", // default enabled

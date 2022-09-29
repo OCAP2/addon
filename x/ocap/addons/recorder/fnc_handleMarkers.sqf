@@ -40,7 +40,7 @@ GVAR(trackedMarkers) = []; // Markers which we saves into replay
 
 
 
-// create CBA event handler to be called on server with key "ocap2_handleMarker"
+// create CBA event handler to be called on server with key "ocap_handleMarker"
 EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
 
   if (!SHOULDSAVEEVENTS) exitWith {};

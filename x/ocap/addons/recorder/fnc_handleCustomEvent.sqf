@@ -4,7 +4,7 @@ Script: FUNC(handleCustomEvent)
 Description:
   Used for applying global event handlers.
 
-  * Applied during initialization of OCAP2 in <ocap_fnc_init>.
+  * Applied during initialization of OCAP in <ocap_fnc_init>.
 
 Parameters:
   _type - objective type that will define the text & icon [String, one of: "flag"]

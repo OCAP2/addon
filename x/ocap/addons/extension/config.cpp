@@ -11,7 +11,7 @@ class CfgPatches
     authors[] = {"Dell", "Zealot", "Kurt", "IndigoFox", "Fank"};
     url = "https://github.com/OCAP2/OCAP";
     VERSION_CONFIG;
-    requiredAddons[] = {"A3_Functions_F","cba_main","cba_xeh","ocap2_main"};
+    requiredAddons[] = {"A3_Functions_F","cba_main","cba_xeh","ocap_main"};
     units[] = {};
     weapons[] = {};
   };

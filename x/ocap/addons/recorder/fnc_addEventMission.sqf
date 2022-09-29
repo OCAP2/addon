@@ -4,7 +4,7 @@ Script: ocap_fnc_addEventMission
 Description:
   Used for applying mission event handlers.
 
-  * Applied during initialization of OCAP2 in <ocap_fnc_init>.
+  * Applied during initialization of OCAP in <ocap_fnc_init>.
 
 Parameters:
   None
@@ -110,7 +110,7 @@ if (isNil QEGVAR(listener,markers)) then {
   call FUNC(handleMarkers);
 };
 
-// Custom event handler with key "ocap2_customEvent"
+// Custom event handler with key "ocap_customEvent"
 // Used for showing custom events in playback events list
 if (isNil QEGVAR(listener,customEvent)) then {
   EGVAR(listener,customEvent) = [QGVARMAIN(customEvent), {
@@ -119,7 +119,7 @@ if (isNil QEGVAR(listener,customEvent)) then {
   OCAPEXTLOG(["Initialized customEvent listener"]);
 };
 
-// Custom event handler with key "ocap2_counterInit"
+// Custom event handler with key "ocap_counterInit"
 // Used for tracking scores or counts per side
 if (isNil QEGVAR(listener,counterInit)) then {
   EGVAR(listener,counterInit) = [QGVARMAIN(counterInit), {
@@ -147,7 +147,7 @@ if (isNil QEGVAR(listener,counterEvent)) then {
   OCAPEXTLOG(["Initialized counterEvent listener"]);
 };
 
-// Custom event handler with key "ocap2_record"
+// Custom event handler with key "ocap_record"
 // This will START OR RESUME recording if not already.
 if (isNil QEGVAR(listener,record)) then {
   EGVAR(listener,record) = [QGVARMAIN(record), {
@@ -156,7 +156,7 @@ if (isNil QEGVAR(listener,record)) then {
   OCAPEXTLOG(["Initialized record listener"]);
 };
 
-// Custom event handler with key "ocap2_pause"
+// Custom event handler with key "ocap_pause"
 // This will PAUSE recording
 if (isNil QEGVAR(listener,pause)) then {
   EGVAR(listener,pause) = [QGVARMAIN(pause), {
@@ -165,7 +165,7 @@ if (isNil QEGVAR(listener,pause)) then {
   OCAPEXTLOG(["Initialized pause listener"]);
 };
 
-// Custom event handler with key "ocap2_exportData"
+// Custom event handler with key "ocap_exportData"
 // This will export the mission immediately regardless of restrictions.
 // params ["_side", "_message", "_tag"];
 if (isNil QEGVAR(listener,exportData)) then {

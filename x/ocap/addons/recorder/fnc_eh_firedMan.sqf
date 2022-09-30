@@ -100,6 +100,9 @@ switch (true) do {
     };
     if (isNil "_projectile") exitWith {};
 
+
+    LOGBULLET;
+
     _projectile addEventHandler ["Deleted", {
       params ["_projectile"];
       [":FIRED:", [
@@ -108,7 +111,6 @@ switch (true) do {
         _pos
       ]] call EFUNC(extension, sendData);
     };
-    // LOGBULLET;
   };
 
 
@@ -140,7 +142,7 @@ switch (true) do {
         };
       };
       case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX", "shotCM"]): {
-        // LOGGRENADE;
+        LOGGRENADE;
 
         _projectile setVariable [GVAR(ocapdata), [_projectile, _wepString, _firer, getPosASL _projectile, _markName, _markTextLocal, _ammoSimType]];
 
@@ -163,18 +165,22 @@ switch (true) do {
   case (_ammoSimType isEqualTo "shotSubmunitions"): {
 
 
-    _projectile setVariable [GVAR(data), ([_weapon, _muzzle, _ammo, _magazine, _projectile, _vehicle, _ammoSimType] call FUNC(getAmmoMarkerData))];
+    _projectile setVariable [GVAR(markerData), ([_weapon, _muzzle, _ammo, _magazine, _projectile, _vehicle, _ammoSimType] call FUNC(getAmmoMarkerData))];
+    _projectile setVariable [GVAR(EHData), [_this, _subTypes, _magazine, _wepString, _firer, _firerId, _firerPos, _frame, _ammoSimType, _subTypesAmmoSimType]];
+
 
 
     _projectile addEventHandler ["SubmunitionCreated", {
       params ["_projectile", "_submunitionProjectile", "_pos", "_velocity"];
-      (_projectile getVariable [GVAR(data), []]) params ["_markTextLocal", "_markName", "_markColor", "_markerType"];
+      (_projectile getVariable [GVAR(markerData), []]) params ["_markTextLocal", "_markName", "_markColor", "_markerType"];
+      (_projectile getVariable [GVAR(EHData), []]) params ["_EHData", "_subTypes", "_magazine", "_wepString", "_firer", "_firerId", "_firerPos", "_frame", "_ammoSimType", "_subTypesAmmoSimType"];
+
       _submunitionProjectile setVariable [QGVAR(firerId), _projectile getVariable [QGVAR(firerId), -1]];
 
       private _magIcon = getText(configFile >> "CfgMagazines" >> _magazine >> "picture");
 
       // then get data of submunition to determine how to track it
-      private _ammoSimType = getText(configFile >> "CfgAmmo" >> (typeOf _projectile) >> "simulation");
+      private _ammoSimType = getText(configFile >> "CfgAmmo" >> (typeOf _submunitionProjectile) >> "simulation");
 
 
       switch (true) do {
@@ -197,7 +203,7 @@ switch (true) do {
 
           if (GVARMAIN(isDebug)) then {
             // add to clients' map draw array
-            private _debugArr = [_projectile, _magIcon, format["%1 %2 - %3", str side group _firer, name _firer, _markTextLocal], [side group _firer] call BIS_fnc_sideColor];
+            private _debugArr = [_submunitionProjectile, _magIcon, format["%1 %2 - %3", str side group _firer, name _firer, _markTextLocal], [side group _firer] call BIS_fnc_sideColor];
             [QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
           };
         };
@@ -209,12 +215,12 @@ switch (true) do {
 
           if (GVARMAIN(isDebug)) then {
             // add to map draw array
-            private _debugArr = [_projectile, _magIcon, format["%1 %2 - %3", str side group _firer, name _firer, _markTextLocal], [side group _firer] call BIS_fnc_sideColor];
+            private _debugArr = [_submunitionProjectile, _magIcon, format["%1 %2 - %3", str side group _firer, name _firer, _markTextLocal], [side group _firer] call BIS_fnc_sideColor];
             [QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
           };
         };
         default {
-          OCAPEXTLOG(ARR3("Invalid ammo sim type, check it", _projectile, _ammoSimType))
+          OCAPEXTLOG(ARR3("Invalid ammo sim type, check it", _submunitionProjectile, _ammoSimType))
         };
       };
     }];

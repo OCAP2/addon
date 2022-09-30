@@ -12,11 +12,11 @@ GVAR(liveBullets) = [];
   {
     _x params ["_obj", "_firerId", "_firer", "_pos"];
 
-    [":FIRED:", [
-      _firerId,
-      GVAR(captureFrameNo),
-      _pos
-    ]] call EFUNC(extension,sendData);
+    // [":FIRED:", [
+    //   _firerId,
+    //   GVAR(captureFrameNo),
+    //   _pos
+    // ]] call EFUNC(extension,sendData);
 
     if (GVARMAIN(isDebug)) then {
       OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _pos));
@@ -52,7 +52,7 @@ GVAR(liveMissiles) = [];
       OCAPEXTLOG(ARR4("FIRED EVENT: SHELL-ROCKET-MISSILE", GVAR(captureFrameNo), _firer getVariable QGVARMAIN(id), str _pos));
     };
 
-    [{[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent}, _markName, 10] call CBA_fnc_waitAndExecute;
+    // [{[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent}, _markName, 10] call CBA_fnc_waitAndExecute;
   } forEach _processNow;
 
   // for missiles that still exist, update positions
@@ -86,7 +86,7 @@ GVAR(liveGrenades) = [];
       OCAPEXTLOG(ARR4("FIRED EVENT: GRENADE-FLARE-SMOKE", GVAR(captureFrameNo), _firer getVariable QGVARMAIN(id), str _pos));
     };
 
-    [{[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent}, _markName, 10] call CBA_fnc_waitAndExecute;
+    // [{[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent}, _markName, 10] call CBA_fnc_waitAndExecute;
   } forEach _processNow;
 
   // for grenades that still exist, update positions

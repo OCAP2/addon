@@ -71,7 +71,9 @@ GVAR(PFHObject) = [
 
     {
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
-        if (_x isKindOf "Logic") exitWith {
+        if (
+          _x isKindOf "Logic"
+        ) exitWith {
           _x setVariable [QGVARMAIN(exclude), true, true];
           _x setVariable [QGVARMAIN(isInitialized), true, true];
         };
@@ -130,7 +132,7 @@ GVAR(PFHObject) = [
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
         _vehType = typeOf _x;
         _class = _vehType call FUNC(getClass);
-        _toExcludeKind = false;
+        private _toExcludeKind = false;
         if (count (parseSimpleArray EGVAR(settings,excludeKindFromRecord)) > 0) then {
           private _vic = _x;
           {
@@ -139,7 +141,15 @@ GVAR(PFHObject) = [
             };
           } forEach (parseSimpleArray EGVAR(settings,excludeKindFromRecord));
         };
-        if ((_class isEqualTo "unknown") || _toExcludeKind) exitWith {
+        private _toExcludeClass = false;
+        if (count (parseSimpleArray EGVAR(settings,excludeClassFromRecord)) > 0) then {
+          {
+            if (typeOf _vic == _x) exitWith {
+              _toExcludeClass = true;
+            };
+          } forEach (parseSimpleArray EGVAR(settings,excludeClassFromRecord));
+        };
+        if ((_class isEqualTo "unknown") || _toExcludeKind || _toExcludeClass) exitWith {
           LOG(ARR2("WARNING: vehicle is defined as 'unknown' or exclude:", _vehType));
           _x setVariable [QGVARMAIN(isInitialized), true, true];
           _x setVariable [QGVARMAIN(exclude), true, true];

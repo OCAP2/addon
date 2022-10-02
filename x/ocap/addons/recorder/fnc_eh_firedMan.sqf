@@ -108,9 +108,9 @@ switch (true) do {
       [":FIRED:", [
         _projectile getVariable [QGVAR(firerId), -1],
         GVAR(captureFrameNo),
-        _pos
-      ]] call EFUNC(extension, sendData);
-    };
+        getPosASL _projectile
+      ]] call EFUNC(extension,sendData);
+    }];
   };
 
 
@@ -135,6 +135,16 @@ switch (true) do {
       case (_ammoSimType in ["shotMissile", "shotRocket", "shotShell"]): {
         LOGMISSILE;
 
+        // create our marker record in the timeline
+        [QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, getPosASL _firer, _markerType, "ICON", [1, 1], getDir _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
+
+        _projectile setVariable [QGVAR(markName), _markName];
+
+        _projectile addEventHandler ["Deleted", {
+          params ["_projectile"];
+          [QGVARMAIN(handleMarker), ["DELETED", _projectile getVariable QGVAR(markName)]] call CBA_fnc_localEvent;
+        }];
+
         if (GVARMAIN(isDebug)) then {
           // add to map draw array
           private _debugArr = [_projectile, _magIcon, format["%1 %2 - %3", str side group _firer, name _firer, _markTextLocal], [side group _firer] call BIS_fnc_sideColor];
@@ -144,11 +154,14 @@ switch (true) do {
       case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX", "shotCM"]): {
         LOGGRENADE;
 
-        _projectile setVariable [GVAR(ocapdata), [_projectile, _wepString, _firer, getPosASL _projectile, _markName, _markTextLocal, _ammoSimType]];
+        // create our marker record in the timeline
+        [QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, getPosASL _firer, _markerType, "ICON", [1, 1], getDir _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
+
+        _projectile setVariable [QGVAR(markName), _markName];
 
         _projectile addEventHandler ["Deleted", {
           params ["_projectile"];
-          [QGVARMAIN(handleMarker), ["DELETED", _projectile getVariable [GVAR(ocapdata)]]] call CBA_fnc_localEvent;
+          [QGVARMAIN(handleMarker), ["DELETED", _projectile getVariable QGVAR(markName)]] call CBA_fnc_localEvent;
         }];
 
         if (GVARMAIN(isDebug)) then {
@@ -191,15 +204,22 @@ switch (true) do {
             [":FIRED:", [
               _projectile getVariable [QGVAR(firerId), -1],
               GVAR(captureFrameNo),
-              _pos
-            ]] call EFUNC(extension, sendData);
-          };
+              getPosASL _projectile
+            ]] call EFUNC(extension,sendData);
+          }];
         };
         case (_ammoSimType in ["shotMissile", "shotRocket", "shotShell"]): {
           LOGMISSILE;
 
           // create our marker record in the timeline
           [QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, getPosASL _firer, _markerType, "ICON", [1, 1], getDir _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
+
+          _projectile setVariable [QGVAR(markName), _markName];
+
+          _projectile addEventHandler ["Deleted", {
+            params ["_projectile"];
+            [QGVARMAIN(handleMarker), ["DELETED", _projectile getVariable QGVAR(markName)]] call CBA_fnc_localEvent;
+          }];
 
           if (GVARMAIN(isDebug)) then {
             // add to clients' map draw array
@@ -212,6 +232,13 @@ switch (true) do {
 
           // create our marker record in the timeline
           [QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, getPosASL _firer, _markerType, "ICON", [1, 1], getDir _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
+
+          _projectile setVariable [QGVAR(markName), _markName];
+
+          _projectile addEventHandler ["Deleted", {
+            params ["_projectile"];
+            [QGVARMAIN(handleMarker), ["DELETED", _projectile getVariable QGVAR(markName)]] call CBA_fnc_localEvent;
+          }];
 
           if (GVARMAIN(isDebug)) then {
             // add to map draw array

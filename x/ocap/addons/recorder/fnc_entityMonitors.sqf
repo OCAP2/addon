@@ -11,25 +11,32 @@
         _sizeInMeters = 2.5;
         _iconSize = (_sizeInMeters * 0.15) * 10^(abs log (ctrlMapScale (_this#0)));
         {
-          // _x params ["_startPos", "_endPos", "_color", "_timeHit"];
-          if (!alive _x || isNull _x) then {continue};
           (_this#0) drawIcon [
-            getText(configFile >> "CfgVehicleIcons" >> (getText((configOf _x) >> "icon"))), // Custom images can also be used: getMissionPath "\myFolder\myIcon.paa"
+            (_x call {
+              if (_this call CBA_fnc_isPerson) then {
+                getText(configFile >> "CfgVehicleIcons" >> (getText((configOf _this) >> "icon")))
+              } else {
+                getText((configOf _this) >> "icon")
+              };
+            }),
             [side group _x] call BIS_fnc_sideColor,
             getPos _x,
             _iconSize,
             _iconSize,
             getDir _x,
-            name _x,
+            (_x call {
+              if (_this call CBA_fnc_isPerson) then {name _this} else {getText(configOf _this >> "displayName")}
+            }),
             1,
             0.02,
             "TahomaB",
             "center"
           ];
-        } forEach (allUnits + vehicles) select {
+        } forEach ((allUnits + vehicles) select {
           _x getVariable [QGVARMAIN(isInitialized), false] &&
-          _x getVariable [QGVARMAIN(exclude), true]
-        };
+          !(_x getVariable [QGVARMAIN(exclude), false]) &&
+          not (!alive _x || isNull _x || objectParent _x isNotEqualTo objNull)
+        });
       };
     }];
   };

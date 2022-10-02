@@ -83,10 +83,10 @@ GVAR(allSettings) = [
     "EDITBOX", // setting type
     [
       "Classnames to Exclude", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      "Array of object classnames that should be excluded from recording. Use single quotes! Default: ['ACE_friesAnchorBar', 'GroundWeaponHolder', 'WeaponHolderSimulated']"
+      "Array of object classnames that should be excluded from recording. Use single quotes! Default: ['ACE_friesAnchorBar', 'WeaponHolderSimulated']"
     ],
     [COMPONENT_NAME, "Exclusions"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
-    "['ACE_friesAnchorBar', 'GroundWeaponHolder', 'WeaponHolderSimulated']", // default string value
+    "['ACE_friesAnchorBar']", // default string value
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
     false // requires restart to apply
@@ -100,7 +100,7 @@ GVAR(allSettings) = [
       "Array of classnames which, along with all child classes, should be excluded from recording. Use single quotes! Default: []"
     ],
     [COMPONENT_NAME, "Exclusions"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
-    "[]", // default string value
+    "['WeaponHolder']", // default string value
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
     false // requires restart to apply

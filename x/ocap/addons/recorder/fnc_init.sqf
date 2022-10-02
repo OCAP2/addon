@@ -140,7 +140,7 @@ if (GVAR(missionName) == "") then {
 [
   {(getClientStateNumber > 9 && (count allPlayers) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
   {
-    call FUNC(startRecording)
+    call FUNC(startRecording);
     [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
   }
 ] call CBA_fnc_waitUntilAndExecute;
@@ -149,7 +149,7 @@ if (GVAR(missionName) == "") then {
 // If a recording has been started, exceeds min mission time, and no players are on the server, auto-save
 [{
   if (
-    QEGVAR(settings,saveOnEmpty) &&
+    EGVAR(settings,saveOnEmpty) &&
     !isNil QGVAR(startTime) && (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime) && count (call CBA_fnc_players) == 0
   ) then {
       [nil, "Recording ended due to server being empty"] call FUNC(exportData);

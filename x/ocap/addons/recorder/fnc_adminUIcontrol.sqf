@@ -1,10 +1,20 @@
 #include "script_component.hpp"
 
-params ["_PID"];
+params [
+  "_PID",
+  ["_grantControls", true, [true]]
+];
 
 if (isNil "_PID") exitWith {};
 
 (getUserInfo _PID) params ["_playerID", "_owner", "_playerUID"];
+
+// If parameter was false, remove the diary entry
+if (!_grantControls) exitWith {
+  {
+    player removeDiarySubject QEGVAR(diary,adminControls_subject);
+  } remoteExec ["call", _owner];
+};
 
 // check if admin
 private _adminUIDs = missionNamespace getVariable [QGVARMAIN(administratorList), nil];

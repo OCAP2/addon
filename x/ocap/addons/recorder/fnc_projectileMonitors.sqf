@@ -1,59 +1,9 @@
 #include "script_component.hpp"
 
-// PFH to track bullets
-GVAR(liveBullets) = [];
-[{
-
-  private _processNow = GVAR(liveBullets) select {isNull (_x#0)};
-  GVAR(liveBullets) = GVAR(liveBullets) select {!isNull (_x#0)};
-
-  // _processNow
-  // for bullets that have hit something and become null, trigger FIRED events in timeline and add to clients for debug draw
-  {
-    _x params ["_obj", "_firerId", "_firer", "_pos"];
-
-    // [":FIRED:", [
-    //   _firerId,
-    //   GVAR(captureFrameNo),
-    //   _pos
-    // ]] call EFUNC(extension,sendData);
-
-    if (GVARMAIN(isDebug)) then {
-      OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _pos));
-
-      // add to clients' map draw array
-      private _debugArr = [getPos _firer, _pos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
-      [QGVAR(addDebugBullet), _debugArr] call CBA_fnc_globalEvent;
-    };
-  } forEach _processNow;
-
-  // for bullets that still exist, update positions
-  {
-    _x set [3, getPosASL (_x#0)];
-  } forEach GVAR(liveBullets);
-}, 0.1 * GVAR(projectileMonitorMultiplier)] call CBA_fnc_addPerFrameHandler;
-
 // PFH to track missiles, rockets, shells
 GVAR(liveMissiles) = [];
 [{
-  private _processNow = GVAR(liveMissiles) select {isNull (_x#0)};
   GVAR(liveMissiles) = GVAR(liveMissiles) select {!isNull (_x#0)};
-
-  // _processNow
-  // for missiles that have hit something and become null, trigger FIRED events in timeline and add to clients for debug draw
-  {
-    _x params ["_obj", "_wepString", "_firer", "_pos", "_markName", "_markTextLocal"];
-    _firer setVariable [
-      QGVARMAIN(lastFired),
-      getText(configFile >> "CfgMagazines" >> _magazine >> "displayName")
-    ];
-
-    if (GVARMAIN(isDebug)) then {
-      OCAPEXTLOG(ARR4("FIRED EVENT: SHELL-ROCKET-MISSILE", GVAR(captureFrameNo), _firer getVariable QGVARMAIN(id), str _pos));
-    };
-
-    // [{[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent}, _markName, 10] call CBA_fnc_waitAndExecute;
-  } forEach _processNow;
 
   // for missiles that still exist, update positions
   {
@@ -62,32 +12,12 @@ GVAR(liveMissiles) = [];
     _x set [3, _nowPos];
     [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _nowPos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
   } forEach GVAR(liveMissiles);
-}, 0.1 * GVAR(projectileMonitorMultiplier)] call CBA_fnc_addPerFrameHandler;
+}, 0.7] call CBA_fnc_addPerFrameHandler;
 
 // PFH to track grenades, flares, thrown charges
 GVAR(liveGrenades) = [];
 [{
-  private _processNow = GVAR(liveGrenades) select {isNull (_x#0)};
   GVAR(liveGrenades) = GVAR(liveGrenades) select {!isNull (_x#0)};
-
-  // _processNow
-  // for grenades that have hit something and become null, trigger FIRED events in timeline and add to clients for debug draw
-  {
-    _x params ["_obj", "_magazine", "_firer", "_pos", "_markName", "_markTextLocal", "_ammoSimType"];
-
-    if !(_ammoSimType in ["shotSmokeX", "shotIlluminating"]) then {
-      _firer setVariable [
-        QGVARMAIN(lastFired),
-        getText(configFile >> "CfgMagazines" >> _magazine >> "displayName")
-      ];
-    };
-
-    if (GVARMAIN(isDebug)) then {
-      OCAPEXTLOG(ARR4("FIRED EVENT: GRENADE-FLARE-SMOKE", GVAR(captureFrameNo), _firer getVariable QGVARMAIN(id), str _pos));
-    };
-
-    // [{[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent}, _markName, 10] call CBA_fnc_waitAndExecute;
-  } forEach _processNow;
 
   // for grenades that still exist, update positions
   {
@@ -96,7 +26,7 @@ GVAR(liveGrenades) = [];
     _x set [3, _nowPos];
     [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _nowPos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
   } forEach GVAR(liveGrenades);
-}, GVAR(frameCaptureDelay)] call CBA_fnc_addPerFrameHandler;
+}, 0.7] call CBA_fnc_addPerFrameHandler;
 
 
 

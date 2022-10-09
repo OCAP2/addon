@@ -10,4 +10,4 @@ if ((_this#0) isEqualTo 2) exitWith {};
   [GVAR(captureFrameNo), "connected", _this select 2]
 ] call EFUNC(extension,sendData);
 
-[_id] call FUNC(adminUIcontrol);
+[_idstr] call FUNC(adminUIcontrol);

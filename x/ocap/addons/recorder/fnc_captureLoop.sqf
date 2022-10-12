@@ -66,7 +66,7 @@ GVAR(PFHObject) = [
             ("<font color='#CCCCCC'>Capture frame: " + str (missionNamespace getVariable [QGVAR(captureFrameNo), "[not yet received]"]) + "</font>")
           ]
         ];
-      } remoteExecCall ["call", 0, false];
+      } remoteExec ["call", 0, false];
     };
 
     {
@@ -187,14 +187,14 @@ GVAR(PFHObject) = [
       false
     } count vehicles;
 
-    GVAR(captureFrameNo) = GVAR(captureFrameNo) + 1;
-    publicVariable QGVAR(captureFrameNo);
-
     if (GVARMAIN(isDebug)) then {
       private _logStr = format["Frame %1 processed in %2ms", GVAR(captureFrameNo), diag_tickTime - _loopStart];
       OCAPEXTLOG([_logStr]);
       _logStr SYSCHAT;
     };
+
+    GVAR(captureFrameNo) = GVAR(captureFrameNo) + 1;
+    publicVariable QGVAR(captureFrameNo);
   },
   GVAR(frameCaptureDelay), // delay
   [], // args

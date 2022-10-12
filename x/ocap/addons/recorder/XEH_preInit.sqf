@@ -48,10 +48,10 @@ GVAR(allSettings) = [
     ],
     [COMPONENT_NAME, "Core"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     [
-        0.25, // min
+        0.30, // min
         10, // max
         1, // default
-        0, // trailing decimals
+        2, // trailing decimals
         false // percentage
     ], // data for this setting: [min, max, default, number of shown trailing decimals]
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer

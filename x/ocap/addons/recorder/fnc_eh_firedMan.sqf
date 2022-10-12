@@ -83,13 +83,11 @@ _projectile setVariable [QGVAR(firerId), _firerId];
 // Track hit events for all projectile types
 _projectile addEventHandler ["HitPart", {
   params ["_projectile", "_hitEntity", "_projectileOwner", "_pos", "_velocity", "_normal", "_component", "_radius" ,"_surfaceType"];
-  LOG(ARR2("HitPart", _hitEntity));
   [_hitEntity, _projectileOwner] call FUNC(eh_projectileHit);
 }];
 
 _projectile addEventHandler ["HitExplosion", {
   params ["_projectile", "_hitEntity", "_projectileOwner", "_hitThings"];
-  LOG(ARR2("HitExplosion", _hitEntity));
   [_hitEntity, _projectileOwner] call FUNC(eh_projectileHit);
 }];
 

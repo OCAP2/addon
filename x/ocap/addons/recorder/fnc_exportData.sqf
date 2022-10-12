@@ -101,18 +101,6 @@ if (!isNil QGVAR(PFHObject)) then {
   GVAR(PFHObject) = nil;
 };
 
-// reset vars in case a new recording is started
-GVAR(captureFrameNo) = 0;
-GVAR(startTime) = nil;
-{
-  _x setVariable [QGVARMAIN(isInitialized), nil];
-  _x setVariable [QGVARMAIN(exclude), nil];
-  _x setVariable [QGVARMAIN(id), nil];
-  _x setVariable [QGVARMAIN(unitType), nil];
-} count (allUnits + allDeadMen + vehicles);
-GVAR(nextId) = 0;
-
-
 if (isNil "_side") then {
   [":EVENT:", [_endFrameNumber, "endMission", ["", "Mission ended"]]] call EFUNC(extension,sendData);
 };
@@ -137,22 +125,37 @@ if (!isNil "_tag") then {
   OCAPEXTLOG(ARR3("Saved recording of mission", GVAR(missionName), "with default tag"));
 };
 
-// briefingName is used here, no need for publicVariable for a simple confirmation log.
-[format["OCAP saved %1 frames successfully", _endFrameNumber], 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
-{
-  player createDiaryRecord [
-    "OCAPInfo",
-    [
-      "Status",
-      (
-        "<font color='#33FF33'>OCAP capture of " + briefingName + " has been exported with " + str(GVAR(endFrameNumber)) + " frames saved.</font>" +
-        "<br/><br/>" +
-        "Upload results have been logged."
-      )
-    ]
-  ];
+
+// notify players that the recording was saved with a 2 second delay to ensure the "stopped recording" entries populate first
+[format["OCAP saved %1 frames successfully", _endFrameNumber], 1, [1, 1, 1, 1]] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+[[GVAR(missionName), GVAR(captureFrameNo)], {
+  params ["_missionName", "_endFrame"];
+
   player setDiarySubjectPicture [
     "OCAPInfo",
     "\A3\ui_f\data\igui\cfg\simpleTasks\types\upload_ca.paa"
   ];
-} remoteExec ["call", 0, false];
+  player createDiaryRecord [
+    "OCAPInfo",
+    [
+      "Status",
+      format[
+        "<font color='#33FF33'>OCAP capture of %1 has been exported with %2 frames saved.</font><br/><br/>Upload results have been logged.",
+        _missionName,
+        _endFrame
+      ]
+    ]
+  ];
+}] remoteExec ["call", [0, -2] select isDedicated, true];
+
+// reset vars in case a new recording is started
+GVAR(captureFrameNo) = 0;
+publicVariable QGVAR(captureFrameNo);
+GVAR(startTime) = nil;
+{
+  _x setVariable [QGVARMAIN(isInitialized), nil];
+  _x setVariable [QGVARMAIN(exclude), nil];
+  _x setVariable [QGVARMAIN(id), nil];
+  _x setVariable [QGVARMAIN(unitType), nil];
+} count (allUnits + allDeadMen + vehicles);
+GVAR(nextId) = 0;

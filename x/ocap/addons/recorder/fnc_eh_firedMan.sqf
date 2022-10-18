@@ -33,7 +33,7 @@ if (!SHOULDSAVEEVENTS) exitWith {};
 
 params ["_firer", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile", "_vehicle"];
 
-private _initialProjPos = getPos _projectile;
+private _initialProjPos = getPosASL _projectile;
 if (getPos _firer distance _initialProjPos > 50 || vehicle _firer isKindOf "Air") then {
   // if projectile in unscheduled environment is > 50m from FiredMan then likely remote controlled
   // we should find the actual firing entity
@@ -63,18 +63,27 @@ if (_firerId == -1) exitWith {};
 ([_weapon, _muzzle, _magazine, _ammo] call FUNC(getWeaponDisplayData)) params ["_muzzleDisp", "_magDisp"];
 
 private _wepString = "";
-if (_muzzleDisp find _magDisp == -1 && _magDisp isNotEqualTo "") then {
-  _wepString = format["%1 [%2]", _muzzleDisp, _magDisp];
-} else {
-  _wepString = _muzzleDisp;
-};
 if (!isNull _vehicle) then {
   _wepString = format["%1 [%2]", (configOf _vehicle) call BIS_fnc_displayName, _wepString];
+} else {
+  _wepString = format["%1 [%2]", _muzzleDisp, _magDisp];
 };
 _firer setVariable [QGVARMAIN(lastFired), _wepString];
 (vehicle _firer) setVariable [QGVARMAIN(lastFired), _wepString];
 
+
+// _ammoSimType
+// "ShotGrenade" // M67
+// "ShotRocket" // S-8
+// "ShotMissile" // R-27
+// "ShotShell" // VOG-17M, HE40mm
+// "ShotMine" // Satchel charge
+// "ShotIlluminating" // 40mm_green Flare
+// "ShotSmokeX"; // M18 Smoke
+// "ShotCM" // Plane flares
+// "ShotSubmunition" // Hind minigun, cluster artillery
 _ammoSimType = getText(configFile >> "CfgAmmo" >> _ammo >> "simulation");
+
 
 // Save marker data to projectile namespace for EH later
 _projectile setVariable [QGVAR(firer), _firer];
@@ -91,17 +100,9 @@ _projectile addEventHandler ["HitExplosion", {
   [_hitEntity, _projectileOwner] call FUNC(eh_projectileHit);
 }];
 
-// _ammoSimType
-// "ShotGrenade" // M67
-// "ShotRocket" // S-8
-// "ShotMissile" // R-27
-// "ShotShell" // VOG-17M, HE40mm
-// "ShotMine" // Satchel charge
-// "ShotIlluminating" // 40mm_green Flare
-// "ShotSmokeX"; // M18 Smoke
-// "ShotCM" // Plane flares
-// "ShotSubmunition" // Hind minigun, cluster artillery
 
+
+// BULLET PROJECTILES
 
 if (_ammoSimType isEqualTo "shotBullet") exitWith {
   // Bullet projectiles
@@ -141,7 +142,7 @@ _firerPos = getPosASL _firer;
 
 
 
-// Move marker, then delete marker, when projectile is deleted
+// Move marker, then delete marker, when projectile is deleted or explodes
 _projectile addEventHandler ["Deleted", {
   params ["_projectile"];
   _markName = _projectile getVariable QGVAR(markName);
@@ -149,8 +150,21 @@ _projectile addEventHandler ["Deleted", {
   [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, getPosASL _projectile, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
   [{
     [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
-  }, _markName, GVAR(frameCaptureDelay)] call CBA_fnc_waitAndExecute;
+  }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
 }];
+
+_projectile addEventHandler ["Explode", {
+	params ["_projectile", "_pos", "_velocity"];
+  _markName = _projectile getVariable QGVAR(markName);
+  _firer = _projectile getVariable QGVAR(firer);
+  [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _pos, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
+  [{
+    [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
+  }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
+}];
+
+
+
 
 // Add to debug
 if (GVARMAIN(isDebug)) then {
@@ -226,7 +240,7 @@ switch (true) do {
           }];
         };
 
-        // Move marker, then delete marker, when projectile is deleted
+        // Move marker, then delete marker, when projectile is deleted or explodes
         _submunitionProjectile addEventHandler ["Deleted", {
           params ["_projectile"];
           _markName = _projectile getVariable QGVAR(markName);
@@ -234,7 +248,17 @@ switch (true) do {
           [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, getPosASL _projectile, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
           [{
             [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
-          }, _markName, GVAR(frameCaptureDelay)] call CBA_fnc_waitAndExecute;
+          }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
+        }];
+
+        _projectile addEventHandler ["Explode", {
+          params ["_projectile", "_pos", "_velocity"];
+          _markName = _projectile getVariable QGVAR(markName);
+          _firer = _projectile getVariable QGVAR(firer);
+          [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _pos, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
+          [{
+            [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
+          }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
         }];
 
         // Add to debug

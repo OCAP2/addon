@@ -251,17 +251,17 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
     {
       private _marker = _x;
 
-    // check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
-    // if value is undefined, then skip
-    private _isExcluded = false;
-    if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) then {
-      {
-        if ((_marker) find _x >= 0) exitWith {
-          _isExcluded = true;
-        };
-      } forEach (parseSimpleArray EGVAR(settings,excludeMarkerFromRecord));
-    };
-    if (_isExcluded) then {continue};
+      // check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
+      // if value is undefined, then skip
+      private _isExcluded = false;
+      if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) then {
+        {
+          if ((_marker) find _x >= 0) exitWith {
+            _isExcluded = true;
+          };
+        } forEach (parseSimpleArray EGVAR(settings,excludeMarkerFromRecord));
+      };
+      if (_isExcluded) then {continue};
 
 
       // "Started polling starting markers" remoteExec ["hint", 0];

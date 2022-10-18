@@ -11,9 +11,9 @@
 
 // The current version of OCAP.
 #define VERSION 2.0
-#define VERSION_STR 2.0.0-RC2
+#define VERSION_STR 2.0.0
 #define VERSION_AR 2,0,0
-#define VERSION_REQUIRED 2.08
+#define VERSION_REQUIRED 2.10
 
 // define: LOG
 // Used for logging messages via the extension.

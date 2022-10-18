@@ -29,17 +29,17 @@ params ["_instigator"];
 
 if (isNull _instigator) exitWith {""};
 
-// if !(_instigator call CBA_fnc_isPerson) then {
-//   _instigator = _instigator call {
-//     if(alive(gunner _this))exitWith{gunner _this};
-//     if(alive(commander _this))exitWith{commander _this};
-//     if(alive(driver _this))exitWith{driver _this};
-//     effectiveCommander _this
-//   };
-// };
+if !(_instigator call CBA_fnc_isPerson) then {
+  _instigator = _instigator call {
+    if(alive(gunner _this))exitWith{gunner _this};
+    if(alive(commander _this))exitWith{commander _this};
+    if(alive(driver _this))exitWith{driver _this};
+    effectiveCommander _this
+  };
+};
 
-// if (_instigator call CBA_fnc_isPerson) then {
-  (weaponstate _instigator) params ["_weapon", "_muzzle", "_mode", "_magazine"];
+if (_instigator call CBA_fnc_isPerson) then {
+  (_instigator weaponstate (currentWeapon _instigator)) params ["_weapon", "_muzzle", "_mode", "_magazine"];
   ([_weapon, _muzzle, _magazine] call FUNC(getWeaponDisplayData)) params ["_muzDisp", "_magDisp"];
 
   _instigator getVariable [
@@ -50,6 +50,6 @@ if (isNull _instigator) exitWith {""};
       _magDisp
     ]
   ];
-// } else {
-  // getText(configFile >> "CfgVehicles" >> (typeOf vehicle _instigator) >> "displayName");
-// };
+} else {
+  getText(configFile >> "CfgVehicles" >> (typeOf vehicle _instigator) >> "displayName");
+};

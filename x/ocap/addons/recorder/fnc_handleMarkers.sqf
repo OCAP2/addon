@@ -1,5 +1,7 @@
 /* ----------------------------------------------------------------------------
-Script: ocap_fnc_handleMarkers
+FILE: fnc_handleMarkers.sqf
+
+FUNCTION: OCAP_recorder_fnc_handleMarkers
 
 Description:
   Used for tracking all markers in the vanilla Arma 3 system.
@@ -10,9 +12,11 @@ Description:
 
   Due to the nature of locality and single-view playback, markers of the same name which exist in different states on different clients may display odd behavior during playback.
 
-  Marker exclusion as configured in userconfig.hpp is handled client-side for performance reasons.
+  Marker exclusions as configured in <OCAP_settings_excludeMarkerFromRecord> are handled client-side to avoid unnecessary network traffic.
 
-  * Applied during mission event handler application in <ocap_fnc_addEventMission>.
+  This will also wait until the mission proceeds past the briefing screen, then gather all existing markers and send them to the server for entry onto the Editor/Briefing Markers layer during playback.
+
+  Applied during mission event handler application in <OCAP_recorder_fnc_addEventMission>.
 
 Parameters:
   None
@@ -21,26 +25,26 @@ Returns:
   Nothing
 
 Examples:
-  --- Code
-  call ocap_fnc_handleMarkers;
-  ---
+  > call FUNC(handleMarkers);
 
 Public:
-  Yes
+  No
 
 Author:
   IndigoFox, Fank
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
-// array: GVAR(trackedMarkers)
+// VARIABLE: OCAP_recorder_trackedMarkers
 // Persistent global variable on server that defines unique marker names currently being tracked.
 // Entries are added at marker create events and removed at marker delete events to avoid duplicate processing.
-GVAR(trackedMarkers) = []; // Markers which we saves into replay
+GVAR(trackedMarkers) = []; // Markers which we save into replay
 
+// VARIABLE: OCAP_listener_markers
+// Contains handle for <OCAP_handleMarker> CBA event handler.
 
-
-// create CBA event handler to be called on server with key "ocap_handleMarker"
+// CBA Event: OCAP_handleMarker
+// Handles marker creation, modification, and deletion events.
 EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
 
   if (!SHOULDSAVEEVENTS) exitWith {};
@@ -157,6 +161,15 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
 
 // handle created markers
 {
+  /*
+    Event Handler: MarkerCreated
+    Description:
+      Tracks marker creations. Present on server and all clients. Ignores remotely-owned markers.
+
+      References <OCAP_settings_excludeMarkerFromRecord> on each local machine to determine if a marker should be recorded.
+
+      If so, sends marker data to <OCAP_handleMarker> on the server for processing.
+ */
   addMissionEventHandler["MarkerCreated", {
     params["_marker", "_channelNumber", "_owner", "_local"];
 
@@ -198,6 +211,15 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
   }];
 
   // handle marker moves/updates
+  /*
+    Event Handler: MarkerUpdated
+    Description:
+      Tracks marker updates (moves). Present on server and all clients. Ignores remotely-owned markers.
+
+      References <OCAP_settings_excludeMarkerFromRecord> on each local machine to determine if a marker should be recorded.
+
+      If so, sends marker data to <OCAP_handleMarker> on the server for processing.
+  */
   addMissionEventHandler["MarkerUpdated", {
     params["_marker", "_local"];
 
@@ -221,6 +243,15 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
   }];
 
   // handle marker deletions
+  /*
+    Event Handler: MarkerDeleted
+    Description:
+      Tracks marker deletions. Present on server and all clients. Ignores remotely-owned markers.
+
+      References <OCAP_settings_excludeMarkerFromRecord> on each local machine to determine if a marker should be recorded.
+
+      If so, sends marker data to <OCAP_handleMarker> on the server for processing.
+  */
   addMissionEventHandler["MarkerDeleted", {
     params["_marker", "_local"];
 

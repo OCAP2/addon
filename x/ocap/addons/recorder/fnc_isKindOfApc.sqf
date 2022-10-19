@@ -1,3 +1,26 @@
+/* ----------------------------------------------------------------------------
+FILE: fnc_isKindOfApc.sqf
+
+FUNCTION: OCAP_recorder_fnc_isKindOfApc
+
+Description:
+  Helper function for <OCAP_recorder_fnc_getClass> to prevent APCs from being classified as Cars or Trucks.
+
+Parameters:
+  _this - The vehicle to check [Object]
+
+Returns:
+  [Bool] - True if the vehicle is an APC, false otherwise
+
+Examples:
+  > if (_this call FUNC(isKindOfApc)) exitWith {"apc"};
+
+Public:
+  No
+
+Author:
+  Dell, Zealot
+---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
 _bool = false;

@@ -1,3 +1,28 @@
+/* ----------------------------------------------------------------------------
+FILE: fnc_entityMonitors.sqf
+
+FUNCTION: OCAP_recorder_fnc_entityMonitors
+
+Description:
+  While debug mode is enabled, this function will render 2D icons and text representing all entities that have been initialized by OCAP and are not being excluded from the recording.
+
+  This is useful for debugging and verifying that the correct entities are being recorded (see <OCAP_settings_excludeClassFromRecord> and <OCAP_settings_excludeKindFromRecord>.
+
+Parameters:
+  None
+
+Returns:
+  Nothing
+
+Examples:
+  > [_hitEntity, _projectileOwner] call FUNC(eh_projectileHit);
+
+Public:
+  No
+
+Author:
+  IndigoFox
+---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
 // DEBUG draws on clients
@@ -42,4 +67,6 @@
   };
 } remoteExec ["call", [0, -2] select isDedicated, true];
 
+// Variable: OCAP_entityMonitorsInitialized
+// This variable on the server indicates whether or not the entity monitors have been initialized for all clients + JIP.
 GVAR(entityMonitorsInitialized) = true;

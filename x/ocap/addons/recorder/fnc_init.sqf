@@ -1,9 +1,10 @@
 /* ----------------------------------------------------------------------------
-Script: ocap_fnc_init
+FILE: fnc_init.sqf
+
+FUNCTION: OCAP_recorder_fnc_init
 
 Description:
-  Automatic Start: Called from ocap_fnc_autoStart.
-  Manual Start: Server execution to begin.
+  Initializes event listeners, event handlers, gathers <OCAP_version> and <OCAP_extension_version>, and kicks off waiters for the auto-start conditions if settings are configured to enable it.
 
 Parameters:
   None
@@ -11,10 +12,8 @@ Parameters:
 Returns:
   Nothing
 
-Examples:
-  --- Code
-  call ocap_fnc_init;
-  ---
+Example:
+  > call OCAP_recorder_fnc_init
 
 Public:
   No
@@ -37,24 +36,60 @@ if (!isNil QGVAR(startTime)) exitWith {
 
 // "debug_console" callExtension format["clientState: %1 (%2) | %3", getClientState, getClientStateNumber, __FILE__];
 
-// bool: GVAR(recording)
+// VARIABLE: OCAP_recorder_recording
+// Global variable that represents whether or not recording is active [Bool]
 GVAR(recording) = false;
 publicVariable QGVAR(recording);
-// int: GVAR(captureFrameNo)
+
+/*
+  VARIABLE: OCAP_recorder_captureFrameNo
+  Global variable that represents the current frame number [Number]
+*/
 GVAR(captureFrameNo) = 0;
 publicVariable QGVAR(captureFrameNo);
+
+/*
+  VARIABLE: OCAP_recorder_nextId
+  Global variable that represents the next available id to assign to a unit or vehicle [Number]
+*/
 GVAR(nextId) = 0;
 
+
+
 // save static setting values so changes during a mission don't interrupt timeline
+
+/*
+  VARIABLE: OCAP_recorder_frameCaptureDelay
+  Global variable that represents the delay between frame captures in seconds. Gathered from CBA settings at init. [Number]
+*/
 GVAR(frameCaptureDelay) = EGVAR(settings,frameCaptureDelay);
+
+/*
+  VARIABLE: OCAP_recorder_autoStart
+  Global variable that represents whether or not recording should automatically start. Gathered from CBA settings at init. [Bool]
+*/
 GVAR(autoStart) = EGVAR(settings,autoStart);
+
+
+/*
+  VARIABLE: OCAP_recorder_minMissionTime
+  Global variable that represents the minimum mission time in seconds to qualify for saving. Can be overridden by using the <ocap_exportData> CBA event. Gathered from CBA settings at init. [Number]
+*/
 GVAR(minMissionTime) = EGVAR(settings,minMissionTime);
+
 GVAR(projectileMonitorMultiplier) = 1;
 
-// macro: GVARMAIN(version)SION
+/*
+  VARIABLE: OCAP_version
+  Global variable that represents the version of OCAP addon being used [String]
+*/
 GVARMAIN(version) = QUOTE(VERSION_STR);
 publicVariable QGVARMAIN(version);
 
+/*
+  VARIABLE: OCAP_extension_version
+  Global variable that represents the version of OCAP extension being used [String]
+*/
 EGVAR(extension,version) = ([":VERSION:", []] call EFUNC(extension,sendData));
 publicVariable QEGVAR(extension,version);
 

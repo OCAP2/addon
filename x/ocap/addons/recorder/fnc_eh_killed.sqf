@@ -1,21 +1,22 @@
 /* ----------------------------------------------------------------------------
-Script: FUNC(eh_killed)
+FILE: fnc_eh_killed.sqf
+
+FUNCTION: OCAP_recorder_fnc_eh_killed
 
 Description:
-  Tracks when a unit is killed. This is the code triggered by the "MPKilled" Event Handler applied to units during <FUNC(addUnitEventHandlers)>.
+  Tracks when a unit is killed. This is the code triggered by the <OCAP_EH_EntityKilled> mission event handler.
 
 Parameters:
   _unit - Object the event handler is assigned to. [Object]
   _killer - Object that killed the unit. [Object]
   _instigator - Person who pulled the trigger. [Object]
-  _useEffects - same as useEffects in setDamage alt syntax. [Boolean]
+  _useEffects - same as useEffects in setDamage alt syntax. [Bool]
 
 Returns:
   Nothing
 
 Examples:
-  --- Code
-  ---
+  > call FUNC(eh_killed);
 
 Public:
   No

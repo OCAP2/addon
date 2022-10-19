@@ -1,8 +1,30 @@
-/*
-  Start Recording
+/* ----------------------------------------------------------------------------
+FILE: fnc_startRecording.sqf
 
-  This is the initial recording start function. If it hasn't been called from anywhere already, it'll get everything in order to initiate a session for this mission.
-*/
+FUNCTION: OCAP_recorder_fnc_startRecording
+
+Description:
+  Begins recording the current mission.
+
+  Called via <OCAP_record> via direct CBA event or the administrative diary entry, or by a waiter in <OCAP_recorder_fnc_init> (see <OCAP_settings_autoStart>).
+
+  Will not start recording if <OCAP_recorder_recording> is true and will notify players.
+
+Parameters:
+  None
+
+Returns:
+  Nothing
+
+Examples:
+  > call FUNC(startRecording);
+
+Public:
+  No
+
+Author:
+  Dell, Zealot, IndigoFox
+---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
 // disregard recording attempts while OCAP is disabled.

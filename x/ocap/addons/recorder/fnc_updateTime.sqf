@@ -1,5 +1,7 @@
 /* ----------------------------------------------------------------------------
-Script: FUNC(updateTime)
+FILE: fnc_updateTime.sqf
+
+FUNCTION: OCAP_recorder_fnc_updateTime
 
 Description:
 	Sends server's system time, mission environment date/time, time multiplier setting, and time since mission start (post-briefing) to the extension. Will run on a recurring basis as part of <FUNC(captureLoop)> if the setting in userconfig.hpp is configured to do so. This is required in missions that utilize time acceleration or have time skips as part of mission flow.
@@ -11,9 +13,7 @@ Returns:
 	Nothing
 
 Examples:
-	--- Code
-	[] call FUNC(updateTime);
-	---
+	> [] call FUNC(updateTime);
 
 Public:
 	No
@@ -21,7 +21,6 @@ Public:
 Author:
 	Fank
 ---------------------------------------------------------------------------- */
-
 #include "script_component.hpp"
 
 params [

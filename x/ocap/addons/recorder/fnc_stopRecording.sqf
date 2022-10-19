@@ -1,3 +1,28 @@
+/* ----------------------------------------------------------------------------
+FILE: fnc_stopRecording.sqf
+
+FUNCTION: OCAP_recorder_fnc_stopRecording
+
+Description:
+  Stops recording the current mission. Can be used to pause the recording for later resumption. Also called automatically as part of <OCAP_recorder_fnc_exportData>.
+
+  Called via <OCAP_pause> via direct CBA event or the administrative diary entry.
+
+Parameters:
+  None
+
+Returns:
+  Nothing
+
+Examples:
+  > call FUNC(stopRecording);
+
+Public:
+  No
+
+Author:
+  Dell, Zealot, IndigoFox
+---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
 private _systemTimeFormat = ["%1-%2-%3T%4:%5:%6.%7"];

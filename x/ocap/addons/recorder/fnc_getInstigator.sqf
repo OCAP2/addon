@@ -1,8 +1,12 @@
 /* ----------------------------------------------------------------------------
-Script: FUNC(getInstigator)
+FILE: fnc_getInstigator.sqf
+
+FUNCTION: OCAP_recorder_fnc_getInstigator
 
 Description:
   Attempts to identify who truly pulled the trigger on a kill event.
+
+  Called in <OCAP_recorder_fnc_eh_killed>.
 
 Parameters:
   _victim - Who was killed. [Object]
@@ -13,9 +17,7 @@ Returns:
   The true killer. [Object]
 
 Examples:
-  --- Code
-  [_victim, _killer] call FUNC(getInstigator);
-  ---
+  > [_victim, _killer] call FUNC(getInstigator);
 
 Public:
   No

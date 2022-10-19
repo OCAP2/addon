@@ -1,3 +1,26 @@
+/* ----------------------------------------------------------------------------
+FILE: fnc_getClass.sqf
+
+FUNCTION: OCAP_recorder_fnc_getClass
+
+Description:
+  Determines what type of vehicle is being recorded to match with the more limited icon set preloaded in the OCAP playback UI.
+
+Parameters:
+  _this - The vehicle being queried [Object]
+
+Returns:
+  [String] - The icon name that should be used to represent the vehicle in the playback UI
+
+Examples:
+  > _class = _vehType call FUNC(getClass);
+
+Public:
+  No
+
+Author:
+  Zealot, Dell
+---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
 if (getText(configFile >> "CfgVehicles" >> _this >> "model") isEqualTo "\A3\Weapons_f\empty") exitWith {"unknown"};

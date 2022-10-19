@@ -1,3 +1,5 @@
+// FILE: CBA Settings
+
 #include "script_component.hpp"
 #include "XEH_prep.sqf"
 
@@ -5,7 +7,19 @@
 // This PreInit creates the settings on the server, only so that the global vars will be registered and synchronized with clients.
 
 GVAR(allSettings) = [
-  // Core
+  // Section: Core
+
+  /*
+    CBA Setting: OCAP_enabled
+    Description:
+      Turns on or off most recording functionality. Will not reset anything from existing session, will just stop recording most new data. Note: For record/pause switching, use the CBA events! Default: true
+
+    Setting Name:
+      Recording Enabled
+
+    Value Type:
+      Boolean
+  */
   [
     QGVARMAIN(enabled),
     "CHECKBOX", // setting type
@@ -20,6 +34,17 @@ GVAR(allSettings) = [
     false // requires restart to apply
   ],
 
+  /*
+    CBA Setting: OCAP_isDebug
+    Description:
+      Enables increased logging of addon actions. Default: false
+
+    Setting Name:
+      Debug Mode
+
+    Value Type:
+      Boolean
+  */
   [
     QGVARMAIN(isDebug),
     "CHECKBOX", // setting type
@@ -34,6 +59,20 @@ GVAR(allSettings) = [
     false // requires restart to apply
   ],
 
+  /*
+    CBA Setting: OCAP_administratorList
+    Description:
+      An array or server-visible variable referencing one that is a list of playerUIDs. Additional briefing diary or UI elements may be available for more accessible control over OCAP's features. Takes effect on player server connection. Format: [] OR myAdminPUIDs | Default: []
+
+    Setting Name:
+      Administrators
+
+    Value Type:
+      Stringified Array
+
+    Example:
+      > "['76561198000000000', '76561198000000001']"
+  */
   [
     QGVARMAIN(administratorList),
     "EDITBOX", // setting type

@@ -1,10 +1,14 @@
 /* ----------------------------------------------------------------------------
-Script: ocap_fnc_getEventWeaponText
+FILE: fnc_getEventWeaponText.sqf
+
+FUNCTION: OCAP_recorder_fnc_getEventWeaponText
 
 Description:
   Used to identify the current weapon a unit is using that has injured or killed another. Will determine the handheld weapon or vehicle weapon they're using.
 
-  Called during <FUNC(eh_hit)> and <FUNC(eh_killed)>.
+  Attempts to reference <OCAP_lastFired> but will fall back to current value if not available.
+
+  Called during <OCAP_recorder_fnc_projectileHit> and <OCAP_recorder_fnc_eh_killed>.
 
 Parameters:
   _instigator - The unit to evaluate [Object]
@@ -13,9 +17,7 @@ Returns:
   The description of weapon or vehicle > weapon. [String]
 
 Examples:
-  --- Code
-  [_instigator] call ocap_fnc_getEventWeaponText
-  ---
+  > [_shooter] call FUNC(getEventWeaponText)
 
 Public:
   No

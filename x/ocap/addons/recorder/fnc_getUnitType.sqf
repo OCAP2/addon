@@ -1,5 +1,7 @@
 /* ----------------------------------------------------------------------------
-Script: ocap_fnc_getUnitType
+FILE: fnc_getUnitType.sqf
+
+FUNCTION: OCAP_recorder_fnc_getUnitType
 
 Description:
   Identifies the role of a unit using similar methodology to Arma 3's. Used in <FUNC(captureLoop)>.
@@ -11,15 +13,13 @@ Returns:
   The role text. [String]
 
 Examples:
-  --- Code
-  [_x] call ocap_fnc_getUnitType;
-  ---
+  > [_x] call ocap_fnc_getUnitType;
 
 Public:
   No
 
 Author:
-  IndigoFox
+  IndigoFox, veteran29
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 

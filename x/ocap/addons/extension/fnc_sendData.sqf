@@ -1,5 +1,7 @@
 /* ----------------------------------------------------------------------------
-Script: EFUNC(extension,sendData)
+FILE: fnc_sendData.sqf
+
+FUNCTION: OCAP_extension_fnc_sendData
 
 Description:
 	Manages raw extension calls and returns values / logs errors where relevant.
@@ -12,9 +14,7 @@ Returns:
 	Depends
 
 Examples:
-	--- Code
-	[":VERSION", []] call EFUNC(extension,sendData);
-	---
+	> [":VERSION", []] call EFUNC(extension,sendData);
 
 Public:
 	No

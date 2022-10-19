@@ -1,3 +1,32 @@
+/* ----------------------------------------------------------------------------
+FILE: fnc_getAmmoMarkerData.sqf
+
+FUNCTION: OCAP_recorder_fnc_getAmmoMarkerData
+
+Description:
+  This function will intake information from <OCAP_EH_FiredMan> and return data used to format a marker for entry into the timeline.
+
+Parameters:
+  _weapon - The weapon used [String]
+  _muzzle - The muzzle used [String]
+  _ammo - The ammo used [String]
+  _magazine - The magazine used [String]
+  _projectile - The projectile object [Object]
+  _vehicle - The vehicle the weapon is mounted on, if any [Object]
+  _ammoSimType - The ammo simulation type [String]
+
+Returns:
+  [_markTextLocal,_markName,_markColor,_markerType] - The marker data [Array]
+
+Examples:
+  > ([_weapon, _muzzle, _ammo, _magazine, _projectile, _vehicle, _ammoSimType] call FUNC(getAmmoMarkerData)) params ["_markTextLocal","_markName","_markColor","_markerType"];
+
+Public:
+  No
+
+Author:
+  IndigoFox
+---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
 params ["_weapon", "_muzzle", "_ammo", "_magazine", "_projectile", "_vehicle", "_ammoSimType"];

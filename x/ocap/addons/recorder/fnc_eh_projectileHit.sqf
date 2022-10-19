@@ -1,21 +1,20 @@
 /* ----------------------------------------------------------------------------
-Script: FUNC(eh_hit)
+FILE: fnc_eh_projectileHit.sqf
+
+FUNCTION: OCAP_recorder_fnc_eh_projectileHit
 
 Description:
-  Tracks when a unit is hit/takes damage. This is the code triggered by the "MPHit" Event Handler applied to units during <FUNC(addUnitEventHandlers)>.
+  Tracks when a unit is hit/takes damage and saves to the timeline. This is called by projectile event handlers in <OCAP_recorder_fnc_eh_firedMan>.
 
 Parameters:
-  _unit - Object the event handler is assigned to. [Object]
-  _causedBy - Object that caused the damage. Contains the unit itself in case of collisions. [Object]
-  _damage - Level of damage caused by the hit. [Number]
-  _instigator - Object - Person who pulled the trigger. [Object]
+  _unit - Object that took damage [Object]
+  _shooter - Object that caused the damage [Object]
 
 Returns:
   Nothing
 
 Examples:
-  --- Code
-  ---
+  > [_hitEntity, _projectileOwner] call FUNC(eh_projectileHit);
 
 Public:
   No

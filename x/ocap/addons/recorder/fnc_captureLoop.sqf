@@ -1,12 +1,15 @@
 /* ----------------------------------------------------------------------------
-Script: FUNC(captureLoop)
+FILE: fnc_captureLoop.sqf
+
+FUNCTION: OCAP_recorder_fnc_captureLoop
 
 Description:
-  Iterates through units, declares they exist, and conditional records their state at an interval defined in userconfig.hpp.
+
+  This function is run unscheduled and creates a CBA PerFrameHandler object, a logic object which executes code every specified interval (<OCAP_settings_frameCaptureDelay>) while a condition (<SHOULDSAVEEVENTS>) is true.
+
+  Iterates through units and vehicles, declares they exist, and conditionally sends their information to the extension to populate recording data.
 
   This is the core processing loop that determines when new units enter the world, all the details about them, classifies which to exclude, and determines their health/life status. It has both unit and vehicle tracking.
-
-  This is spawned during <ocap_fnc_init>.
 
 Parameters:
   None
@@ -15,9 +18,7 @@ Returns:
   Nothing
 
 Examples:
-  --- Code
-  0 spawn FUNC(captureLoop);
-  ---
+  >  call FUNC(captureLoop);
 
 Public:
   No
@@ -38,6 +39,8 @@ if (isNil QGVAR(startTime)) then {
   LOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
 };
 
+// Variable: OCAP_PFHObject
+// The CBA PerFrameHandler object that is created and used to run the capture loop.
 GVAR(PFHObject) = [
   {
     private _loopStart = diag_tickTime;

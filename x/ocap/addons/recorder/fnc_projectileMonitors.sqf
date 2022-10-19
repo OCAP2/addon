@@ -1,6 +1,35 @@
+/* ----------------------------------------------------------------------------
+FILE: fnc_projectileMonitors.sqf
+
+FUNCTION: OCAP_recorder_fnc_projectileMonitors
+
+Description:
+  This initializes projectile monitoring for the purposes of moving non-bullet projectile markers across the map during playback as well as to display them on the in-game map while <OCAP_isDebug> is true.
+
+  On clients, it will create a "Draw" UI event handler to display both fire-lines representing bullets and markers representing non-bullet projectiles. It will also create an event handler used by the server in <OCAP_recorder_fnc_eh_firedMan> to integrate new projectiles to the array being procesed by the "Draw" handler.
+
+  On the server, it will initialize <OCAP_recorder_liveMissiles> and <OCAP_recorder_liveGrenades>. These are watch arrays that are used to track the position of non-bullet projectiles and update the extension with their positions as they travel. This causes the effect of a 'moving marker' during playback.
+
+Parameters:
+  None
+
+Returns:
+  Nothing
+
+Example:
+  > call FUNC(projectileMonitors);
+
+Public:
+  No
+
+Author:
+  IndigoFox
+---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
 // PFH to track missiles, rockets, shells
+// Variable: OCAP_recorder_liveMissiles
+// Watched array of missiles, rockets, shells, and any other unaccounted projectile. Every 0.7 seconds, the position of each object in the array is updated and sent to the extension.
 GVAR(liveMissiles) = [];
 [{
   GVAR(liveMissiles) = GVAR(liveMissiles) select {!isNull (_x#0)};
@@ -15,6 +44,8 @@ GVAR(liveMissiles) = [];
 }, 0.7] call CBA_fnc_addPerFrameHandler;
 
 // PFH to track grenades, flares, thrown charges
+// Variable: OCAP_recorder_liveGrenades
+// Watched array of grenades, flares, and thrown charges. Every 0.7 seconds, the position of each object in the array is updated and sent to the extension.
 GVAR(liveGrenades) = [];
 [{
   GVAR(liveGrenades) = GVAR(liveGrenades) select {!isNull (_x#0)};
@@ -38,6 +69,9 @@ GVAR(liveGrenades) = [];
   if (!hasInterface) exitWith {};
   [] spawn {
     waitUntil {!isNull (findDisplay 12)};
+
+    // Variable: OCAP_recorder_liveDebugBullets
+    // Used by clients to draw bullet lines. Entered via <OCAP_recorder_fnc_eh_firedMan> and managed in ??
     GVAR(liveDebugBullets) = [];
     disableSerialization;
     (findDisplay 12 displayCtrl 51) ctrlAddEventHandler ["Draw", {
@@ -67,6 +101,9 @@ GVAR(liveGrenades) = [];
   if (!hasInterface) exitWith {};
   [] spawn {
     waitUntil {!isNull (findDisplay 12)};
+
+    // Variable: OCAP_recorder_liveDebugMagIcons
+    // Used by clients to draw magazine icons of non-bullet projectiles. Entered via <OCAP_recorder_fnc_eh_firedMan> and managed in ??
     GVAR(liveDebugMagIcons) = [];
     disableSerialization;
     (findDisplay 12 displayCtrl 51) ctrlAddEventHandler ["Draw", {

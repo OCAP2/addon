@@ -1,51 +1,56 @@
-/* ----------------------------------------------------------------------------
-Script: FUNC(handleCustomEvent)
+/*
+  FILE: fnc_handleCustomEvent.sqf
 
-Description:
-  Used for applying global event handlers.
+  FUNCTION: OCAP_recorder_fnc_handleCustomEvent
 
-  * Applied during initialization of OCAP in <ocap_fnc_init>.
+  Description:
+    Sends custom event data to the extension to save it to the timeline. This custom event data is later read by Javascript in the web component to determine how it should be displayed.
 
-Parameters:
-  _type - objective type that will define the text & icon [String, one of: "flag"]
-  _unit - name of the unit that performed the action [String]
-  _unitColor - color for the unit's name shown in Events list and for the pulse on the map [String, Hex RGB, defaults "" and will show as white]
-  _objectiveColor - color representing the icon in Events list [String, Hex RGB, defaults "" and will show as white]
-  _position - the location to pulse on the map [optional, PositionATL, default nil]
+    Applied during initialization of OCAP in <OCAP_recorder_fnc_init>.
 
-Returns:
-  Nothing
+  Parameters:
+    _type - classifier for the type of event. used to determine text & icon [[String], one of: "flag", "generalEvent"]
+    _unit - name of the unit that performed the action [String]
+    _unitColor - (optional) color for the unit's name shown in Events list and for the pulse on the map [[String], Hex RGB, defaults "" and will show as white]
+    _objectiveColor - (optional) color representing the icon in Events list [[String], Hex RGB, defaults "" and will show as white]
+    _position - (optional) the location to pulse on the map [<PositionATL>, default nil]
 
-Examples:
-  --- Code
-  ["ocap_handleCustomEvent", ["eventType", "eventMessage"]] call CBA_fnc_serverEvent;
+  Returns:
+    Nothing
 
-  // indicates a flag has been captured
-  ["ocap_handleCustomEvent", ["captured", [
-    "flag",
-    name _unit,
-    str side group _unit,
-    "#FF0000",
-    getPosAtl _flag
-  ]]] call call CBA_fnc_serverEvent;
+  Examples:
+    (start code)
+    ["ocap_handleCustomEvent", ["eventType", "eventMessage"]] call CBA_fnc_serverEvent;
+
+    // saves a general event to the timeline
+    ["ocap_handleCustomEvent", ["generalEvent", "eventText"]] call CBA_fnc_serverEvent;
+
+    // indicates a flag has been captured
+    ["ocap_handleCustomEvent", ["captured", [
+      "flag",
+      name _unit,
+      str side group _unit,
+      "#FF0000",
+      getPosAtl _flag
+    ]]] call call CBA_fnc_serverEvent;
 
 
-  // Not yet implemented
-  ["ocap_handleCustomEvent", ["captured", [
-    "sector",
-    name _unit,
-    str side group _unit,
-    "#FF0000",
-    getPosAtl _sectorObject
-  ]]] call call CBA_fnc_serverEvent;
-  ---
+    // Not yet implemented
+    ["ocap_handleCustomEvent", ["captured", [
+      "sector",
+      name _unit,
+      str side group _unit,
+      "#FF0000",
+      getPosAtl _sectorObject
+    ]]] call call CBA_fnc_serverEvent;
+    (end code)
 
-Public:
-  Yes
+  Public:
+    Yes
 
-Author:
-  Fank, Zealot
----------------------------------------------------------------------------- */
+  Author:
+    Fank, Zealot
+*/
 #include "script_component.hpp"
 
 if (!SHOULDSAVEEVENTS) exitWith {};

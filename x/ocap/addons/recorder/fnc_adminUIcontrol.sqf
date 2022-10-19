@@ -1,3 +1,31 @@
+/*
+  FILE: fnc_adminUIControl.sqf
+
+  FUNCTION: OCAP_recorder_fnc_adminUIControl
+
+  Description:
+    Runs checks to determine if a player should have the administrative diary entry added or removed upon joining the mission or logging in/out as admin.
+
+    - <OCAP_recorder_fnc_eh_connected> at mission start to determine if a player is in <OCAP_administratorList>
+    - <OCAP_recorder_fnc_eh_onUserAdminStateChanged> to add/remove when a player logs in or out as admin on the server
+
+  Parameters:
+    _PID - PlayerID indicating unique network client on the server [String]
+    _event - Event that triggered this call [[String], one of: "connect", "login", "logout"]
+
+  Returns:
+    Nothing
+
+  Examples:
+    > ["1234567890", "connect"] call FUNC(adminUIControl);
+
+  Public:
+    No
+
+  Author:
+    IndigoFox
+*/
+
 #include "script_component.hpp"
 
 params [
@@ -50,7 +78,8 @@ _fnc_removeControls = {
     player setVariable [QGVARMAIN(hasAdminControls), false, 2];
   } remoteExec ["call", _owner];
 
-  // set variable on unit
+  // Variable: OCAP_hasAdminControls
+  // Applied on units processed in <OCAP_recorder_fnc_adminUIControl>. Indicates whether or not they have the administrative diary entry available. Server missionNamespace only.
   _unit setVariable [QGVARMAIN(hasAdminControls), false];
 };
 

@@ -1,10 +1,18 @@
 /* ----------------------------------------------------------------------------
-Script: FUNC(exportData)
+FILE: fnc_exportData.sqf
+
+FUNCTION: OCAP_recorder_fnc_exportData
 
 Description:
   This function facilitates the actual endMission and save events in the extension, prompting it to pack the mission and upload it to the web component.
 
-  This function MUST be called in order to save a mission recording. A boolean true in the correct option of userconfig.hpp will automatically execute this function when the "MPEnded" Event Handler triggers.
+  Called directly, it is subject to the <OCAP_settings_minMissionTime> setting, and will not export if the mission is not long enough. It can also be called using <OCAP_listener_exportData> to bypass this check.
+
+  When <OCAP_settings_saveMissionEnded> is true, this function will be called automatically when the mission ends.
+
+  When <OCAP_settings_saveOnEmpty> is true, this function will execute when the last player leaves the mission (to lobby or when disconnecting).
+
+  <OCAP_settings_saveTag> is used to tag the mission with a custom string, which can be used to identify the mission in the web component.
 
 Parameters:
   _side - The winning side [optional, Side]
@@ -15,7 +23,7 @@ Returns:
   Nothing
 
 Examples:
-  --- Code
+  (start code)
   // "Mission ended"
   [] call FUNC(exportData);
 
@@ -28,10 +36,12 @@ Examples:
   // "Independent Win. INDFOR stole the intel!"
   // Mission is saved under filterable "SnatchAndGrab" tag on web
   [independent, "INDFOR stole the intel!", "SnatchAndGrab"] call FUNC(exportData);
-  ---
+
+  ["OCAP_exportData", west] call CBA_fnc_serverEvent;
+  (end code)
 
 Public:
-  Yes
+  No
 
 Author:
   Dell, Zealot, IndigoFox, TyroneMF
@@ -77,7 +87,7 @@ if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {
   ["OCAP attempted to save, but the minimum recording duration hasn't been met. Recording will continue.", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
   {
     player createDiaryRecord [
-      "OCA2Info",
+      "OCAPInfo",
       [
         "Status",
         (

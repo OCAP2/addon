@@ -199,9 +199,9 @@ _projectile addEventHandler ["Deleted", {
   _markName = _projectile getVariable QGVAR(markName);
   _firer = _projectile getVariable QGVAR(firer);
   [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, getPosASL _projectile, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
-  [{
-    [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
-  }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
+  // [{
+  //   [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
+  // }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
 }];
 
 _projectile addEventHandler ["Explode", {
@@ -209,9 +209,9 @@ _projectile addEventHandler ["Explode", {
   _markName = _projectile getVariable QGVAR(markName);
   _firer = _projectile getVariable QGVAR(firer);
   [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _pos, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
-  [{
-    [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
-  }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
+  // [{
+  //   [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
+  // }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
 }];
 
 
@@ -317,9 +317,9 @@ switch (true) do {
           _markName = _projectile getVariable QGVAR(markName);
           _firer = _projectile getVariable QGVAR(firer);
           [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, getPosASL _projectile, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
-          [{
-            [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
-          }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
+          // [{
+          //   [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
+          // }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
         }];
 
         _projectile addEventHandler ["Explode", {
@@ -327,9 +327,9 @@ switch (true) do {
           _markName = _projectile getVariable QGVAR(markName);
           _firer = _projectile getVariable QGVAR(firer);
           [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _pos, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
-          [{
-            [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
-          }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
+          // [{
+          //   [QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
+          // }, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
         }];
 
         // Add to debug

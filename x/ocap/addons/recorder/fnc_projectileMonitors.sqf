@@ -32,32 +32,38 @@ Author:
 // Watched array of missiles, rockets, shells, and any other unaccounted projectile. Every 0.7 seconds, the position of each object in the array is updated and sent to the extension.
 GVAR(liveMissiles) = [];
 [{
-  GVAR(liveMissiles) = GVAR(liveMissiles) select {!isNull (_x#0)};
-
-  // for missiles that still exist, update positions
   {
-    _x params ["_obj", "_wepString", "_firer", "_pos", "_markName", "_markTextLocal"];
-    _nowPos = getPosASL (_x#0);
-    _x set [3, _nowPos];
-    [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _nowPos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
+    _x params ["_projectile", "_wepString", "_firer", "_pos", "_markName", "_markTextLocal"];
+    if (isNull _projectile) then {
+      [QGVARMAIN(handleMarker), ["DELETED", _markName]] call CBA_fnc_localEvent;
+    } else {
+      _pos = getPosASL _projectile;
+      GVAR(liveMissiles) set [_forEachIndex, [_projectile, _wepString, _firer, _pos, _markName, _markTextLocal]];
+      [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _pos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
+    };
   } forEach GVAR(liveMissiles);
-}, 0.7] call CBA_fnc_addPerFrameHandler;
+
+  GVAR(liveMissiles) = GVAR(liveMissiles) select {!isNull (_x select 0)};
+}, GVAR(frameCaptureDelay)] call CBA_fnc_addPerFrameHandler;
 
 // PFH to track grenades, flares, thrown charges
 // Variable: OCAP_recorder_liveGrenades
 // Watched array of grenades, flares, and thrown charges. Every 0.7 seconds, the position of each object in the array is updated and sent to the extension.
 GVAR(liveGrenades) = [];
 [{
-  GVAR(liveGrenades) = GVAR(liveGrenades) select {!isNull (_x#0)};
-
-  // for grenades that still exist, update positions
   {
-    _x params ["_obj", "_magazine", "_firer", "_pos", "_markName", "_markTextLocal", "_ammoSimType"];
-    _nowPos = getPosASL (_x#0);
-    _x set [3, _nowPos];
-    [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _nowPos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
+    _x params ["_projectile", "_wepString", "_firer", "_pos", "_markName", "_markTextLocal", "_ammoSimType"];
+    if (isNull _projectile) then {
+      [QGVARMAIN(handleMarker), ["DELETED", _markName]] call CBA_fnc_localEvent;
+    } else {
+      _pos = getPosASL _projectile;
+      GVAR(liveGrenades) set [_forEachIndex, [_projectile, _wepString, _firer, _pos, _markName, _markTextLocal, _ammoSimType]];
+      [QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _pos, "", "", "", getDir (_x#0), "", "", 1]] call CBA_fnc_localEvent;
+    };
   } forEach GVAR(liveGrenades);
-}, 0.7] call CBA_fnc_addPerFrameHandler;
+
+  GVAR(liveGrenades) = GVAR(liveGrenades) select {!isNull (_x select 0)};
+}, GVAR(frameCaptureDelay)] call CBA_fnc_addPerFrameHandler;
 
 
 

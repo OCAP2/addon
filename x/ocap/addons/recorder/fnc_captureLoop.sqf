@@ -35,8 +35,8 @@ if (!isNil QGVAR(PFHObject)) then {
 };
 if (isNil QGVAR(startTime)) then {
   GVAR(startTime) = time;
-  OCAPEXTLOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
-  LOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
+  OCAPEXTLOG(ARR3(__FILE__, QGVAR(recording) + localize LSTRING(RecordingStartedLog), GVAR(startTime)));
+  LOG(ARR3(__FILE__, QGVAR(recording) + localize LSTRING(RecordingStartedLog), GVAR(startTime)));
 };
 
 // Variable: OCAP_PFHObject
@@ -61,25 +61,31 @@ GVAR(PFHObject) = [
     // update diary record every 320 frames
     if (GVAR(captureFrameNo) % (320 / GVAR(frameCaptureDelay)) == 0) then {
       publicVariable QGVAR(captureFrameNo);
-      {
-        player createDiaryRecord [
-          "OCAPInfo",
-          [
-            "Status",
-            ("<font color='#CCCCCC'>Capture frame: " + str (missionNamespace getVariable [QGVAR(captureFrameNo), "[not yet received]"]) + "</font>")
-          ]
-        ];
-      } remoteExec ["call", 0, false];
+      [
+        [
+          localize LSTRING(Status),
+          localize LSTRING(CaptureFrame),
+          localize LSTRING(NotYetReceived)
+        ],
+        {
+          player createDiaryRecord [
+            "OCAPInfo",
+            [
+              _this select 0,
+              format[
+                "<font color='#CCCCCC'>%1 %2 [%3]</font>",
+                _this select 1,
+                str (missionNamespace getVariable [QGVAR(captureFrameNo), 0]),
+                _this select 2
+              ]
+            ]
+          ];
+        }
+      ] remoteExec ["call", 0, false];
     };
 
     {
-      if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
-        if (
-          _x isKindOf "Logic"
-        ) exitWith {
-          _x setVariable [QGVARMAIN(exclude), true, true];
-          _x setVariable [QGVARMAIN(isInitialized), true, true];
-        };
+      if !(_x getVariable [QGVARMAIN(isInitialized), false] && (str side group _x == "LOGIC")) then {
         _x setVariable [QGVARMAIN(id), GVAR(nextId)];
         [":NEW:UNIT:", [
           GVAR(captureFrameNo), //1
@@ -191,7 +197,7 @@ GVAR(PFHObject) = [
     } count vehicles;
 
     if (GVARMAIN(isDebug)) then {
-      private _logStr = format["Frame %1 processed in %2ms", GVAR(captureFrameNo), diag_tickTime - _loopStart];
+      private _logStr = format[localize LSTRING(FrameProcessedIn), GVAR(captureFrameNo), diag_tickTime - _loopStart];
       OCAPEXTLOG([_logStr]);
       _logStr SYSCHAT;
     };

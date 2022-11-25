@@ -54,5 +54,5 @@ private _eventData = [
 [":EVENT:", _eventData] call EFUNC(extension,sendData);
 
 if (GVARMAIN(isDebug)) then {
-  OCAPEXTLOG(ARR4("HIT EVENT", _hitFrame, _unitID, _causedById));
+  OCAPEXTLOG(ARR4("HIT EVENT:", _hitFrame, _unitID, _causedById));
 };

@@ -56,6 +56,9 @@ _markerType = "Minefield";
 ]] call CBA_fnc_localEvent;
 
 if (GVARMAIN(isDebug)) then {
+  private _msg = localize LSTRING(ExplosivePlacedMarkerCreated);
+  format["%1, %2, %3", _msg, _markName, _explosiveDisp] SYSCHAT;
+  OCAPEXTLOG(ARR3(_msg, _markName, _explosiveDisp));
   // add to map draw array
   private _debugArr = [_explosive, _explosivePic, format["%1 %2 - %3", str side group _unit, name _unit, _markTextLocal], [side group _unit] call BIS_fnc_sideColor];
   GVAR(liveDebugMagIcons) pushBack _debugArr;
@@ -75,8 +78,9 @@ if (GVARMAIN(isDebug)) then {
 
   // remove previous marker
   if (GVARMAIN(isDebug)) then {
-    format["Removed explosive placed marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
-    OCAPEXTLOG(ARR3("Removed explosive placed marker", _markName, _explosiveDisp));
+    private _msg = localize LSTRING(ExplosivePlacedMarkerRemoved);
+    format["%1, %2, %3", _msg, _markName, _explosiveDisp] SYSCHAT;
+    OCAPEXTLOG(ARR3(_msg, _markName, _explosiveDisp));
   };
 
 
@@ -89,8 +93,9 @@ if (GVARMAIN(isDebug)) then {
   _markerType = "waypoint";
 
   if (GVARMAIN(isDebug)) then {
-    format["Created explosive explosion marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
-    OCAPEXTLOG(ARR3("Created explosive explosion marker", _markName, _explosiveDisp));
+    private _msg = localize LSTRING(ExplosionMarkerCreated);
+    format["%1, %2, %3", _msg, _markName, _explosiveDisp] SYSCHAT;
+    OCAPEXTLOG(ARR3(_msg, _markName, _explosiveDisp));
   };
 
 
@@ -103,8 +108,9 @@ if (GVARMAIN(isDebug)) then {
   [{
     params ["_markName", "_explosiveDisp"];
     if (GVARMAIN(isDebug)) then {
-      format["Removed explosive explosion marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
-      OCAPEXTLOG(ARR3("Removed explosive explosion marker", _markName, _explosiveDisp));
+      private _msg = localize LSTRING(ExplosionMarkerRemoved);
+      format["%1, %2, %3", _msg, _markName, _explosiveDisp] SYSCHAT;
+      OCAPEXTLOG(ARR3(_msg, _markName, _explosiveDisp));
     };
     [QGVARMAIN(handleMarker), ["DELETED", _markName]] call CBA_fnc_localEvent;
   }, [_markName, _explosiveDisp], GVAR(captureFrameNo) * 10] call CBA_fnc_waitAndExecute;

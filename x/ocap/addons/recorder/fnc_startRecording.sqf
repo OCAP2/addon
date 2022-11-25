@@ -32,10 +32,10 @@ if (!GVARMAIN(enabled)) exitWith {};
 
 // if recording started earlier and startTime has been noted, only restart the capture loop with any updated settings.
 if (GVAR(recording) && GVAR(captureFrameNo) > 10) exitWith {
-  OCAPEXTLOG(["OCAP was asked to record and is already recording!"]);
+  private _msg = localize LSTRING(AlreadyRecording);
+  OCAPEXTLOG([_msg]);
   [
-    ["OCAP was asked to record", 1, [1, 1, 1, 1]],
-    ["and is already recording", 1, [1, 1, 1, 1]]
+    [_msg, 1, [1, 1, 1, 1]]
   ] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
 };
 
@@ -47,7 +47,7 @@ _systemTimeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} 
 private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];
 _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 
-[[cba_missionTime, format _missionDateFormat, format _systemTimeFormat], { // add diary entry for clients on recording start
+[[cba_missionTime, format _missionDateFormat, format _systemTimeFormat, localize LSTRING(Status)], { // add diary entry for clients on recording start
   [{!isNull player}, {
     player setDiarySubjectPicture [
       "OCAPInfo",
@@ -56,7 +56,7 @@ _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {st
     player createDiaryRecord [
       "OCAPInfo",
       [
-        "Status",
+        _this select 3,
         format["<font color='#33FF33'>OCAP started recording.<br/>In-Mission Time Elapsed: %1<br/>Mission World Time: %2<br/>System Time UTC: %3</font>", _this#0, _this#1, _this#2]
       ]
     ];
@@ -70,8 +70,8 @@ if (GVAR(captureFrameNo) == 0) then {
   call FUNC(captureLoop);
 };
 
-[QGVARMAIN(customEvent), ["generalEvent", "Recording started."]] call CBA_fnc_serverEvent;
-["OCAP began recording", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+[QGVARMAIN(customEvent), ["generalEvent", localize LSTRING(RecordingStarted)]] call CBA_fnc_serverEvent;
+[localize LSTRING(RecordingStarted), 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
 
 // Log times
 [] call FUNC(updateTime);

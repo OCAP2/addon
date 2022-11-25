@@ -85,7 +85,7 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
       ];
 
       if (GVARMAIN(isDebug)) then {
-        OCAPEXTLOG(ARR4("KILLED EVENT", _killedFrame, _victimId, _killerId));
+        OCAPEXTLOG(ARR4("KILLED EVENT:", _killedFrame, _victimId, _killerId));
       };
     };
 

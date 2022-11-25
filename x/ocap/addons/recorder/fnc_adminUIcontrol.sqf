@@ -43,29 +43,43 @@ _unit = _userInfo select 10;
 _fnc_addControls = {
   params ["_owner","_unit"];
   // add controls to diary entry
-  {
-    [{getClientStateNumber > 9 && !isNull player}, {
+  [
+    [
+      localize LSTRING(DiarySubjectTitle),
+      localize LSTRING(Controls),
+      localize LSTRING(DiaryAdminControlsText),
+      localize LSTRING(StartRecording),
+      localize LSTRING(PauseRecording),
+      localize LSTRING(StopRecording)
+    ],
+    {
+      [{getClientStateNumber > 9 && !isNull player}, {
 
-      player createDiarySubject [
-        QEGVAR(diary,adminControls_subject),
-        "OCAP Admin",
-        "\A3\ui_f\data\igui\cfg\simpleTasks\types\interact_ca.paa"
-      ];
+        player createDiarySubject [
+          QEGVAR(diary,adminControls_subject),
+          _this select 0,
+          "\A3\ui_f\data\igui\cfg\simpleTasks\types\interact_ca.paa"
+        ];
 
-      EGVAR(diary,adminControls_record) = player createDiaryRecord [
-        QEGVAR(diary,adminControls_subject),
-        [
-          "Controls",
-          format[
-            "<br/>These controls can be used to Start Recording, Pause Recording, and Save/Export the Recording. On the backend, these use the corresponding CBA server events that can be found in the documentation. Because of this, they override the default minimum duration required to save, so be aware that clicking ""Stop and Export Recording"" will save and upload your current recording regardless of its duration.<br/><br/><execute expression='[""%1""] call CBA_fnc_serverEvent;'>Start/Resume Recording</execute><br/><execute expression='[""%2""] call CBA_fnc_serverEvent;'>Pause Recording</execute><br/><execute expression='[""%3""] call CBA_fnc_serverEvent;'>Stop and Export Recording</execute>",
-            QGVARMAIN(record),
-            QGVARMAIN(pause),
-            QGVARMAIN(exportData)
+        EGVAR(diary,adminControls_record) = player createDiaryRecord [
+          QEGVAR(diary,adminControls_subject),
+          [
+            _this select 1,
+            format[
+              "<br/>%1<br/><br/><execute expression='[""%2""] call CBA_fnc_serverEvent>%3</execute><br/><execute expression='[""%4""] call CBA_fnc_serverEvent;'>%5</execute><br/><execute expression='[""%6""] call CBA_fnc_serverEvent;'>%7</execute>",
+              _this select 2,
+              QGVARMAIN(record),
+              _this select 3,
+              QGVARMAIN(pause),
+              _this select 4,
+              QGVARMAIN(exportData),
+              _this select 5
+            ]
           ]
-        ]
-      ];
-    }] call CBA_fnc_waitUntilAndExecute;
-  } remoteExec ["call", _owner];
+        ];
+      }] call CBA_fnc_waitUntilAndExecute;
+    }
+   ] remoteExec ["call", _owner];
 
   // set variable on unit
   _unit setVariable [QGVARMAIN(hasAdminControls), true];
@@ -90,7 +104,8 @@ private _adminUIDs = missionNamespace getVariable [QGVARMAIN(administratorList),
 
 if (isNil "_adminUIDs") exitWith {
   // At this point, no adminUIDs are defined in missionNamespace or in CBA settings
-  WARNING("Failed to parse administrator list setting. Please check its value!");
+  private _msg = localize LSTRING(AdminListParseFail);
+  WARNING(_msg);
 
 
   switch (_event) do {
@@ -102,7 +117,7 @@ if (isNil "_adminUIDs") exitWith {
       if !(_unit getVariable [QGVARMAIN(hasAdminControls), false]) then {
         [_owner, _unit] call _fnc_addControls;
         if (GVARMAIN(isDebug)) then {
-          format["%1 was granted OCAP control by logging in as admin", name _unit] SYSCHAT;
+          format[localize LSTRING(OCAPControlAdminAdded), name _unit] SYSCHAT;
         };
       };
     };
@@ -111,7 +126,7 @@ if (isNil "_adminUIDs") exitWith {
       if (_unit getVariable [QGVARMAIN(hasAdminControls), false]) then {
         [_owner, _unit] call _fnc_removeControls;
         if (GVARMAIN(isDebug)) then {
-          format["%1 had their admin controls removed due to logging out from admin", name _unit] SYSCHAT;
+          format[localize LSTRING(OCAPControlAdminRemoved), name _unit] SYSCHAT;
         };
       };
     };
@@ -130,7 +145,7 @@ switch (_event) do {
     if (_inAdminList) then {
       [_owner, _unit] call _fnc_addControls;
       if (GVARMAIN(isDebug)) then {
-        format["%1 was granted OCAP control due to being in the administratorList", name _unit] SYSCHAT;
+        format[localize LSTRING(OCAPControlListAdded), name _unit] SYSCHAT;
       };
     };
   };
@@ -139,7 +154,7 @@ switch (_event) do {
     if !(_unit getVariable [QGVARMAIN(hasAdminControls), false]) then {
       [_owner, _unit] call _fnc_addControls;
       if (GVARMAIN(isDebug)) then {
-        format["%1 was granted OCAP control by logging in as admin", name _unit] SYSCHAT;
+        format[localize LSTRING(OCAPControlAdminAdded), name _unit] SYSCHAT;
       };
     };
   };
@@ -148,7 +163,7 @@ switch (_event) do {
     if (_unit getVariable [QGVARMAIN(hasAdminControls), false]) then {
       [_owner, _unit] call _fnc_removeControls;
       if (GVARMAIN(isDebug)) then {
-        format["%1 had their admin controls removed due to logging out from admin", name _unit] SYSCHAT;
+        format[localize LSTRING(OCAPControlAdminRemoved), name _unit] SYSCHAT;
       };
     };
   };

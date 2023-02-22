@@ -33,7 +33,6 @@ PREP(getWeaponDisplayData);
 PREP(projectileMonitors);
 PREP(entityMonitors);
 
-PREP(aceThrowing);
 PREP(aceExplosives);
 
 PREP(exportData);

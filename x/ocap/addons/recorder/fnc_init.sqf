@@ -26,6 +26,8 @@ Author:
 
 // exit if in 3DEN editor (when loaded in PreInit XEH)
 if (is3DEN || !isMultiplayer) exitWith {};
+// exit if not server
+if (!isServer) exitWith {};
 // if OCAP is disabled do nothing
 if (!GVARMAIN(enabled)) exitWith {};
 // if recording has already initialized this session then just start recording, don't re-init

@@ -81,7 +81,7 @@ GVAR(PFHObject) = [
           _x setVariable [QGVARMAIN(isInitialized), true, true];
         };
         _x setVariable [QGVARMAIN(id), GVAR(nextId)];
-        [":NEW:UNIT:", [
+        private _newUnit = [
           GVAR(captureFrameNo), //1
           GVAR(nextId), //2
           name _x, //3
@@ -89,7 +89,9 @@ GVAR(PFHObject) = [
           str side group _x, //5
           BOOL(isPlayer _x), //6
           roleDescription _x // 7
-        ]] call EFUNC(extension,sendData);
+        ];
+        [":NEW:UNIT:", _newUnit] call EFUNC(extension,sendData);
+        _x setVariable [QGVARMAIN(newUnitData), _newUnit];
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(isInitialized), true, true];
@@ -112,7 +114,7 @@ GVAR(PFHObject) = [
 
         _pos = getPosASL _x;
 
-        _unitData = [
+        private _unitData = [
           (_x getVariable QGVARMAIN(id)), //1
           _pos, //2
           round getDir _x, //3
@@ -125,8 +127,53 @@ GVAR(PFHObject) = [
 
         if (_x getVariable ["unitData", []] isNotEqualTo _unitData) then {
           [":UPDATE:UNIT:", _unitData] call EFUNC(extension,sendData);
+          _x setVariable [QGVARMAIN(unitData), _unitData];
         };
-        _x setVariable [QGVARMAIN(unitData), _unitData];
+
+        if (EGVAR(database,dbValid)) then {
+          private _newUnitData = _x getVariable [QGVARMAIN(newUnitData), []];
+          private _dbOut = [];
+          if (count _newUnitData > 6) then {
+            // encode JSON in SQF, slower
+            // _dbOut pushBack [
+            //   ["captureFrame", GVAR(captureFrameNo)],
+            //   ["unitId", _unit select 0],
+            //   ["unitName", _unit select 5],
+            //   ["groupId", (if (_lifestate isNotEqualTo 0) then {
+            //                 groupID (group _unit)} else {""})],
+            //   ["side", _newUnitData select 4]
+            //   ["isPlayer",_unitData select 6]
+            //   ["roleDescription", _newUnitData select 6]
+            //   ["currentRole", _unitRole]
+            //   ["position", _unitData select 1]
+            //   ["bearing", _unitData select 2]
+            //   ["lifeState", _unitData select 3]
+            //   ["inVehicle", _unitData select 5]
+            // ];
+            // ["logSoldier", [[_dbOut] call CBA_fnc_encodeJSON]] call EFUNC(database,sendData);
+
+            // send raw array and parse in extension
+            _dbOut = [
+              GVAR(captureFrameNo),
+              _x getVariable QGVARMAIN(id),
+              _unitData select 5,
+              (if (_lifeState isNotEqualTo 0) then {
+                groupID (group _x)
+              } else {""}),
+              _newUnitData select 4,
+              _unitData select 6,
+              _newUnitData select 6,
+              _unitRole,
+              _pos select 0, // break coords into elements to parse floats directly
+              _pos select 1,
+              _pos select 2,
+              _unitData select 2,
+              _unitData select 3,
+              _unitData select 5
+            ];
+            [":LOG:SOLDIER:", _dbOut] call EFUNC(extension,sendData);
+          };
+        };
       };
       false
     } count (allUnits + allDeadMen);
@@ -159,12 +206,16 @@ GVAR(PFHObject) = [
         };
 
         _x setVariable [QGVARMAIN(id), GVAR(nextId)];
-        [":NEW:VEH:", [
+
+        private _newVehicleData = [
           GVAR(captureFrameNo), //1
           GVAR(nextId), //2
           _class, //3
           getText (configFile >> "CfgVehicles" >> _vehType >> "displayName") //4
-        ]] call EFUNC(extension,sendData);
+        ];
+
+        [":NEW:VEH:", _newVehicleData] call EFUNC(extension,sendData);
+        _x setVariable [QGVARMAIN(newVehicleData), _newVehicleData];
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(vehicleClass), _class];
@@ -178,14 +229,51 @@ GVAR(PFHObject) = [
           }; false
         } count (crew _x);
         _pos = getPosASL _x;
-        [":UPDATE:VEH:", [
+
+        private _vehicleData = [
           (_x getVariable QGVARMAIN(id)), //1
           _pos, //2
           round getDir _x, //3
           BOOL(alive _x), //4
           _crew, //5
           GVAR(captureFrameNo) // 6
-        ]] call EFUNC(extension,sendData);
+        ];
+        [":UPDATE:VEH:", _vehicleData] call EFUNC(extension,sendData);
+
+        if (EGVAR(database,dbValid)) then {
+          private _newVehicleData = _x getVariable [QGVARMAIN(_newVehicleData), []];
+          private _dbOut = [];
+
+          if (count _newVehicleData > 6) then {
+            // encode JSON in SQF, slower
+            // _dbOut pushBack [
+            //   ["captureFrame", GVAR(captureFrameNo)],
+            //   ["vehicleId", _x getVariable QGVARMAIN(id)],
+            //   ["vehicleClass", _newVehicleData select 2],
+            //   ["displayName", _newVehicleData select 3],
+            //   ["position", _pos],
+            //   ["bearing", _vehicleData select 2],
+            //   ["isAlive", BOOL(alive _x)],
+            //   ["crew", _crew]
+            // ];
+            // ["logSoldier", [[_dbOut] call CBA_fnc_encodeJSON]] call EFUNC(database,sendData);
+
+            // send raw array and parse in extension
+            _dbOut = [
+              GVAR(captureFrameNo),
+              _x getVariable QGVARMAIN(id),
+              _newVehicleData select 2,
+              _newVehicleData select 3,
+              _pos select 0, // break coords into elements to parse floats directly
+              _pos select 1,
+              _pos select 2,
+              _vehicleData select 2,
+              BOOL(alive _x),
+              _crew
+            ];
+            [":LOG:VEHICLE:", _dbOut] call EFUNC(extension,sendData);
+          };
+        };
       };
       false
     } count vehicles;

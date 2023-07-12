@@ -31,6 +31,10 @@ params ["_unit", "_id", "_uid", "_name"];
 	[GVAR(captureFrameNo), "disconnected", _name]
 ] call EFUNC(extension,sendData);
 
+[":EVENT:",
+  [GVAR(captureFrameNo), "disconnected", _name, _uid]
+] call EFUNC(database,sendData);
+
 if (_unit getVariable [QGVARMAIN(isInitialized), false]) then {
 	_unit setVariable [QGVARMAIN(exclude), true];
 };

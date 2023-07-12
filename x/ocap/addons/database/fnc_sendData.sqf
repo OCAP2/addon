@@ -1,7 +1,7 @@
 /* ----------------------------------------------------------------------------
 FILE: fnc_sendData.sqf
 
-FUNCTION: OCAP_extension_fnc_sendData
+FUNCTION: OCAP_database_fnc_sendData
 
 Description:
 	Manages raw extension calls and returns values / logs errors where relevant.
@@ -14,17 +14,17 @@ Returns:
 	Depends
 
 Examples:
-	> [":VERSION", []] call EFUNC(extension,sendData);
+	> [":VERSION", []] call EFUNC(database,sendData);
 
 Public:
 	No
 
 Author:
-	Dell, Zealot
+	Dell, Zealot, modified by IndigoFox
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
-params ["_command","_args", ["_dllName", "OcapReplaySaver2"]];
+params ["_command","_args", ["_dllName", "ocap_recorder"]];
 
 private _res = _dllName callExtension [_command, _args];
 
@@ -35,6 +35,5 @@ if (_errorCode != 0 || _returnCode != 0) then {
 };
 
 if (
-	_command isEqualTo ":VERSION:" &&
 	_result isEqualType ""
 ) then {parseSimpleArray _result};

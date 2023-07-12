@@ -167,6 +167,9 @@ if (GVAR(missionName) == "") then {
 ];
 
 
+// Initialize DB connection and log world/mission info
+call EFUNC(database,initDB);
+
 /*
   Conditional Start Recording
   We'll wait to see if auto-start is enabled and minPlayercount setting is met. This covers scenarios where someone changes the autostart setting during the mission as well, and excludes cases where autostart is disabled.

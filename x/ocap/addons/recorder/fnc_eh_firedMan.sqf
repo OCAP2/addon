@@ -94,6 +94,10 @@ if (_firerId == -1) exitWith {};
 // set the firer's lastFired var as this weapon, so subsequent kills are logged accurately
 ([_weapon, _muzzle, _magazine, _ammo] call FUNC(getWeaponDisplayData)) params ["_muzzleDisp", "_magDisp"];
 
+_projectile setVariable [QGVARMAIN(muzzleDisp), _muzzleDisp];
+_projectile setVariable [QGVARMAIN(magDisp), _magDisp];
+_projectile setVariable [QGVARMAIN(firemode), _mode];
+
 private _wepString = "";
 if (!isNull _vehicle) then {
 	_wepString = format["%1 [%2]", (configOf _vehicle) call BIS_fnc_displayName, _wepString];
@@ -140,12 +144,26 @@ if (_ammoSimType isEqualTo "shotBullet") exitWith {
 		_firer = _projectile getVariable [QGVAR(firer), objNull];
 		_firerId = _projectile getVariable [QGVAR(firerId), -1];
 		_projectilePos = getPosASL _projectile;
+    _firerPos = getPosASL _firer;
 
 		[":FIRED:", [
 			_firerId,
 			GVAR(captureFrameNo),
 			_projectilePos
 		]] call EFUNC(extension,sendData);
+
+    if (EGVAR(database,dbValid) && EGVAR(database,enabled)) then {
+      // calculating start/end positions at instant of hit. This is not 100% accurate but is close enough
+      [":FIRED:", [
+        _firerId, // ocapid 1
+        GVAR(captureFrameNo), // frame 2
+        _projectilePos joinString ",", // bullet dest 3
+        _firerPos joinString ",", // bullet start 4
+        _projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
+        _projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
+        _projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
+      ]] call EFUNC(database,sendData);
+    };
 
 		if (GVARMAIN(isDebug)) then {
 			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _projectilePos));

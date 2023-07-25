@@ -31,9 +31,10 @@ private _res = _dllName callExtension [_command, _args];
 _res params ["_result","_returnCode","_errorCode"];
 
 if (_errorCode != 0 || _returnCode != 0) then {
-  textLogFormat ["Error when calling extension: %1", [_result, _returnCode, _errorCode, _command, _args]];
+  diag_log formatText ["Error when calling extension: %1", [_result, _returnCode, _errorCode, _command, _args]];
 };
 
-if (
-	_result isEqualType ""
-) then {parseSimpleArray _result};
+// if (
+// 	_result isEqualType ""
+// // ) then {parseSimpleArray _result};
+// ) then {diag_log text format ["%1", _result];};

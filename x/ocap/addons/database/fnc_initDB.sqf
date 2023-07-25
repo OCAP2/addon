@@ -1,61 +1,85 @@
+#include "script_component.hpp"
+
 // Initialize DB
-private _res = ["getDB", []] call FUNC(sendData);
-_res params ["_code", "_result"];
-if (_code == 1) exitWith {
-  GVAR(dbValid) = false;
-  textLogFormat ["OCAP: Failed to initialize DB"];
-  textLogFormat ["OCAP: %1", _result];
-};
-
-GVAR(dbValid) = true;
-textLogFormat ["OCAP: Initialized DB"];
+GVAR(dbValid) = false;
 
 
-// Write mission and world to DB
+// when the extension is ready, it'll send a callback which will set dbValid to true and let the other functions being sending data
+addMissionEventHandler ["ExtensionCallback", {
+  params ["_name", "_function", "_data"];
+  if (_name != "ocap_recorder") exitWith {};
+  if (_function isEqualTo ":DB:OK:") exitWith {
+    diag_log formatText ["OCAP: Initialized DB"];
+    // send mission data
+    // Write mission and world to DB
 
-// WORLD
-_world = ( configfile >> "CfgWorlds" >> worldName );
-_author = getText( _world >> "author" );
-_name = getText ( _world >> "description" );
-_source = configSourceMod ( _world );
-_workshopID = '';
-{
-	if ( ( _x#1 ) == _source ) then	{
-		_workshopID = _x#7;
-		break;
-	};
-} foreach getLoadedModsInfo;
+    // WORLD
+    _world = ( configfile >> "CfgWorlds" >> worldName );
+    _author = getText( _world >> "author" );
+    _name = getText ( _world >> "description" );
+    _source = configSourceMod ( _world );
+    _workshopID = '';
+    {
+      if ( ( _x#1 ) == _source ) then	{
+        _workshopID = _x#7;
+        break;
+      };
+    } foreach getLoadedModsInfo;
 
-GVAR(worldContext) = [[
-  ["author", _author],
-  ["workshopID", _workshopID],
-  ["displayName", _name],
-  ["worldName", toLower worldName],
-  ["worldNameOriginal", worldName],
-  ["worldSize", getNumber(configFile >> "CfgWorlds" >> worldName >> "worldSize")],
-  ["latitude", getNumber(configFile >> "CfgWorlds" >> worldName >> "latitude")],
-  ["longitude", getNumber(configFile >> "CfgWorlds" >> worldName >> "longitude")]
-]] call CBA_fnc_encodeJSON;
+    GVAR(worldContext) = [createHashMapFromArray [
+      ["author", _author],
+      ["workshopID", _workshopID],
+      ["displayName", _name],
+      ["worldName", toLower worldName],
+      ["worldNameOriginal", worldName],
+      ["worldSize", getNumber(configFile >> "CfgWorlds" >> worldName >> "worldSize")],
+      ["latitude", 1 - getNumber(configFile >> "CfgWorlds" >> worldName >> "latitude")],
+      ["longitude", getNumber(configFile >> "CfgWorlds" >> worldName >> "longitude")]
+    ]] call CBA_fnc_encodeJSON;
 
-// MISSION
-GVAR(missionContext) = [[
-  ["missionName", missionName],
-  ["briefingName", briefingName],
-  ["missionNameSource", missionNameSource],
-  ["onLoadName", getMissionConfigValue ["onLoadName", ""]],
-  ["author", getMissionConfigValue ["author", ""]],
-  ["serverName", serverName],
-  ["serverProfile", profileName],
-  ["missionStart", "0"],
-  ["worldName", toLower worldName],
-  ["tag", EGVAR(settings,saveTag)]
-]] call CBA_fnc_encodeJSON;
+    // MISSION
+    private _loadedMods = getLoadedModsInfo;
+    private _addons = [];
+    {
+      _addons pushBack [_x#0, _x#7]; // name, workshop id
+    } forEach _loadedMods;
+    GVAR(missionContext) = [createHashMapFromArray [
+      ["missionName", missionName],
+      ["briefingName", briefingName],
+      ["missionNameSource", missionNameSource],
+      ["onLoadName", getMissionConfigValue ["onLoadName", ""]],
+      ["author", getMissionConfigValue ["author", ""]],
+      ["serverName", serverName],
+      ["serverProfile", profileName],
+      ["missionStart", nil],
+      ["worldName", toLower worldName],
+      ["tag", EGVAR(settings,saveTag)],
+      ["captureDelay", EGVAR(settings,frameCaptureDelay)],
+      ["addons", _addons]
+    ]] call CBA_fnc_encodeJSON;
 
-// Save mission and world to DB
-private _res = ["logNewMission", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData);
-_res params ["_code", "_result"];
-if (_code == 1) exitWith {
-  GVAR(dbValid) = false;
-  textLogFormat ["OCAP: Failed to save mission and world to DB"];
-  textLogFormat ["OCAP: %1", _result];
-};
+    // Save mission and world to DB
+    diag_log formatText ["OCAP: Saving mission and world to DB"];
+    diag_log formatText ["%1", GVAR(worldContext)];
+    diag_log formatText ["%1", GVAR(missionContext)];
+    [":NEW:MISSION:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData);
+    };
+
+    if (_function isEqualTo ":MISSION:OK:") exitWith {
+      diag_log formatText ["OCAP: Saved mission and world to DB, proceeding with recording"];
+      GVAR(dbValid) = true;
+
+      // set initial stuff unique to DB
+      [] spawn FUNC(getStaticObjects);
+      call FUNC(addEventHandlers);
+      call FUNC(startLoop);
+      removeMissionEventHandler ["ExtensionCallback", _thisEventHandler];
+    };
+}];
+
+
+
+
+diag_log formatText ["OCAP: Initializing DB"];
+[":INIT:DB:", []] call FUNC(sendData);
+true

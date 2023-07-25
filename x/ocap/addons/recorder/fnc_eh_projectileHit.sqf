@@ -38,9 +38,10 @@ if (_shooterID == -1) exitWith {};
 private _distanceInfo = 0;
 _distanceInfo = round (_shooter distance _unit);
 
+private _eventText = [_shooter] call FUNC(getEventWeaponText);
 _causedByInfo = [
   _shooterID,
-  ([_shooter] call FUNC(getEventWeaponText))
+  _eventText
 ];
 
 private _eventData = [
@@ -52,6 +53,16 @@ private _eventData = [
 ];
 
 [":EVENT:", _eventData] call EFUNC(extension,sendData);
+
+if (EGVAR(database,dbValid) && EGVAR(database,enabled)) then {
+  [":HIT:", [
+    _hitFrame, // Frame number
+    _unitID, // hit unit ID
+    _shooterID, // shooter unit ID
+    _eventText, // weapon etc
+    _distanceInfo // distance
+  ]] call EFUNC(database,sendData);
+};
 
 if (GVARMAIN(isDebug)) then {
   OCAPEXTLOG(ARR4("HIT EVENT", _hitFrame, _unitID, _causedById));

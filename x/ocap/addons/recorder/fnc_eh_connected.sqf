@@ -36,9 +36,18 @@ if (_owner isEqualTo 2) exitWith {};
   [GVAR(captureFrameNo), "connected", _name]
 ] call EFUNC(extension,sendData);
 
+if (EGVAR(database,dbValid) && EGVAR(database,enabled)) then {
 [":EVENT:",
-  [GVAR(captureFrameNo), "connected", _name, _uid]
+  [
+    GVAR(captureFrameNo),
+    "connected",
+    _name,
+    [createHashMapFromArray [
+      ["playerUid", _uid]
+    ]] call CBA_fnc_encodeJSON
+  ]
 ] call EFUNC(database,sendData);
+};
 
 // trigger admin control check for all connecting players
 [_idstr, "connect"] call FUNC(adminUIcontrol);

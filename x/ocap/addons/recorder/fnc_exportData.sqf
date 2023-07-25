@@ -113,17 +113,53 @@ if (!isNil QGVAR(PFHObject)) then {
 
 if (isNil "_side") then {
   [":EVENT:", [_endFrameNumber, "endMission", ["", "Mission ended"]]] call EFUNC(extension,sendData);
+  [":EVENT:", [
+    _endFrameNumber,
+    "endMission",
+    "",
+    [createHashMapFromArray [
+      ["winSide", ""],
+      ["message", "Mission ended"]
+    ]] call CBA_fnc_encodeJSON
+  ]] call EFUNC(database,sendData);
 };
 if (isNil "_side" && !isNil "_message") then {
   [":EVENT:", [_endFrameNumber, "endMission", ["", _message]]] call EFUNC(extension,sendData);
+  [":EVENT:", [
+    _endFrameNumber,
+    "endMission",
+    "",
+    [createHashMapFromArray [
+      ["winSide", ""],
+      ["message", _message]
+    ]] call CBA_fnc_encodeJSON
+  ]] call EFUNC(database,sendData);
 };
 if (!isNil "_side" && isNil "_message") then {
   [":EVENT:", [_endFrameNumber, "endMission", ["", _side]]] call EFUNC(extension,sendData);
+  [":EVENT:", [
+    _endFrameNumber,
+    "endMission",
+    "",
+    [createHashMapFromArray [
+      ["winSide", _side],
+      ["message", ""]
+    ]] call CBA_fnc_encodeJSON
+  ]] call EFUNC(database,sendData);
 };
 if (!isNil "_side" && !isNil "_message") then {
   private _sideString = str(_side);
   if (_side == sideUnknown) then { _sideString = "" };
   [":EVENT:", [_endFrameNumber, "endMission", [_sideString, _message]]] call EFUNC(extension,sendData);
+  [":EVENT:", [
+    _endFrameNumber,
+    "endMission",
+    "",
+    [createHashMapFromArray [
+      ["winSide", _sideString],
+      ["message", _message]
+    ]] call CBA_fnc_encodeJSON
+  ]] call EFUNC(database,sendData);
 };
 
 

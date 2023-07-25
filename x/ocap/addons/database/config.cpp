@@ -7,8 +7,8 @@ class CfgPatches
   {
 
     name = COMPONENT_NAME;
-    author = "Dell, Zealot, Kurt, IndigoFox, Fank";
-    authors[] = {"Dell", "Zealot", "Kurt", "IndigoFox", "Fank"};
+    author = "IndigoFox";
+    authors[] = {"IndigoFox"};
     url = "https://github.com/OCAP2/OCAP";
     VERSION_CONFIG;
     requiredAddons[] = {"A3_Functions_F","cba_main","cba_xeh","ocap_main"};

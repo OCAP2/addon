@@ -92,6 +92,26 @@ GVAR(PFHObject) = [
         ];
         [":NEW:UNIT:", _newUnit] call EFUNC(extension,sendData);
         _x setVariable [QGVARMAIN(newUnitData), _newUnit];
+
+        if (
+          missionNamespace getVariable [
+            QEGVAR(database,enabled), false]
+        ) then {
+          _newUnit pushBack (typeOf _x); // 8
+          _newUnit pushBack ([configOf _x] call BIS_fnc_displayName); // 9
+          if (isPlayer _x) then { // 10
+            _newUnit pushBack (getPlayerUID _x);
+          } else {
+            _newUnit pushBack "";
+          };
+          [
+            {missionNamespace getVariable [QEGVAR(database,dbValid), false]},
+            {[":NEW:SOLDIER:", _this] call EFUNC(database,sendData);},
+            _newUnit,
+            30
+          ] call CBA_fnc_waitUntilAndExecute;
+        };
+
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(isInitialized), true, true];
@@ -130,53 +150,37 @@ GVAR(PFHObject) = [
           _x setVariable [QGVARMAIN(unitData), _unitData];
         };
 
-        if (EGVAR(database,dbValid)) then {
-          private _newUnitData = _x getVariable [QGVARMAIN(newUnitData), []];
-          private _dbOut = [];
-          if (count _newUnitData > 6) then {
-            // encode JSON in SQF, slower
-            // _dbOut pushBack [
-            //   ["captureFrame", GVAR(captureFrameNo)],
-            //   ["unitId", _unit select 0],
-            //   ["unitName", _unit select 5],
-            //   ["groupId", (if (_lifestate isNotEqualTo 0) then {
-            //                 groupID (group _unit)} else {""})],
-            //   ["side", _newUnitData select 4]
-            //   ["isPlayer",_unitData select 6]
-            //   ["roleDescription", _newUnitData select 6]
-            //   ["currentRole", _unitRole]
-            //   ["position", _unitData select 1]
-            //   ["bearing", _unitData select 2]
-            //   ["lifeState", _unitData select 3]
-            //   ["inVehicle", _unitData select 5]
-            // ];
-            // ["logSoldier", [[_dbOut] call CBA_fnc_encodeJSON]] call EFUNC(database,sendData);
-
-            // send raw array and parse in extension
-            _dbOut = [
-              GVAR(captureFrameNo),
-              _x getVariable QGVARMAIN(id),
-              _unitData select 5,
-              (if (_lifeState isNotEqualTo 0) then {
-                groupID (group _x)
-              } else {""}),
-              _newUnitData select 4,
-              _unitData select 6,
-              _newUnitData select 6,
-              _unitRole,
-              _pos select 0, // break coords into elements to parse floats directly
-              _pos select 1,
-              _pos select 2,
-              _unitData select 2,
-              _unitData select 3,
-              _unitData select 5
-            ];
-            [":LOG:SOLDIER:", _dbOut] call EFUNC(extension,sendData);
+        if (
+          missionNamespace getVariable [QEGVAR(database,dbValid), false] &&
+          missionNamespace getVariable [QEGVAR(database,enabled), false]
+        ) then {
+          _unitData pushBack GVAR(captureFrameNo); // frame 9
+          if (!isNil "ace_medical_status_fnc_hasStableVitals") then {
+            // ACE3 medical
+            // has stable vitals 10
+            // is being dragged or carried 11
+            _unitData pushBack BOOL([_x] call ace_medical_status_fnc_hasStableVitals);
+            _unitData pushBack BOOL([_x] call ace_medical_status_fnc_isBeingDragged);
+          } else {
+            // vanilla medical
+            // default true, false
+            _unitData pushBack true;
+            _unitData pushBack false;
           };
+
+          _unitData pushBack (
+            (getPlayerScores _x) joinString ","
+          ); // scores 12
+          _unitData pushBack (
+            _x call CBA_fnc_vehicleRole
+          ); // scores 13
+
+          [":NEW:SOLDIER:STATE:", _unitData] call EFUNC(database,sendData);
         };
       };
       false
     } count (allUnits + allDeadMen);
+
 
     {
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
@@ -216,6 +220,20 @@ GVAR(PFHObject) = [
 
         [":NEW:VEH:", _newVehicleData] call EFUNC(extension,sendData);
         _x setVariable [QGVARMAIN(newVehicleData), _newVehicleData];
+
+        if (
+          missionNamespace getVariable [
+            QEGVAR(database,enabled), false]
+        ) then {
+          _newVehicleData pushBack (typeOf _x);
+          _newVehicleData pushBack format ["%1", [_x] call BIS_fnc_getVehicleCustomization];
+          [
+            {missionNamespace getVariable [QEGVAR(database,dbValid), false]},
+            {[":NEW:VEHICLE:", _this] call EFUNC(database,sendData);},
+            _newVehicleData,
+            30
+          ] call CBA_fnc_waitUntilAndExecute;
+        };
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(vehicleClass), _class];
@@ -240,39 +258,17 @@ GVAR(PFHObject) = [
         ];
         [":UPDATE:VEH:", _vehicleData] call EFUNC(extension,sendData);
 
-        if (EGVAR(database,dbValid)) then {
-          private _newVehicleData = _x getVariable [QGVARMAIN(_newVehicleData), []];
-          private _dbOut = [];
+        if (
+          missionNamespace getVariable [QEGVAR(database,dbValid), false] &&
+          missionNamespace getVariable [QEGVAR(database,enabled), false]
+        ) then {
+          _vehicleData pushBack (fuel _x); // 7
+          _vehicleData pushBack (damage _x); // 8
+          _vehicleData pushBack (isEngineOn _x); // 9
+          _vehicleData pushBack ((locked _x) >= 2), // 10
+          _vehicleData pushBack (side _x); // 11
 
-          if (count _newVehicleData > 6) then {
-            // encode JSON in SQF, slower
-            // _dbOut pushBack [
-            //   ["captureFrame", GVAR(captureFrameNo)],
-            //   ["vehicleId", _x getVariable QGVARMAIN(id)],
-            //   ["vehicleClass", _newVehicleData select 2],
-            //   ["displayName", _newVehicleData select 3],
-            //   ["position", _pos],
-            //   ["bearing", _vehicleData select 2],
-            //   ["isAlive", BOOL(alive _x)],
-            //   ["crew", _crew]
-            // ];
-            // ["logSoldier", [[_dbOut] call CBA_fnc_encodeJSON]] call EFUNC(database,sendData);
-
-            // send raw array and parse in extension
-            _dbOut = [
-              GVAR(captureFrameNo),
-              _x getVariable QGVARMAIN(id),
-              _newVehicleData select 2,
-              _newVehicleData select 3,
-              _pos select 0, // break coords into elements to parse floats directly
-              _pos select 1,
-              _pos select 2,
-              _vehicleData select 2,
-              BOOL(alive _x),
-              _crew
-            ];
-            [":LOG:VEHICLE:", _dbOut] call EFUNC(extension,sendData);
-          };
+          [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(database,sendData);
         };
       };
       false

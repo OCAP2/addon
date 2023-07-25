@@ -168,6 +168,7 @@ if (GVAR(missionName) == "") then {
 
 
 // Initialize DB connection and log world/mission info
+EGVAR(database,dbValid) = false;
 call EFUNC(database,initDB);
 
 /*

@@ -66,31 +66,41 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
       _killerId = _instigator getVariable [QGVARMAIN(id), -1];
       if (_killerId == -1) exitWith {};
 
+      private _eventText = [_instigator] call FUNC(getEventWeaponText);
       private _killerInfo = [];
       // if (_instigator isKindOf "CAManBase") then {
         _killerInfo = [
           _killerId,
-          ([_instigator] call FUNC(getEventWeaponText))
+          _eventText
         ];
       // } else {
       //   _killerInfo = [_killerId];
       // };
+
+      private _killDistance = round(_instigator distance _victim);
 
       _eventData = [
         _killedFrame,
         "killed",
         _victimId,
         _killerInfo,
-        round(_instigator distance _victim)
+        _killDistance
       ];
 
       if (GVARMAIN(isDebug)) then {
         OCAPEXTLOG(ARR4("KILLED EVENT", _killedFrame, _victimId, _killerId));
       };
+
+      [":EVENT:", _eventData] call EFUNC(extension,sendData);
+      if (EGVAR(database,dbValid) && EGVAR(database,enabled)) then {
+        [":KILL:", [
+          _killedFrame,
+          _victimId,
+          _killerId,
+          _eventText,
+          _killDistance
+        ]] call EFUNC(database,sendData);
+      };
     };
-
-
-
-    [":EVENT:", _eventData] call EFUNC(extension,sendData);
   };
 };

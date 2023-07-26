@@ -54,6 +54,8 @@ if (!GVAR(enabled)) exitWith {};
           _freq = [_radio, _additionalChannel + 1] call TFAR_fnc_getChannelFrequency;
           _code = _radio call TFAR_fnc_getSwRadioCode;
         };
+        // get the parent class of the radio wihtout numeric suffix that represents a unique radio
+        _radio = getText(inheritsFrom (_radio call CBA_fnc_getItemConfig) >> "displayName");
       } else {
         if (!_additional) then {
           _radio = call TFAR_fnc_activeLrRadio;
@@ -68,11 +70,14 @@ if (!GVAR(enabled)) exitWith {};
           _freq = [_radio, _additionalChannel + 1] call TFAR_fnc_getChannelFrequency;
           _code = _radio call TFAR_fnc_getLrRadioCode;
         };
-      };
 
-      // LR and vehicle radios are sent as an array [obj, settings]
-      if (_radio isEqualType []) then {
-        _radio = typeOf ((_radio#0)#0);
+        // LR and vehicle radios are sent as an array [obj, settings]
+        private _actual = _radio#0;
+        if ((_radio#0) isEqualType "") then {_radio = _radio#0} else {
+          if ((_radio#0) isEqualType objNull) then {_radio = typeOf (_radio#0)};
+        };
+        // get display name
+        _radio = getText(configFile >> "CfgVehicles" >> _radio >> "displayName");
       };
 
       // channels are returned on a 0 index, so fix that

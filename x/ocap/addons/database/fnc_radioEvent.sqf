@@ -18,7 +18,8 @@ if (_mod isEqualTo "TFAR") then {
     ["_typeTransmission", "", [""]],
     "_channel",
     ["_isAdditional", false, [false]],
-    "_freq"
+    "_freq",
+    "_code"
   ];
 
   private _ocapId = _unit getVariable [QGVARMAIN(id), -1];
@@ -27,11 +28,6 @@ if (_mod isEqualTo "TFAR") then {
     _channel isEqualTo -1 ||
     _freq isEqualTo -1
   ) exitWith {};
-
-  // LR and vehicle radios are sent as an array [obj, settings]
-  if (_radio isEqualType []) then {
-    _radio = typeOf ((_radio#0)#0);
-  };
 
   [
     ":RADIO:", [
@@ -42,7 +38,8 @@ if (_mod isEqualTo "TFAR") then {
       _typeTransmission,
       _channel,
       _isAdditional,
-      _freq
+      _freq,
+      _code
     ]
   ] call FUNC(sendData);
 };

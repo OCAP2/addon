@@ -82,6 +82,8 @@ if (!GVAR(enabled)) exitWith {};
 
       // channels are returned on a 0 index, so fix that
       _channel = _channel + 1;
+      // round frequency to the nearest 3 significant digits
+      _freq = _freq toFixed 3;
 
       [
           "TFAR", [

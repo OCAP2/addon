@@ -10,3 +10,5 @@
     diag_fpsmin
   ]] call FUNC(sendData);
 }, 10] call CBA_fnc_addPerFrameHandler;
+
+

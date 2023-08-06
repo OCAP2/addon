@@ -10,13 +10,71 @@ if (!GVAR(enabled)) exitWith {};
   // log chat
 	addMissionEventHandler ["HandleChatMessage", {
 		params ["_channel", "_owner", "_from", "_text", "_person", "_name", "_strID", "_forcedDisplay", "_isPlayerMessage", "_sentenceType", "_chatMessageType"];
+    if (!(missionNamespace getVariable [QEGVAR(recorder,recording), false])) exitWith {};
+
 		if (_owner == clientOwner && parseNumber _strID > 1) then {
-			_this remoteExecCall ["ocap_database_fnc_handleChatMessage", 2];
+			_this remoteExecCall [QFUNC(handleChatMessage), 2];
 		};
 		false;
 	}];
 } remoteExec ["call", 0, true];
 
+// ACE death
+// https://github.com/acemod/ACE3/blob/c7e13ca4c7106ffb567b84b8590a472df4cab2f1/addons/medical_status/functions/fnc_setDead.sqf#L24-L27
+// remoteExec to all machines with JIP -- is local event
+{
+  // need headless clients to register AI too, so we won't do an interface check
+  if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
+
+    // add event handlers
+    ["ace_medical_death", {
+      _this params ["_unit"];
+      _ownerId = _thisArgs;
+
+      _ocapID = _unit getVariable [QGVARMAIN(id), -1];
+      if (_ocapID isEqualTo -1) exitWith {};
+
+      if (!(missionNamespace getVariable [QEGVAR(recorder,recording), false])) exitWith {};
+
+      [
+        [
+          GVARMAIN(captureFrameNo),
+          _ocapID,
+          _unit getVariable ["ace_medical_causeOfDeath", "UNKNOWN"]
+        ],
+        {
+          if (GVAR(dbValid) && GVAR(enabled)) then {
+            [":DEATH:", _this] call FUNC(sendData);
+          };
+        }
+      ] remoteExec ["call", _ownerId];
+    }, remoteExecutedOwner] call CBA_fnc_addEventHandlerArgs;
+  };
+} remoteExec ["call", 0, true];
+
+// ace unconsciousness is a global event
+// https://github.com/acemod/ACE3/blob/c7e13ca4c7106ffb567b84b8590a472df4cab2f1/addons/medical_status/functions/fnc_setUnconsciousState.sqf
+if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
+  ["ace_unconscious", {
+      _this params ["_unit", "_isUnconscious"];
+
+      _ocapID = _unit getVariable [QGVARMAIN(id), -1];
+      if (_ocapID isEqualTo -1) exitWith {};
+
+      if (!(missionNamespace getVariable [QEGVAR(recorder,recording), false])) exitWith {};
+
+      if (GVAR(dbValid) && GVAR(enabled)) then {
+        [":UNCONSCIOUS:", [
+          GVARMAIN(captureFrameNo),
+          _ocapID,
+          _isUnconscious
+        ]] call FUNC(sendData);
+      };
+  }] call CBA_fnc_addEventHandlerArgs;
+};
+
+
+// remoteExec to all non-dedicated machines with JIP -- will trigger when local
 {
   if (!hasInterface) exitWith {};
 
@@ -25,6 +83,8 @@ if (!GVAR(enabled)) exitWith {};
     ["TFAR_event_OnTangent", {
       _this params ["_TFAR_currentUnit", "_radio", "_radioType", "_additional", "_isStartTransmission"];
       _ownerId = _thisArgs;
+
+      if (!(missionNamespace getVariable [QEGVAR(recorder,recording), false])) exitWith {};
 
       private [
         "_typeRadio",
@@ -109,6 +169,8 @@ if (!GVAR(enabled)) exitWith {};
   //     if !(_onRadio) exitWith {};
 
   //     _ownerId = _thisArgs;
+
+  // if (!(missionNamespace getVariable [QEGVAR(recorder,recording), false])) exitWith {};
 
 
   //     ["ACRE_PRC343_ID_1"] call acre_api_fnc_getDisplayName;

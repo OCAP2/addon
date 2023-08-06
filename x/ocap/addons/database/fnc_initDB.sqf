@@ -6,10 +6,32 @@ GVAR(dbValid) = false;
 
 // when the extension is ready, it'll send a callback which will set dbValid to true and let the other functions being sending data
 addMissionEventHandler ["ExtensionCallback", {
-  params ["_name", "_function", "_data"];
   if (_name != "ocap_recorder") exitWith {};
+
+  params ["_name", "_function", "_data"];
+
+  TRACE_3("ExtensionCallback", _name, _function, _data);
+
+  if (_function isEqualTo ":VERSION:") exitWith {
+    private _dataArr = parseSimpleArray _data;
+    EGVAR(database,version) = _data#0;
+    publicVariable QEGVAR(database,version);
+    INFO_1("Version", EGVAR(database,version));
+  };
+
+  if (_function isEqualTo ":DB:ERROR:") exitWith {
+    diag_log formatText ["OCAP: DB error: %1", _data];
+    ERROR_MSG_1("Database connection error", _data);
+  };
+
+
   if (_function isEqualTo ":DB:OK:") exitWith {
-    diag_log formatText ["OCAP: Initialized DB"];
+    _dataArr = parseSimpleArray _data;
+    INFO_1("Database connection success", _data#0);
+    if ((_data#0) isEqualTo "SQLITE") then {
+      WARNING("SQLITE is used as a local fallback due to Postgres connection error -- the 'migratebackups' command will need to be used to centralize your data!");
+    };
+
     // send mission data
     // Write mission and world to DB
 
@@ -55,31 +77,35 @@ addMissionEventHandler ["ExtensionCallback", {
       ["worldName", toLower worldName],
       ["tag", EGVAR(settings,saveTag)],
       ["captureDelay", EGVAR(settings,frameCaptureDelay)],
-      ["addons", _addons]
+      ["addons", _addons],
+      ["extensionVersion", EGVAR(extension,version) # 0],
+      ["extensionBuild", EGVAR(extension,version) # 1],
+      ["ocapRecorderExtensionVersion", EGVAR(database,version)]
     ]] call CBA_fnc_encodeJSON;
 
     // Save mission and world to DB
-    diag_log formatText ["OCAP: Saving mission and world to DB"];
-    diag_log formatText ["%1", GVAR(worldContext)];
-    diag_log formatText ["%1", GVAR(missionContext)];
+    INFO("Saving mission and world to DB");
+    TRACE_2("World and mission context", GVAR(worldContext), GVAR(missionContext));
     [":NEW:MISSION:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData);
-    };
+  };
 
-    if (_function isEqualTo ":MISSION:OK:") exitWith {
-      diag_log formatText ["OCAP: Saved mission and world to DB, proceeding with recording"];
-      GVAR(dbValid) = true;
+  if (_function isEqualTo ":MISSION:OK:") exitWith {
+    INFO_1("Initialization completed in %1ms", diag_tickTime - GVAR(initTimer));
+    INFO("Mission saved to DB, starting data send");
+    GVAR(dbValid) = true;
 
-      // set initial stuff unique to DB
-      [] spawn FUNC(getStaticObjects);
-      call FUNC(addEventHandlers);
-      call FUNC(startLoop);
-      removeMissionEventHandler ["ExtensionCallback", _thisEventHandler];
-    };
+    // set initial stuff unique to DB
+    [] spawn FUNC(getStaticObjects);
+    call FUNC(addEventHandlers);
+    call FUNC(startLoop);
+    removeMissionEventHandler ["ExtensionCallback", _thisEventHandler];
+  };
 }];
 
 
 
 
-diag_log formatText ["OCAP: Initializing DB"];
+INFO("Initializing DB");
+GVAR(initTimer) = diag_tickTime;
 [":INIT:DB:", []] call FUNC(sendData);
 true

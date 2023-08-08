@@ -35,8 +35,8 @@ params [
 
 if (isNil "_PID") exitWith {};
 
-private _userInfo = (getUserInfo _PID);
-if (isNil "_userInfo") exitWith {};
+private _userInfo = getUserInfo _PID;
+if (_userInfo isEqualTo []) exitWith {};
 _userInfo params ["_playerID", "_owner", "_playerUID"];
 _unit = _userInfo select 10;
 

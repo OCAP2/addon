@@ -28,6 +28,8 @@
 
 #include "script_component.hpp"
 
+if (!GVARMAIN(enabledAdministratorUI)) exitWith {};
+
 params [
 	"_PID",
 	["_event", "", [""]]

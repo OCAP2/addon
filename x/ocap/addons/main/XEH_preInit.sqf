@@ -82,7 +82,7 @@ GVAR(allSettings) = [
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
     false // requires restart to apply
-  ]
+  ],
 
   /*
     CBA Setting: OCAP_administratorList

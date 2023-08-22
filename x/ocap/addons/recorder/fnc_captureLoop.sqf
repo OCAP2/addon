@@ -35,6 +35,7 @@ if (!isNil QGVAR(PFHObject)) then {
 };
 if (isNil QGVAR(startTime)) then {
   GVAR(startTime) = time;
+  publicVariable QGVAR(startTime);
   OCAPEXTLOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
   LOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
 };
@@ -97,13 +98,15 @@ GVAR(PFHObject) = [
           missionNamespace getVariable [
             QEGVAR(database,enabled), false]
         ) then {
-          _newUnit pushBack (typeOf _x); // 8
-          _newUnit pushBack ([configOf _x] call BIS_fnc_displayName); // 9
-          if (isPlayer _x) then { // 10
+          _newUnit pushBack (typeOf _x); // 8 classname
+          _newUnit pushBack ([configOf _x] call BIS_fnc_displayName); // 9 type displayname
+          if (isPlayer _x) then { // 10 player uid
             _newUnit pushBack (getPlayerUID _x);
           } else {
             _newUnit pushBack "";
           };
+          _newUnit pushBack ([squadParams _x] call CBA_fnc_encodeJSON); // 11 squad params
+
           [
             {missionNamespace getVariable [QEGVAR(database,dbValid), false]},
             {[":NEW:SOLDIER:", _this] call EFUNC(database,sendData);},
@@ -173,7 +176,14 @@ GVAR(PFHObject) = [
           ); // scores 12
           _unitData pushBack (
             _x call CBA_fnc_vehicleRole
-          ); // scores 13
+          ); // vehicle role ("driver", "cargo", "gunner", "crew", "turret") 13
+          if (!isNull objectParent _x) then {
+            _unitData pushBack ((objectParent _x) getVariable [QGVARMAIN(id), -1]); // 14
+          } else {
+            _unitData pushBack -1;
+          };
+          _unitData pushBack (stance _x); // 15
+
 
           [":NEW:SOLDIER:STATE:", _unitData] call EFUNC(database,sendData);
         };
@@ -267,6 +277,15 @@ GVAR(PFHObject) = [
           _vehicleData pushBack (isEngineOn _x); // 9
           _vehicleData pushBack ((locked _x) >= 2), // 10
           _vehicleData pushBack (side _x); // 11
+          toFixed 2;
+          _vehicleData pushBack (vectorDir _x); // 12
+          _vehicleData pushBack (vectorUp _x); // 13
+
+          ([_x, [0], true] call CBA_fnc_turretDir) params
+            ["_turretAz", "_turretEl"];
+          _vehicleData pushBack _turretAz; // 14
+          _vehicleData pushBack _turretEl; // 15
+          toFixed -1;
 
           [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(database,sendData);
         };

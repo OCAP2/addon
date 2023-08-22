@@ -26,13 +26,20 @@ Author:
 
 params ["_command","_args", ["_dllName", "ocap_recorder"]];
 
-private _res = _dllName callExtension [_command, _args];
+if (_args isEqualType []) exitWith {
+  private _res = _dllName callExtension [_command, _args];
 
-_res params ["_result","_returnCode","_errorCode"];
+  _res params ["_result","_returnCode","_errorCode"];
 
-if (_errorCode != 0 || _returnCode != 0) then {
-  diag_log formatText ["Error when calling extension: %1", [_result, _returnCode, _errorCode, _command, _args]];
+  if (_errorCode != 0 || _returnCode != 0) then {
+    diag_log formatText ["Error when calling extension: %1", [_result, _returnCode, _errorCode, _command, _args]];
+  };
 };
+
+if (isNil "_args") exitWith {
+  _dllName callExtension _command;
+};
+
 
 // if (
 // 	_result isEqualType ""

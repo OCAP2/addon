@@ -168,7 +168,7 @@ if (_ammoSimType isEqualTo "shotBullet") exitWith {
 		if (GVARMAIN(isDebug)) then {
 			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _projectilePos));
 
-			      // add to clients' map draw array
+      // add to clients' map draw array
 			private _debugArr = [getPosASL _firer, _projectilePos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
 			[QGVAR(addDebugBullet), _debugArr] call CBA_fnc_globalEvent;
 		};

@@ -32,6 +32,8 @@ Author:
 
 if (!SHOULDSAVEEVENTS) exitWith {};
 
+// TODO: Rework this to use projectile event handlers
+
 params ["_explosive", "_dir", "_pitch", "_unit"];
 
 private _int = random(2000);

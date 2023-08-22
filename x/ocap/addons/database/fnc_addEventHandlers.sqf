@@ -5,12 +5,10 @@
 if (!GVAR(enabled)) exitWith {};
 
 {
-	if (!hasInterface) exitWith {};
-
   // log chat
 	addMissionEventHandler ["HandleChatMessage", {
 		params ["_channel", "_owner", "_from", "_text", "_person", "_name", "_strID", "_forcedDisplay", "_isPlayerMessage", "_sentenceType", "_chatMessageType"];
-    if (!(missionNamespace getVariable [QEGVAR(recorder,recording), false])) exitWith {};
+    if (!SHOULDSAVEEVENTS) exitWith {};
 
 		if (_owner == clientOwner && parseNumber _strID > 1) then {
 			_this remoteExecCall [QFUNC(handleChatMessage), 2];
@@ -28,23 +26,26 @@ if (!GVAR(enabled)) exitWith {};
 
     // add event handlers
     ["ace_medical_death", {
+      if (!SHOULDSAVEEVENTS) exitWith {};
       _this params ["_unit"];
       _ownerId = _thisArgs;
 
       _ocapID = _unit getVariable [QGVARMAIN(id), -1];
       if (_ocapID isEqualTo -1) exitWith {};
 
-      if (!(missionNamespace getVariable [QEGVAR(recorder,recording), false])) exitWith {};
+      _lastDamageSource = _unit getVariable ["ace_medical_lastDamageSoruce", objNull];
+      _lastDamageID = _lastDamageSource getVariable [QGVARMAIN(id), -1];
 
-      [
+      [ // remoteExec back to server for db check
         [
-          GVARMAIN(captureFrameNo),
+          EGVAR(recorder,captureFrameNo),
           _ocapID,
-          _unit getVariable ["ace_medical_causeOfDeath", "UNKNOWN"]
+          _unit getVariable ["ace_medical_causeOfDeath", "UNKNOWN"],
+          _lastDamageID
         ],
         {
           if (GVAR(dbValid) && GVAR(enabled)) then {
-            [":DEATH:", _this] call FUNC(sendData);
+            [":ACE3:DEATH:", _this] call FUNC(sendData);
           };
         }
       ] remoteExec ["call", _ownerId];
@@ -56,16 +57,15 @@ if (!GVAR(enabled)) exitWith {};
 // https://github.com/acemod/ACE3/blob/c7e13ca4c7106ffb567b84b8590a472df4cab2f1/addons/medical_status/functions/fnc_setUnconsciousState.sqf
 if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
   ["ace_unconscious", {
+      if (!SHOULDSAVEEVENTS) exitWith {};
       _this params ["_unit", "_isUnconscious"];
 
       _ocapID = _unit getVariable [QGVARMAIN(id), -1];
       if (_ocapID isEqualTo -1) exitWith {};
 
-      if (!(missionNamespace getVariable [QEGVAR(recorder,recording), false])) exitWith {};
-
       if (GVAR(dbValid) && GVAR(enabled)) then {
-        [":UNCONSCIOUS:", [
-          GVARMAIN(captureFrameNo),
+        [":ACE3:UNCONSCIOUS:", [
+          EGVAR(recorder,captureFrameNo),
           _ocapID,
           _isUnconscious
         ]] call FUNC(sendData);
@@ -84,7 +84,7 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
       _this params ["_TFAR_currentUnit", "_radio", "_radioType", "_additional", "_isStartTransmission"];
       _ownerId = _thisArgs;
 
-      if (!(missionNamespace getVariable [QEGVAR(recorder,recording), false])) exitWith {};
+      if (!SHOULDSAVEEVENTS) exitWith {};
 
       private [
         "_typeRadio",
@@ -165,6 +165,7 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
   // wip
   // if (isClass (configFile >> "CfgPatches" >> "acre_main")) then {
   //   ["acre_startedSpeaking", {
+          // if (!SHOULDSAVEEVENTS) exitWith {};
   //     _this params ["_unit", "_onRadio", "_radioId", "_speakingType"];
   //     if !(_onRadio) exitWith {};
 
@@ -199,3 +200,5 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
 
   missionNamespace setVariable [QGVARMAIN(radioEventsInitialized), true];
 } remoteExec ["call", [0, -2] select isDedicated, true];
+
+

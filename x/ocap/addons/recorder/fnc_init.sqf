@@ -168,6 +168,7 @@ if (GVAR(missionName) == "") then {
 
 
 // Initialize DB connection and log world/mission info
+// Conditionals are housed in that module
 EGVAR(database,dbValid) = false;
 call EFUNC(database,initDB);
 

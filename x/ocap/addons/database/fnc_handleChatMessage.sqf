@@ -10,7 +10,7 @@ if (parseNumber _strID > 1) then {
   };
 };
 
-private _senderOcapId = _owner getVariable [QGVARMAIN(id), -1];
+private _senderOcapId = _person getVariable [QGVARMAIN(id), -1];
 
 [":CHAT:", [
   EGVAR(recorder,captureFrameNo),

@@ -17,13 +17,13 @@
 // The current version of OCAP.
 
 // DEFINE: VERSION
-#define VERSION 2.0
+#define VERSION 3.0
 
 // DEFINE: VERSION_STR
-#define VERSION_STR 2.0.0
+#define VERSION_STR 3.0.0
 
 // DEFINE: VERSION_AR
-#define VERSION_AR 2,0,0
+#define VERSION_AR 3,0,0
 
 // DEFINE: VERSION_REQUIRED
 #define VERSION_REQUIRED 2.10
@@ -38,7 +38,7 @@
 
 // MACRO: SHOULDSAVEEVENTS
 // Used to determine if events should currently be saved based on <OCAP_recorder_recording> and <OCAP_recorder_startTime>.
-#define SHOULDSAVEEVENTS ((missionNamespace getVariable [QGVAR(recording), false]) && missionNamespace getVariable [QGVAR(startTime), -1] > -1)
+#define SHOULDSAVEEVENTS ((missionNamespace getVariable [QEGVAR(recorder,recording), false]) && missionNamespace getVariable [QEGVAR(recorder,startTime), -1] > -1)
 
 #define DEBUG_MODE_NORMAL
 // #define DEBUG_MODE_FULL

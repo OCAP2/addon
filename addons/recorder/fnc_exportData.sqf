@@ -76,7 +76,7 @@ if (isNil QGVAR(startTime)) exitWith {
 
 _elapsedTime = time - GVAR(startTime);
 _frameTimeDuration = (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60;
-TRACE_7("Save attempted. Elapsed Time =", _elapsedTime," Frame Count * Delay Duration =", _frameTimeDuration," delta =", _elapsedTime - _frameTimeDuration);
+TRACE_5("Save attempted. Elapsed Time =", _elapsedTime," Frame Count * Delay Duration =", _frameTimeDuration," delta =", _elapsedTime - _frameTimeDuration);
 
 
 if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {

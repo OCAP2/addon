@@ -1,6 +1,9 @@
 // HEADER: script_macros.hpp
 // Defines macros imported to other functions
 
+
+#include "script_version.hpp"
+
 // DEFINE: PREFIX
 #define PREFIX OCAP
 
@@ -14,19 +17,6 @@
 // DEFINE: ADDON
 // <PREFIX>_<COMPONENT>
 
-// The current version of OCAP.
-
-// DEFINE: VERSION
-#define VERSION 3.0
-
-// DEFINE: VERSION_STR
-#define VERSION_STR 3.0.0
-
-// DEFINE: VERSION_AR
-#define VERSION_AR 3,0,0
-
-// DEFINE: VERSION_REQUIRED
-#define VERSION_REQUIRED 2.10
 
 // MACRO: LOG
 // Used for logging messages to the extension (ocap-ext log file).

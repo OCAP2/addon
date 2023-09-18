@@ -1,0 +1,10 @@
+name = "OCAP"
+prefix = "ocap"
+mainprefix = "x"
+author = "OCAP2 Team"
+[files]
+include = [
+    "mod.cpp",
+    "licence.txt",
+    "logo_ocap.paa",
+]

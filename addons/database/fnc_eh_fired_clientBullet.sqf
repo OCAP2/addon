@@ -102,7 +102,7 @@ _projectile addEventHandler ["Deflected", {
 // Tracks a projectile that detonated, either by a script or by the game. We can save the position it was at.
 _projectile addEventHandler ["Explode", {
 	params ["_projectile", "_pos", "_velocity"];
-  TRACE_4("Explode",_projectile,_pos,_velocity);
+  TRACE_3("Explode",_projectile,_pos,_velocity);
 
   // just log position
   ((_projectile getVariable QGVARMAIN(dataHash)) get "positions") pushBack [
@@ -126,5 +126,5 @@ _projectile addEventHandler ["Deleted", {
   [QGVARMAIN(handleFiredManData), [_hash]] call CBA_fnc_serverEvent;
 }];
 
-TRACE_2("Finished applying EH", _projectile);
+TRACE_1("Finished applying EH", _projectile);
 true

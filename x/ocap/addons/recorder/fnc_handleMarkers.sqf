@@ -175,6 +175,9 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
 
     if (!_local) exitWith {};
 
+    // If the Restrict Markers mod is loaded and enabled, only the server's markers should be recorded
+    if (GVAR(restrictMarkersCompat) && {!isServer}) exitWith {};
+
     // check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
     // if value is undefined, then skip
     private _isExcluded = false;
@@ -225,6 +228,9 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
 
     if (!_local) exitWith {};
 
+    // If the Restrict Markers mod is loaded and enabled, only the server's markers should be recorded
+    if (GVAR(restrictMarkersCompat) && {!isServer}) exitWith {};
+
     // check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
     // if value is undefined, then skip
     private _isExcluded = false;
@@ -256,6 +262,9 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
     params["_marker", "_local"];
 
     if (!_local) exitWith {};
+
+    // If the Restrict Markers mod is loaded and enabled, only the server's markers should be recorded
+    if (GVAR(restrictMarkersCompat) && {!isServer}) exitWith {};
 
     // check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
     // if value is undefined, then skip

@@ -26,15 +26,20 @@ Author:
 
 params ["_command","_args", ["_dllName", "ocap_recorder"]];
 
+diag_log text format ["[OCAP] [EXT] >> Calling extension '%1' with command='%2', args=%3", _dllName, _command, _args];
+
 private _res = _dllName callExtension [_command, _args];
 
 _res params ["_result","_returnCode","_errorCode"];
 
+diag_log text format ["[OCAP] [EXT] << Response: result='%1', returnCode=%2, errorCode=%3", _result, _returnCode, _errorCode];
+
 if (_errorCode != 0 || _returnCode != 0) then {
-  textLogFormat ["Error when calling extension: %1", [_result, _returnCode, _errorCode, _command, _args]];
+  diag_log text format ["[OCAP] [EXT] ERROR when calling extension: %1", [_result, _returnCode, _errorCode, _command, _args]];
 };
 
-if (
-	_command isEqualTo ":VERSION:" &&
-	_result isEqualType ""
-) then {parseSimpleArray _result};
+if (_command isEqualTo ":VERSION:" && _result isEqualType "") then {
+  private _parsed = parseSimpleArray _result;
+  diag_log text format ["[OCAP] [EXT] :VERSION: parsed result=%1, type=%2", _parsed, typeName _parsed];
+  _parsed
+};

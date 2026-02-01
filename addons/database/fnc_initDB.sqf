@@ -13,9 +13,9 @@ GVAR(dbValid) = false;
 
 // when the extension is ready, it'll send a callback which will set dbValid to true and let the other functions being sending data
 addMissionEventHandler ["ExtensionCallback", {
-  if (_name != "ocap_recorder") exitWith {};
-
   params ["_name", "_function", "_dataArr"];
+
+  if (_name != "ocap_recorder") exitWith {};
 
   private _data = parseSimpleArray _dataArr;
 

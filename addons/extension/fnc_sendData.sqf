@@ -24,7 +24,7 @@ Author:
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
-params ["_command","_args", ["_dllName", "OcapReplaySaver2"]];
+params ["_command","_args", ["_dllName", "ocap_recorder"]];
 
 private _res = _dllName callExtension [_command, _args];
 

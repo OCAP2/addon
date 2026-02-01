@@ -5,7 +5,7 @@ class CfgPatches
 {
   class ADDON
   {
-
+    requiredVersion = 2.06;
     name = COMPONENT_NAME;
     author = "Dell, Zealot, Kurt, IndigoFox, Fank";
     authors[] = {"Dell", "Zealot", "Kurt", "IndigoFox", "Fank"};

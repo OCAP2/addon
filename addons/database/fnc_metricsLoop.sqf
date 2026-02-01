@@ -28,7 +28,7 @@
       // Number of server (local) owned units
       [":METRIC:", [
         "server_performance",
-        format["entity_count_server_%2", _thisSideStr],
+        format["entity_count_server_%1", _thisSideStr],
         ["tag", "side", _thisSideStr] joinString "::",
         ["field", "int", "units_total", {
             side _x isEqualTo _thisSide &&
@@ -62,7 +62,7 @@
       // Number of remote, non-local units
       [":METRIC:", [
         "server_performance",
-        format["entity_count_remote_%2", _thisSideStr],
+        format["entity_count_remote_%1", _thisSideStr],
         ["field", "int", "units_total", {
             side _x isEqualTo _thisSide &&
             not (local _x)

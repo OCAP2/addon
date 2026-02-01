@@ -275,7 +275,7 @@ GVAR(PFHObject) = [
           _vehicleData pushBack (fuel _x); // 7
           _vehicleData pushBack (damage _x); // 8
           _vehicleData pushBack (isEngineOn _x); // 9
-          _vehicleData pushBack ((locked _x) >= 2), // 10
+          _vehicleData pushBack ((locked _x) >= 2); // 10
           _vehicleData pushBack (side _x); // 11
           toFixed 2;
           _vehicleData pushBack (vectorDir _x); // 12

@@ -62,22 +62,25 @@ addMissionEventHandler ["ExtensionCallback", {
     // get logging dir
     [":GETDIR:OCAPLOG:", nil, 'ocap_recorder'] call FUNC(sendData);
 
-    INFO("Connecting to services...");
-    [":INIT:DB:", nil, 'ocap_recorder'] call FUNC(sendData);
+    INFO("Initializing storage...");
+    [":INIT:STORAGE:", nil, 'ocap_recorder'] call FUNC(sendData);
   };
 
 
-  if (_function isEqualTo ":DB:ERROR:") exitWith {
+  if (_function isEqualTo ":STORAGE:ERROR:") exitWith {
     private _error = _data#0;
-    ERROR_MSG_1("Database connection error: %1",_error);
+    ERROR_MSG_1("Storage initialization error: %1",_error);
   };
 
 
-  if (_function isEqualTo ":DB:OK:") exitWith {
-    private _database = _data#0;
-    INFO_1("Database connection success: %1",_database);
-    if (toLower _database isEqualTo "sqlite") then {
+  if (_function isEqualTo ":STORAGE:OK:") exitWith {
+    private _engine = _data#0;
+    INFO_1("Storage initialized: %1",_engine);
+    if (toLower _engine isEqualTo "sqlite") then {
       WARNING("SQLite is used as a local fallback due to Postgres connection error -- the 'migratebackups' command will need to be used to centralize your data!");
+    };
+    if (toLower _engine isEqualTo "memory") then {
+      INFO("Memory-only mode active - data will be exported to JSON file");
     };
 
     // send mission data

@@ -53,17 +53,17 @@ addMissionEventHandler ["ExtensionCallback", {
   if (_function isEqualTo ":EXT:READY:") exitWith {
     INFO("Extension ready.");
     // extension is ready, send version
-    [":ADDON:VERSION:", [QUOTE(VERSION_STR)], 'ocap_recorder'] call FUNC(sendData);
+    [":ADDON:VERSION:", [QUOTE(VERSION_STR)], 'ocap_recorder'] call EFUNC(extension,sendData);
 
     // get arma dir and module dir
-    [":GETDIR:ARMA:", nil, 'ocap_recorder'] call FUNC(sendData);
-    [":GETDIR:MODULE:", nil, 'ocap_recorder'] call FUNC(sendData);
+    [":GETDIR:ARMA:", nil, 'ocap_recorder'] call EFUNC(extension,sendData);
+    [":GETDIR:MODULE:", nil, 'ocap_recorder'] call EFUNC(extension,sendData);
 
     // get logging dir
-    [":GETDIR:OCAPLOG:", nil, 'ocap_recorder'] call FUNC(sendData);
+    [":GETDIR:OCAPLOG:", nil, 'ocap_recorder'] call EFUNC(extension,sendData);
 
     INFO("Initializing storage...");
-    [":INIT:STORAGE:", nil, 'ocap_recorder'] call FUNC(sendData);
+    [":INIT:STORAGE:", nil, 'ocap_recorder'] call EFUNC(extension,sendData);
   };
 
 
@@ -150,7 +150,7 @@ addMissionEventHandler ["ExtensionCallback", {
     // Save mission and world to DB
     INFO("Saving mission and world to DB");
     TRACE_2("World and mission context",GVAR(worldContext),GVAR(missionContext));
-    [":NEW:MISSION:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData);
+    [":NEW:MISSION:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call EFUNC(extension,sendData);
   };
 
   if (_function isEqualTo ":MISSION:OK:") exitWith {
@@ -169,5 +169,5 @@ addMissionEventHandler ["ExtensionCallback", {
 
 INFO("Initializing extension...");
 GVAR(initTimer) = diag_tickTime;
-[":INIT:", nil] call FUNC(sendData);
+[":INIT:", nil] call EFUNC(extension,sendData);
 true

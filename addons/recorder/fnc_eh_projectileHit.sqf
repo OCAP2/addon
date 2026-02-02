@@ -50,7 +50,7 @@ _causedByInfo = [
   _shooterID, // shooter unit ID
   _eventText, // weapon etc
   _distanceInfo // distance
-]] call EFUNC(database,sendData);
+]] call EFUNC(extension,sendData);
 
 if (GVARMAIN(isDebug)) then {
   OCAPEXTLOG(ARR4("HIT EVENT", _hitFrame, _unitID, _shooterID));

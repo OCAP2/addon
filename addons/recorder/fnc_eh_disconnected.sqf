@@ -34,7 +34,7 @@ params ["_unit", "_id", "_uid", "_name"];
   [createHashMapFromArray [
     ["playerUid", _uid]
   ]] call CBA_fnc_encodeJSON
-]] call EFUNC(database,sendData);
+]] call EFUNC(extension,sendData);
 
 if (_unit getVariable [QGVARMAIN(isInitialized), false]) then {
 	_unit setVariable [QGVARMAIN(exclude), true];

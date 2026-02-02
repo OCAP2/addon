@@ -45,7 +45,7 @@ if (!GVAR(enabled)) exitWith {};
         ],
         {
           if (GVAR(dbValid) && GVAR(enabled)) then {
-            [":ACE3:DEATH:", _this] call FUNC(sendData);
+            [":ACE3:DEATH:", _this] call EFUNC(extension,sendData);
           };
         }
       ] remoteExec ["call", _ownerId];
@@ -68,7 +68,7 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
           EGVAR(recorder,captureFrameNo),
           _ocapID,
           _isUnconscious
-        ]] call FUNC(sendData);
+        ]] call EFUNC(extension,sendData);
       };
   }] call CBA_fnc_addEventHandlerArgs;
 };

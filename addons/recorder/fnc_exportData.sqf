@@ -122,11 +122,11 @@ private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mis
     ["winSide", _winSide],
     ["message", _endMessage]
   ]] call CBA_fnc_encodeJSON
-]] call EFUNC(database,sendData);
+]] call EFUNC(extension,sendData);
 
 
 private _saveTag = if (!isNil "_tag") then {_tag} else {EGVAR(settings,saveTag)};
-[":SAVE:MISSION:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, _saveTag]] call EFUNC(database,sendData);
+[":SAVE:MISSION:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, _saveTag]] call EFUNC(extension,sendData);
 OCAPEXTLOG(ARR4("Saved recording of mission", GVAR(missionName), "with tag", _saveTag));
 
 

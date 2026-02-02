@@ -97,7 +97,7 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
         _killerId,
         _eventText,
         _killDistance
-      ]] call EFUNC(database,sendData);
+      ]] call EFUNC(extension,sendData);
     };
   };
 };

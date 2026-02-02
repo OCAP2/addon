@@ -41,4 +41,4 @@ _missionDateFormat append (_date apply {if (_x < 10) then {"0" + str _x} else {s
   format _missionDateFormat,
   timeMultiplier,
   time
-]] call EFUNC(database,sendData);
+]] call EFUNC(extension,sendData);

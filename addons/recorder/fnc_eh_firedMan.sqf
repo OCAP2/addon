@@ -154,7 +154,7 @@ if (_ammoSimType isEqualTo "shotBullet") exitWith {
 			_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
 			_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
 			_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
-		]] call EFUNC(database,sendData);
+		]] call EFUNC(extension,sendData);
 
 		if (GVARMAIN(isDebug)) then {
 			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _projectilePos));
@@ -179,7 +179,7 @@ if (_ammoSimType isEqualTo "shotBullet") exitWith {
 			_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
 			_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
 			_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
-		]] call EFUNC(database,sendData);
+		]] call EFUNC(extension,sendData);
 
 		if (GVARMAIN(isDebug)) then {
 			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _projectilePos));
@@ -287,7 +287,7 @@ switch (true) do {
 							_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
 							_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
 							_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
-						]] call EFUNC(database,sendData);
+						]] call EFUNC(extension,sendData);
 
 						if (GVARMAIN(isDebug)) then {
 							// add to clients' map draw array
@@ -312,7 +312,7 @@ switch (true) do {
 							_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
 							_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
 							_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
-						]] call EFUNC(database,sendData);
+						]] call EFUNC(extension,sendData);
 
 						if (GVARMAIN(isDebug)) then {
 							// add to clients' map draw array

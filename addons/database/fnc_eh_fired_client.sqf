@@ -62,7 +62,7 @@ if (_muzzleDisplay isEqualTo "") then {
 // firedWith: weapon and ammo info
 _projectile setVariable [QGVARMAIN(dataHash), createHashMapFromArray [
   ["firedFrame", EGVAR(recorder,captureFrameNo)],
-  ["firedTime", [":TIMESTAMP:"] call FUNC(sendData)],
+  ["firedTime", [":TIMESTAMP:"] call EFUNC(extension,sendData)],
   ["firerID", _firerOcapId],
   ["vehicleID", _vehicleOcapId],
   ["vehicleRole", _vehicleRole],
@@ -77,7 +77,7 @@ _projectile setVariable [QGVARMAIN(dataHash), createHashMapFromArray [
   ["fireMode", _mode],
   ["positions", [
     [
-      [":TIMESTAMP:"] call FUNC(sendData),
+      [":TIMESTAMP:"] call EFUNC(extension,sendData),
       EGVAR(recorder,captureFrameNo),
       (getPosASL _projectile) joinString ","
     ]
@@ -110,7 +110,7 @@ if (getText(configFile >> "CfgAmmo" >> _ammo >> "simulation") isEqualTo "ShotSub
     private _hash = _submunitionProjectile getVariable QGVARMAIN(dataHash);
     _hash set ["isSub", true];
     (_hash get "positions") pushBack [
-        [":TIMESTAMP:"] call FUNC(sendData),
+        [":TIMESTAMP:"] call EFUNC(extension,sendData),
         EGVAR(recorder,captureFrameNo),
         getPosASL _submunitionProjectile
       ];

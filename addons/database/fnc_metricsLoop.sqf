@@ -8,7 +8,7 @@
     EGVAR(recorder,captureFrameNo),
     diag_fps,
     diag_fpsmin
-  ]] call FUNC(sendData);
+  ]] call EFUNC(extension,sendData);
 }, 10] call CBA_fnc_addPerFrameHandler;
 
 
@@ -56,7 +56,7 @@
             local _x &&
             (_x isKindOf "WeaponHolderSimulated")
           } count _vehicles] joinString "::"
-      ]] call FUNC(sendData);
+      ]] call EFUNC(extension,sendData);
 
 
       // Number of remote, non-local units
@@ -89,7 +89,7 @@
             not (local _x) &&
             (_x isKindOf "WeaponHolderSimulated")
           } count _vehicles] joinString "::"
-      ]] call FUNC(sendData);
+      ]] call EFUNC(extension,sendData);
     } forEach [east, west, independent, civilian];
 
     // Number of all units (global)
@@ -114,14 +114,14 @@
       ["field", "int", "players_dead", {
         !alive _x
         } count _allPlayers] joinString "::"
-    ]] call FUNC(sendData);
+    ]] call EFUNC(extension,sendData);
 
     [":METRIC:", [
       "server_performance",
       "player_count",
       ["field", "int", "players_connected",
         count _allPlayers] joinString "::"
-    ]] call FUNC(sendData);
+    ]] call EFUNC(extension,sendData);
 
 
     {
@@ -143,7 +143,7 @@
           _avgBandwidth] joinString "::",
         ["field", "float", "desync",
           _desync] joinString "::"
-      ]] call FUNC(sendData);
+      ]] call EFUNC(extension,sendData);
 
       true;
     } count (allUsers apply {getUserInfo _x});
@@ -164,7 +164,7 @@
             count CBA_common_perFrameHandlerArray
           } else {0}
         ] joinString "::"
-    ]] call FUNC(sendData);
+    ]] call EFUNC(extension,sendData);
 
     [":METRIC:", [
       "server_performance",
@@ -173,7 +173,7 @@
         diag_fps toFixed 2] joinString "::",
       ["field", "float", "fps_min",
         diag_fpsMin toFixed 2] joinString "::"
-    ]] call FUNC(sendData);
+    ]] call EFUNC(extension,sendData);
 
     [":METRIC:", [
       "mission_data",
@@ -186,7 +186,7 @@
         timeMultiplier toFixed 2] joinString "::",
       ["field", "float", "accTime",
         accTime toFixed 2] joinString "::"
-    ]] call FUNC(sendData);
+    ]] call EFUNC(extension,sendData);
 
     [":METRIC:", [
       "mission_data",
@@ -215,7 +215,7 @@
         moonPhase date] joinString "::",
       ["field", "float", "sunOrMoon",
         sunOrMoon] joinString "::"
-    ]] call FUNC(sendData);
+    ]] call EFUNC(extension,sendData);
 
     private _dur = diag_tickTime - _start;
     if (_dur < 10) then {

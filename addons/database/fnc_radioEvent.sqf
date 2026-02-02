@@ -41,5 +41,5 @@ if (_mod isEqualTo "TFAR") then {
       _freq,
       _code
     ]
-  ] call FUNC(sendData);
+  ] call EFUNC(extension,sendData);
 };

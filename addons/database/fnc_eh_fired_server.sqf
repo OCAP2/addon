@@ -86,6 +86,6 @@
   TRACE_1("Sending fired data JSON to extension", _json);
   _json spawn {
     sleep 2;
-    [":PROJECTILE:", [_this]] call FUNC(sendData);
+    [":PROJECTILE:", [_this]] call EFUNC(extension,sendData);
   };
 }] call CBA_fnc_addEventHandler;

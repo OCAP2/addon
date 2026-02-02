@@ -66,5 +66,5 @@ params [
   _eventName,
   _eventMessage,
   [_extraData] call CBA_fnc_encodeJSON
-]] call EFUNC(database,sendData);
+]] call EFUNC(extension,sendData);
 true

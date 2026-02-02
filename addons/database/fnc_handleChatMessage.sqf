@@ -20,4 +20,4 @@ private _senderOcapId = _person getVariable [QGVARMAIN(id), -1];
   _name,
   _text,
   _playerUID
-]] call FUNC(sendData);
+]] call EFUNC(extension,sendData);

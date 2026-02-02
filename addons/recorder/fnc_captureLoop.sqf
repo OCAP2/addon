@@ -100,7 +100,7 @@ GVAR(PFHObject) = [
 
         [
           {missionNamespace getVariable [QEGVAR(database,dbValid), false]},
-          {[":NEW:SOLDIER:", _this] call EFUNC(database,sendData);},
+          {[":NEW:SOLDIER:", _this] call EFUNC(extension,sendData);},
           _newUnit,
           30
         ] call CBA_fnc_waitUntilAndExecute;
@@ -147,7 +147,7 @@ GVAR(PFHObject) = [
         ];
 
         if (_x getVariable ["unitData", []] isNotEqualTo _unitData) then {
-          [":NEW:SOLDIER:STATE:", _unitData] call EFUNC(database,sendData);
+          [":NEW:SOLDIER:STATE:", _unitData] call EFUNC(extension,sendData);
           _x setVariable [QGVARMAIN(unitData), _unitData];
         };
       };
@@ -197,7 +197,7 @@ GVAR(PFHObject) = [
 
         [
           {missionNamespace getVariable [QEGVAR(database,dbValid), false]},
-          {[":NEW:VEHICLE:", _this] call EFUNC(database,sendData);},
+          {[":NEW:VEHICLE:", _this] call EFUNC(extension,sendData);},
           _newVehicleData,
           30
         ] call CBA_fnc_waitUntilAndExecute;
@@ -237,7 +237,7 @@ GVAR(PFHObject) = [
         ];
         toFixed -1;
 
-        [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(database,sendData);
+        [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
       };
       false
     } count vehicles;

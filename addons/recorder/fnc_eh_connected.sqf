@@ -39,7 +39,7 @@ if (_owner isEqualTo 2) exitWith {};
   [createHashMapFromArray [
     ["playerUid", _uid]
   ]] call CBA_fnc_encodeJSON
-]] call EFUNC(database,sendData);
+]] call EFUNC(extension,sendData);
 
 // trigger admin control check for all connecting players
 [_idstr, "connect"] call FUNC(adminUIcontrol);

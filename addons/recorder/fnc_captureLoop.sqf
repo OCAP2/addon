@@ -131,7 +131,7 @@ GVAR(PFHObject) = [
           _pos, //2
           round getDir _x, //3
           _lifeState, //4
-          BOOL(!((vehicle _x) isEqualTo _x)),  //5
+          BOOL((vehicle _x) isNotEqualTo _x),  //5
           if (alive _x) then {name _x} else {""}, //6
           BOOL(isPlayer _x), //7
           _unitRole, //8
@@ -158,7 +158,7 @@ GVAR(PFHObject) = [
         _vehType = typeOf _x;
         _class = _vehType call FUNC(getClass);
         private _toExcludeKind = false;
-        if (count (parseSimpleArray EGVAR(settings,excludeKindFromRecord)) > 0) then {
+        if (parseSimpleArray EGVAR(settings,excludeKindFromRecord) isNotEqualTo []) then {
           private _vic = _x;
           {
             if (_vic isKindOf _x) exitWith {
@@ -167,7 +167,7 @@ GVAR(PFHObject) = [
           } forEach (parseSimpleArray EGVAR(settings,excludeKindFromRecord));
         };
         private _toExcludeClass = false;
-        if (count (parseSimpleArray EGVAR(settings,excludeClassFromRecord)) > 0) then {
+        if (parseSimpleArray EGVAR(settings,excludeClassFromRecord) isNotEqualTo []) then {
           {
             if (typeOf _vic == _x) exitWith {
               _toExcludeClass = true;

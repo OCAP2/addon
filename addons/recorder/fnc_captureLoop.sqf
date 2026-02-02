@@ -74,6 +74,7 @@ GVAR(PFHObject) = [
     };
 
     {
+      private _justInitialized = false;
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
         if (
           _x isKindOf "Logic"
@@ -107,8 +108,9 @@ GVAR(PFHObject) = [
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(isInitialized), true, true];
+        _justInitialized = true;
       };
-      if !(_x getVariable [QGVARMAIN(exclude), false]) then {
+      if (!_justInitialized && {!(_x getVariable [QGVARMAIN(exclude), false])}) then {
         private _unitRole = _x getVariable [QGVARMAIN(unitType), ""];
         if (GVAR(captureFrameNo) % 10 == 0 || _unitRole == "") then {
           _unitRole = [_x] call FUNC(getUnitType);
@@ -154,6 +156,7 @@ GVAR(PFHObject) = [
 
 
     {
+      private _justInitialized = false;
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
         _vehType = typeOf _x;
         _class = _vehType call FUNC(getClass);
@@ -202,8 +205,9 @@ GVAR(PFHObject) = [
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(vehicleClass), _class];
         _x setVariable [QGVARMAIN(isInitialized), true, true];
+        _justInitialized = true;
       };
-      if !(_x getVariable [QGVARMAIN(exclude), false]) then {
+      if (!_justInitialized && {!(_x getVariable [QGVARMAIN(exclude), false])}) then {
         private _crew = [];
         {
           if (_x getVariable [QGVARMAIN(isInitialized), false]) then {

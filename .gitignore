@@ -1,3 +1,7 @@
 *.pbo
 
 *.bak
+
+.hemttout/
+
+hemtt.exe

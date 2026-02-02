@@ -1,0 +1,17 @@
+name = "OCAP"
+prefix = "ocap"
+mainprefix = "x"
+author = "OCAP2 Team"
+[files]
+include = [
+    "mod.cpp",
+    "licence.txt",
+    "logo_ocap.paa",
+]
+
+[lints.sqf]
+# Suppress errors until code is fixed
+command_case = false
+banned_commands = false
+undefined = false
+format_args = false

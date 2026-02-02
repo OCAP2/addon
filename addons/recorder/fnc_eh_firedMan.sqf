@@ -144,31 +144,22 @@ if (_ammoSimType isEqualTo "shotBullet") exitWith {
 		_firer = _projectile getVariable [QGVAR(firer), objNull];
 		_firerId = _projectile getVariable [QGVAR(firerId), -1];
 		_projectilePos = getPosASL _projectile;
-    _firerPos = getPosASL _firer;
+		_firerPos = getPosASL _firer;
 
 		[":FIRED:", [
-			_firerId,
-			GVAR(captureFrameNo),
-			_projectilePos
-		]] call EFUNC(extension,sendData);
-
-    if (EGVAR(database,dbValid) && EGVAR(database,enabled)) then {
-      // calculating start/end positions at instant of hit. This is not 100% accurate but is close enough
-      [":FIRED:", [
-        _firerId, // ocapid 1
-        GVAR(captureFrameNo), // frame 2
-        _projectilePos joinString ",", // bullet dest 3
-        _firerPos joinString ",", // bullet start 4
-        _projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
-        _projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
-        _projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
-      ]] call EFUNC(database,sendData);
-    };
+			_firerId, // ocapid 1
+			GVAR(captureFrameNo), // frame 2
+			_projectilePos joinString ",", // bullet dest 3
+			_firerPos joinString ",", // bullet start 4
+			_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
+			_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
+			_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
+		]] call EFUNC(database,sendData);
 
 		if (GVARMAIN(isDebug)) then {
 			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _projectilePos));
 
-      // add to clients' map draw array
+			// add to clients' map draw array
 			private _debugArr = [getPosASL _firer, _projectilePos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
 			[QGVAR(addDebugBullet), _debugArr] call CBA_fnc_globalEvent;
 		};
@@ -178,17 +169,22 @@ if (_ammoSimType isEqualTo "shotBullet") exitWith {
 		_firer = _projectile getVariable [QGVAR(firer), objNull];
 		_firerId = _projectile getVariable [QGVAR(firerId), -1];
 		_projectilePos = getPosASL _projectile;
+		_firerPos = getPosASL _firer;
 
 		[":FIRED:", [
-			_firerId,
-			GVAR(captureFrameNo),
-			_projectilePos
-		]] call EFUNC(extension,sendData);
+			_firerId, // ocapid 1
+			GVAR(captureFrameNo), // frame 2
+			_projectilePos joinString ",", // bullet dest 3
+			_firerPos joinString ",", // bullet start 4
+			_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
+			_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
+			_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
+		]] call EFUNC(database,sendData);
 
 		if (GVARMAIN(isDebug)) then {
 			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _projectilePos));
 
-			      // add to clients' map draw array
+			// add to clients' map draw array
 			private _debugArr = [getPosASL _firer, _projectilePos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
 			[QGVAR(addDebugBullet), _debugArr] call CBA_fnc_globalEvent;
 		};
@@ -281,12 +277,17 @@ switch (true) do {
 						_firer = _projectile getVariable [QGVAR(firer), objNull];
 						_firerId = _projectile getVariable [QGVAR(firerId), -1];
 						_projectilePos = getPosASL _projectile;
+						_firerPos = getPosASL _firer;
 
 						[":FIRED:", [
-							_firerId,
-							GVAR(captureFrameNo),
-							_projectilePos
-						]] call EFUNC(extension,sendData);
+							_firerId, // ocapid 1
+							GVAR(captureFrameNo), // frame 2
+							_projectilePos joinString ",", // bullet dest 3
+							_firerPos joinString ",", // bullet start 4
+							_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
+							_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
+							_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
+						]] call EFUNC(database,sendData);
 
 						if (GVARMAIN(isDebug)) then {
 							// add to clients' map draw array
@@ -301,12 +302,17 @@ switch (true) do {
 						_firer = _projectile getVariable [QGVAR(firer), objNull];
 						_firerId = _projectile getVariable [QGVAR(firerId), -1];
 						_projectilePos = getPosASL _projectile;
+						_firerPos = getPosASL _firer;
 
 						[":FIRED:", [
-							_firerId,
-							GVAR(captureFrameNo),
-							_projectilePos
-						]] call EFUNC(extension,sendData);
+							_firerId, // ocapid 1
+							GVAR(captureFrameNo), // frame 2
+							_projectilePos joinString ",", // bullet dest 3
+							_firerPos joinString ",", // bullet start 4
+							_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
+							_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
+							_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
+						]] call EFUNC(database,sendData);
 
 						if (GVARMAIN(isDebug)) then {
 							// add to clients' map draw array

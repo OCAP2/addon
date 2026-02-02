@@ -89,31 +89,20 @@ GVAR(PFHObject) = [
           groupID (group _x), //4
           str side group _x, //5
           BOOL(isPlayer _x), //6
-          roleDescription _x // 7
+          roleDescription _x, // 7
+          typeOf _x, // 8 classname
+          [configOf _x] call BIS_fnc_displayName, // 9 type displayname
+          if (isPlayer _x) then {getPlayerUID _x} else {""}, // 10 player uid
+          [squadParams _x] call CBA_fnc_encodeJSON // 11 squad params
         ];
-        [":NEW:UNIT:", _newUnit] call EFUNC(extension,sendData);
         _x setVariable [QGVARMAIN(newUnitData), _newUnit];
 
-        if (
-          missionNamespace getVariable [
-            QEGVAR(database,enabled), false]
-        ) then {
-          _newUnit pushBack (typeOf _x); // 8 classname
-          _newUnit pushBack ([configOf _x] call BIS_fnc_displayName); // 9 type displayname
-          if (isPlayer _x) then { // 10 player uid
-            _newUnit pushBack (getPlayerUID _x);
-          } else {
-            _newUnit pushBack "";
-          };
-          _newUnit pushBack ([squadParams _x] call CBA_fnc_encodeJSON); // 11 squad params
-
-          [
-            {missionNamespace getVariable [QEGVAR(database,dbValid), false]},
-            {[":NEW:SOLDIER:", _this] call EFUNC(database,sendData);},
-            _newUnit,
-            30
-          ] call CBA_fnc_waitUntilAndExecute;
-        };
+        [
+          {missionNamespace getVariable [QEGVAR(database,dbValid), false]},
+          {[":NEW:SOLDIER:", _this] call EFUNC(database,sendData);},
+          _newUnit,
+          30
+        ] call CBA_fnc_waitUntilAndExecute;
 
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
@@ -145,47 +134,19 @@ GVAR(PFHObject) = [
           BOOL(!((vehicle _x) isEqualTo _x)),  //5
           if (alive _x) then {name _x} else {""}, //6
           BOOL(isPlayer _x), //7
-          _unitRole //8
+          _unitRole, //8
+          GVAR(captureFrameNo), // frame 9
+          if (!isNil "ace_medical_status_fnc_hasStableVitals") then {BOOL([_x] call ace_medical_status_fnc_hasStableVitals)} else {true}, // 10
+          if (!isNil "ace_medical_status_fnc_isBeingDragged") then {BOOL([_x] call ace_medical_status_fnc_isBeingDragged)} else {false}, // 11
+          (getPlayerScores _x) joinString ",", // scores 12
+          _x call CBA_fnc_vehicleRole, // vehicle role 13
+          if (!isNull objectParent _x) then {(objectParent _x) getVariable [QGVARMAIN(id), -1]} else {-1}, // 14
+          stance _x // 15
         ];
 
         if (_x getVariable ["unitData", []] isNotEqualTo _unitData) then {
-          [":UPDATE:UNIT:", _unitData] call EFUNC(extension,sendData);
-          _x setVariable [QGVARMAIN(unitData), _unitData];
-        };
-
-        if (
-          missionNamespace getVariable [QEGVAR(database,dbValid), false] &&
-          missionNamespace getVariable [QEGVAR(database,enabled), false]
-        ) then {
-          _unitData pushBack GVAR(captureFrameNo); // frame 9
-          if (!isNil "ace_medical_status_fnc_hasStableVitals") then {
-            // ACE3 medical
-            // has stable vitals 10
-            // is being dragged or carried 11
-            _unitData pushBack BOOL([_x] call ace_medical_status_fnc_hasStableVitals);
-            _unitData pushBack BOOL([_x] call ace_medical_status_fnc_isBeingDragged);
-          } else {
-            // vanilla medical
-            // default true, false
-            _unitData pushBack true;
-            _unitData pushBack false;
-          };
-
-          _unitData pushBack (
-            (getPlayerScores _x) joinString ","
-          ); // scores 12
-          _unitData pushBack (
-            _x call CBA_fnc_vehicleRole
-          ); // vehicle role ("driver", "cargo", "gunner", "crew", "turret") 13
-          if (!isNull objectParent _x) then {
-            _unitData pushBack ((objectParent _x) getVariable [QGVARMAIN(id), -1]); // 14
-          } else {
-            _unitData pushBack -1;
-          };
-          _unitData pushBack (stance _x); // 15
-
-
           [":NEW:SOLDIER:STATE:", _unitData] call EFUNC(database,sendData);
+          _x setVariable [QGVARMAIN(unitData), _unitData];
         };
       };
       false
@@ -225,25 +186,18 @@ GVAR(PFHObject) = [
           GVAR(captureFrameNo), //1
           GVAR(nextId), //2
           _class, //3
-          getText (configFile >> "CfgVehicles" >> _vehType >> "displayName") //4
+          getText (configFile >> "CfgVehicles" >> _vehType >> "displayName"), //4
+          typeOf _x, //5
+          format ["%1", [_x] call BIS_fnc_getVehicleCustomization] //6
         ];
-
-        [":NEW:VEH:", _newVehicleData] call EFUNC(extension,sendData);
         _x setVariable [QGVARMAIN(newVehicleData), _newVehicleData];
 
-        if (
-          missionNamespace getVariable [
-            QEGVAR(database,enabled), false]
-        ) then {
-          _newVehicleData pushBack (typeOf _x);
-          _newVehicleData pushBack format ["%1", [_x] call BIS_fnc_getVehicleCustomization];
-          [
-            {missionNamespace getVariable [QEGVAR(database,dbValid), false]},
-            {[":NEW:VEHICLE:", _this] call EFUNC(database,sendData);},
-            _newVehicleData,
-            30
-          ] call CBA_fnc_waitUntilAndExecute;
-        };
+        [
+          {missionNamespace getVariable [QEGVAR(database,dbValid), false]},
+          {[":NEW:VEHICLE:", _this] call EFUNC(database,sendData);},
+          _newVehicleData,
+          30
+        ] call CBA_fnc_waitUntilAndExecute;
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(vehicleClass), _class];
@@ -258,37 +212,28 @@ GVAR(PFHObject) = [
         } count (crew _x);
         _pos = getPosASL _x;
 
+        ([_x, [0], true] call CBA_fnc_turretDir) params ["_turretAz", "_turretEl"];
+        toFixed 2;
         private _vehicleData = [
           (_x getVariable QGVARMAIN(id)), //1
           _pos, //2
           round getDir _x, //3
           BOOL(alive _x), //4
           _crew, //5
-          GVAR(captureFrameNo) // 6
+          GVAR(captureFrameNo), // 6
+          fuel _x, // 7
+          damage _x, // 8
+          isEngineOn _x, // 9
+          (locked _x) >= 2, // 10
+          side _x, // 11
+          vectorDir _x, // 12
+          vectorUp _x, // 13
+          _turretAz, // 14
+          _turretEl // 15
         ];
-        [":UPDATE:VEH:", _vehicleData] call EFUNC(extension,sendData);
+        toFixed -1;
 
-        if (
-          missionNamespace getVariable [QEGVAR(database,dbValid), false] &&
-          missionNamespace getVariable [QEGVAR(database,enabled), false]
-        ) then {
-          _vehicleData pushBack (fuel _x); // 7
-          _vehicleData pushBack (damage _x); // 8
-          _vehicleData pushBack (isEngineOn _x); // 9
-          _vehicleData pushBack ((locked _x) >= 2); // 10
-          _vehicleData pushBack (side _x); // 11
-          toFixed 2;
-          _vehicleData pushBack (vectorDir _x); // 12
-          _vehicleData pushBack (vectorUp _x); // 13
-
-          ([_x, [0], true] call CBA_fnc_turretDir) params
-            ["_turretAz", "_turretEl"];
-          _vehicleData pushBack _turretAz; // 14
-          _vehicleData pushBack _turretEl; // 15
-          toFixed -1;
-
-          [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(database,sendData);
-        };
+        [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(database,sendData);
       };
       false
     } count vehicles;

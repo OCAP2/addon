@@ -44,26 +44,14 @@ _causedByInfo = [
   _eventText
 ];
 
-private _eventData = [
+[":HIT:", [
   _hitFrame, // Frame number
-  "hit", // event type
   _unitID, // hit unit ID
-  _causedByInfo, // event info
+  _shooterID, // shooter unit ID
+  _eventText, // weapon etc
   _distanceInfo // distance
-];
-
-[":EVENT:", _eventData] call EFUNC(extension,sendData);
-
-if (EGVAR(database,dbValid) && EGVAR(database,enabled)) then {
-  [":HIT:", [
-    _hitFrame, // Frame number
-    _unitID, // hit unit ID
-    _shooterID, // shooter unit ID
-    _eventText, // weapon etc
-    _distanceInfo // distance
-  ]] call EFUNC(database,sendData);
-};
+]] call EFUNC(database,sendData);
 
 if (GVARMAIN(isDebug)) then {
-  OCAPEXTLOG(ARR4("HIT EVENT", _hitFrame, _unitID, _causedById));
+  OCAPEXTLOG(ARR4("HIT EVENT", _hitFrame, _unitID, _shooterID));
 };

@@ -111,65 +111,23 @@ if (!isNil QGVAR(PFHObject)) then {
   GVAR(PFHObject) = nil;
 };
 
-if (isNil "_side") then {
-  [":EVENT:", [_endFrameNumber, "endMission", ["", "Mission ended"]]] call EFUNC(extension,sendData);
-  [":EVENT:", [
-    _endFrameNumber,
-    "endMission",
-    "",
-    [createHashMapFromArray [
-      ["winSide", ""],
-      ["message", "Mission ended"]
-    ]] call CBA_fnc_encodeJSON
-  ]] call EFUNC(database,sendData);
-};
-if (isNil "_side" && !isNil "_message") then {
-  [":EVENT:", [_endFrameNumber, "endMission", ["", _message]]] call EFUNC(extension,sendData);
-  [":EVENT:", [
-    _endFrameNumber,
-    "endMission",
-    "",
-    [createHashMapFromArray [
-      ["winSide", ""],
-      ["message", _message]
-    ]] call CBA_fnc_encodeJSON
-  ]] call EFUNC(database,sendData);
-};
-if (!isNil "_side" && isNil "_message") then {
-  [":EVENT:", [_endFrameNumber, "endMission", ["", _side]]] call EFUNC(extension,sendData);
-  [":EVENT:", [
-    _endFrameNumber,
-    "endMission",
-    "",
-    [createHashMapFromArray [
-      ["winSide", _side],
-      ["message", ""]
-    ]] call CBA_fnc_encodeJSON
-  ]] call EFUNC(database,sendData);
-};
-if (!isNil "_side" && !isNil "_message") then {
-  private _sideString = str(_side);
-  if (_side == sideUnknown) then { _sideString = "" };
-  [":EVENT:", [_endFrameNumber, "endMission", [_sideString, _message]]] call EFUNC(extension,sendData);
-  [":EVENT:", [
-    _endFrameNumber,
-    "endMission",
-    "",
-    [createHashMapFromArray [
-      ["winSide", _sideString],
-      ["message", _message]
-    ]] call CBA_fnc_encodeJSON
-  ]] call EFUNC(database,sendData);
-};
+private _winSide = if (isNil "_side" || _side == sideUnknown) then {""} else {str _side};
+private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mission ended"} else {""}} else {_message};
+
+[":EVENT:", [
+  _endFrameNumber,
+  "endMission",
+  "",
+  [createHashMapFromArray [
+    ["winSide", _winSide],
+    ["message", _endMessage]
+  ]] call CBA_fnc_encodeJSON
+]] call EFUNC(database,sendData);
 
 
-if (!isNil "_tag") then {
-  [":SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, _tag]] call EFUNC(extension,sendData);
-  OCAPEXTLOG(ARR4("Saved recording of mission", GVAR(missionName), "with tag", _tag));
-} else {// default tag to configured setting
-  [":SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, EGVAR(settings,saveTag)]] call EFUNC(extension,sendData);
-  OCAPEXTLOG(ARR3("Saved recording of mission", GVAR(missionName), "with default tag"));
-};
+private _saveTag = if (!isNil "_tag") then {_tag} else {EGVAR(settings,saveTag)};
+[":SAVE:MISSION:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, _saveTag]] call EFUNC(database,sendData);
+OCAPEXTLOG(ARR4("Saved recording of mission", GVAR(missionName), "with tag", _saveTag));
 
 
 // notify players that the recording was saved with a 2 second delay to ensure the "stopped recording" entries populate first

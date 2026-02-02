@@ -27,22 +27,14 @@
 
 params ["_unit", "_id", "_uid", "_name"];
 
-[":EVENT:",
-	[GVAR(captureFrameNo), "disconnected", _name]
-] call EFUNC(extension,sendData);
-
-if (EGVAR(database,dbValid) && EGVAR(database,enabled)) then {
-[":EVENT:",
-  [
-    GVAR(captureFrameNo),
-    "disconnected",
-    _name,
-    [createHashMapFromArray [
-      ["playerUid", _uid]
-    ]] call CBA_fnc_encodeJSON
-  ]
-] call EFUNC(database,sendData);
-};
+[":EVENT:", [
+  GVAR(captureFrameNo),
+  "disconnected",
+  _name,
+  [createHashMapFromArray [
+    ["playerUid", _uid]
+  ]] call CBA_fnc_encodeJSON
+]] call EFUNC(database,sendData);
 
 if (_unit getVariable [QGVARMAIN(isInitialized), false]) then {
 	_unit setVariable [QGVARMAIN(exclude), true];

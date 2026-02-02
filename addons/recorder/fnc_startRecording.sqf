@@ -64,9 +64,6 @@ _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {st
 }] remoteExec ["call", [0, -2] select isDedicated, true];
 
 if (GVAR(captureFrameNo) == 0) then {
-  // Notify the extension
-  [":START:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay)]] call EFUNC(extension,sendData);
-  [":SET:VERSION:", [GVARMAIN(version)]] call EFUNC(extension,sendData);
   call FUNC(captureLoop);
 };
 

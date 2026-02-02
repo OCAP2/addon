@@ -91,16 +91,13 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
         OCAPEXTLOG(ARR4("KILLED EVENT", _killedFrame, _victimId, _killerId));
       };
 
-      [":EVENT:", _eventData] call EFUNC(extension,sendData);
-      if (EGVAR(database,dbValid) && EGVAR(database,enabled)) then {
-        [":KILL:", [
-          _killedFrame,
-          _victimId,
-          _killerId,
-          _eventText,
-          _killDistance
-        ]] call EFUNC(database,sendData);
-      };
+      [":KILL:", [
+        _killedFrame,
+        _victimId,
+        _killerId,
+        _eventText,
+        _killDistance
+      ]] call EFUNC(database,sendData);
     };
   };
 };

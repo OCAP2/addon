@@ -35,10 +35,10 @@ if (_date isEqualTo []) then {
 };
 _missionDateFormat append (_date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 
-[":TIME:", [
+[":NEW:TIME:STATE:", [
   GVAR(captureFrameNo),
   format _systemTimeFormat,
   format _missionDateFormat,
   timeMultiplier,
   time
-]] call EFUNC(extension,sendData);
+]] call EFUNC(database,sendData);

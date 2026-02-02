@@ -61,18 +61,10 @@ params [
   ["_extraData", createHashMap, [createHashMap, []]]
 ];
 
-[":EVENT:",
-  [GVAR(captureFrameNo), _eventName, _eventMessage]
-] call EFUNC(extension,sendData);
-
-if (EGVAR(database,dbValid) && EGVAR(database,enabled)) then {
-  [":EVENT:",
-    [
-      GVAR(captureFrameNo),
-      _eventName,
-      _eventMessage,
-      [_extraData] call CBA_fnc_encodeJSON
-    ]
-  ] call EFUNC(database,sendData);
-};
+[":EVENT:", [
+  GVAR(captureFrameNo),
+  _eventName,
+  _eventMessage,
+  [_extraData] call CBA_fnc_encodeJSON
+]] call EFUNC(database,sendData);
 true

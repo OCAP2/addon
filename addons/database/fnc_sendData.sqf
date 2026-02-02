@@ -40,12 +40,6 @@ private _parseResponse = {
     nil
   };
 
-  // Handle raw values (not array format) - e.g., :TIMESTAMP: returns raw number
-  if !(_result select [0, 1] isEqualTo "[") exitWith {
-    diag_log text format ["[OCAP] [DB-EXT] Raw response: %1", _result];
-    _result
-  };
-
   private _parsed = parseSimpleArray _result;
   diag_log text format ["[OCAP] [DB-EXT] Parsed response: %1", _parsed];
 

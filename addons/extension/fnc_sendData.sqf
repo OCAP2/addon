@@ -53,24 +53,30 @@ if !(_parsed isEqualType []) exitWith {
   nil
 };
 
-if (count _parsed < 2) exitWith {
-  diag_log text format ["[OCAP] [EXT] ERROR: Response array too short: %1", _parsed];
+if (count _parsed < 1) exitWith {
+  diag_log text format ["[OCAP] [EXT] ERROR: Response array empty: %1", _parsed];
   nil
 };
 
 private _status = _parsed # 0;
-private _data = _parsed # 1;
 
 if (_status isEqualTo "error") exitWith {
-  diag_log text format ["[OCAP] [EXT] ERROR from extension: %1 (command: %2)", _data, _command];
+  private _errorMsg = if (count _parsed > 1) then {_parsed # 1} else {"Unknown error"};
+  diag_log text format ["[OCAP] [EXT] ERROR from extension: %1 (command: %2)", _errorMsg, _command];
   nil
 };
 
 if (_status isEqualTo "ok") exitWith {
-  diag_log text format ["[OCAP] [EXT] OK: %1", _data];
-  _data
+  if (count _parsed > 1) then {
+    private _data = _parsed # 1;
+    diag_log text format ["[OCAP] [EXT] OK: %1", _data];
+    _data
+  } else {
+    diag_log text "[OCAP] [EXT] OK";
+    true
+  };
 };
 
 // Unknown status
-diag_log text format ["[OCAP] [EXT] WARNING: Unknown status '%1', returning data as-is: %2", _status, _data];
-_data
+diag_log text format ["[OCAP] [EXT] Unknown status: %1", _status];
+nil

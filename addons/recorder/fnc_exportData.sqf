@@ -111,7 +111,7 @@ if (!isNil QGVAR(PFHObject)) then {
   GVAR(PFHObject) = nil;
 };
 
-private _winSide = if (isNil "_side" || _side == sideUnknown) then {""} else {str _side};
+private _winSide = if (isNil "_side") then {""} else {if (_side == sideUnknown) then {""} else {str _side}};
 private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mission ended"} else {""}} else {_message};
 
 [":EVENT:", [

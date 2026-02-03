@@ -86,11 +86,11 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
         _mrk_owner = -1;
         _sideOfMarker = -1;
       } else {
-        _sideOfMarker = (side _mrk_owner) call BIS_fnc_sideID;
+        _sideOfMarker = str side _mrk_owner;
         _mrk_owner = _mrk_owner getVariable[QGVARMAIN(id), 0];
       };
 
-      if (_sideOfMarker isEqualTo 4 ||
+      if (_sideOfMarker in ["EMPTY", "LOGIC", "UNKNOWN"] ||
       (["Projectile#", _mrk_name] call BIS_fnc_inString) ||
       (["Detonation#", _mrk_name] call BIS_fnc_inString) ||
       (["Mine#", _mrk_name] call BIS_fnc_inString) ||

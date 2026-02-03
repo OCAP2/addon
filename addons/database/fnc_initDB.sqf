@@ -19,7 +19,7 @@ addMissionEventHandler ["ExtensionCallback", {
 
   private _data = parseSimpleArray _dataArr;
 
-  TRACE_3("ExtensionCallback",_name,_function,_data);
+  TRACE_3("ExtensionCallback", _name, _function, _data);
 
   if (_function isEqualTo ":VERSION:") exitWith {
     // version return is automatic during extension init process

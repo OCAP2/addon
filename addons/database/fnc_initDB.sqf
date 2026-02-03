@@ -63,7 +63,7 @@ addMissionEventHandler ["ExtensionCallback", {
     [":GETDIR:OCAPLOG:", nil, 'ocap_recorder'] call EFUNC(extension,sendData);
 
     INFO("Initializing storage...");
-    [":INIT:STORAGE:", [], 'ocap_recorder'] call EFUNC(extension,sendData);
+    [":INIT:STORAGE:", nil, 'ocap_recorder'] call EFUNC(extension,sendData);
   };
 
 
@@ -169,5 +169,5 @@ addMissionEventHandler ["ExtensionCallback", {
 
 INFO("Initializing extension...");
 GVAR(initTimer) = diag_tickTime;
-[":INIT:", []] call EFUNC(extension,sendData);
+[":INIT:", nil] call EFUNC(extension,sendData);
 true

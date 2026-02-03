@@ -7,12 +7,18 @@ if (isNil "_projectile") exitWith {
   WARNING("Projectile EHs: _projectile is nil");
 };
 
+// Projectile data array indices:
+// 14: positions
+// 16: hitParts
+// 17: sim
+// 18: isSub
+
 // first, we need to verify simtype & whether this was a submunition or not.
 // if this is NOT a deployed submunition itself but the simType of the ammo is "ShotSubmunition", then we need to skip the Deleted EH and leave the Deleted registration to the submunition itself. This will ensure we're tracking start to finish multiple actual projectiles from things like shotguns, cluster artillery, mixed-belt machineguns, etc.
-private _hash = _projectile getVariable QGVARMAIN(dataHash);
+private _data = _projectile getVariable QGVARMAIN(projectileData);
 if (
-  _hash get "sim" isEqualTo "ShotSubmunition" &&
-  {_hash get "isSub" isEqualTo false}
+  (_data select 17) isEqualTo "ShotSubmunition" &&
+  {(_data select 18) isEqualTo false}
 ) exitWith {};
 
 // HitExplosion
@@ -31,24 +37,25 @@ _projectile addEventHandler ["HitExplosion", {
   // skip if no components were hit
   if (count _hitThings isEqualTo 0) exitWith {};
 
+  private _data = _projectile getVariable QGVARMAIN(projectileData);
 
   // many hit components for these events, so we'll sort them by radius (_x#3) largest to smallest and keep the top 5
   private _hitThings = _hitThings apply {[_x#3, _x#2]};
   _hitThings sort true;
   _hitThings = _hitThings select [0, 5 min (count _hitThings)];
   // add data, _x#1 will be the component name
-  ((_projectile getVariable QGVARMAIN(dataHash)) get "hitParts") pushBack [
+  (_data select 16) pushBack [
     _hitOcapId,
     _hitThings apply {_x#1},
     (getPosASL _projectile) joinString ",",
     EGVAR(recorder,captureFrameNo)
   ];
   // add pos
-  ((_projectile getVariable QGVARMAIN(dataHash)) get "positions") pushBack [
-      [":TIMESTAMP:", []] call EFUNC(extension,sendData),
-      EGVAR(recorder,captureFrameNo),
-      (getPosASL _projectile) joinString ","
-    ];
+  (_data select 14) pushBack [
+    diag_tickTime,
+    EGVAR(recorder,captureFrameNo),
+    (getPosASL _projectile) joinString ","
+  ];
 }];
 
 // HitPart
@@ -67,19 +74,21 @@ _projectile addEventHandler ["HitPart", {
   // skip if no components were hit
   if (count _hitThings isEqualTo 0) exitWith {};
 
+  private _data = _projectile getVariable QGVARMAIN(projectileData);
+
   // add hit data
-  ((_projectile getVariable QGVARMAIN(dataHash)) get "hitParts") pushBack [
+  (_data select 16) pushBack [
     _hitOcapId,
     _component,
     (getPosASL _projectile) joinString ",",
     EGVAR(recorder,captureFrameNo)
   ];
   // add pos
-  ((_projectile getVariable QGVARMAIN(dataHash)) get "positions") pushBack [
-      [":TIMESTAMP:", []] call EFUNC(extension,sendData),
-      EGVAR(recorder,captureFrameNo),
-      _pos joinString ","
-    ];
+  (_data select 14) pushBack [
+    diag_tickTime,
+    EGVAR(recorder,captureFrameNo),
+    _pos joinString ","
+  ];
 }];
 
 // Deflected
@@ -88,12 +97,13 @@ _projectile addEventHandler ["Deflected", {
 	params ["_projectile", "_pos", "_velocity", "_hitObject"];
   TRACE_4("Deflected",_projectile,_pos,_velocity,_hitObject);
 
+  private _data = _projectile getVariable QGVARMAIN(projectileData);
   // just log position
-  ((_projectile getVariable QGVARMAIN(dataHash)) get "positions") pushBack [
-      [":TIMESTAMP:", []] call EFUNC(extension,sendData),
-      EGVAR(recorder,captureFrameNo),
-      _pos joinString ","
-    ];
+  (_data select 14) pushBack [
+    diag_tickTime,
+    EGVAR(recorder,captureFrameNo),
+    _pos joinString ","
+  ];
 }];
 
 // END EHs
@@ -104,26 +114,27 @@ _projectile addEventHandler ["Explode", {
 	params ["_projectile", "_pos", "_velocity"];
   TRACE_3("Explode",_projectile,_pos,_velocity);
 
+  private _data = _projectile getVariable QGVARMAIN(projectileData);
   // just log position
-  ((_projectile getVariable QGVARMAIN(dataHash)) get "positions") pushBack [
-      [":TIMESTAMP:", []] call EFUNC(extension,sendData),
-      EGVAR(recorder,captureFrameNo),
-      _pos joinString ","
-    ];
+  (_data select 14) pushBack [
+    diag_tickTime,
+    EGVAR(recorder,captureFrameNo),
+    _pos joinString ","
+  ];
 }];
 
 // Deleted
 // Tracks a projectile that was deleted, either by a script or by the game. The final processing call that'll send data to the server for processing.
 _projectile addEventHandler ["Deleted", {
 	params ["_projectile"];
-  private _hash = _projectile getVariable QGVARMAIN(dataHash);
-  (_hash get "positions") pushBack [
-      [":TIMESTAMP:", []] call EFUNC(extension,sendData),
-      EGVAR(recorder,captureFrameNo),
-      (getPosASL _projectile) joinString ","
-    ];
-  TRACE_1("Projectile hash",_hash);
-  [QGVARMAIN(handleFiredManData), [_hash]] call CBA_fnc_serverEvent;
+  private _data = _projectile getVariable QGVARMAIN(projectileData);
+  (_data select 14) pushBack [
+    diag_tickTime,
+    EGVAR(recorder,captureFrameNo),
+    (getPosASL _projectile) joinString ","
+  ];
+  TRACE_1("Projectile data",_data);
+  [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_serverEvent;
 }];
 
 TRACE_1("Finished applying EH",_projectile);

@@ -15,3 +15,6 @@ command_case = false
 banned_commands = false
 undefined = false
 format_args = false
+# Optimization suggestions - not critical
+if_assign = false
+select_parse_number = false

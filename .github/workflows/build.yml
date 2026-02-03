@@ -18,7 +18,17 @@ jobs:
         uses: arma-actions/hemtt@v1
 
       - name: Run HEMTT check
-        run: hemtt check
+        run: |
+          # Run hemtt check and capture output
+          OUTPUT=$(hemtt check 2>&1) || true
+          echo "$OUTPUT"
+
+          # Check for critical warnings that should fail the build
+          # PW1: macro redefinition, PW3: macro padding, FNL: missing newline
+          if echo "$OUTPUT" | grep -E "warning\[(PW1|PW3|FNL)\]"; then
+            echo "::error::Critical lint warnings found (PW1/PW3/FNL)"
+            exit 1
+          fi
 
       - name: Run HEMTT build
         run: hemtt build

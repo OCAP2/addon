@@ -54,42 +54,50 @@ if (_muzzleDisplay isEqualTo "") then {
   _muzzleDisplay = getText(configFile >> "CfgWeapons" >> _weapon >> "displayName");
 };
 
+// Projectile data array structure:
+// 0:  firedFrame
+// 1:  firedTime (diag_tickTime)
+// 2:  firerID
+// 3:  vehicleID
+// 4:  vehicleRole
+// 5:  remoteControllerID
+// 6:  weapon
+// 7:  weaponDisplay
+// 8:  muzzle
+// 9:  muzzleDisplay
+// 10: magazine
+// 11: magazineDisplay
+// 12: ammo
+// 13: fireMode
+// 14: positions [[tickTime, frame, "x,y,z"], ...]
+// 15: initialVelocity
+// 16: hitParts [[hitOcapId, component, "x,y,z", frame], ...]
+// 17: sim
+// 18: isSub
 
-// set variables
-// firedAt: refers to timing, i.e. frame number and unixNano timestamp
-// firedBy: shooter info
-// positions: each registered point of the projectile's path
-// firedWith: weapon and ammo info
-_projectile setVariable [QGVARMAIN(dataHash), createHashMapFromArray [
-  ["firedFrame", EGVAR(recorder,captureFrameNo)],
-  ["firedTime", [":TIMESTAMP:", []] call EFUNC(extension,sendData)],
-  ["firerID", _firerOcapId],
-  ["vehicleID", _vehicleOcapId],
-  ["vehicleRole", _vehicleRole],
-  ["remoteControllerID", _remoteControllerOcapId],
-  ["weapon", _weapon],
-  ["weaponDisplay", getText(configFile >> "CfgWeapons" >> _weapon >> "displayName")],
-  ["muzzle", _muzzle],
-  ["muzzleDisplay", _muzzleDisplay],
-  ["magazine", _magazine],
-  ["magazineDisplay", getText(configFile >> "CfgMagazines" >> _magazine >> "displayName")],
-  ["ammo", _ammo],
-  ["fireMode", _mode],
-  ["positions", [
-    [
-      [":TIMESTAMP:", []] call EFUNC(extension,sendData),
-      EGVAR(recorder,captureFrameNo),
-      (getPosASL _projectile) joinString ","
-    ]
-  ]],
-  ["initialVelocity",
-    (velocity _projectile) joinString ","
-  ],
-  ["hitParts", []],
-  ["sim", getText(configFile >> "CfgAmmo" >> _ammo >> "simulation")],
-  ["isSub", false]
-]];
+private _data = [
+  EGVAR(recorder,captureFrameNo),                                    // 0: firedFrame
+  diag_tickTime,                                                     // 1: firedTime
+  _firerOcapId,                                                      // 2: firerID
+  _vehicleOcapId,                                                    // 3: vehicleID
+  _vehicleRole,                                                      // 4: vehicleRole
+  _remoteControllerOcapId,                                           // 5: remoteControllerID
+  _weapon,                                                           // 6: weapon
+  getText(configFile >> "CfgWeapons" >> _weapon >> "displayName"),   // 7: weaponDisplay
+  _muzzle,                                                           // 8: muzzle
+  _muzzleDisplay,                                                    // 9: muzzleDisplay
+  _magazine,                                                         // 10: magazine
+  getText(configFile >> "CfgMagazines" >> _magazine >> "displayName"), // 11: magazineDisplay
+  _ammo,                                                             // 12: ammo
+  _mode,                                                             // 13: fireMode
+  [[diag_tickTime, EGVAR(recorder,captureFrameNo), (getPosASL _projectile) joinString ","]], // 14: positions
+  (velocity _projectile) joinString ",",                             // 15: initialVelocity
+  [],                                                                // 16: hitParts
+  getText(configFile >> "CfgAmmo" >> _ammo >> "simulation"),         // 17: sim
+  false                                                              // 18: isSub
+];
 
+_projectile setVariable [QGVARMAIN(projectileData), _data];
 
 // the simulation type of this ammo will determine how we handle it.
 // "ShotGrenade" // M67
@@ -103,17 +111,17 @@ _projectile setVariable [QGVARMAIN(dataHash), createHashMapFromArray [
 // "ShotSubmunition" // Hind minigun, cluster artillery
 
 // carryover variables to submunitions
-if (getText(configFile >> "CfgAmmo" >> _ammo >> "simulation") isEqualTo "ShotSubmunition") then {
+if ((_data select 17) isEqualTo "ShotSubmunition") then {
   _projectile addEventHandler ["SubmunitionCreated", {
     params ["_projectile", "_submunitionProjectile"];
-    _submunitionProjectile setVariable [QGVARMAIN(dataHash), _projectile getVariable QGVARMAIN(dataHash)];
-    private _hash = _submunitionProjectile getVariable QGVARMAIN(dataHash);
-    _hash set ["isSub", true];
-    (_hash get "positions") pushBack [
-        [":TIMESTAMP:", []] call EFUNC(extension,sendData),
-        EGVAR(recorder,captureFrameNo),
-        getPosASL _submunitionProjectile
-      ];
+    private _data = +(_projectile getVariable QGVARMAIN(projectileData));
+    _data set [18, true]; // isSub = true
+    (_data select 14) pushBack [
+      diag_tickTime,
+      EGVAR(recorder,captureFrameNo),
+      (getPosASL _submunitionProjectile) joinString ","
+    ];
+    _submunitionProjectile setVariable [QGVARMAIN(projectileData), _data];
     // add the rest of EHs to submunition
     [_submunitionProjectile] call FUNCMAIN(addBulletEH);
   }];

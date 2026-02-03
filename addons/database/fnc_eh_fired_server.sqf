@@ -79,13 +79,11 @@
 
 // Finally, we'll add a CBA Event Handler to take in the pre-processed fired data here on the server and send it to the extension.
 [QGVARMAIN(handleFiredManData), {
-  params ["_hash"];
-  // Receive hashmap from server, hc, or client.
-  // Try encoding JSON
-  private _json = [_hash] call CBA_fnc_encodeJSON;
-  TRACE_1("Sending fired data JSON to extension",_json);
-  _json spawn {
+  params ["_data"];
+  // Receive array from server, hc, or client.
+  TRACE_1("Sending fired data to extension",_data);
+  _data spawn {
     sleep 2;
-    [":PROJECTILE:", [_this]] call EFUNC(extension,sendData);
+    [":PROJECTILE:", _this] call EFUNC(extension,sendData);
   };
 }] call CBA_fnc_addEventHandler;

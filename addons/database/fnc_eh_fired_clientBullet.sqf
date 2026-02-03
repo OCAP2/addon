@@ -45,7 +45,7 @@ _projectile addEventHandler ["HitExplosion", {
   ];
   // add pos
   ((_projectile getVariable QGVARMAIN(dataHash)) get "positions") pushBack [
-      [":TIMESTAMP:"] call EFUNC(extension,sendData),
+      [":TIMESTAMP:", []] call EFUNC(extension,sendData),
       EGVAR(recorder,captureFrameNo),
       (getPosASL _projectile) joinString ","
     ];
@@ -76,7 +76,7 @@ _projectile addEventHandler ["HitPart", {
   ];
   // add pos
   ((_projectile getVariable QGVARMAIN(dataHash)) get "positions") pushBack [
-      [":TIMESTAMP:"] call EFUNC(extension,sendData),
+      [":TIMESTAMP:", []] call EFUNC(extension,sendData),
       EGVAR(recorder,captureFrameNo),
       _pos joinString ","
     ];
@@ -90,7 +90,7 @@ _projectile addEventHandler ["Deflected", {
 
   // just log position
   ((_projectile getVariable QGVARMAIN(dataHash)) get "positions") pushBack [
-      [":TIMESTAMP:"] call EFUNC(extension,sendData),
+      [":TIMESTAMP:", []] call EFUNC(extension,sendData),
       EGVAR(recorder,captureFrameNo),
       _pos joinString ","
     ];
@@ -106,7 +106,7 @@ _projectile addEventHandler ["Explode", {
 
   // just log position
   ((_projectile getVariable QGVARMAIN(dataHash)) get "positions") pushBack [
-      [":TIMESTAMP:"] call EFUNC(extension,sendData),
+      [":TIMESTAMP:", []] call EFUNC(extension,sendData),
       EGVAR(recorder,captureFrameNo),
       _pos joinString ","
     ];
@@ -118,7 +118,7 @@ _projectile addEventHandler ["Deleted", {
 	params ["_projectile"];
   private _hash = _projectile getVariable QGVARMAIN(dataHash);
   (_hash get "positions") pushBack [
-      [":TIMESTAMP:"] call EFUNC(extension,sendData),
+      [":TIMESTAMP:", []] call EFUNC(extension,sendData),
       EGVAR(recorder,captureFrameNo),
       (getPosASL _projectile) joinString ","
     ];

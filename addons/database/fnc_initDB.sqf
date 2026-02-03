@@ -56,14 +56,14 @@ addMissionEventHandler ["ExtensionCallback", {
     [":ADDON:VERSION:", [QUOTE(VERSION_STR)], 'ocap_recorder'] call EFUNC(extension,sendData);
 
     // get arma dir and module dir
-    [":GETDIR:ARMA:", nil, 'ocap_recorder'] call EFUNC(extension,sendData);
-    [":GETDIR:MODULE:", nil, 'ocap_recorder'] call EFUNC(extension,sendData);
+    [":GETDIR:ARMA:", [], 'ocap_recorder'] call EFUNC(extension,sendData);
+    [":GETDIR:MODULE:", [], 'ocap_recorder'] call EFUNC(extension,sendData);
 
     // get logging dir
-    [":GETDIR:OCAPLOG:", nil, 'ocap_recorder'] call EFUNC(extension,sendData);
+    [":GETDIR:OCAPLOG:", [], 'ocap_recorder'] call EFUNC(extension,sendData);
 
     INFO("Initializing storage...");
-    [":INIT:STORAGE:", nil, 'ocap_recorder'] call EFUNC(extension,sendData);
+    [":INIT:STORAGE:", [], 'ocap_recorder'] call EFUNC(extension,sendData);
   };
 
 
@@ -169,5 +169,5 @@ addMissionEventHandler ["ExtensionCallback", {
 
 INFO("Initializing extension...");
 GVAR(initTimer) = diag_tickTime;
-[":INIT:", nil] call EFUNC(extension,sendData);
+[":INIT:", []] call EFUNC(extension,sendData);
 true

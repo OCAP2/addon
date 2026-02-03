@@ -157,7 +157,7 @@ if (_ammoSimType isEqualTo "shotBullet") exitWith {
 		]] call EFUNC(extension,sendData);
 
 		if (GVARMAIN(isDebug)) then {
-			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _projectilePos));
+			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET",GVAR(captureFrameNo),_firerId,str _projectilePos));
 
 			// add to clients' map draw array
 			private _debugArr = [getPosASL _firer, _projectilePos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
@@ -182,7 +182,7 @@ if (_ammoSimType isEqualTo "shotBullet") exitWith {
 		]] call EFUNC(extension,sendData);
 
 		if (GVARMAIN(isDebug)) then {
-			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _projectilePos));
+			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET",GVAR(captureFrameNo),_firerId,str _projectilePos));
 
 			// add to clients' map draw array
 			private _debugArr = [getPosASL _firer, _projectilePos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
@@ -257,7 +257,7 @@ switch (true) do {
 				private _magIcon = getText(configFile >> "CfgMagazines" >> _magazine >> "picture");
 
 				                // then get data of submunition to determine how to track it
-				private _ammoSimType = getText(configFile >> "CfgAmmo" >> (typeOf _submunitionProjectile) >> "simulation");
+				private _ammoSimType = getText(configOf _submunitionProjectile >> "simulation");
 
 				_submunitionProjectile addEventHandler ["HitPart", {
 					// Track hit events for all projectile types
@@ -291,7 +291,7 @@ switch (true) do {
 
 						if (GVARMAIN(isDebug)) then {
 							// add to clients' map draw array
-							OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _projectilePos));
+							OCAPEXTLOG(ARR4("FIRED EVENT: BULLET",GVAR(captureFrameNo),_firerId,str _projectilePos));
 
 							private _debugArr = [getPosASL _firer, _projectilePos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
 							[QGVAR(addDebugBullet), _debugArr] call CBA_fnc_globalEvent;
@@ -316,7 +316,7 @@ switch (true) do {
 
 						if (GVARMAIN(isDebug)) then {
 							// add to clients' map draw array
-							OCAPEXTLOG(ARR4("FIRED EVENT: BULLET", GVAR(captureFrameNo), _firerId, str _projectilePos));
+							OCAPEXTLOG(ARR4("FIRED EVENT: BULLET",GVAR(captureFrameNo),_firerId,str _projectilePos));
 							private _debugArr = [getPosASL _firer, _projectilePos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
 							[QGVAR(addDebugBullet), _debugArr] call CBA_fnc_globalEvent;
 						};

@@ -1,7 +1,7 @@
 #include "script_component.hpp"
 
 if (!SHOULDSAVEEVENTS) exitWith {
-  TRACE_1("Saving events is disabled", SHOULDSAVEEVENTS);
+  TRACE_1("Saving events is disabled",SHOULDSAVEEVENTS);
   false;
 };
 
@@ -11,14 +11,14 @@ if (!SHOULDSAVEEVENTS) exitWith {
 params ["_firer", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile", "_vehicle"];
 
 if (isNil "_projectile") exitWith {
-  TRACE_2("Projectile is nil", name _firer, _weapon);
+  TRACE_2("Projectile is nil",name _firer,_weapon);
   false;
 };
 
 // get ocap id of firer
 private _firerOcapId = _firer getVariable [QGVARMAIN(id), -1];
 if (_firerOcapId isEqualTo -1) exitWith {
-  TRACE_2("Firer ocap id is -1", name _firer, _weapon);
+  TRACE_2("Firer ocap id is -1",name _firer,_weapon);
   false;
 };
 

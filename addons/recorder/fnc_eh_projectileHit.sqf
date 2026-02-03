@@ -53,5 +53,5 @@ _causedByInfo = [
 ]] call EFUNC(extension,sendData);
 
 if (GVARMAIN(isDebug)) then {
-  OCAPEXTLOG(ARR4("HIT EVENT", _hitFrame, _unitID, _shooterID));
+  OCAPEXTLOG(ARR4("HIT EVENT",_hitFrame,_unitID,_shooterID));
 };

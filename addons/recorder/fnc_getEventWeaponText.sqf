@@ -53,5 +53,5 @@ if (_instigator call CBA_fnc_isPerson) then {
     ]
   ];
 } else {
-  getText(configFile >> "CfgVehicles" >> (typeOf vehicle _instigator) >> "displayName");
+  getText(configOf (vehicle _instigator) >> "displayName");
 };

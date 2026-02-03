@@ -1,4 +1,6 @@
 // HEADER: script_component.hpp
+#ifndef OCAP_DATABASE_COMPONENT_HPP
+#define OCAP_DATABASE_COMPONENT_HPP
 
 // DEFINE: COMPONENT
 #define COMPONENT database
@@ -10,3 +12,5 @@
 
 
 #include "\x\ocap\addons\main\script_macros.hpp"
+
+#endif

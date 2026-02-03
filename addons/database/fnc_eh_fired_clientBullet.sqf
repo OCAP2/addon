@@ -126,5 +126,5 @@ _projectile addEventHandler ["Deleted", {
   [QGVARMAIN(handleFiredManData), [_hash]] call CBA_fnc_serverEvent;
 }];
 
-TRACE_1("Finished applying EH", _projectile);
+TRACE_1("Finished applying EH",_projectile);
 true

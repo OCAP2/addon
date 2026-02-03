@@ -36,8 +36,8 @@ if (!isNil QGVAR(PFHObject)) then {
 if (isNil QGVAR(startTime)) then {
   GVAR(startTime) = time;
   publicVariable QGVAR(startTime);
-  OCAPEXTLOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
-  LOG(ARR3(__FILE__, QGVAR(recording) + " started, time:", GVAR(startTime)));
+  OCAPEXTLOG(ARR3(__FILE__,QGVAR(recording) + " started, time:",GVAR(startTime)));
+  LOG(ARR3(__FILE__,QGVAR(recording) + " started, time:",GVAR(startTime)));
 };
 
 // Variable: OCAP_PFHObject
@@ -178,7 +178,7 @@ GVAR(PFHObject) = [
           } forEach (parseSimpleArray EGVAR(settings,excludeClassFromRecord));
         };
         if ((_class isEqualTo "unknown") || _toExcludeKind || _toExcludeClass) exitWith {
-          LOG(ARR2("WARNING: vehicle is defined as 'unknown' or exclude:", _vehType));
+          LOG(ARR2("WARNING: vehicle is defined as 'unknown' or exclude:",_vehType));
           _x setVariable [QGVARMAIN(isInitialized), true, true];
           _x setVariable [QGVARMAIN(exclude), true, true];
         };

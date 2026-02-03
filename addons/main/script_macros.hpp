@@ -1,6 +1,7 @@
 // HEADER: script_macros.hpp
 // Defines macros imported to other functions
-
+#ifndef OCAP_SCRIPT_MACROS_HPP
+#define OCAP_SCRIPT_MACROS_HPP
 
 #include "script_version.hpp"
 
@@ -46,7 +47,8 @@
 #define ARR6(_arg1, _arg2, _arg3, _arg4, _arg5, _arg6) [_arg1, _arg2, _arg3, _arg4, _arg5, _arg6]
 
 // https://github.com/CBATeam/CBA_A3/blob/master/addons/main/script_macros_common.hpp
+#undef DEBUG_MODE_NORMAL
 #include "\x\cba\addons\main\script_macros_common.hpp"
 #include "\x\cba\addons\xeh\script_xeh.hpp"
 
-
+#endif

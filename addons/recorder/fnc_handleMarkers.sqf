@@ -56,18 +56,18 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
     case "CREATED":{
 
       if (GVARMAIN(isDebug)) then {
-        OCAPEXTLOG(ARR2("MARKER:CREATE: Processing marker data -- ", _mrk_name));
+        OCAPEXTLOG(ARR2("MARKER:CREATE: Processing marker data -- ",_mrk_name));
       };
 
       if (_mrk_name in GVAR(trackedMarkers)) exitWith {
         if (GVARMAIN(isDebug)) then {
-          OCAPEXTLOG(ARR3("MARKER:CREATE: Marker", _mrk_name, "already tracked, exiting"));
+          OCAPEXTLOG(ARR3("MARKER:CREATE: Marker",_mrk_name,"already tracked, exiting"));
         };
       };
 
       if (GVARMAIN(isDebug)) then {
         format["CREATE:MARKER: Valid CREATED process of %1, sending to extension", _mrk_name] SYSCHAT;
-        OCAPEXTLOG(ARR3("CREATE:MARKER: Valid CREATED process of", _mrk_name, ", sending to extension"));
+        OCAPEXTLOG(ARR3("CREATE:MARKER: Valid CREATED process of",_mrk_name,", sending to extension"));
       };
 
       if (_type isEqualTo "") then {_type = "mil_dot"};
@@ -121,7 +121,7 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
           private _logParams = (str [GVAR(captureFrameNo), time, _creationTime, _delta, _lastFrameTime, _captureFrameNo]);
 
           if (GVARMAIN(isDebug)) then {
-            OCAPEXTLOG(ARR2("CREATE:MARKER: adjust frame ", _logParams));
+            OCAPEXTLOG(ARR2("CREATE:MARKER: adjust frame ",_logParams));
           };
         };
       };
@@ -145,7 +145,7 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
 
         if (GVARMAIN(isDebug)) then {
           format["MARKER:DELETE: Marker %1", _mrk_name] SYSCHAT;
-          OCAPEXTLOG(ARR3("MARKER:DELETE: Marker", _mrk_name, "deleted"));
+          OCAPEXTLOG(ARR3("MARKER:DELETE: Marker",_mrk_name,"deleted"));
         };
 
         [":DELETE:MARKER:", [_mrk_name, GVAR(captureFrameNo)]] call EFUNC(extension,sendData);

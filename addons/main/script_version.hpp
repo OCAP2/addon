@@ -1,4 +1,6 @@
 // The current version of OCAP.
+#ifndef OCAP_SCRIPT_VERSION_HPP
+#define OCAP_SCRIPT_VERSION_HPP
 
 // DEFINE: VERSION
 #define VERSION 3.0
@@ -16,3 +18,5 @@
 #define MINOR 0
 #define PATCH 0
 #define BUILD 0
+
+#endif

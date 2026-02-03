@@ -76,7 +76,7 @@ if (isNil QGVAR(startTime)) exitWith {
 
 _elapsedTime = time - GVAR(startTime);
 _frameTimeDuration = (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60;
-TRACE_5("Save attempted. Elapsed Time =", _elapsedTime," Frame Count * Delay Duration =", _frameTimeDuration," delta =", _elapsedTime - _frameTimeDuration);
+TRACE_5("Save attempted. Elapsed Time =",_elapsedTime," Frame Count * Delay Duration =",_frameTimeDuration," delta =",_elapsedTime - _frameTimeDuration);
 
 
 if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {
@@ -127,7 +127,7 @@ private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mis
 
 private _saveTag = if (!isNil "_tag") then {_tag} else {EGVAR(settings,saveTag)};
 [":SAVE:MISSION:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, _saveTag]] call EFUNC(extension,sendData);
-OCAPEXTLOG(ARR4("Saved recording of mission", GVAR(missionName), "with tag", _saveTag));
+OCAPEXTLOG(ARR4("Saved recording of mission",GVAR(missionName),"with tag",_saveTag));
 
 
 // notify players that the recording was saved with a 2 second delay to ensure the "stopped recording" entries populate first

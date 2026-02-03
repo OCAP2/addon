@@ -19,14 +19,14 @@ addMissionEventHandler ["ExtensionCallback", {
 
   private _data = parseSimpleArray _dataArr;
 
-  TRACE_3("ExtensionCallback", _name, _function, _data);
+  TRACE_3("ExtensionCallback",_name,_function,_data);
 
   if (_function isEqualTo ":VERSION:") exitWith {
     // version return is automatic during extension init process
     private _ver = _data#0;
     EGVAR(database,extensionVersion) = _ver;
     publicVariable QEGVAR(database,extensionVersion);
-    INFO_1("Extension version: %1", str _ver);
+    INFO_1("Extension version: %1",str _ver);
   };
 
   if (_function isEqualTo ":GETDIR:ARMA:") exitWith {

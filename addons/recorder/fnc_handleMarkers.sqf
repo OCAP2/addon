@@ -230,7 +230,7 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
     private _isExcluded = false;
     if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) then {
       {
-        if ((str _marker) find _x >= -1) exitWith {
+        if ((str _marker) find _x >= 0) exitWith {
           _isExcluded = true;
         };
       } forEach (parseSimpleArray EGVAR(settings,excludeMarkerFromRecord));

@@ -101,7 +101,7 @@ publicVariable QEGVAR(extension,version);
   VARIABLE: OCAP_recorder_restrictMarkersCompat
   Global variable flag to prevent a client's local markers from being recorded on the server, in the case of the mod Restrict Markers being loaded and enabled. Otherwise, marker recording would create lots of duplicates that hurt playback performance.
 */
-GVAR(restrictMarkersCompat) = isClass (configFile >> "CfgPatches" >> "restrict_markers") && {!isNil "restrict_markers_main_enabled" && {restrict_markers_main_enabled}};
+GVAR(restrictMarkersCompat) = isClass (configFile >> "CfgPatches" >> "restrict_markers") && {missionNamespace getVariable ["restrict_markers_main_enabled", false]};
 publicVariable QGVAR(restrictMarkersCompat);
 
 // Add mission event handlers

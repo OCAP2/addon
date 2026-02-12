@@ -64,7 +64,16 @@ _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {st
 }] remoteExec ["call", [0, -2] select isDedicated, true];
 
 if (GVAR(captureFrameNo) == 0) then {
-  call FUNC(captureLoop);
+  if (!EGVAR(database,dbValid)) then {
+    // Previous recording was exported — re-register new mission with extension
+    call EFUNC(database,newMission);
+    // Wait for extension to confirm new mission before starting capture
+    [{EGVAR(database,dbValid)}, {
+      call FUNC(captureLoop);
+    }] call CBA_fnc_waitUntilAndExecute;
+  } else {
+    call FUNC(captureLoop);
+  };
 };
 
 [QGVARMAIN(customEvent), ["generalEvent", "Recording started."]] call CBA_fnc_serverEvent;

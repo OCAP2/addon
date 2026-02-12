@@ -4,6 +4,7 @@ PREP(addEventHandlers);
 PREP(getStaticObjects);
 PREP(handleChatMessage);
 PREP(initDB);
+PREP(newMission);
 PREP(radioEvent);
 PREP(metricsLoop);
 PREP(eh_fired_server);

@@ -74,6 +74,7 @@ if (_muzzleDisplay isEqualTo "") then {
 // 16: hitParts [[hitOcapId, component, "x,y,z", frame], ...]
 // 17: sim
 // 18: isSub
+// 19: magazineIcon
 
 private _data = [
   EGVAR(recorder,captureFrameNo),                                    // 0: firedFrame
@@ -94,7 +95,8 @@ private _data = [
   (velocity _projectile) joinString ",",                             // 15: initialVelocity
   [],                                                                // 16: hitParts
   getText(configFile >> "CfgAmmo" >> _ammo >> "simulation"),         // 17: sim
-  false                                                              // 18: isSub
+  false,                                                             // 18: isSub
+  getText(configFile >> "CfgMagazines" >> _magazine >> "picture")    // 19: magazineIcon
 ];
 
 _projectile setVariable [QGVARMAIN(projectileData), _data];

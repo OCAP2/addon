@@ -40,6 +40,8 @@ if (isNil QGVAR(startTime)) then {
   LOG(ARR3(__FILE__,QGVAR(recording) + " started, time:",GVAR(startTime)));
 };
 
+GVAR(trackedVehicles) = createHashMap;
+
 // Variable: OCAP_PFHObject
 // The CBA PerFrameHandler object that is created and used to run the capture loop.
 GVAR(PFHObject) = [
@@ -154,7 +156,6 @@ GVAR(PFHObject) = [
       false
     } count (allUnits + allDeadMen);
 
-
     {
       private _justInitialized = false;
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
@@ -237,10 +238,37 @@ GVAR(PFHObject) = [
         ];
         toFixed -1;
 
-        [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
+        private _ocapId = _vehicleData select 0;
+
+        // Stop tracking parachutes/ejection seats with no crew (landed/empty)
+        if ((_x getVariable [QGVARMAIN(vehicleClass), ""]) isEqualTo "parachute" && _crew isEqualTo []) then {
+          _vehicleData set [3, 0];
+          [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
+          _x setVariable [QGVARMAIN(exclude), true, true];
+          GVAR(trackedVehicles) deleteAt _ocapId;
+        } else {
+          [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
+          GVAR(trackedVehicles) set [_ocapId, [_x, _pos, round getDir _x]];
+        };
       };
       false
     } count vehicles;
+
+    // Detect disappeared vehicles (deleted/garbage-collected) and send final dead state
+    private _toRemove = [];
+    {
+      (GVAR(trackedVehicles) get _x) params ["_obj", "_lastPos", "_lastDir"];
+      if (isNull _obj) then {
+        toFixed 2;
+        [":NEW:VEHICLE:STATE:", [
+          _x, _lastPos, _lastDir, 0, [], GVAR(captureFrameNo),
+          0, 1, false, false, "UNKNOWN", [0,0,1], [0,0,0], 0, 0
+        ]] call EFUNC(extension,sendData);
+        toFixed -1;
+        _toRemove pushBack _x;
+      };
+    } forEach (keys GVAR(trackedVehicles));
+    { GVAR(trackedVehicles) deleteAt _x } forEach _toRemove;
 
     if (GVARMAIN(isDebug)) then {
       private _logStr = format["Frame %1 processed in %2ms", GVAR(captureFrameNo), diag_tickTime - _loopStart];

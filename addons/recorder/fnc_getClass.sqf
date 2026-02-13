@@ -25,6 +25,8 @@ Author:
 
 if (getText(configFile >> "CfgVehicles" >> _this >> "model") isEqualTo "\A3\Weapons_f\empty") exitWith {"unknown"};
 
+if ((toLower getText(configFile >> "CfgVehicles" >> _this >> "displayName")) find "ejection" > -1) exitWith {"parachute"};
+
 if (_this isKindOf "Truck_F") exitWith {"truck"}; // Should be higher than Car
 if (_this call FUNC(isKindOfApc)) exitWith {"apc"};
 if (_this isKindOf "Car") exitWith {"car"};

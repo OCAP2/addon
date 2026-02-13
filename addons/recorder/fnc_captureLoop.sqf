@@ -248,7 +248,7 @@ GVAR(PFHObject) = [
           GVAR(trackedVehicles) deleteAt _ocapId;
         } else {
           [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
-          GVAR(trackedVehicles) set [_ocapId, [_x, _pos, round getDir _x]];
+          GVAR(trackedVehicles) set [_ocapId, [_x, _pos, round getDir _x, side _x, vectorDir _x, vectorUp _x]];
         };
       };
       false
@@ -257,12 +257,12 @@ GVAR(PFHObject) = [
     // Detect disappeared vehicles (deleted/garbage-collected) and send final dead state
     private _toRemove = [];
     {
-      (GVAR(trackedVehicles) get _x) params ["_obj", "_lastPos", "_lastDir"];
+      (GVAR(trackedVehicles) get _x) params ["_obj", "_lastPos", "_lastDir", "_lastSide", "_lastVectorDir", "_lastVectorUp"];
       if (isNull _obj) then {
         toFixed 2;
         [":NEW:VEHICLE:STATE:", [
           _x, _lastPos, _lastDir, 0, [], GVAR(captureFrameNo),
-          0, 1, false, false, "UNKNOWN", [0,0,1], [0,0,0], 0, 0
+          0, 1, false, false, _lastSide, _lastVectorDir, _lastVectorUp, 0, 0
         ]] call EFUNC(extension,sendData);
         toFixed -1;
         _toRemove pushBack _x;

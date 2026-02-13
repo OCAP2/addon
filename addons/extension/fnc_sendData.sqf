@@ -34,9 +34,13 @@ _res params ["_result","_returnCode","_errorCode"];
 
 diag_log text format ["[OCAP] [EXT] << Response: result='%1', returnCode=%2, errorCode=%3", _result, _returnCode, _errorCode];
 
-if (_errorCode != 0 || _returnCode != 0) exitWith {
-  diag_log text format ["[OCAP] [EXT] ERROR when calling extension: %1", [_result, _returnCode, _errorCode, _command, _args]];
+if (_returnCode != 0) exitWith {
+  diag_log text format ["[OCAP] [EXT] ERROR from extension (returnCode=%1): %2", _returnCode, [_result, _returnCode, _errorCode, _command, _args]];
   nil
+};
+
+if (_errorCode != 0) then {
+  diag_log text format ["[OCAP] [EXT] WARNING: Arma errorCode=%1 for command '%2' (result still valid)", _errorCode, _command];
 };
 
 // Parse the response - new format: ["ok", <result>] or ["error", "<message>"]

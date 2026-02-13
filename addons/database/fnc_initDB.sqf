@@ -158,11 +158,14 @@ addMissionEventHandler ["ExtensionCallback", {
     INFO("Mission saved to DB. Starting data send.");
     GVAR(dbValid) = true;
 
-    // set initial stuff unique to DB
-    [] spawn FUNC(getStaticObjects);
-    call FUNC(addEventHandlers);
-    call FUNC(eh_fired_server);
-    call FUNC(metricsLoop);
+    // Only run one-time setup on first init, not on re-registration after export
+    if (isNil QGVAR(initialSetupDone)) then {
+      GVAR(initialSetupDone) = true;
+      [] spawn FUNC(getStaticObjects);
+      call FUNC(addEventHandlers);
+      call FUNC(eh_fired_server);
+      call FUNC(metricsLoop);
+    };
   };
 }];
 

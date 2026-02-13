@@ -64,7 +64,19 @@ _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {st
 }] remoteExec ["call", [0, -2] select isDedicated, true];
 
 if (GVAR(captureFrameNo) == 0) then {
-  call FUNC(captureLoop);
+  if (!EGVAR(database,dbValid)) then {
+    // Previous recording was exported — re-register new mission with extension
+    call EFUNC(database,newMission);
+    // Wait for extension to confirm new mission before starting capture
+    [{EGVAR(database,dbValid)}, {
+      call FUNC(captureLoop);
+    }, [], 30, {
+      ERROR("Timeout waiting for new mission confirmation from extension. Recording will not start.");
+      ["OCAP failed to start recording: extension did not respond", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+    }] call CBA_fnc_waitUntilAndExecute;
+  } else {
+    call FUNC(captureLoop);
+  };
 };
 
 [QGVARMAIN(customEvent), ["generalEvent", "Recording started."]] call CBA_fnc_serverEvent;

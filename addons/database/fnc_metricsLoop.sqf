@@ -177,19 +177,6 @@
 
     [":METRIC:", [
       "mission_data",
-      "time",
-      ["field", "float", "diag_tickTime",
-        diag_tickTime toFixed 2] joinString "::",
-      ["field", "float", "serverTime",
-        time toFixed 2] joinString "::",
-      ["field", "float", "timeMultiplier",
-        timeMultiplier toFixed 2] joinString "::",
-      ["field", "float", "accTime",
-        accTime toFixed 2] joinString "::"
-    ]] call EFUNC(extension,sendData);
-
-    [":METRIC:", [
-      "mission_data",
       "weather",
       ["field", "float", "fog",
         fog] joinString "::",

@@ -240,8 +240,8 @@ GVAR(PFHObject) = [
 
         private _ocapId = _vehicleData select 0;
 
-        // Stop tracking parachutes/ejection seats with no crew (landed/empty)
-        if ((_x getVariable [QGVARMAIN(vehicleClass), ""]) isEqualTo "parachute" && _crew isEqualTo []) then {
+        // Stop tracking parachutes/ejection seats that are empty or dead
+        if ((_x getVariable [QGVARMAIN(vehicleClass), ""]) isEqualTo "parachute" && {!((alive _x) && {_crew isNotEqualTo []})}) then {
           _vehicleData set [3, 0];
           [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
           _x setVariable [QGVARMAIN(exclude), true, true];

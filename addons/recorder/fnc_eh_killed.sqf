@@ -33,6 +33,9 @@ params ["_victim", "_killer", "_instigator"];
 // Skip parachutes and ejection seats - these generate noise like "Ejection Seat destroyed by Ejection Seat"
 if ((_victim getVariable [QGVARMAIN(vehicleClass), ""]) isEqualTo "parachute") exitWith {};
 
+// Skip disconnected players - engine kills the unit on disconnect, which is not a real death
+if (_victim getVariable [QGVARMAIN(exclude), false]) exitWith {};
+
 if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
   _victim setvariable [QGVARMAIN(isKilled),true];
 

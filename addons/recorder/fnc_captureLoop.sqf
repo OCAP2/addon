@@ -112,6 +112,10 @@ GVAR(PFHObject) = [
         _x setVariable [QGVARMAIN(isInitialized), true, true];
         _justInitialized = true;
       };
+      // Re-include units that have become player-controlled again (e.g., reconnected players)
+      if (_x getVariable [QGVARMAIN(exclude), false] && {isPlayer _x}) then {
+        _x setVariable [QGVARMAIN(exclude), false];
+      };
       if (!_justInitialized && {!(_x getVariable [QGVARMAIN(exclude), false])}) then {
         private _unitRole = _x getVariable [QGVARMAIN(unitType), ""];
         if (GVAR(captureFrameNo) % 10 == 0 || _unitRole == "") then {

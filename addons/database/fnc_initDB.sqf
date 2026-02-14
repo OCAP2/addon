@@ -129,8 +129,9 @@ addMissionEventHandler ["ExtensionCallback", {
       ["tag", EGVAR(settings,saveTag)],
       ["captureDelay", EGVAR(settings,frameCaptureDelay)],
       ["addons", _addons],
-      ["extensionVersion", EGVAR(extension,version) # 0],
-      ["extensionBuild", EGVAR(extension,version) # 1],
+      ["extensionBuildVersion", EGVAR(extension,version) # 0],
+      ["extensionBuildCommit", EGVAR(extension,version) # 1],
+      ["extensionBuildDate", EGVAR(extension,version) # 2],
       ["ocapRecorderExtensionVersion", EGVAR(database,version)],
       ["playableSlots", [
           playableSlotsNumber east,

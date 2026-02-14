@@ -121,7 +121,7 @@ call FUNC(addEventMission);
           "<font size='20' face='PuristaBold'><font color='#BBBBBB'>OCAP</font><font color='#44AAFF'>2</font></font><br/>" +
           "Addon version: " + GVARMAIN(version) +
           "<br/>" +
-          "Extension version: " + (EGVAR(extension,version) # 0) + " (built " + (EGVAR(extension,version) # 1) + ")" +
+          "Extension version: " + (EGVAR(extension,version) # 0) + " (" + (EGVAR(extension,version) # 1) + ", built " + (EGVAR(extension,version) # 2) + ")" +
           "<br/>" +
           "<execute expression='call ocap_fnc_copyGitHubToClipboard;'>https://github.com/OCAP2/OCAP</execute>" +
           "<br/><br/>" +

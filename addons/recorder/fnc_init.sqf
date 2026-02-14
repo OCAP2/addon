@@ -107,6 +107,12 @@ publicVariable QGVAR(restrictMarkersCompat);
 // Add mission event handlers
 call FUNC(addEventMission);
 
+// Check already-connected players for admin controls (fixes race condition
+// where players connected before OCAP initialized don't get diary entries)
+{
+  [owner _x, "connect"] call FUNC(adminUIcontrol);
+} forEach allPlayers;
+
 // remoteExec diary creation commands to clients listing version numbers and waiting start state
 {
   [{!isNil QGVARMAIN(version) && !isNil QEGVAR(extension,version)}, {

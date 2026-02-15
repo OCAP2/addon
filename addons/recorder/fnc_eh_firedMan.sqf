@@ -32,7 +32,7 @@
 
 /*
 	  Variable: OCAP_lastFired
-	  Indicates a formatted string of the last weapon and magazine type fired by the unit. Used for logging hits/kills. Applied to a firing unit.
+	  Indicates a structured array [vehicleName, weaponDisp, magDisp] of the last weapon fired by the unit. Used for logging hits/kills. Applied to a firing unit.
 */
 
 /*
@@ -98,11 +98,11 @@ _projectile setVariable [QGVARMAIN(muzzleDisp), _muzzleDisp];
 _projectile setVariable [QGVARMAIN(magDisp), _magDisp];
 _projectile setVariable [QGVARMAIN(firemode), _mode];
 
-private _wepString = "";
+private _wepString = [];
 if (!isNull _vehicle) then {
-	_wepString = format["%1: %2 [%3]", ([configOf _vehicle] call BIS_fnc_displayName), _muzzleDisp, _magDisp];
+	_wepString = [([configOf _vehicle] call BIS_fnc_displayName), _muzzleDisp, _magDisp];
 } else {
-	_wepString = format["%1 [%2]", _muzzleDisp, _magDisp];
+	_wepString = ["", _muzzleDisp, _magDisp];
 };
 
 _firer setVariable [QGVARMAIN(lastFired), _wepString];

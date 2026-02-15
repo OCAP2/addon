@@ -14,7 +14,7 @@ Parameters:
   _instigator - The unit to evaluate [Object]
 
 Returns:
-  The description of weapon or vehicle > weapon. [String]
+  Structured weapon info as [vehicleName, weaponDisp, magDisp]. [Array]
 
 Examples:
   > [_shooter] call FUNC(getEventWeaponText)
@@ -29,7 +29,7 @@ Author:
 
 params ["_instigator"];
 
-if (isNull _instigator) exitWith {""};
+if (isNull _instigator) exitWith {["", "", ""]};
 
 if !(_instigator call CBA_fnc_isPerson) then {
   _instigator = _instigator call {
@@ -55,13 +55,13 @@ if (_instigator call CBA_fnc_isPerson) then {
       private _weapon = _turretWeapons select 0;
       private _mag = if (_turretMags isNotEqualTo []) then {_turretMags select 0} else {""};
       ([_weapon, _weapon, _mag] call FUNC(getWeaponDisplayData)) params ["_muzDisp", "_magDisp"];
-      format["%1: %2 [%3]", ([configOf _veh] call BIS_fnc_displayName), _muzDisp, _magDisp];
+      [([configOf _veh] call BIS_fnc_displayName), _muzDisp, _magDisp];
     } else {
       (_instigator weaponstate (currentWeapon _instigator)) params ["_weapon", "_muzzle", "_mode", "_magazine"];
       ([_weapon, _muzzle, _magazine] call FUNC(getWeaponDisplayData)) params ["_muzDisp", "_magDisp"];
       _instigator getVariable [
         QGVARMAIN(lastFired),
-        format ["%1 [%2]", _muzDisp, _magDisp]
+        ["", _muzDisp, _magDisp]
       ];
     };
   } else {
@@ -69,9 +69,9 @@ if (_instigator call CBA_fnc_isPerson) then {
     ([_weapon, _muzzle, _magazine] call FUNC(getWeaponDisplayData)) params ["_muzDisp", "_magDisp"];
     _instigator getVariable [
       QGVARMAIN(lastFired),
-      format ["%1 [%2]", _muzDisp, _magDisp]
+      ["", _muzDisp, _magDisp]
     ];
   };
 } else {
-  getText(configOf (vehicle _instigator) >> "displayName");
+  [getText(configOf (vehicle _instigator) >> "displayName"), "", ""];
 };

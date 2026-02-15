@@ -68,7 +68,7 @@ _explosive addEventHandler ["Explode", {
   _data params ["_explosiveDisp", "_unit", "_placedPos", "_markName", "_int"];
 
   // Set unit who placed's lastFired var as the explosive so kills are registered to the explosive
-  _unit setVariable [QGVARMAIN(lastFired), _explosiveDisp];
+  _unit setVariable [QGVARMAIN(lastFired), ["", _explosiveDisp, ""]];
 
   if (GVARMAIN(isDebug)) then {
     format["Removed explosive placed marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;

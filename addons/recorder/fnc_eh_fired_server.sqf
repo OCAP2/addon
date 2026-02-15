@@ -31,16 +31,27 @@
   params ["_entity"];
 
   // When object is inited, add the EH to the owner machine.
-  [_entity, {
-    private _id = _this addEventHandler ["FiredMan", {
-      TRACE_2("FiredMan EH fired",clientOwner,_this);
+  // For local entities (server-owned AI), add directly — remoteExec to owner 0
+  // (not-yet-networked entities) causes the object reference to deserialize as null.
+  if (local _entity) then {
+    private _id = _entity addEventHandler ["FiredMan", {
       private _start = diag_tickTime;
       _this call FUNCMAIN(handleFiredMan);
       TRACE_1("Ran fired handler",diag_tickTime - _start);
     }];
-    _this setVariable [QGVARMAIN(firedManEHExists), true];
-    _this setVariable [QGVARMAIN(firedManEH), _id];
-  }] remoteExec ["call", owner _entity];
+    _entity setVariable [QGVARMAIN(firedManEHExists), true];
+    _entity setVariable [QGVARMAIN(firedManEH), _id];
+  } else {
+    [_entity, {
+      private _id = _this addEventHandler ["FiredMan", {
+        private _start = diag_tickTime;
+        _this call FUNCMAIN(handleFiredMan);
+        TRACE_1("Ran fired handler",diag_tickTime - _start);
+      }];
+      _this setVariable [QGVARMAIN(firedManEHExists), true];
+      _this setVariable [QGVARMAIN(firedManEH), _id];
+    }] remoteExec ["call", owner _entity];
+  };
 
 
   // Again, we will add a single Local EH for the unit on the server, but it has global effect so this is sufficient.

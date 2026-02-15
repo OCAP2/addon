@@ -100,7 +100,7 @@ _projectile setVariable [QGVARMAIN(firemode), _mode];
 
 private _wepString = "";
 if (!isNull _vehicle) then {
-	_wepString = format["%1 [%2]", (configOf _vehicle) call BIS_fnc_displayName, _wepString];
+	_wepString = format["%1: %2 [%3]", ([configOf _vehicle] call BIS_fnc_displayName), _muzzleDisp, _magDisp];
 } else {
 	_wepString = format["%1 [%2]", _muzzleDisp, _magDisp];
 };

@@ -7,6 +7,3 @@ PREP(initDB);
 PREP(newMission);
 PREP(radioEvent);
 PREP(metricsLoop);
-PREP(eh_fired_server);
-PREP(eh_fired_client);
-PREP(eh_fired_clientBullet);

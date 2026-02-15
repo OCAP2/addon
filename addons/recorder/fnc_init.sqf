@@ -79,8 +79,6 @@ GVAR(autoStart) = EGVAR(settings,autoStart);
 */
 GVAR(minMissionTime) = EGVAR(settings,minMissionTime);
 
-GVAR(projectileMonitorMultiplier) = 1;
-
 /*
   VARIABLE: OCAP_version
   Global variable that represents the version of OCAP addon being used [String]
@@ -212,10 +210,6 @@ call EFUNC(database,initDB);
       [nil, "Recording ended due to server being empty"] call FUNC(exportData);
   };
 }, 30] call CBA_fnc_addPerFrameHandler;
-
-if (isNil QGVAR(projectileMonitorsInitialized)) then {
-  call FUNC(projectileMonitors);
-};
 
 if (isNil QGVAR(entityMonitorsInitialized)) then {
   call FUNC(entityMonitors);

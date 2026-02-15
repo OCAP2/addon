@@ -17,7 +17,7 @@ if (isNil "_projectile") exitWith {
 // if this is NOT a deployed submunition itself but the simType of the ammo is "ShotSubmunition", then we need to skip the Deleted EH and leave the Deleted registration to the submunition itself. This will ensure we're tracking start to finish multiple actual projectiles from things like shotguns, cluster artillery, mixed-belt machineguns, etc.
 private _data = _projectile getVariable QGVARMAIN(projectileData);
 if (
-  (_data select 17) isEqualTo "ShotSubmunition" &&
+  (_data select 17) isEqualTo "shotSubmunitions" &&
   {(_data select 18) isEqualTo false}
 ) exitWith {};
 
@@ -136,6 +136,23 @@ _projectile addEventHandler ["Deleted", {
   TRACE_1("Projectile data",_data);
   [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_serverEvent;
 }];
+
+// Periodic position sampling for non-bullet projectiles (runs on owning client)
+if ((_data select 17) isNotEqualTo "shotBullet") then {
+  [{
+    params ["_args", "_handle"];
+    _args params ["_projectile"];
+    if (isNull _projectile) exitWith {
+      [_handle] call CBA_fnc_removePerFrameHandler;
+    };
+    private _data = _projectile getVariable QGVARMAIN(projectileData);
+    (_data select 14) pushBack [
+      diag_tickTime,
+      EGVAR(recorder,captureFrameNo),
+      (getPosASL _projectile) joinString ","
+    ];
+  }, EGVAR(settings,frameCaptureDelay), [_projectile]] call CBA_fnc_addPerFrameHandler;
+};
 
 TRACE_1("Finished applying EH",_projectile);
 true

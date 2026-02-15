@@ -28,12 +28,14 @@ if (_vehicleOcapId isEqualTo -1) then {
   _vehicleOcapId = _firerOcapId;
 };
 
-// get vehicle role
-private _vehicleRole = assignedVehicleRole _firer;
-if (count _vehicleRole isEqualTo 0) then {
-  _vehicleRole = "";
-} else {
-  _vehicleRole = _vehicleRole select 0;
+// get vehicle role — only when FiredMan says this was a vehicle weapon,
+// assignedVehicleRole can return stale data after dismount
+private _vehicleRole = "";
+if (!isNull _vehicle) then {
+  private _role = assignedVehicleRole _firer;
+  if (count _role > 0) then {
+    _vehicleRole = _role select 0;
+  };
 };
 
 // get controller of this unit
@@ -101,22 +103,12 @@ private _data = [
 
 _projectile setVariable [QGVARMAIN(projectileData), _data];
 
-// the simulation type of this ammo will determine how we handle it.
-// "ShotGrenade" // M67
-// "ShotRocket" // S-8
-// "ShotMissile" // R-27
-// "ShotShell" // VOG-17M, HE40mm
-// "ShotMine" // Satchel charge
-// "ShotIlluminating" // 40mm_green Flare
-// "ShotSmokeX"; // M18 Smoke
-// "ShotCM" // Plane flares
-// "ShotSubmunition" // Hind minigun, cluster artillery
-
 // carryover variables to submunitions
-if ((_data select 17) isEqualTo "ShotSubmunition") then {
+if ((_data select 17) isEqualTo "shotSubmunitions") then {
   _projectile addEventHandler ["SubmunitionCreated", {
     params ["_projectile", "_submunitionProjectile"];
     private _data = +(_projectile getVariable QGVARMAIN(projectileData));
+    _data set [17, getText(configOf _submunitionProjectile >> "simulation")]; // actual sim type
     _data set [18, true]; // isSub = true
     (_data select 14) pushBack [
       diag_tickTime,

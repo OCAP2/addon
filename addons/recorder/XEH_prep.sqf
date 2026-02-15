@@ -22,15 +22,14 @@ PREP(eh_onUserAdminStateChanged);
 PREP(adminUIcontrol);
 
 PREP(eh_firedMan);
-// PREP(eh_hit);
-PREP(eh_projectileHit);
+PREP(eh_fired_server);
+PREP(eh_fired_client);
+PREP(eh_fired_clientBullet);
 PREP(eh_killed);
 PREP(getInstigator);
 PREP(getEventWeaponText);
-PREP(getAmmoMarkerData);
 PREP(getWeaponDisplayData);
 
-PREP(projectileMonitors);
 PREP(entityMonitors);
 
 PREP(aceExplosives);

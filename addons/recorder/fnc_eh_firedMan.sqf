@@ -35,17 +35,6 @@
 	  Indicates a structured array [vehicleName, weaponDisp, magDisp] of the last weapon fired by the unit. Used for logging kills. Applied to a firing unit.
 */
 
-/*
-	  Event Handlers: Projectiles (Non-Bullets)
-	  Deleted - Triggered when a non-bullet projectile is deleted. Updates marker position, then removes it 3 frames later.
-	  Explode - Triggered when a non-bullet projectile explodes. Updates marker position, then removes it 3 frames later.
-*/
-
-/*
-	  CBA Events: Projectiles
-	  OCAP_recorder_addDebugMagIcon - Triggered when a non-bullet projectile is fired and the debug mode is enabled. Shares recent data to all clients.
-*/
-
 #include "script_component.hpp"
 
 if (!SHOULDSAVEEVENTS) exitWith {};
@@ -77,8 +66,6 @@ if (!isNull _vehicle) then {
 	_projectile setShotParents [_firer, _firer];
 };
 
-private _frame = GVAR(captureFrameNo);
-
 private _firerId = (_firer getVariable [QGVARMAIN(id), -1]);
 if (_firerId == -1) exitWith {};
 
@@ -94,136 +81,3 @@ if (!isNull _vehicle) then {
 
 _firer setVariable [QGVARMAIN(lastFired), _wepString];
 (vehicle _firer) setVariable [QGVARMAIN(lastFired), _wepString];
-
-// _ammoSimType
-// "ShotGrenade" // M67
-// "ShotRocket" // S-8
-// "ShotMissile" // R-27
-// "ShotShell" // VOG-17M, HE40mm
-// "ShotMine" // Satchel charge
-// "ShotIlluminating" // 40mm_green Flare
-// "ShotSmokeX"; // M18 Smoke
-// "ShotCM" // Plane flares
-// "ShotSubmunition" // Hind minigun, cluster artillery
-_ammoSimType = getText(configFile >> "CfgAmmo" >> _ammo >> "simulation");
-
-// Save marker data to projectile namespace for EH later
-_projectile setVariable [QGVAR(firer), _firer];
-_projectile setVariable [QGVAR(firerId), _firerId];
-
-// BULLET PROJECTILES
-
-if (_ammoSimType isEqualTo "shotBullet") exitWith {};
-
-// ALL OTHER PROJECTILES
-
-// get data for marker
-([_weapon, _muzzle, _ammo, _magazine, _projectile, _vehicle, _ammoSimType] call FUNC(getAmmoMarkerData)) params ["_markTextLocal", "_markName", "_markColor", "_markerType"];
-private _magIcon = getText(configFile >> "CfgMagazines" >> _magazine >> "picture");
-_projectile setVariable [QGVAR(markName), _markName];
-
-// MAKE MARKER for PLAYBACK
-_firerPos = getPosASL _firer;
-[QGVARMAIN(handleMarker), ["CREATED", _markName, _firer, _firerPos, _markerType, "ICON", [1, 1], getDirVisual _firer, "Solid", _markColor, 1, _markTextLocal, true]] call CBA_fnc_localEvent;
-
-// move marker, then delete marker, when projectile is deleted or explodes
-_projectile addEventHandler ["Deleted", {
-	params ["_projectile"];
-	_markName = _projectile getVariable QGVAR(markName);
-	_firer = _projectile getVariable QGVAR(firer);
-	[QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, getPosASL _projectile, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
-	[{
-		[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
-	}, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
-}];
-
-_projectile addEventHandler ["Explode", {
-	params ["_projectile", "_pos", "_velocity"];
-	_markName = _projectile getVariable QGVAR(markName);
-	_firer = _projectile getVariable QGVAR(firer);
-	[QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _pos, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
-	[{
-		[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
-	}, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
-}];
-
-// Add to debug
-if (GVARMAIN(isDebug)) then {
-	// add to map draw array
-	private _debugArr = [_projectile, _magIcon, format["%1 %2 - %3", str side group _firer, name _firer, _markTextLocal], [side group _firer] call BIS_fnc_sideColor];
-	[QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
-};
-
-switch (true) do {
-	case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX", "shotCM"]): {
-		GVAR(liveGrenades) pushBack [_projectile, _wepString, _firer, getPosASL _projectile, _markName, _markTextLocal, _ammoSimType];
-	};
-
-	default {
-		// case (_ammoSimType in ["shotMissile", "shotRocket", "shotShell", "shotSubmunitions"]):
-		GVAR(liveMissiles) pushBack [_projectile, _wepString, _firer, getPosASL _projectile, _markName, _markTextLocal];
-
-		if (_ammoSimType isEqualTo "shotSubmunitions") then {
-			_projectile setVariable [QGVAR(markerData), ([_weapon, _muzzle, _ammo, _magazine, _projectile, _vehicle, _ammoSimType] call FUNC(getAmmoMarkerData))];
-			_projectile setVariable [QGVAR(EHData), [_this, _subTypes, _magazine, _wepString, _firer, _firerId, _firerPos, _frame, _ammoSimType, _subTypesAmmoSimType]];
-
-			            // for every submunition split process here
-			_projectile addEventHandler ["SubmunitionCreated", {
-				params ["_projectile", "_submunitionProjectile", "_pos", "_velocity"];
-				(_projectile getVariable [QGVAR(markerData), []]) params ["_markTextLocal", "_markName", "_markColor", "_markerType"];
-				(_projectile getVariable [QGVAR(EHData), []]) params ["_EHData", "_subTypes", "_magazine", "_wepString", "_firer", "_firerId", "_firerPos", "_frame", "_ammoSimType", "_subTypesAmmoSimType"];
-
-				                // Save marker data to projectile namespace for EH later
-				_submunitionProjectile setVariable [QGVAR(firer), _firer];
-				_submunitionProjectile setVariable [QGVAR(firerId), _firerId];
-				_submunitionProjectile setVariable [QGVAR(markName), _markName];
-
-				private _magIcon = getText(configFile >> "CfgMagazines" >> _magazine >> "picture");
-
-				                // then get data of submunition to determine how to track it
-				private _ammoSimType = getText(configOf _submunitionProjectile >> "simulation");
-
-				if (_ammoSimType isEqualTo "shotBullet") exitWith {};
-
-				_submunitionProjectile addEventHandler ["Deleted", {
-					// move marker, then delete marker, when projectile is deleted or explodes
-					params ["_projectile"];
-					_markName = _projectile getVariable QGVAR(markName);
-					_firer = _projectile getVariable QGVAR(firer);
-					[QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, getPosASL _projectile, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
-					[{
-						[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
-					}, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
-				}];
-
-				_projectile addEventHandler ["Explode", {
-					params ["_projectile", "_pos", "_velocity"];
-					_markName = _projectile getVariable QGVAR(markName);
-					_firer = _projectile getVariable QGVAR(firer);
-					[QGVARMAIN(handleMarker), ["UPDATED", _markName, _firer, _pos, "", "", "", getDir _projectile, "", "", 1]] call CBA_fnc_localEvent;
-					[{
-						[QGVARMAIN(handleMarker), ["DELETED", _this]] call CBA_fnc_localEvent;
-					}, _markName, GVAR(frameCaptureDelay) * 3] call CBA_fnc_waitAndExecute;
-				}];
-
-				if (GVARMAIN(isDebug)) then {
-					// Add to debug
-					// add to map draw array
-					private _debugArr = [_projectile, _magIcon, format["%1 %2 - %3", str side group _firer, name _firer, _markTextLocal], [side group _firer] call BIS_fnc_sideColor];
-					[QGVAR(addDebugMagIcon), _debugArr] call CBA_fnc_globalEvent;
-				};
-
-				switch (true) do {
-					case (_ammoSimType in ["shotGrenade", "shotIlluminating", "shotMine", "shotSmokeX", "shotCM"]): {
-						GVAR(liveGrenades) pushBack [_submunitionProjectile, _wepString, _firer, getPosASL _submunitionProjectile, _markName, _markTextLocal, _ammoSimType];
-					};
-
-					default {
-						// case (_ammoSimType in ["shotMissile", "shotRocket", "shotShell", "shotSubmunitions"]):
-						GVAR(liveMissiles) pushBack [_submunitionProjectile, _wepString, _firer, getPosASL _submunitionProjectile, _markName, _markTextLocal];
-					};
-				};
-			}];
-		};
-	};
-};

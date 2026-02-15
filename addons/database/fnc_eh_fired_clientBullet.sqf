@@ -137,5 +137,22 @@ _projectile addEventHandler ["Deleted", {
   [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_serverEvent;
 }];
 
+// Periodic position sampling for non-bullet projectiles (runs on owning client)
+if ((_data select 17) isNotEqualTo "shotBullet") then {
+  [{
+    params ["_args", "_handle"];
+    _args params ["_projectile"];
+    if (isNull _projectile) exitWith {
+      [_handle] call CBA_fnc_removePerFrameHandler;
+    };
+    private _data = _projectile getVariable QGVARMAIN(projectileData);
+    (_data select 14) pushBack [
+      diag_tickTime,
+      EGVAR(recorder,captureFrameNo),
+      (getPosASL _projectile) joinString ","
+    ];
+  }, EGVAR(settings,frameCaptureDelay), [_projectile]] call CBA_fnc_addPerFrameHandler;
+};
+
 TRACE_1("Finished applying EH",_projectile);
 true

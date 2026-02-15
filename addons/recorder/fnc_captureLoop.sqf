@@ -227,7 +227,6 @@ GVAR(PFHObject) = [
         _pos = getPosASL _x;
 
         ([_x, [0], true] call CBA_fnc_turretDir) params ["_turretAz", "_turretEl"];
-        toFixed 2;
         private _vehicleData = [
           (_x getVariable QGVARMAIN(id)), //1
           _pos, //2
@@ -245,7 +244,6 @@ GVAR(PFHObject) = [
           _turretAz, // 14
           _turretEl // 15
         ];
-        toFixed -1;
 
         private _ocapId = _vehicleData select 0;
 
@@ -268,12 +266,10 @@ GVAR(PFHObject) = [
     {
       (GVAR(trackedVehicles) get _x) params ["_obj", "_lastPos", "_lastDir", "_lastSide", "_lastVectorDir", "_lastVectorUp"];
       if (isNull _obj) then {
-        toFixed 2;
         [":NEW:VEHICLE:STATE:", [
           _x, _lastPos, _lastDir, 0, [], GVAR(captureFrameNo),
           0, 1, false, false, _lastSide, _lastVectorDir, _lastVectorUp, 0, 0
         ]] call EFUNC(extension,sendData);
-        toFixed -1;
         _toRemove pushBack _x;
       };
     } forEach (keys GVAR(trackedVehicles));

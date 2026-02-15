@@ -28,12 +28,14 @@ if (_vehicleOcapId isEqualTo -1) then {
   _vehicleOcapId = _firerOcapId;
 };
 
-// get vehicle role
-private _vehicleRole = assignedVehicleRole _firer;
-if (count _vehicleRole isEqualTo 0) then {
-  _vehicleRole = "";
-} else {
-  _vehicleRole = _vehicleRole select 0;
+// get vehicle role — only when FiredMan says this was a vehicle weapon,
+// assignedVehicleRole can return stale data after dismount
+private _vehicleRole = "";
+if (!isNull _vehicle) then {
+  private _role = assignedVehicleRole _firer;
+  if (count _role > 0) then {
+    _vehicleRole = _role select 0;
+  };
 };
 
 // get controller of this unit

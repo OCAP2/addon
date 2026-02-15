@@ -103,19 +103,8 @@ private _data = [
 
 _projectile setVariable [QGVARMAIN(projectileData), _data];
 
-// the simulation type of this ammo will determine how we handle it.
-// "ShotGrenade" // M67
-// "ShotRocket" // S-8
-// "ShotMissile" // R-27
-// "ShotShell" // VOG-17M, HE40mm
-// "ShotMine" // Satchel charge
-// "ShotIlluminating" // 40mm_green Flare
-// "ShotSmokeX"; // M18 Smoke
-// "ShotCM" // Plane flares
-// "ShotSubmunition" // Hind minigun, cluster artillery
-
 // carryover variables to submunitions
-if ((_data select 17) isEqualTo "ShotSubmunition") then {
+if ((_data select 17) isEqualTo "shotSubmunitions") then {
   _projectile addEventHandler ["SubmunitionCreated", {
     params ["_projectile", "_submunitionProjectile"];
     private _data = +(_projectile getVariable QGVARMAIN(projectileData));

@@ -17,7 +17,7 @@ if (isNil "_projectile") exitWith {
 // if this is NOT a deployed submunition itself but the simType of the ammo is "ShotSubmunition", then we need to skip the Deleted EH and leave the Deleted registration to the submunition itself. This will ensure we're tracking start to finish multiple actual projectiles from things like shotguns, cluster artillery, mixed-belt machineguns, etc.
 private _data = _projectile getVariable QGVARMAIN(projectileData);
 if (
-  (_data select 17) isEqualTo "ShotSubmunition" &&
+  (_data select 17) isEqualTo "shotSubmunitions" &&
   {(_data select 18) isEqualTo false}
 ) exitWith {};
 

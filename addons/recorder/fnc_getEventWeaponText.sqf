@@ -41,30 +41,7 @@ if !(_instigator call CBA_fnc_isPerson) then {
 };
 
 if (_instigator call CBA_fnc_isPerson) then {
-  private _veh = objectParent _instigator;
-  if (!isNull _veh) then {
-    private _turretWeapons = [];
-    private _turretMags = [];
-    {
-      if ((_veh turretUnit _x) isEqualTo _instigator) exitWith {
-        _turretWeapons = _veh weaponsTurret _x;
-        _turretMags = _veh magazinesTurret _x;
-      };
-    } forEach (allTurrets _veh);
-    if (_turretWeapons isNotEqualTo []) then {
-      private _weapon = _turretWeapons select 0;
-      private _mag = if (_turretMags isNotEqualTo []) then {_turretMags select 0} else {""};
-      ([_weapon, _weapon, _mag] call FUNC(getWeaponDisplayData)) params ["_muzDisp", "_magDisp"];
-      [([configOf _veh] call BIS_fnc_displayName), _muzDisp, _magDisp];
-    } else {
-      (_instigator weaponstate (currentWeapon _instigator)) params ["_weapon", "_muzzle", "_mode", "_magazine"];
-      ([_weapon, _muzzle, _magazine] call FUNC(getWeaponDisplayData)) params ["_muzDisp", "_magDisp"];
-      _instigator getVariable [
-        QGVARMAIN(lastFired),
-        ["", _muzDisp, _magDisp]
-      ];
-    };
-  } else {
+  private _personalWeapon = {
     (_instigator weaponstate (currentWeapon _instigator)) params ["_weapon", "_muzzle", "_mode", "_magazine"];
     ([_weapon, _muzzle, _magazine] call FUNC(getWeaponDisplayData)) params ["_muzDisp", "_magDisp"];
     _instigator getVariable [
@@ -72,6 +49,26 @@ if (_instigator call CBA_fnc_isPerson) then {
       ["", _muzDisp, _magDisp]
     ];
   };
+
+  private _veh = objectParent _instigator;
+  if (isNull _veh) exitWith {call _personalWeapon};
+
+  // Find instigator's turret — uses allTurrets without true to exclude FFV/person turrets
+  private _turretWeapons = [];
+  private _turretMags = [];
+  {
+    if ((_veh turretUnit _x) isEqualTo _instigator) exitWith {
+      _turretWeapons = _veh weaponsTurret _x;
+      _turretMags = _veh magazinesTurret _x;
+    };
+  } forEach (allTurrets _veh);
+
+  if (_turretWeapons isEqualTo []) exitWith {call _personalWeapon};
+
+  private _weapon = _turretWeapons select 0;
+  private _mag = if (_turretMags isNotEqualTo []) then {_turretMags select 0} else {""};
+  ([_weapon, _weapon, _mag] call FUNC(getWeaponDisplayData)) params ["_muzDisp", "_magDisp"];
+  [([configOf _veh] call BIS_fnc_displayName), _muzDisp, _magDisp];
 } else {
   [getText(configOf (vehicle _instigator) >> "displayName"), "", ""];
 };

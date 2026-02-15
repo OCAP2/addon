@@ -119,6 +119,7 @@ if ((_data select 17) isEqualTo "ShotSubmunition") then {
   _projectile addEventHandler ["SubmunitionCreated", {
     params ["_projectile", "_submunitionProjectile"];
     private _data = +(_projectile getVariable QGVARMAIN(projectileData));
+    _data set [17, getText(configOf _submunitionProjectile >> "simulation")]; // actual sim type
     _data set [18, true]; // isSub = true
     (_data select 14) pushBack [
       diag_tickTime,

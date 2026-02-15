@@ -135,6 +135,7 @@ GVAR(PFHObject) = [
         };
 
         _pos = getPosASL _x;
+        private _unitGroup = group _x;
 
         private _unitData = [
           (_x getVariable QGVARMAIN(id)), //1
@@ -151,7 +152,9 @@ GVAR(PFHObject) = [
           (getPlayerScores _x) joinString ",", // scores 12
           _x call CBA_fnc_vehicleRole, // vehicle role 13
           if (!isNull objectParent _x) then {(objectParent _x) getVariable [QGVARMAIN(id), -1]} else {-1}, // 14
-          stance _x // 15
+          stance _x, // 15
+          groupID _unitGroup, // 16 group name (dynamic)
+          str side _unitGroup // 17 side (dynamic)
         ];
 
         if (_x getVariable ["unitData", []] isNotEqualTo _unitData) then {

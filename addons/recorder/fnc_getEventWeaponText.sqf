@@ -8,7 +8,7 @@ Description:
 
   Attempts to reference <OCAP_lastFired> but will fall back to current value if not available.
 
-  Called during <OCAP_recorder_fnc_projectileHit> and <OCAP_recorder_fnc_eh_killed>.
+  Called during <OCAP_recorder_fnc_eh_killed>.
 
 Parameters:
   _instigator - The unit to evaluate [Object]

@@ -22,8 +22,6 @@ PREP(eh_onUserAdminStateChanged);
 PREP(adminUIcontrol);
 
 PREP(eh_firedMan);
-// PREP(eh_hit);
-PREP(eh_projectileHit);
 PREP(eh_killed);
 PREP(getInstigator);
 PREP(getEventWeaponText);

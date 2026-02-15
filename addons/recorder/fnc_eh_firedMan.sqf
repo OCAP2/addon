@@ -32,26 +32,17 @@
 
 /*
 	  Variable: OCAP_lastFired
-	  Indicates a structured array [vehicleName, weaponDisp, magDisp] of the last weapon fired by the unit. Used for logging hits/kills. Applied to a firing unit.
+	  Indicates a structured array [vehicleName, weaponDisp, magDisp] of the last weapon fired by the unit. Used for logging kills. Applied to a firing unit.
 */
 
 /*
-	  Event Handlers: Projectiles (Bullets)
-	  Deleted - Makes extension call to draw a fire-line between the firer and the final destination.
-	  Explode - Makes extension call to draw a fire-line between the firer and the final destination.
-	  HitPart - Triggered when a projectile hits a part of a unit. Calls <OCAP_recorder_fnc_eh_projectileHit>.
-	  HitExplosion - Triggered when a projectile explodes and damages a part of a unit. Calls <OCAP_recorder_fnc_eh_projectileHit>.
-
 	  Event Handlers: Projectiles (Non-Bullets)
 	  Deleted - Triggered when a non-bullet projectile is deleted. Updates marker position, then removes it 3 frames later.
 	  Explode - Triggered when a non-bullet projectile explodes. Updates marker position, then removes it 3 frames later.
-	  HitPart - Triggered when a projectile hits a part of a unit. Calls <OCAP_recorder_fnc_eh_projectileHit>.
-	  HitExplosion - Triggered when a projectile explodes and damages a part of a unit. Calls <OCAP_recorder_fnc_eh_projectileHit>.
 */
 
 /*
 	  CBA Events: Projectiles
-	  OCAP_recorder_addDebugBullet - Triggered when a bullet is fired and the debug mode is enabled. Shares recent bullet data to all clients.
 	  OCAP_recorder_addDebugMagIcon - Triggered when a non-bullet projectile is fired and the debug mode is enabled. Shares recent data to all clients.
 */
 
@@ -94,10 +85,6 @@ if (_firerId == -1) exitWith {};
 // set the firer's lastFired var as this weapon, so subsequent kills are logged accurately
 ([_weapon, _muzzle, _magazine, _ammo] call FUNC(getWeaponDisplayData)) params ["_muzzleDisp", "_magDisp"];
 
-_projectile setVariable [QGVARMAIN(muzzleDisp), _muzzleDisp];
-_projectile setVariable [QGVARMAIN(magDisp), _magDisp];
-_projectile setVariable [QGVARMAIN(firemode), _mode];
-
 private _wepString = [];
 if (!isNull _vehicle) then {
 	_wepString = [([configOf _vehicle] call BIS_fnc_displayName), _muzzleDisp, _magDisp];
@@ -124,72 +111,9 @@ _ammoSimType = getText(configFile >> "CfgAmmo" >> _ammo >> "simulation");
 _projectile setVariable [QGVAR(firer), _firer];
 _projectile setVariable [QGVAR(firerId), _firerId];
 
-// Track hit events for all projectile types
-_projectile addEventHandler ["HitPart", {
-	params ["_projectile", "_hitEntity", "_projectileOwner", "_pos", "_velocity", "_normal", "_component", "_radius", "_surfaceType"];
-	[_hitEntity, _projectileOwner] call FUNC(eh_projectileHit);
-}];
-
-_projectile addEventHandler ["HitExplosion", {
-	params ["_projectile", "_hitEntity", "_projectileOwner", "_hitThings"];
-	[_hitEntity, _projectileOwner] call FUNC(eh_projectileHit);
-}];
-
 // BULLET PROJECTILES
 
-if (_ammoSimType isEqualTo "shotBullet") exitWith {
-	// Bullet projectiles
-	_projectile addEventHandler ["Deleted", {
-		params ["_projectile"];
-		_firer = _projectile getVariable [QGVAR(firer), objNull];
-		_firerId = _projectile getVariable [QGVAR(firerId), -1];
-		_projectilePos = getPosASL _projectile;
-		_firerPos = getPosASL _firer;
-
-		[":FIRED:", [
-			_firerId, // ocapid 1
-			GVAR(captureFrameNo), // frame 2
-			_projectilePos joinString ",", // bullet dest 3
-			_firerPos joinString ",", // bullet start 4
-			_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
-			_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
-			_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
-		]] call EFUNC(extension,sendData);
-
-		if (GVARMAIN(isDebug)) then {
-			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET",GVAR(captureFrameNo),_firerId,str _projectilePos));
-
-			// add to clients' map draw array
-			private _debugArr = [getPosASL _firer, _projectilePos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
-			[QGVAR(addDebugBullet), _debugArr] call CBA_fnc_globalEvent;
-		};
-	}];
-	_projectile addEventHandler ["Explode", {
-		params ["_projectile", "_pos", "_velocity"];
-		_firer = _projectile getVariable [QGVAR(firer), objNull];
-		_firerId = _projectile getVariable [QGVAR(firerId), -1];
-		_projectilePos = getPosASL _projectile;
-		_firerPos = getPosASL _firer;
-
-		[":FIRED:", [
-			_firerId, // ocapid 1
-			GVAR(captureFrameNo), // frame 2
-			_projectilePos joinString ",", // bullet dest 3
-			_firerPos joinString ",", // bullet start 4
-			_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
-			_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
-			_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
-		]] call EFUNC(extension,sendData);
-
-		if (GVARMAIN(isDebug)) then {
-			OCAPEXTLOG(ARR4("FIRED EVENT: BULLET",GVAR(captureFrameNo),_firerId,str _projectilePos));
-
-			// add to clients' map draw array
-			private _debugArr = [getPosASL _firer, _projectilePos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
-			[QGVAR(addDebugBullet), _debugArr] call CBA_fnc_globalEvent;
-		};
-	}];
-};
+if (_ammoSimType isEqualTo "shotBullet") exitWith {};
 
 // ALL OTHER PROJECTILES
 
@@ -259,69 +183,7 @@ switch (true) do {
 				                // then get data of submunition to determine how to track it
 				private _ammoSimType = getText(configOf _submunitionProjectile >> "simulation");
 
-				_submunitionProjectile addEventHandler ["HitPart", {
-					// Track hit events for all projectile types
-					params ["_projectile", "_hitEntity", "_projectileOwner", "_pos", "_velocity", "_normal", "_component", "_radius", "_surfaceType"];
-					[_hitEntity, _projectileOwner] call FUNC(eh_projectileHit);
-				}];
-
-				_submunitionProjectile addEventHandler ["HitExplosion", {
-					params ["_projectile", "_hitEntity", "_projectileOwner", "_hitThings"];
-					[_hitEntity, _projectileOwner] call FUNC(eh_projectileHit);
-				}];
-
-				if (_ammoSimType isEqualTo "shotBullet") exitWith {
-					// Bullet projectiles
-					_submunitionProjectile addEventHandler ["Deleted", {
-						params ["_projectile"];
-						_firer = _projectile getVariable [QGVAR(firer), objNull];
-						_firerId = _projectile getVariable [QGVAR(firerId), -1];
-						_projectilePos = getPosASL _projectile;
-						_firerPos = getPosASL _firer;
-
-						[":FIRED:", [
-							_firerId, // ocapid 1
-							GVAR(captureFrameNo), // frame 2
-							_projectilePos joinString ",", // bullet dest 3
-							_firerPos joinString ",", // bullet start 4
-							_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
-							_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
-							_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
-						]] call EFUNC(extension,sendData);
-
-						if (GVARMAIN(isDebug)) then {
-							// add to clients' map draw array
-							OCAPEXTLOG(ARR4("FIRED EVENT: BULLET",GVAR(captureFrameNo),_firerId,str _projectilePos));
-
-							private _debugArr = [getPosASL _firer, _projectilePos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
-							[QGVAR(addDebugBullet), _debugArr] call CBA_fnc_globalEvent;
-						};
-					}];
-					_submunitionProjectile addEventHandler ["Explode", {
-						params ["_projectile"];
-						_firer = _projectile getVariable [QGVAR(firer), objNull];
-						_firerId = _projectile getVariable [QGVAR(firerId), -1];
-						_projectilePos = getPosASL _projectile;
-						_firerPos = getPosASL _firer;
-
-						[":FIRED:", [
-							_firerId, // ocapid 1
-							GVAR(captureFrameNo), // frame 2
-							_projectilePos joinString ",", // bullet dest 3
-							_firerPos joinString ",", // bullet start 4
-							_projectile getVariable [QGVARMAIN(muzzleDisp), ""], // weapon display name 5
-							_projectile getVariable [QGVARMAIN(magDisp), ""], // magazine display name 6
-							_projectile getVariable [QGVARMAIN(firemode), ""] // firemode 7
-						]] call EFUNC(extension,sendData);
-
-						if (GVARMAIN(isDebug)) then {
-							// add to clients' map draw array
-							OCAPEXTLOG(ARR4("FIRED EVENT: BULLET",GVAR(captureFrameNo),_firerId,str _projectilePos));
-							private _debugArr = [getPosASL _firer, _projectilePos, [side group _firer] call BIS_fnc_sideColor, cba_missionTime];
-							[QGVAR(addDebugBullet), _debugArr] call CBA_fnc_globalEvent;
-						};
-					}];
-				};
+				if (_ammoSimType isEqualTo "shotBullet") exitWith {};
 
 				_submunitionProjectile addEventHandler ["Deleted", {
 					// move marker, then delete marker, when projectile is deleted or explodes

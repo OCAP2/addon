@@ -71,9 +71,6 @@ _projectile addEventHandler ["HitPart", {
   private _hitOcapId = _hitEntity getVariable [QGVARMAIN(id), -1];
   if (_hitOcapId isEqualTo -1) exitWith {};
 
-  // skip if no components were hit
-  if (count _hitThings isEqualTo 0) exitWith {};
-
   private _data = _projectile getVariable QGVARMAIN(projectileData);
 
   // add hit data

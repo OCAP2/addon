@@ -6,4 +6,3 @@ PREP(handleChatMessage);
 PREP(initDB);
 PREP(newMission);
 PREP(radioEvent);
-PREP(metricsLoop);

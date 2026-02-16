@@ -1,9 +1,9 @@
 #include "script_component.hpp"
 
 /* ----------------------------------------------------------------------------
-FILE: fnc_metricsLoop.sqf
+FILE: fnc_telemetryLoop.sqf
 
-FUNCTION: OCAP_recorder_fnc_metricsLoop
+FUNCTION: OCAP_recorder_fnc_telemetryLoop
 
 Description:
   Collects server telemetry data every 10 seconds and sends a single

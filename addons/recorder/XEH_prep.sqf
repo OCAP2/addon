@@ -31,7 +31,7 @@ PREP(getEventWeaponText);
 PREP(getWeaponDisplayData);
 
 PREP(entityMonitors);
-PREP(metricsLoop);
+PREP(telemetryLoop);
 
 PREP(aceExplosives);
 

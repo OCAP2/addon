@@ -63,14 +63,16 @@ Author:
     } forEach [east, west, independent, civilian];
 
     // [3] Global entity counts
+    private _weaponholders = {_x isKindOf "WeaponHolderSimulated"} count _vehicles;
+    private _playersAlive = {alive _x} count _allPlayers;
     private _globalCounts = [
       {alive _x} count _allUnits,
       count _allDeadMen,
       count _allGroups,
-      {!(_x isKindOf "WeaponHolderSimulated")} count _vehicles,
-      {_x isKindOf "WeaponHolderSimulated"} count _vehicles,
-      {alive _x} count _allPlayers,
-      {!alive _x} count _allPlayers,
+      count _vehicles - _weaponholders,
+      _weaponholders,
+      _playersAlive,
+      count _allPlayers - _playersAlive,
       count _allPlayers
     ];
 
@@ -109,12 +111,12 @@ Author:
       _playerData
     ]] call EFUNC(extension,sendData);
 
-    private _dur = diag_tickTime - _start;
-    if (_dur < 10) then {
-      private _msg = format["Telemetry logged in %1 ms", _dur];
+    private _dur = round ((diag_tickTime - _start) * 1000);
+    if (_dur < 10000) then {
+      private _msg = format["Telemetry logged in %1ms", _dur];
       LOG(_msg);
     } else {
-      private _msg = format["Telemetry took > 10s: %1 ms", _dur];
+      private _msg = format["Telemetry took > 10s: %1ms", _dur];
       WARNING(_msg);
     };
   };

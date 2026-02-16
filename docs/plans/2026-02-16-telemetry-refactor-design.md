@@ -205,20 +205,22 @@ Author:
       private _remoteWH = _sVeh select {!local _x && _x isKindOf "WeaponHolderSimulated"};
 
       _sideData pushBack [
-        [count _localUnits, count _localUnits, count _localDead, count _localGroups, count _localVeh, count _localWH],
-        [count _remoteUnits, count _remoteUnits, count _remoteDead, count _remoteGroups, count _remoteVeh, count _remoteWH]
+        [count _localUnits, {alive _x} count _localUnits, count _localDead, count _localGroups, count _localVeh, count _localWH],
+        [count _remoteUnits, {alive _x} count _remoteUnits, count _remoteDead, count _remoteGroups, count _remoteVeh, count _remoteWH]
       ];
     } forEach [east, west, independent, civilian];
 
     // [3] Global entity counts
+    private _weaponholders = {_x isKindOf "WeaponHolderSimulated"} count _vehicles;
+    private _playersAlive = {alive _x} count _allPlayers;
     private _globalCounts = [
-      count _allUnits,
+      {alive _x} count _allUnits,
       count _allDeadMen,
       count _allGroups,
-      {!(_x isKindOf "WeaponHolderSimulated")} count _vehicles,
-      {_x isKindOf "WeaponHolderSimulated"} count _vehicles,
-      {alive _x} count _allPlayers,
-      {!alive _x} count _allPlayers,
+      count _vehicles - _weaponholders,
+      _weaponholders,
+      _playersAlive,
+      count _allPlayers - _playersAlive,
       count _allPlayers
     ];
 

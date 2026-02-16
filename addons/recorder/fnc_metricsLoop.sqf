@@ -1,215 +1,120 @@
 #include "script_component.hpp"
 
-// PFHs to gather additional data
+/* ----------------------------------------------------------------------------
+FILE: fnc_metricsLoop.sqf
 
-// server fps to DB
+FUNCTION: OCAP_recorder_fnc_metricsLoop
+
+Description:
+  Collects server telemetry data every 10 seconds and sends a single
+  :TELEMETRY: command to the extension. The extension handles routing
+  to mission recording (FPS) and InfluxDB (all metrics).
+
+Parameters:
+  None
+
+Returns:
+  None
+
+Public:
+  No
+
+Author:
+  OCAP Team
+---------------------------------------------------------------------------- */
+
 [{
-  [":FPS:", [
-    GVAR(captureFrameNo),
-    diag_fps,
-    diag_fpsmin
-  ]] call EFUNC(extension,sendData);
-}, 10] call CBA_fnc_addPerFrameHandler;
-
-
-[{ // entity counts to InfluxDB
   [] spawn {
     private _start = diag_tickTime;
+
+    // Snapshot game state
     private _allUnits = allUnits;
     private _allDeadMen = allDeadMen;
     private _allGroups = allGroups;
     private _vehicles = vehicles;
     private _allPlayers = call BIS_fnc_listPlayers;
 
+    // [2] Per-side entity counts: [east, west, independent, civilian]
+    // Each side: [[serverLocal], [remote]]
+    // Each locality: [units_total, units_alive, units_dead, groups, vehicles, weaponholders]
+    private _sideData = [];
     {
-      private _thisSide = _x;
-      private _thisSideStr = _thisSide call BIS_fnc_sideNameUnlocalized;
+      private _s = _x;
+      private _sUnits = _allUnits select {side _x isEqualTo _s};
+      private _sDead = _allDeadMen select {side _x isEqualTo _s};
+      private _sGroups = _allGroups select {side _x isEqualTo _s};
+      private _sVeh = _vehicles select {side _x isEqualTo _s};
 
-      // Number of server (local) owned units
-      [":METRIC:", [
-        "server_performance",
-        format["entity_count_server_%1", _thisSideStr],
-        ["tag", "side", _thisSideStr] joinString "::",
-        ["field", "int", "units_total", {
-            side _x isEqualTo _thisSide &&
-            local _x
-          } count _allUnits] joinString "::",
-        ["field", "int", "units_alive", {
-            side _x isEqualTo _thisSide &&
-            local _x
-          } count _allUnits] joinString "::",
-        ["field", "int", "units_dead", {
-            side _x isEqualTo _thisSide &&
-            local _x
-          } count _allDeadMen] joinString "::",
-        ["field", "int", "groups_total", {
-            side _x isEqualTo _thisSide &&
-            local _x
-          } count _allGroups] joinString "::",
-        ["field", "int", "vehicles_total", {
-            side _x isEqualTo _thisSide &&
-            local _x &&
-            !(_x isKindOf "WeaponHolderSimulated")
-          } count _vehicles] joinString "::",
-        ["field", "int", "vehicles_weaponholder", {
-            side _x isEqualTo _thisSide &&
-            local _x &&
-            (_x isKindOf "WeaponHolderSimulated")
-          } count _vehicles] joinString "::"
-      ]] call EFUNC(extension,sendData);
+      private _localUnits = _sUnits select {local _x};
+      private _remoteUnits = _sUnits select {!local _x};
+      private _localDead = _sDead select {local _x};
+      private _remoteDead = _sDead select {!local _x};
+      private _localGroups = _sGroups select {local _x};
+      private _remoteGroups = _sGroups select {!local _x};
+      private _localVeh = _sVeh select {local _x && !(_x isKindOf "WeaponHolderSimulated")};
+      private _remoteVeh = _sVeh select {!local _x && !(_x isKindOf "WeaponHolderSimulated")};
+      private _localWH = _sVeh select {local _x && _x isKindOf "WeaponHolderSimulated"};
+      private _remoteWH = _sVeh select {!local _x && _x isKindOf "WeaponHolderSimulated"};
 
-
-      // Number of remote, non-local units
-      [":METRIC:", [
-        "server_performance",
-        format["entity_count_remote_%1", _thisSideStr],
-        ["field", "int", "units_total", {
-            side _x isEqualTo _thisSide &&
-            not (local _x)
-          } count _allUnits] joinString "::",
-        ["field", "int", "units_alive", {
-            side _x isEqualTo _thisSide &&
-            not (local _x)
-          } count _allUnits] joinString "::",
-        ["field", "int", "units_dead", {
-            side _x isEqualTo _thisSide &&
-            not (local _x)
-          } count _allDeadMen] joinString "::",
-        ["field", "int", "groups_total", {
-            side _x isEqualTo _thisSide &&
-            not (local _x)
-          } count _allGroups] joinString "::",
-        ["field", "int", "vehicles_total", {
-            side _x isEqualTo _thisSide &&
-            not (local _x) &&
-            !(_x isKindOf "WeaponHolderSimulated")
-          } count _vehicles] joinString "::",
-        ["field", "int", "vehicles_weaponholder", {
-            side _x isEqualTo _thisSide &&
-            not (local _x) &&
-            (_x isKindOf "WeaponHolderSimulated")
-          } count _vehicles] joinString "::"
-      ]] call EFUNC(extension,sendData);
+      _sideData pushBack [
+        [count _localUnits, {alive _x} count _localUnits, count _localDead, count _localGroups, count _localVeh, count _localWH],
+        [count _remoteUnits, {alive _x} count _remoteUnits, count _remoteDead, count _remoteGroups, count _remoteVeh, count _remoteWH]
+      ];
     } forEach [east, west, independent, civilian];
 
-    // Number of all units (global)
-    [":METRIC:", [
-      "server_performance",
-      "entity_count_global_all",
-      ["field", "int", "units_alive",
-        count _allUnits] joinString "::",
-      ["field", "int", "units_dead",
-        count _allDeadMen] joinString "::",
-      ["field", "int", "groups_total",
-        count _allGroups] joinString "::",
-      ["field", "int", "vehicles_total", {
-        !(_x isKindOf "WeaponHolderSimulated")
-        } count _vehicles] joinString "::",
-      ["field", "int", "vehicles_weaponholder", {
-        (_x isKindOf "WeaponHolderSimulated")
-        } count _vehicles] joinString "::",
-      ["field", "int", "players_alive", {
-        alive _x
-        } count _allPlayers] joinString "::",
-      ["field", "int", "players_dead", {
-        !alive _x
-        } count _allPlayers] joinString "::"
-    ]] call EFUNC(extension,sendData);
+    // [3] Global entity counts
+    private _globalCounts = [
+      {alive _x} count _allUnits,
+      count _allDeadMen,
+      count _allGroups,
+      {!(_x isKindOf "WeaponHolderSimulated")} count _vehicles,
+      {_x isKindOf "WeaponHolderSimulated"} count _vehicles,
+      {alive _x} count _allPlayers,
+      {!alive _x} count _allPlayers,
+      count _allPlayers
+    ];
 
-    [":METRIC:", [
-      "server_performance",
-      "player_count",
-      ["field", "int", "players_connected",
-        count _allPlayers] joinString "::"
-    ]] call EFUNC(extension,sendData);
+    // [4] Running scripts
+    private _scripts = diag_activeScripts + [
+      if (isClass(configFile >> "CfgPatches" >> "cba_main")) then {
+        count CBA_common_perFrameHandlerArray
+      } else {0}
+    ];
 
+    // [5] Weather
+    private _weather = [
+      fog, overcast, rain, humidity, waves,
+      windDir, windStr, gusts, lightnings,
+      moonIntensity, moonPhase date, sunOrMoon
+    ];
 
+    // [6] Player network data
+    private _playerData = [];
     {
-      if (_x isEqualTo []) exitWith {nil};
-      _x params ["_playerID", "_ownerId", "_playerUID", "_profileName", "_displayName", "_steamName", "_clientState", "_isHC", "_adminState", "_networkInfo", "_unit"];
-      _networkInfo params ["_avgPing", "_avgBandwidth", "_desync"];
+      if (_x isEqualTo []) then {continue};
+      _x params ["", "", "_uid", "_name", "", "", "", "_isHC", "", "_net", "_unit"];
+      if (isNull _unit || _isHC) then {continue};
+      _net params ["_ping", "_bw", "_desync"];
+      _playerData pushBack [_uid, _name, _ping, _bw, _desync];
+    } forEach (allUsers apply {getUserInfo _x});
 
-
-      if (_unit == objNull || _isHC) exitWith {false};
-
-      [":METRIC:", [
-        "player_performance",
-        "network",
-        ["tag", "playerUID", _playerUID] joinString "::",
-        ["tag", "playerName", _profileName] joinString "::",
-        ["field", "float", "avgPing",
-          _avgPing] joinString "::",
-        ["field", "float", "avgBandwidth",
-          _avgBandwidth] joinString "::",
-        ["field", "float", "desync",
-          _desync] joinString "::"
-      ]] call EFUNC(extension,sendData);
-
-      true;
-    } count (allUsers apply {getUserInfo _x});
-
-    [":METRIC:", [
-      "server_performance",
-      "running_scripts",
-      ["field", "int", "spawn",
-        diag_activeScripts select 0] joinString "::",
-      ["field", "int", "execVM",
-        diag_activeScripts select 1] joinString "::",
-      ["field", "int", "exec",
-        diag_activeScripts select 2] joinString "::",
-      ["field", "int", "execFSM",
-        diag_activeScripts select 3] joinString "::",
-      ["field", "int", "pfh",
-          if (isClass(configFile >> "CfgPatches" >> "cba_main")) then {
-            count CBA_common_perFrameHandlerArray
-          } else {0}
-        ] joinString "::"
-    ]] call EFUNC(extension,sendData);
-
-    [":METRIC:", [
-      "server_performance",
-      "fps",
-      ["field", "float", "fps_avg",
-        diag_fps toFixed 2] joinString "::",
-      ["field", "float", "fps_min",
-        diag_fpsMin toFixed 2] joinString "::"
-    ]] call EFUNC(extension,sendData);
-
-    [":METRIC:", [
-      "mission_data",
-      "weather",
-      ["field", "float", "fog",
-        fog] joinString "::",
-      ["field", "float", "overcast",
-        overcast] joinString "::",
-      ["field", "float", "rain",
-        rain] joinString "::",
-      ["field", "float", "humidity",
-        humidity] joinString "::",
-      ["field", "float", "waves",
-        waves] joinString "::",
-      ["field", "float", "windDir",
-        windDir] joinString "::",
-      ["field", "float", "windStr",
-        windStr] joinString "::",
-      ["field", "float", "gusts",
-        gusts] joinString "::",
-      ["field", "float", "lightnings",
-        lightnings] joinString "::",
-      ["field", "float", "moonIntensity",
-        moonIntensity] joinString "::",
-      ["field", "float", "moonPhase",
-        moonPhase date] joinString "::",
-      ["field", "float", "sunOrMoon",
-        sunOrMoon] joinString "::"
+    // Single telemetry call — extension handles routing and formatting
+    [":TELEMETRY:", [
+      GVAR(captureFrameNo),
+      [diag_fps, diag_fpsmin],
+      _sideData,
+      _globalCounts,
+      _scripts,
+      _weather,
+      _playerData
     ]] call EFUNC(extension,sendData);
 
     private _dur = diag_tickTime - _start;
     if (_dur < 10) then {
-      private _msg = format["Metrics logged in %1 ms", _dur];
+      private _msg = format["Telemetry logged in %1 ms", _dur];
       LOG(_msg);
     } else {
-      private _msg = format["Metrics took > 10s: logged in %1 ms", _dur];
+      private _msg = format["Telemetry took > 10s: %1 ms", _dur];
       WARNING(_msg);
     };
   };

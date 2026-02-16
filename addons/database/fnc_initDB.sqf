@@ -165,7 +165,7 @@ addMissionEventHandler ["ExtensionCallback", {
       [] spawn FUNC(getStaticObjects);
       call FUNC(addEventHandlers);
       call EFUNC(recorder,eh_fired_server);
-      call FUNC(metricsLoop);
+      call EFUNC(recorder,metricsLoop);
     };
   };
 }];

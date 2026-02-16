@@ -5,7 +5,7 @@
 // server fps to DB
 [{
   [":FPS:", [
-    EGVAR(recorder,captureFrameNo),
+    GVAR(captureFrameNo),
     diag_fps,
     diag_fpsmin
   ]] call EFUNC(extension,sendData);

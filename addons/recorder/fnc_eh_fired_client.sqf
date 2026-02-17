@@ -56,6 +56,12 @@ if (_muzzleDisplay isEqualTo "") then {
   _muzzleDisplay = getText(configFile >> "CfgWeapons" >> _weapon >> "displayName");
 };
 
+// Set lastFired on firer for kill attribution — broadcast to server (owner 2)
+// so the kill handler can read it regardless of which machine the firer is on
+private _magDisplay = getText(configFile >> "CfgMagazines" >> _magazine >> "displayName");
+private _vehicleDisplay = if (!isNull _vehicle) then {[configOf _vehicle] call BIS_fnc_displayName} else {""};
+_firer setVariable [QGVARMAIN(lastFired), [_vehicleDisplay, _muzzleDisplay, _magDisplay], 2];
+
 // Projectile data array structure:
 // 0:  firedFrame
 // 1:  firedTime (diag_tickTime)

@@ -45,7 +45,6 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
     private _killedFrame = GVAR(captureFrameNo);
 
     // allow some time for last-fired variable on killer to be updated
-    // namely for explosives, shells, grenades explosions, which are updated on impact
     sleep GVAR(frameCaptureDelay);
 
     if (_killer == _victim && owner _victim != 2 && EGVAR(settings,preferACEUnconscious) && isClass(configFile >> "CfgPatches" >> "ace_medical_status")) then {

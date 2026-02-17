@@ -86,7 +86,7 @@ if (isNil QEGVAR(EH,MPEnded)) then {
   // Event Handler: OCAP_EH_MPEnded
   // Handle for the "MPEnded" mission event handler. Fired on the MPEnded mission event. This is used to automatically save and export if <OCAP_settings_saveMissionEnded> is true and <OCAP_settings_minMissionTime> was reached.
   EGVAR(EH,MPEnded) = addMissionEventHandler ["MPEnded", {
-    if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) >= GVAR(minMissionTime)) then {
+    if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) / 60 >= GVAR(minMissionTime)) then {
       ["Mission ended automatically"] call FUNC(exportData);
     };
   }];
@@ -97,7 +97,7 @@ if (isNil QEGVAR(EH,Ended)) then {
   // Event Handler: OCAP_EH_Ended
   // Handle for the "Ended" mission event handler. Fired on the singleplayer Ended mission event. This is used to automatically save and export if <OCAP_settings_saveMissionEnded> is true and <OCAP_settings_minMissionTime> was reached. Kept in just in case this event triggers.
   EGVAR(EH,Ended) = addMissionEventHandler ["Ended", {
-    if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) >= GVAR(minMissionTime)) then {
+    if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) / 60 >= GVAR(minMissionTime)) then {
       ["Mission ended automatically"] call FUNC(exportData);
     };
   }];

@@ -43,8 +43,9 @@ if (isNil QGVAR(startTime)) then {
 GVAR(trackedVehicles) = createHashMap;
 
 // Pre-compute frame intervals that depend on frameCaptureDelay (constant for the mission)
-private _ticketInterval = round (30 / GVAR(frameCaptureDelay));
-private _diaryInterval = round (320 / GVAR(frameCaptureDelay));
+// Must be GVARs, not private — PFH code runs in a different scope.
+GVAR(ticketInterval) = round (30 / GVAR(frameCaptureDelay));
+GVAR(diaryInterval) = round (320 / GVAR(frameCaptureDelay));
 
 // Variable: OCAP_PFHObject
 // The CBA PerFrameHandler object that is created and used to run the capture loop.
@@ -57,7 +58,7 @@ GVAR(PFHObject) = [
     };
 
     // every 15 frames of recording check respawn ticket state of each of three sides
-    if (GVAR(captureFrameNo) % _ticketInterval == 0 && EGVAR(settings,trackTickets)) then {
+    if (GVAR(captureFrameNo) % GVAR(ticketInterval) == 0 && EGVAR(settings,trackTickets)) then {
       private _scores = [];
       {
         _scores pushBack ([_x] call BIS_fnc_respawnTickets);
@@ -66,7 +67,7 @@ GVAR(PFHObject) = [
     };
 
     // update diary record every ~320 seconds
-    if (GVAR(captureFrameNo) % _diaryInterval == 0) then {
+    if (GVAR(captureFrameNo) % GVAR(diaryInterval) == 0) then {
       publicVariable QGVAR(captureFrameNo);
       {
         player createDiaryRecord [

@@ -47,11 +47,10 @@ _systemTimeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} 
 private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];
 _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 
-private _t = round cba_missionTime;
-private _elapsedStr = format ["%1:%2", floor (_t / 60), [str (_t mod 60), "0" + str (_t mod 60)] select (_t mod 60 < 10)];
-
-[[_elapsedStr, format _missionDateFormat, format _systemTimeFormat], { // add diary entry for clients on recording start
+[[format _missionDateFormat, format _systemTimeFormat], { // add diary entry for clients on recording start
   [{!isNull player}, {
+    private _t = round cba_missionTime;
+    private _elapsedStr = format ["%1:%2", floor (_t / 60), [str (_t mod 60), "0" + str (_t mod 60)] select (_t mod 60 < 10)];
     player setDiarySubjectPicture [
       "OCAPInfo",
       "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
@@ -60,7 +59,7 @@ private _elapsedStr = format ["%1:%2", floor (_t / 60), [str (_t mod 60), "0" + 
       "OCAPInfo",
       [
         "Status",
-        format["<font color='#33FF33'>OCAP started recording.<br/>In-Mission Time Elapsed: %1<br/>Mission World Time: %2<br/>System Time UTC: %3</font>", _this#0, _this#1, _this#2]
+        format["<font color='#33FF33'>OCAP started recording.<br/>In-Mission Time Elapsed: %1<br/>Mission World Time: %2<br/>System Time UTC: %3</font>", _elapsedStr, _this#0, _this#1]
       ]
     ];
   }, _this] call CBA_fnc_waitUntilAndExecute;

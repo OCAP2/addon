@@ -107,8 +107,15 @@ call FUNC(addEventMission);
 
 // Check already-connected players for admin controls (fixes race condition
 // where players connected before OCAP initialized don't get diary entries)
+// Wait for getUserInfo to be populated before calling, as it may not be ready during postInit
 {
-  [str owner _x, "connect"] call FUNC(adminUIcontrol);
+  private _pid = str owner _x;
+  [{
+    private _info = getUserInfo _this;
+    !isNil "_info" && {_info isEqualType [] && {count _info >= 11}}
+  }, {
+    [_this, "connect"] call FUNC(adminUIcontrol);
+  }, _pid, 30] call CBA_fnc_waitUntilAndExecute;
 } forEach allPlayers;
 
 // remoteExec diary creation commands to clients listing version numbers and waiting start state

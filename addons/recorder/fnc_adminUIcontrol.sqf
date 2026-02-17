@@ -33,12 +33,22 @@ params [
 	["_event", "", [""]]
 ];
 
-if (isNil "_PID") exitWith {};
+if (isNil "_PID") exitWith {
+	diag_log text format ["[OCAP] (recorder) WARNING: adminUIcontrol called with nil PID, event: %1", _event];
+};
 
 private _userInfo = (getUserInfo _PID);
-if (isNil "_userInfo") exitWith {};
+if (isNil "_userInfo") exitWith {
+	diag_log text format ["[OCAP] (recorder) WARNING: getUserInfo returned nil for PID: %1", _PID];
+};
+if (!(_userInfo isEqualType []) || {count _userInfo < 11}) exitWith {
+	diag_log text format ["[OCAP] (recorder) WARNING: getUserInfo returned unexpected data for PID %1: type=%2 count=%3 data=%4", _PID, typeName _userInfo, if (_userInfo isEqualType []) then {count _userInfo} else {-1}, _userInfo];
+};
 _userInfo params ["_playerID", "_owner", "_playerUID"];
-_unit = _userInfo select 10;
+private _unit = _userInfo select 10;
+if (isNull _unit) exitWith {
+	diag_log text format ["[OCAP] (recorder) WARNING: getUserInfo unit (index 10) is null for PID %1 (UID: %2)", _PID, _playerUID];
+};
 
 _fnc_addControls = {
 	params ["_owner", "_unit"];

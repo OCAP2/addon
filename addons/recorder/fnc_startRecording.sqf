@@ -47,7 +47,10 @@ _systemTimeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} 
 private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];
 _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 
-[[cba_missionTime, format _missionDateFormat, format _systemTimeFormat], { // add diary entry for clients on recording start
+private _t = round cba_missionTime;
+private _elapsedStr = format ["%1:%2", floor (_t / 60), [str (_t mod 60), "0" + str (_t mod 60)] select (_t mod 60 < 10)];
+
+[[_elapsedStr, format _missionDateFormat, format _systemTimeFormat], { // add diary entry for clients on recording start
   [{!isNull player}, {
     player setDiarySubjectPicture [
       "OCAPInfo",

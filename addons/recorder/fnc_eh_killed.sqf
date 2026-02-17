@@ -44,24 +44,19 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
 
     private _killedFrame = GVAR(captureFrameNo);
 
-    // Capture explosive/mine weapon info before sleep — the killer object
-    // (mine, satchel, demo charge) may be deleted after detonation.
-    // lastFired on the instigator is often stale for placed explosives since
-    // the player typically fires other weapons between placement and detonation.
-    private _killerWeaponOverride = [];
-    if (!isNull _killer && {!(_killer isKindOf "CAManBase")}) then {
-      private _type = typeOf _killer;
-      private _name = getText (configFile >> "CfgVehicles" >> _type >> "displayName");
-      if (_name == "") then {
-        _name = getText (configFile >> "CfgAmmo" >> _type >> "displayName");
-      };
-      if (_name != "") then {
-        _killerWeaponOverride = ["", _name, ""];
-      };
+    // Log raw EntityKilled params for debugging
+    if (GVARMAIN(isDebug)) then {
+      diag_log text format [
+        "[OCAP] KILL_RAW: victim=%1 (%2), killer=%3 (%4), instigator=%5, lastDamageAmmo=%6",
+        name _victim, typeOf _victim,
+        if (isNull _killer) then {"null"} else {format ["%1 (%2)", name _killer, typeOf _killer]},
+        typeOf _killer,
+        if (isNull _instigator) then {"null"} else {name _instigator},
+        _victim getVariable [QGVARMAIN(lastDamageAmmo), ""]
+      ];
     };
 
     // allow some time for last-fired variable on killer to be updated
-    // namely for explosives, shells, grenades explosions, which are updated on impact
     sleep GVAR(frameCaptureDelay);
 
     if (_killer == _victim && owner _victim != 2 && EGVAR(settings,preferACEUnconscious) && isClass(configFile >> "CfgPatches" >> "ace_medical_status")) then {
@@ -79,21 +74,43 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
       _instigator = [_victim, _killer] call FUNC(getInstigator);
     };
 
-    // For explosive/projectile kills (mines, satchels, etc.), override lastFired
-    // since it may have been overwritten by subsequent weapon fires.
-    // Skip if instigator is in an armed turret — getEventWeaponText will report the turret weapon.
-    if (_killerWeaponOverride isNotEqualTo []) then {
-      private _inArmedTurret = false;
-      private _veh = objectParent _instigator;
-      if (!isNull _veh) then {
-        {
-          if ((_veh turretUnit _x) isEqualTo _instigator && {(_veh weaponsTurret _x) isNotEqualTo []}) exitWith {
-            _inArmedTurret = true;
+    // Check if victim was killed by explosive ammo (mines, satchels, grenades, etc.)
+    // HandleDamage EH stores the actual ammo classname on the victim.
+    // For explosive ammo, override lastFired since the instigator may have fired other weapons since.
+    private _lastDamageAmmo = _victim getVariable [QGVARMAIN(lastDamageAmmo), ""];
+    if (_lastDamageAmmo != "" && {!isNull _instigator}) then {
+      private _isExplosive = getNumber (configFile >> "CfgAmmo" >> _lastDamageAmmo >> "explosive") > 0;
+      if (_isExplosive) then {
+        // Derive display name from ammo config (magazine name preferred, then ammo name, then classname)
+        private _ammoDisplayName = "";
+        private _defaultMag = getText (configFile >> "CfgAmmo" >> _lastDamageAmmo >> "defaultMagazine");
+        if (_defaultMag != "") then {
+          _ammoDisplayName = getText (configFile >> "CfgMagazines" >> _defaultMag >> "displayName");
+        };
+        if (_ammoDisplayName == "") then {
+          _ammoDisplayName = getText (configFile >> "CfgAmmo" >> _lastDamageAmmo >> "displayName");
+        };
+        if (_ammoDisplayName == "") then {
+          _ammoDisplayName = _lastDamageAmmo;
+        };
+
+        // Skip override if instigator is in an armed turret — turret weapon attribution is correct
+        private _inArmedTurret = false;
+        private _veh = objectParent _instigator;
+        if (!isNull _veh) then {
+          {
+            if ((_veh turretUnit _x) isEqualTo _instigator && {(_veh weaponsTurret _x) isNotEqualTo []}) exitWith {
+              _inArmedTurret = true;
+            };
+          } forEach (allTurrets _veh);
+        };
+
+        if (!_inArmedTurret) then {
+          if (GVARMAIN(isDebug)) then {
+            diag_log text format ["[OCAP] KILL_EXPLOSIVE_OVERRIDE: ammo=%1, displayName=%2, instigator=%3", _lastDamageAmmo, _ammoDisplayName, name _instigator];
           };
-        } forEach (allTurrets _veh);
-      };
-      if (!_inArmedTurret) then {
-        _instigator setVariable [QGVARMAIN(lastFired), _killerWeaponOverride];
+          _instigator setVariable [QGVARMAIN(lastFired), ["", _ammoDisplayName, ""]];
+        };
       };
     };
 
@@ -128,7 +145,10 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
       ];
 
       if (GVARMAIN(isDebug)) then {
-        OCAPEXTLOG(ARR4("KILLED EVENT",_killedFrame,_victimId,_killerId));
+        diag_log text format [
+          "[OCAP] KILL_EVENT: frame=%1, victim=%2 (id=%3), killer=%4 (id=%5), weapon=%6, distance=%7, lastDamageAmmo=%8",
+          _killedFrame, name _victim, _victimId, name _instigator, _killerId, _eventText, _killDistance, _lastDamageAmmo
+        ];
       };
 
       [":KILL:", [

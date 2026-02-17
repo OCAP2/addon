@@ -26,13 +26,19 @@ Author:
 
 params ["_command","_args", ["_dllName", "ocap_recorder"]];
 
-diag_log text format ["[OCAP] [EXT] >> Calling extension '%1' with command='%2', args=%3", _dllName, _command, _args];
+private _debug = GVARMAIN(isDebug);
+
+if (_debug) then {
+  diag_log text format ["[OCAP] [EXT] >> Calling extension '%1' with command='%2', args=%3", _dllName, _command, _args];
+};
 
 private _res = _dllName callExtension [_command, _args];
 
 _res params ["_result","_returnCode","_errorCode"];
 
-diag_log text format ["[OCAP] [EXT] << Response: result='%1', returnCode=%2, errorCode=%3", _result, _returnCode, _errorCode];
+if (_debug) then {
+  diag_log text format ["[OCAP] [EXT] << Response: result='%1', returnCode=%2, errorCode=%3", _result, _returnCode, _errorCode];
+};
 
 if (_returnCode != 0) exitWith {
   diag_log text format ["[OCAP] [EXT] ERROR from extension (returnCode=%1): %2", _returnCode, [_result, _returnCode, _errorCode, _command, _args]];
@@ -50,7 +56,9 @@ if (_result isEqualTo "") exitWith {
 };
 
 private _parsed = parseSimpleArray _result;
-diag_log text format ["[OCAP] [EXT] Parsed response: %1", _parsed];
+if (_debug) then {
+  diag_log text format ["[OCAP] [EXT] Parsed response: %1", _parsed];
+};
 
 if !(_parsed isEqualType []) exitWith {
   diag_log text format ["[OCAP] [EXT] ERROR: Response is not an array: %1", _parsed];
@@ -73,10 +81,14 @@ if (_status isEqualTo "error") exitWith {
 if (_status isEqualTo "ok") exitWith {
   if (count _parsed > 1) then {
     private _data = _parsed # 1;
-    diag_log text format ["[OCAP] [EXT] OK: %1", _data];
+    if (_debug) then {
+      diag_log text format ["[OCAP] [EXT] OK: %1", _data];
+    };
     _data
   } else {
-    diag_log text "[OCAP] [EXT] OK";
+    if (_debug) then {
+      diag_log text "[OCAP] [EXT] OK";
+    };
     true
   };
 };

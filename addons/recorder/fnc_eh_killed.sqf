@@ -44,15 +44,15 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
 
     private _killedFrame = GVAR(captureFrameNo);
 
-    // Log raw EntityKilled params for debugging
+    // Log raw EntityKilled params before any resolution
     if (GVARMAIN(isDebug)) then {
       diag_log text format [
-        "[OCAP] KILL_RAW: victim=%1 (%2), killer=%3 (%4), instigator=%5, lastDamageAmmo=%6",
+        "[OCAP] KILL_RAW: victim=%1 (%2), killer=%3 (%4, isMan=%5), instigator=%6 (%7), killerLastFired=%8, victimLastFired=%9",
         name _victim, typeOf _victim,
-        if (isNull _killer) then {"null"} else {format ["%1 (%2)", name _killer, typeOf _killer]},
-        typeOf _killer,
-        if (isNull _instigator) then {"null"} else {name _instigator},
-        _victim getVariable [QGVARMAIN(lastDamageAmmo), ""]
+        if (isNull _killer) then {"null"} else {name _killer}, typeOf _killer, _killer isKindOf "CAManBase",
+        if (isNull _instigator) then {"null"} else {name _instigator}, typeOf _instigator,
+        _killer getVariable [QGVARMAIN(lastFired), "N/A"],
+        _victim getVariable [QGVARMAIN(lastFired), "N/A"]
       ];
     };
 
@@ -74,44 +74,16 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
       _instigator = [_victim, _killer] call FUNC(getInstigator);
     };
 
-    // Check if victim was killed by explosive ammo (mines, satchels, grenades, etc.)
-    // HandleDamage EH stores the actual ammo classname on the victim.
-    // For explosive ammo, override lastFired since the instigator may have fired other weapons since.
-    private _lastDamageAmmo = _victim getVariable [QGVARMAIN(lastDamageAmmo), ""];
-    if (_lastDamageAmmo != "" && {!isNull _instigator}) then {
-      private _isExplosive = getNumber (configFile >> "CfgAmmo" >> _lastDamageAmmo >> "explosive") > 0;
-      if (_isExplosive) then {
-        // Derive display name from ammo config (magazine name preferred, then ammo name, then classname)
-        private _ammoDisplayName = "";
-        private _defaultMag = getText (configFile >> "CfgAmmo" >> _lastDamageAmmo >> "defaultMagazine");
-        if (_defaultMag != "") then {
-          _ammoDisplayName = getText (configFile >> "CfgMagazines" >> _defaultMag >> "displayName");
-        };
-        if (_ammoDisplayName == "") then {
-          _ammoDisplayName = getText (configFile >> "CfgAmmo" >> _lastDamageAmmo >> "displayName");
-        };
-        if (_ammoDisplayName == "") then {
-          _ammoDisplayName = _lastDamageAmmo;
-        };
-
-        // Skip override if instigator is in an armed turret — turret weapon attribution is correct
-        private _inArmedTurret = false;
-        private _veh = objectParent _instigator;
-        if (!isNull _veh) then {
-          {
-            if ((_veh turretUnit _x) isEqualTo _instigator && {(_veh weaponsTurret _x) isNotEqualTo []}) exitWith {
-              _inArmedTurret = true;
-            };
-          } forEach (allTurrets _veh);
-        };
-
-        if (!_inArmedTurret) then {
-          if (GVARMAIN(isDebug)) then {
-            diag_log text format ["[OCAP] KILL_EXPLOSIVE_OVERRIDE: ammo=%1, displayName=%2, instigator=%3", _lastDamageAmmo, _ammoDisplayName, name _instigator];
-          };
-          _instigator setVariable [QGVARMAIN(lastFired), ["", _ammoDisplayName, ""]];
-        };
-      };
+    // Log resolved state after instigator resolution and sleep
+    if (GVARMAIN(isDebug)) then {
+      diag_log text format [
+        "[OCAP] KILL_RESOLVED: killer=%1 (%2), instigator=%3 (%4), instigatorLastFired=%5, instigatorCurrentWeapon=%6, instigatorVehicle=%7",
+        if (isNull _killer) then {"null"} else {name _killer}, typeOf _killer,
+        if (isNull _instigator) then {"null"} else {name _instigator}, typeOf _instigator,
+        _instigator getVariable [QGVARMAIN(lastFired), "N/A"],
+        if (!isNull _instigator) then {currentWeapon _instigator} else {""},
+        if (!isNull _instigator && {!isNull objectParent _instigator}) then {typeOf objectParent _instigator} else {"on foot"}
+      ];
     };
 
     // [GVAR(captureFrameNo), "killed", _victimId, ["null"], -1];
@@ -146,8 +118,8 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
 
       if (GVARMAIN(isDebug)) then {
         diag_log text format [
-          "[OCAP] KILL_EVENT: frame=%1, victim=%2 (id=%3), killer=%4 (id=%5), weapon=%6, distance=%7, lastDamageAmmo=%8",
-          _killedFrame, name _victim, _victimId, name _instigator, _killerId, _eventText, _killDistance, _lastDamageAmmo
+          "[OCAP] KILL_FINAL: frame=%1, victim=%2 (id=%3), killer=%4 (id=%5), weapon=%6, distance=%7",
+          _killedFrame, name _victim, _victimId, name _instigator, _killerId, _eventText, _killDistance
         ];
       };
 

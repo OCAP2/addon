@@ -31,22 +31,6 @@ Author:
 params ["_entity", ["_respawn", false]];
 
 
-// HANDLEDAMAGE — capture ammo classname on victim for explosive kill attribution.
-// When a mine/explosive kills a unit, EntityKilled's _killer is the mine owner (a person),
-// so we can't determine the weapon from _killer alone. HandleDamage gives us the actual
-// ammo classname via _projectile, which we store on the unit for the kill handler to read.
-if (isNil {_entity getVariable QGVARMAIN(HandleDamageEH)}) then {
-  _entity setVariable [
-    QGVARMAIN(HandleDamageEH),
-    _entity addEventHandler ["HandleDamage", {
-      params ["_unit", "_selection", "_damage", "_source", "_projectile"];
-      if (_projectile != "") then {
-        _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile];
-      };
-    }]
-  ];
-};
-
 // FIREDMAN
 // Set a serverside variable on the unit with a value of the handle of the FiredMan EH placed on that unit.
 if ((_entity call BIS_fnc_objectType) # 0 == "Soldier") then {

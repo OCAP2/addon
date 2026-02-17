@@ -57,7 +57,7 @@ if (_damageAmmo isNotEqualTo "" && {_instigator call CBA_fnc_isPerson} && {isNul
   };
 };
 if (_explosiveWeaponText isNotEqualTo []) exitWith {
-  OCAPEXTLOG(ARR3("WEAPON_EXPLOSIVE",_damageAmmo,_explosiveWeaponText));
+  diag_log formatText ["[OCAP] WEAPON_EXPLOSIVE damageAmmo=%1 result=%2", _damageAmmo, _explosiveWeaponText];
   _explosiveWeaponText
 };
 

@@ -75,7 +75,7 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
       private _eventText = [_instigator, _lastDamageAmmo] call FUNC(getEventWeaponText);
 
       private _lastFired = _instigator getVariable [QGVARMAIN(lastFired), "N/A"];
-      OCAPEXTLOG(ARR6("KILL_DEBUG",name _victim,name _instigator,_lastDamageAmmo,_lastFired,_eventText));
+      diag_log formatText ["[OCAP] KILL_DEBUG victim=%1 instigator=%2 lastDamageAmmo=%3 lastFired=%4 eventText=%5", name _victim, name _instigator, _lastDamageAmmo, _lastFired, _eventText];
       private _killerInfo = [];
       // if (_instigator isKindOf "CAManBase") then {
         _killerInfo = [

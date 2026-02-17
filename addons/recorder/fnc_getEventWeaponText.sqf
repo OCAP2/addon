@@ -27,7 +27,7 @@ Author:
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
-params ["_instigator"];
+params ["_instigator", ["_damageAmmo", ""]];
 
 if (isNull _instigator) exitWith {["", "", ""]};
 
@@ -39,6 +39,24 @@ if !(_instigator call CBA_fnc_isPerson) then {
     effectiveCommander _this
   };
 };
+
+// Check HandleDamage ammo for explosive kills (mines, placed explosives)
+// Only for on-foot instigators — vehicle kills use turret weapon info below
+private _explosiveWeaponText = [];
+if (_damageAmmo isNotEqualTo "" && {_instigator call CBA_fnc_isPerson} && {isNull objectParent _instigator}) then {
+  private _indirectHitRange = getNumber(configFile >> "CfgAmmo" >> _damageAmmo >> "indirectHitRange");
+  if (_indirectHitRange > 1) then {
+    private _mag = getText(configFile >> "CfgAmmo" >> _damageAmmo >> "defaultMagazine");
+    private _magDisp = getText(configFile >> "CfgMagazines" >> _mag >> "displayName");
+    if (_magDisp isEqualTo "") then {
+      _magDisp = getText(configFile >> "CfgAmmo" >> _damageAmmo >> "displayName");
+    };
+    if (_magDisp isNotEqualTo "") then {
+      _explosiveWeaponText = ["", _magDisp, ""];
+    };
+  };
+};
+if (_explosiveWeaponText isNotEqualTo []) exitWith {_explosiveWeaponText};
 
 if (_instigator call CBA_fnc_isPerson) then {
   private _personalWeapon = {

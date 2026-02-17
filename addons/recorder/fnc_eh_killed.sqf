@@ -73,6 +73,11 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
 
       private _lastDamageAmmo = _victim getVariable [QGVARMAIN(lastDamageAmmo), ""];
       private _eventText = [_instigator, _lastDamageAmmo] call FUNC(getEventWeaponText);
+
+      if (GVARMAIN(isDebug)) then {
+        private _lastFired = _instigator getVariable [QGVARMAIN(lastFired), "N/A"];
+        OCAPEXTLOG(ARR6("KILL_DEBUG",name _victim,name _instigator,_lastDamageAmmo,_lastFired,_eventText));
+      };
       private _killerInfo = [];
       // if (_instigator isKindOf "CAManBase") then {
         _killerInfo = [

@@ -53,7 +53,7 @@ GVAR(PFHObject) = [
     };
 
     // every 15 frames of recording check respawn ticket state of each of three sides
-    if (GVAR(captureFrameNo) % (30 / GVAR(frameCaptureDelay)) == 0 && EGVAR(settings,trackTickets)) then {
+    if (GVAR(captureFrameNo) % round (30 / GVAR(frameCaptureDelay)) == 0 && EGVAR(settings,trackTickets)) then {
       private _scores = [];
       {
         _scores pushBack ([_x] call BIS_fnc_respawnTickets);
@@ -62,7 +62,7 @@ GVAR(PFHObject) = [
     };
 
     // update diary record every 320 frames
-    if (GVAR(captureFrameNo) % (320 / GVAR(frameCaptureDelay)) == 0) then {
+    if (GVAR(captureFrameNo) % round (320 / GVAR(frameCaptureDelay)) == 0) then {
       publicVariable QGVAR(captureFrameNo);
       {
         player createDiaryRecord [

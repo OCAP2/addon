@@ -84,7 +84,7 @@ GVAR(PFHObject) = [
           _x setVariable [QGVARMAIN(exclude), true, true];
           _x setVariable [QGVARMAIN(isInitialized), true, true];
         };
-        _x setVariable [QGVARMAIN(id), GVAR(nextId)];
+        _x setVariable [QGVARMAIN(id), GVAR(nextId), true];
         private _newUnit = [
           GVAR(captureFrameNo), //1
           GVAR(nextId), //2
@@ -193,7 +193,7 @@ GVAR(PFHObject) = [
           _x setVariable [QGVARMAIN(exclude), true, true];
         };
 
-        _x setVariable [QGVARMAIN(id), GVAR(nextId)];
+        _x setVariable [QGVARMAIN(id), GVAR(nextId), true];
 
         private _newVehicleData = [
           GVAR(captureFrameNo), //1

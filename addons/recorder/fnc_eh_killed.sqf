@@ -81,9 +81,20 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
 
     // For explosive/projectile kills (mines, satchels, etc.), override lastFired
     // since it may have been overwritten by subsequent weapon fires.
-    // Skip if instigator is in a vehicle — vehicle weapon kills are handled by getEventWeaponText.
-    if (_killerWeaponOverride isNotEqualTo [] && {isNull objectParent _instigator}) then {
-      _instigator setVariable [QGVARMAIN(lastFired), _killerWeaponOverride];
+    // Skip if instigator is in an armed turret — getEventWeaponText will report the turret weapon.
+    if (_killerWeaponOverride isNotEqualTo []) then {
+      private _inArmedTurret = false;
+      private _veh = objectParent _instigator;
+      if (!isNull _veh) then {
+        {
+          if ((_veh turretUnit _x) isEqualTo _instigator && {(_veh weaponsTurret _x) isNotEqualTo []}) exitWith {
+            _inArmedTurret = true;
+          };
+        } forEach (allTurrets _veh);
+      };
+      if (!_inArmedTurret) then {
+        _instigator setVariable [QGVARMAIN(lastFired), _killerWeaponOverride];
+      };
     };
 
     // [GVAR(captureFrameNo), "killed", _victimId, ["null"], -1];

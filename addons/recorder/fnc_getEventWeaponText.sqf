@@ -56,10 +56,7 @@ if (_damageAmmo isNotEqualTo "" && {_instigator call CBA_fnc_isPerson} && {isNul
     };
   };
 };
-if (_explosiveWeaponText isNotEqualTo []) exitWith {
-  diag_log formatText ["[OCAP] WEAPON_EXPLOSIVE damageAmmo=%1 result=%2", _damageAmmo, _explosiveWeaponText];
-  _explosiveWeaponText
-};
+if (_explosiveWeaponText isNotEqualTo []) exitWith {_explosiveWeaponText};
 
 if (_instigator call CBA_fnc_isPerson) then {
   private _personalWeapon = {

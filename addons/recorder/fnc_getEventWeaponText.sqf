@@ -57,9 +57,7 @@ if (_damageAmmo isNotEqualTo "" && {_instigator call CBA_fnc_isPerson} && {isNul
   };
 };
 if (_explosiveWeaponText isNotEqualTo []) exitWith {
-  if (GVARMAIN(isDebug)) then {
-    OCAPEXTLOG(ARR3("WEAPON_EXPLOSIVE",_damageAmmo,_explosiveWeaponText));
-  };
+  OCAPEXTLOG(ARR3("WEAPON_EXPLOSIVE",_damageAmmo,_explosiveWeaponText));
   _explosiveWeaponText
 };
 

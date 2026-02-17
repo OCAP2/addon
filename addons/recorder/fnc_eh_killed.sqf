@@ -71,7 +71,8 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
       _killerId = _instigator getVariable [QGVARMAIN(id), -1];
       if (_killerId == -1) exitWith {};
 
-      private _eventText = [_instigator] call FUNC(getEventWeaponText);
+      private _lastDamageAmmo = _victim getVariable [QGVARMAIN(lastDamageAmmo), ""];
+      private _eventText = [_instigator, _lastDamageAmmo] call FUNC(getEventWeaponText);
       private _killerInfo = [];
       // if (_instigator isKindOf "CAManBase") then {
         _killerInfo = [

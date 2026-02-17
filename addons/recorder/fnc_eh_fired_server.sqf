@@ -46,6 +46,16 @@ missionNamespace setVariable [QFUNCMAIN(addBulletEH), FUNC(eh_fired_clientBullet
     }];
     _entity setVariable [QGVARMAIN(firedManEHExists), true];
     _entity setVariable [QGVARMAIN(firedManEH), _id];
+
+    // HandleDamage stores the ammo classname on the victim for kill attribution
+    private _hdId = _entity addEventHandler ["HandleDamage", {
+      params ["_unit", "", "", "", "_projectile"];
+      if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
+        _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
+      };
+    }];
+    _entity setVariable [QGVARMAIN(handleDamageEHExists), true];
+    _entity setVariable [QGVARMAIN(handleDamageEH), _hdId];
   } else {
     [_entity, {
       private _id = _this addEventHandler ["FiredMan", {
@@ -55,6 +65,15 @@ missionNamespace setVariable [QFUNCMAIN(addBulletEH), FUNC(eh_fired_clientBullet
       }];
       _this setVariable [QGVARMAIN(firedManEHExists), true];
       _this setVariable [QGVARMAIN(firedManEH), _id];
+
+      private _hdId = _this addEventHandler ["HandleDamage", {
+        params ["_unit", "", "", "", "_projectile"];
+        if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
+          _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
+        };
+      }];
+      _this setVariable [QGVARMAIN(handleDamageEHExists), true];
+      _this setVariable [QGVARMAIN(handleDamageEH), _hdId];
     }] remoteExec ["call", owner _entity];
   };
 
@@ -67,12 +86,18 @@ missionNamespace setVariable [QFUNCMAIN(addBulletEH), FUNC(eh_fired_clientBullet
     // If the unit is NO LONGER local, remove the EH and the CBA EH.
     // We need to see if it exists already.
     private _firedManEHExists = _entity getVariable [QGVARMAIN(firedManEHExists), false];
+    private _handleDamageEHExists = _entity getVariable [QGVARMAIN(handleDamageEHExists), false];
 
     // If the unit is NO LONGER local, and the EH exists, remove it.
     if (!_isLocal && _firedManEHExists) then {
       _entity removeEventHandler ["FiredMan", _entity getVariable QGVARMAIN(firedManEH)];
       _entity setVariable [QGVARMAIN(firedManEHExists), false];
       _entity setVariable [QGVARMAIN(firedManEH), nil];
+    };
+    if (!_isLocal && _handleDamageEHExists) then {
+      _entity removeEventHandler ["HandleDamage", _entity getVariable QGVARMAIN(handleDamageEH)];
+      _entity setVariable [QGVARMAIN(handleDamageEHExists), false];
+      _entity setVariable [QGVARMAIN(handleDamageEH), nil];
     };
 
     // If the unit is NOW local and the EH doesn't exist, add it.
@@ -85,6 +110,16 @@ missionNamespace setVariable [QFUNCMAIN(addBulletEH), FUNC(eh_fired_clientBullet
       }];
       _entity setVariable [QGVARMAIN(firedManEHExists), true];
       _entity setVariable [QGVARMAIN(firedManEH), _id];
+    };
+    if (_isLocal && !_handleDamageEHExists) then {
+      private _hdId = _entity addEventHandler ["HandleDamage", {
+        params ["_unit", "", "", "", "_projectile"];
+        if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
+          _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
+        };
+      }];
+      _entity setVariable [QGVARMAIN(handleDamageEHExists), true];
+      _entity setVariable [QGVARMAIN(handleDamageEH), _hdId];
     };
   }];
 

@@ -24,6 +24,7 @@ Author:
 ---------------------------------------------------------------------------- */
 
 [{
+  if !(SHOULDSAVEEVENTS) exitWith {};
   [] spawn {
     private _start = diag_tickTime;
 

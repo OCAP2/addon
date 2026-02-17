@@ -44,6 +44,22 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
 
     private _killedFrame = GVAR(captureFrameNo);
 
+    // Capture explosive/mine weapon info before sleep — the killer object
+    // (mine, satchel, demo charge) may be deleted after detonation.
+    // lastFired on the instigator is often stale for placed explosives since
+    // the player typically fires other weapons between placement and detonation.
+    private _killerWeaponOverride = [];
+    if (!isNull _killer && {!(_killer isKindOf "CAManBase")}) then {
+      private _type = typeOf _killer;
+      private _name = getText (configFile >> "CfgVehicles" >> _type >> "displayName");
+      if (_name == "") then {
+        _name = getText (configFile >> "CfgAmmo" >> _type >> "displayName");
+      };
+      if (_name != "") then {
+        _killerWeaponOverride = ["", _name, ""];
+      };
+    };
+
     // allow some time for last-fired variable on killer to be updated
     // namely for explosives, shells, grenades explosions, which are updated on impact
     sleep GVAR(frameCaptureDelay);
@@ -61,6 +77,13 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
 
     if (isNull _instigator) then {
       _instigator = [_victim, _killer] call FUNC(getInstigator);
+    };
+
+    // For explosive/projectile kills (mines, satchels, etc.), override lastFired
+    // since it may have been overwritten by subsequent weapon fires.
+    // Skip if instigator is in a vehicle — vehicle weapon kills are handled by getEventWeaponText.
+    if (_killerWeaponOverride isNotEqualTo [] && {isNull objectParent _instigator}) then {
+      _instigator setVariable [QGVARMAIN(lastFired), _killerWeaponOverride];
     };
 
     // [GVAR(captureFrameNo), "killed", _victimId, ["null"], -1];

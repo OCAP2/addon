@@ -105,6 +105,12 @@ publicVariable QGVAR(restrictMarkersCompat);
 // Add mission event handlers
 call FUNC(addEventMission);
 
+// Add integration event handlers (chat, ACE, TFAR)
+call FUNC(addEventIntegrations);
+call FUNC(eh_fired_server);
+call FUNC(telemetryLoop);
+[] spawn FUNC(getStaticObjects);
+
 // Check already-connected players for admin controls (fixes race condition
 // where players connected before OCAP initialized don't get diary entries)
 // Wait for getUserInfo to be populated before calling, as it may not be ready during postInit
@@ -187,10 +193,9 @@ if (GVAR(missionName) == "") then {
 ];
 
 
-// Initialize DB connection and log world/mission info
-// Conditionals are housed in that module
-EGVAR(database,dbValid) = false;
-call EFUNC(database,initDB);
+// Initialize extension session and log world/mission info
+EGVAR(extension,sessionReady) = false;
+call EFUNC(extension,initSession);
 
 /*
   Conditional Start Recording

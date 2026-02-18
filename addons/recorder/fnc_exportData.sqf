@@ -163,4 +163,4 @@ GVAR(startTime) = nil;
   _x setVariable [QGVARMAIN(unitType), nil];
 } count (allUnits + allDeadMen + vehicles);
 GVAR(nextId) = 0;
-EGVAR(database,dbValid) = false;
+EGVAR(extension,sessionReady) = false;

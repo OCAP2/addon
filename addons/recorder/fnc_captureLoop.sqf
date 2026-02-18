@@ -106,7 +106,7 @@ GVAR(PFHObject) = [
         _x setVariable [QGVARMAIN(newUnitData), _newUnit];
 
         [
-          {missionNamespace getVariable [QEGVAR(database,dbValid), false]},
+          {missionNamespace getVariable [QEGVAR(extension,sessionReady), false]},
           {[":NEW:SOLDIER:", _this] call EFUNC(extension,sendData);},
           _newUnit,
           30
@@ -211,7 +211,7 @@ GVAR(PFHObject) = [
         _x setVariable [QGVARMAIN(newVehicleData), _newVehicleData];
 
         [
-          {missionNamespace getVariable [QEGVAR(database,dbValid), false]},
+          {missionNamespace getVariable [QEGVAR(extension,sessionReady), false]},
           {[":NEW:VEHICLE:", _this] call EFUNC(extension,sendData);},
           _newVehicleData,
           30

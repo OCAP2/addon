@@ -1,11 +1,11 @@
 /* ----------------------------------------------------------------------------
 FILE: fnc_getStaticObjects.sqf
 
-FUNCTION: OCAP_database_fnc_getStaticObjects
+FUNCTION: OCAP_recorder_fnc_getStaticObjects
 
 Description:
-
-  This function runs in the scheduled environment and will grab information about all non-terrain static objects on the map for reference, saving them to the database.
+  This function runs in the scheduled environment and will grab information
+  about all non-terrain static objects on the map for reference.
 
 Parameters:
   None

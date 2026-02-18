@@ -102,47 +102,47 @@ publicVariable QEGVAR(extension,version);
 GVAR(restrictMarkersCompat) = isClass (configFile >> "CfgPatches" >> "restrict_markers") && {missionNamespace getVariable ["restrict_markers_main_enabled", false]};
 publicVariable QGVAR(restrictMarkersCompat);
 
-// Client-facing translations distributed to clients via publicVariable.
-// Server-side only addon: clients don't have the stringtable, so we embed
-// all translations here and look up by the client's `language` at runtime.
-GVAR(translations) = createHashMap;
-{
-  _x params ["_key", "_en", "_de"];
-  GVAR(translations) set [_key, createHashMapFromArray [["English", _en], ["German", _de]]];
-} forEach [
-  [LSTRING(About), "About", "Info"],
-  [LSTRING(AlreadyRecording), "OCAP was asked to record and is already recording!", "OCAP wurde zum Aufnehmen aufgefordert und nimmt bereits auf!"],
-  [LSTRING(CaptureFrame), "Capture frame:", "Aufnahme-Frame:"],
-  [LSTRING(Controls), "Controls", "Steuerung"],
-  [LSTRING(DiaryAdminControlsText), "These controls can be used to Start Recording, Pause Recording, and Save/Export the Recording. On the backend, these use the corresponding CBA server events that can be found in the documentation. Because of this, they override the default minimum duration required to save, so be aware that clicking ""Stop and Export Recording"" will save and upload your current recording regardless of its duration.", "Diese Steuerungen können zum Starten, Pausieren und Speichern/Exportieren der Aufnahme verwendet werden. Im Hintergrund verwenden sie die entsprechenden CBA-Server-Events aus der Dokumentation. Dadurch wird die standardmäßige Mindestdauer zum Speichern umgangen. Beachten Sie, dass ein Klick auf ""Aufnahme stoppen und exportieren"" Ihre aktuelle Aufnahme unabhängig von ihrer Dauer speichert und hochlädt."],
-  [LSTRING(DiaryRecordingStarted), "OCAP started recording.", "OCAP hat die Aufnahme gestartet."],
-  [LSTRING(DiarySavedRecording1), "OCAP capture of %1 has been exported with %2 frames saved.", "OCAP-Aufnahme von %1 wurde mit %2 gespeicherten Frames exportiert."],
-  [LSTRING(DiarySavedRecording2), "Upload results have been logged.", "Upload-Ergebnisse wurden protokolliert."],
-  [LSTRING(DiarySubjectTitle), "OCAP Admin", "OCAP Admin"],
-  [LSTRING(Disclaimer), "DISCLAIMER: This mission may be recorded and made publicly available at the discretion of the server administrators. Please be aware that your actions during this mission will be tracked and attributed to your in-game username.", "HINWEIS: Diese Mission kann nach Ermessen der Serveradministratoren aufgezeichnet und öffentlich zugänglich gemacht werden. Bitte beachten Sie, dass Ihre Aktionen während dieser Mission verfolgt und Ihrem Spielernamen zugeordnet werden."],
-  [LSTRING(InMissionTimeElapsed), "In-Mission Time Elapsed:", "Vergangene Missionszeit:"],
-  [LSTRING(MinimumDurationNotMet), "OCAP capture of %1 has not yet reached the minimum duration to save it. Recording will continue.", "OCAP-Aufnahme von %1 hat die Mindestdauer zum Speichern noch nicht erreicht. Die Aufnahme wird fortgesetzt."],
-  [LSTRING(MinimumDurationNotMetNotify), "OCAP attempted to save, but the minimum recording duration hasn't been met. Recording will continue.", "OCAP hat versucht zu speichern, aber die Mindestaufnahmedauer wurde nicht erreicht. Die Aufnahme wird fortgesetzt."],
-  [LSTRING(MissionWorldTime), "Mission World Time:", "Missions-Weltzeit:"],
-  [LSTRING(NotYetReceived), "not yet received", "noch nicht empfangen"],
-  [LSTRING(OCAPInitialized), "OCAP initialized.", "OCAP initialisiert."],
-  [LSTRING(OCAPSavedFrames), "OCAP saved %1 frames successfully", "OCAP hat %1 Frames erfolgreich gespeichert"],
-  [LSTRING(PauseRecording), "Pause Recording", "Aufnahme pausieren"],
-  [LSTRING(RecordingNotStartedYet), "OCAP was asked to save, but recording hasn't started yet.", "OCAP wurde zum Speichern aufgefordert, aber die Aufnahme hat noch nicht begonnen."],
-  [LSTRING(RecordingPaused), "OCAP paused recording", "OCAP hat die Aufnahme pausiert"],
-  [LSTRING(RecordingStarted), "OCAP began recording", "OCAP hat die Aufnahme begonnen"],
-  [LSTRING(StartRecording), "Start/Resume Recording", "Aufnahme starten/fortsetzen"],
-  [LSTRING(StartRecordingExtFailed), "OCAP failed to start recording: extension did not respond", "OCAP konnte die Aufnahme nicht starten: Extension hat nicht geantwortet"],
-  [LSTRING(Status), "Status", "Status"],
-  [LSTRING(StopRecording), "Stop and Export Recording", "Aufnahme stoppen und exportieren"],
-  [LSTRING(SystemTimeUTC), "System Time UTC:", "Systemzeit UTC:"]
+// Client-facing translation fallback map distributed via publicVariable.
+// Server-side only addon: clients don't have the stringtable. On the server,
+// `localize` returns the English (Original) text. If a client installs an
+// optional stringtable addon, `localize` returns their language directly.
+// Otherwise the flat map provides the English fallback.
+GVAR(tr) = createHashMapFromArray [
+  [LSTRING(About), localize LSTRING(About)],
+  [LSTRING(AlreadyRecording), localize LSTRING(AlreadyRecording)],
+  [LSTRING(CaptureFrame), localize LSTRING(CaptureFrame)],
+  [LSTRING(Controls), localize LSTRING(Controls)],
+  [LSTRING(DiaryAdminControlsText), localize LSTRING(DiaryAdminControlsText)],
+  [LSTRING(DiaryRecordingStarted), localize LSTRING(DiaryRecordingStarted)],
+  [LSTRING(DiarySavedRecording1), localize LSTRING(DiarySavedRecording1)],
+  [LSTRING(DiarySavedRecording2), localize LSTRING(DiarySavedRecording2)],
+  [LSTRING(DiarySubjectTitle), localize LSTRING(DiarySubjectTitle)],
+  [LSTRING(Disclaimer), localize LSTRING(Disclaimer)],
+  [LSTRING(InMissionTimeElapsed), localize LSTRING(InMissionTimeElapsed)],
+  [LSTRING(MinimumDurationNotMet), localize LSTRING(MinimumDurationNotMet)],
+  [LSTRING(MinimumDurationNotMetNotify), localize LSTRING(MinimumDurationNotMetNotify)],
+  [LSTRING(MissionWorldTime), localize LSTRING(MissionWorldTime)],
+  [LSTRING(NotYetReceived), localize LSTRING(NotYetReceived)],
+  [LSTRING(OCAPInitialized), localize LSTRING(OCAPInitialized)],
+  [LSTRING(OCAPSavedFrames), localize LSTRING(OCAPSavedFrames)],
+  [LSTRING(PauseRecording), localize LSTRING(PauseRecording)],
+  [LSTRING(RecordingNotStartedYet), localize LSTRING(RecordingNotStartedYet)],
+  [LSTRING(RecordingPaused), localize LSTRING(RecordingPaused)],
+  [LSTRING(RecordingStarted), localize LSTRING(RecordingStarted)],
+  [LSTRING(StartRecording), localize LSTRING(StartRecording)],
+  [LSTRING(StartRecordingExtFailed), localize LSTRING(StartRecordingExtFailed)],
+  [LSTRING(Status), localize LSTRING(Status)],
+  [LSTRING(StopRecording), localize LSTRING(StopRecording)],
+  [LSTRING(SystemTimeUTC), localize LSTRING(SystemTimeUTC)]
 ];
-publicVariable QGVAR(translations);
+publicVariable QGVAR(tr);
 
-// Lookup function: resolves on client using `language` command
+// Lookup function: try client-side localize first (works if optional
+// stringtable addon is installed), fall back to server-resolved English.
 GVAR(fnc_tr) = {
-  private _map = GVAR(translations) getOrDefault [_this, createHashMap];
-  _map getOrDefault [language, _map getOrDefault ["English", _this]]
+  private _r = localize _this;
+  if (_r == "") then { _r = GVAR(tr) getOrDefault [_this, _this] };
+  _r
 };
 publicVariable QGVAR(fnc_tr);
 

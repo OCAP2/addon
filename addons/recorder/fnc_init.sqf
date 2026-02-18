@@ -102,6 +102,46 @@ publicVariable QEGVAR(extension,version);
 GVAR(restrictMarkersCompat) = isClass (configFile >> "CfgPatches" >> "restrict_markers") && {missionNamespace getVariable ["restrict_markers_main_enabled", false]};
 publicVariable QGVAR(restrictMarkersCompat);
 
+// Build fallback translation table for clients that may not have the addon's stringtable.
+// Lookup tries client-side localize first (works if addon is loaded client-side),
+// falls back to server-resolved strings (English on dedicated servers).
+GVAR(stringFallbacks) = createHashMapFromArray [
+  [LSTRING(About), localize LSTRING(About)],
+  [LSTRING(AlreadyRecording), localize LSTRING(AlreadyRecording)],
+  [LSTRING(CaptureFrame), localize LSTRING(CaptureFrame)],
+  [LSTRING(Controls), localize LSTRING(Controls)],
+  [LSTRING(DiaryAdminControlsText), localize LSTRING(DiaryAdminControlsText)],
+  [LSTRING(DiaryRecordingStarted), localize LSTRING(DiaryRecordingStarted)],
+  [LSTRING(DiarySavedRecording1), localize LSTRING(DiarySavedRecording1)],
+  [LSTRING(DiarySavedRecording2), localize LSTRING(DiarySavedRecording2)],
+  [LSTRING(DiarySubjectTitle), localize LSTRING(DiarySubjectTitle)],
+  [LSTRING(Disclaimer), localize LSTRING(Disclaimer)],
+  [LSTRING(InMissionTimeElapsed), localize LSTRING(InMissionTimeElapsed)],
+  [LSTRING(MinimumDurationNotMet), localize LSTRING(MinimumDurationNotMet)],
+  [LSTRING(MinimumDurationNotMetNotify), localize LSTRING(MinimumDurationNotMetNotify)],
+  [LSTRING(MissionWorldTime), localize LSTRING(MissionWorldTime)],
+  [LSTRING(NotYetReceived), localize LSTRING(NotYetReceived)],
+  [LSTRING(OCAPInitialized), localize LSTRING(OCAPInitialized)],
+  [LSTRING(OCAPSavedFrames), localize LSTRING(OCAPSavedFrames)],
+  [LSTRING(PauseRecording), localize LSTRING(PauseRecording)],
+  [LSTRING(RecordingNotStartedYet), localize LSTRING(RecordingNotStartedYet)],
+  [LSTRING(RecordingPaused), localize LSTRING(RecordingPaused)],
+  [LSTRING(RecordingStarted), localize LSTRING(RecordingStarted)],
+  [LSTRING(StartRecording), localize LSTRING(StartRecording)],
+  [LSTRING(StartRecordingExtFailed), localize LSTRING(StartRecordingExtFailed)],
+  [LSTRING(Status), localize LSTRING(Status)],
+  [LSTRING(StopRecording), localize LSTRING(StopRecording)],
+  [LSTRING(SystemTimeUTC), localize LSTRING(SystemTimeUTC)]
+];
+publicVariable QGVAR(stringFallbacks);
+
+GVAR(fnc_tr) = {
+  private _r = localize _this;
+  if (_r == "") then { _r = GVAR(stringFallbacks) getOrDefault [_this, _this] };
+  _r
+};
+publicVariable QGVAR(fnc_tr);
+
 // Add mission event handlers
 call FUNC(addEventMission);
 
@@ -119,16 +159,15 @@ call FUNC(addEventMission);
 } forEach allPlayers;
 
 // remoteExec diary creation commands to clients listing version numbers and waiting start state
-[[localize LSTRING(About), localize LSTRING(Disclaimer), localize LSTRING(Status), localize LSTRING(OCAPInitialized)], {
-    [{!isNil QGVARMAIN(version) && !isNil QEGVAR(extension,version)}, {
-      _this params ["_aboutStr", "_disclaimerStr", "_statusStr", "_initializedStr"];
+[{
+    [{!isNil QGVARMAIN(version) && !isNil QEGVAR(extension,version) && !isNil QGVAR(fnc_tr)}, {
       player createDiarySubject ["OCAPInfo", "OCAP AAR", "\A3\ui_f\data\igui\cfg\simpleTasks\types\whiteboard_ca.paa"];
 
       ocap_fnc_copyGitHubToClipboard = {copyToClipboard "https://github.com/OCAP2/OCAP"; systemChat "OCAP GitHub link copied to clipboard";};
       EGVAR(diary,about) = player createDiaryRecord [
         "OCAPInfo",
         [
-          _aboutStr,
+          LSTRING(About) call GVAR(fnc_tr),
           (
             "<font size='20' face='PuristaBold'><font color='#BBBBBB'>OCAP</font><font color='#44AAFF'>2</font></font><br/>" +
             "Addon version: " + GVARMAIN(version) +
@@ -141,7 +180,7 @@ call FUNC(addEventMission);
             "<br/><br/>" +
             "Recording status can be found in the Status section." +
             "<br/><br/>" +
-            _disclaimerStr
+            LSTRING(Disclaimer) call GVAR(fnc_tr)
           )
         ]
       ];
@@ -149,11 +188,11 @@ call FUNC(addEventMission);
       EGVAR(diary,status) = player createDiaryRecord [
         "OCAPInfo",
         [
-          _statusStr,
-          _initializedStr
+          LSTRING(Status) call GVAR(fnc_tr),
+          LSTRING(OCAPInitialized) call GVAR(fnc_tr)
         ]
       ];
-    }, _this] call CBA_fnc_waitUntilAndExecute;
+    }] call CBA_fnc_waitUntilAndExecute;
 }] remoteExecCall ["call", [0, -2] select isDedicated, true];
 
 

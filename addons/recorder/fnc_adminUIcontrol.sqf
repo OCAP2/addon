@@ -53,37 +53,34 @@ if (isNull _unit) exitWith {
 _fnc_addControls = {
 	params ["_owner", "_unit"];
 	  // add controls to diary entry
-	[[localize LSTRING(DiarySubjectTitle), localize LSTRING(Controls), localize LSTRING(DiaryAdminControlsText),
-		localize LSTRING(StartRecording), localize LSTRING(PauseRecording), localize LSTRING(StopRecording)
-	], {
+	{
 		[{
-			getClientStateNumber > 9 && !isNull player
+			getClientStateNumber > 9 && !isNull player && !isNil QGVAR(fnc_tr)
 		}, {
-			_this params ["_subjectStr", "_controlsStr", "_adminTextStr", "_startStr", "_pauseStr", "_stopStr"];
 			player createDiarySubject [
 				QEGVAR(diary,adminControls_subject),
-				_subjectStr,
+				LSTRING(DiarySubjectTitle) call GVAR(fnc_tr),
 				"\A3\ui_f\data\igui\cfg\simpleTasks\types\interact_ca.paa"
 			];
 
 			EGVAR(diary,adminControls_record) = player createDiaryRecord [
 				QEGVAR(diary,adminControls_subject),
 				[
-					_controlsStr,
+					LSTRING(Controls) call GVAR(fnc_tr),
 					format[
 						"<br/>%1<br/><br/><execute expression='[""%2""] call CBA_fnc_serverEvent;'>%3</execute><br/><execute expression='[""%4""] call CBA_fnc_serverEvent;'>%5</execute><br/><execute expression='[""%6""] call CBA_fnc_serverEvent;'>%7</execute>",
-						_adminTextStr,
+						LSTRING(DiaryAdminControlsText) call GVAR(fnc_tr),
 						QGVARMAIN(record),
-						_startStr,
+						LSTRING(StartRecording) call GVAR(fnc_tr),
 						QGVARMAIN(pause),
-						_pauseStr,
+						LSTRING(PauseRecording) call GVAR(fnc_tr),
 						QGVARMAIN(exportData),
-						_stopStr
+						LSTRING(StopRecording) call GVAR(fnc_tr)
 					]
 				]
 			];
-		}, _this] call CBA_fnc_waitUntilAndExecute;
-	}] remoteExec ["call", _owner];
+		}] call CBA_fnc_waitUntilAndExecute;
+	} remoteExec ["call", _owner];
 
 	  // set variable on unit
 	_unit setVariable [QGVARMAIN(hasAdminControls), true];

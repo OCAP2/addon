@@ -119,15 +119,16 @@ call FUNC(addEventMission);
 } forEach allPlayers;
 
 // remoteExec diary creation commands to clients listing version numbers and waiting start state
-[{
+[[localize LSTRING(About), localize LSTRING(Disclaimer), localize LSTRING(Status), localize LSTRING(OCAPInitialized)], {
     [{!isNil QGVARMAIN(version) && !isNil QEGVAR(extension,version)}, {
+      _this params ["_aboutStr", "_disclaimerStr", "_statusStr", "_initializedStr"];
       player createDiarySubject ["OCAPInfo", "OCAP AAR", "\A3\ui_f\data\igui\cfg\simpleTasks\types\whiteboard_ca.paa"];
 
       ocap_fnc_copyGitHubToClipboard = {copyToClipboard "https://github.com/OCAP2/OCAP"; systemChat "OCAP GitHub link copied to clipboard";};
       EGVAR(diary,about) = player createDiaryRecord [
         "OCAPInfo",
         [
-          localize LSTRING(About),
+          _aboutStr,
           (
             "<font size='20' face='PuristaBold'><font color='#BBBBBB'>OCAP</font><font color='#44AAFF'>2</font></font><br/>" +
             "Addon version: " + GVARMAIN(version) +
@@ -140,7 +141,7 @@ call FUNC(addEventMission);
             "<br/><br/>" +
             "Recording status can be found in the Status section." +
             "<br/><br/>" +
-            localize LSTRING(Disclaimer)
+            _disclaimerStr
           )
         ]
       ];
@@ -148,11 +149,11 @@ call FUNC(addEventMission);
       EGVAR(diary,status) = player createDiaryRecord [
         "OCAPInfo",
         [
-          localize LSTRING(Status),
-          localize LSTRING(OCAPInitialized)
+          _statusStr,
+          _initializedStr
         ]
       ];
-    }] call CBA_fnc_waitUntilAndExecute;
+    }, _this] call CBA_fnc_waitUntilAndExecute;
 }] remoteExecCall ["call", [0, -2] select isDedicated, true];
 
 

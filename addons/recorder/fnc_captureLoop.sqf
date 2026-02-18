@@ -69,15 +69,16 @@ GVAR(PFHObject) = [
     // update diary record every ~320 seconds
     if (GVAR(captureFrameNo) % GVAR(diaryInterval) == 0) then {
       publicVariable QGVAR(captureFrameNo);
-      [{
+      [[localize LSTRING(Status), localize LSTRING(CaptureFrame), localize LSTRING(NotYetReceived)], {
+          params ["_statusStr", "_frameStr", "_notReceivedStr"];
           player createDiaryRecord [
             "OCAPInfo",
             [
-              localize LSTRING(Status),
+              _statusStr,
               format[
                 "<font color='#CCCCCC'>%1 %2</font>",
-                localize LSTRING(CaptureFrame),
-                missionNamespace getVariable [QGVAR(captureFrameNo), localize LSTRING(NotYetReceived)]
+                _frameStr,
+                missionNamespace getVariable [QGVAR(captureFrameNo), _notReceivedStr]
               ]
             ]
           ];

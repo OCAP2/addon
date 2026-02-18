@@ -56,15 +56,16 @@ if (isNil QGVAR(startTime)) exitWith {
   // if recording hasn't started, there's nothing to save
   LOG(["Export data call received, but recording of this session hasn't yet started."]);
 
-  [{
+  [[localize LSTRING(Status), localize LSTRING(RecordingNotStartedYet)], {
       [{!isNull player}, {
+        _this params ["_statusStr", "_notStartedStr"];
         player createDiaryRecord [
           "OCAPInfo",
           [
-            localize LSTRING(Status),
+            _statusStr,
             format[
               "<font color='#33FF33'>%1</font>",
-              localize LSTRING(RecordingNotStartedYet)
+              _notStartedStr
             ]
           ], taskNull, "", false
         ];
@@ -72,7 +73,7 @@ if (isNil QGVAR(startTime)) exitWith {
           "OCAPInfo",
           "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
         ];
-      }] call CBA_fnc_waitUntilAndExecute;
+      }, _this] call CBA_fnc_waitUntilAndExecute;
   }] remoteExecCall ["call", 0, true];
 };
 
@@ -87,15 +88,16 @@ if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {
   // then we won't save, but will continue recording in case admins want to save once that threshold is met.
   // allow this restriction to be overriden
   LOG(["Save attempted, but the minimum recording duration hasn't been met. Not saving, continuing to record."]);
-  [{[localize LSTRING(MinimumDurationNotMetNotify), 1, [1, 1, 1, 1]] call CBA_fnc_notify}] remoteExec ["call", [0, -2] select isDedicated];
-  [[briefingName], {
+  [localize LSTRING(MinimumDurationNotMetNotify), 1, [1, 1, 1, 1]] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+  [[localize LSTRING(Status), format[localize LSTRING(MinimumDurationNotMet), briefingName]], {
+      _this params ["_statusStr", "_durationMsg"];
       player createDiaryRecord [
         "OCAPInfo",
         [
-          localize LSTRING(Status),
+          _statusStr,
           format[
             "<font color='#FFFF33'>%1</font>",
-            format[localize LSTRING(MinimumDurationNotMet), _this select 0]
+            _durationMsg
           ]
         ]
       ];
@@ -136,13 +138,16 @@ OCAPEXTLOG([_logMsg]);
 
 
 // notify players that the recording was saved with a 2 second delay to ensure the "stopped recording" entries populate first
-[[_endFrameNumber], {[format[localize LSTRING(OCAPSavedFrames), _this select 0], 1, [1, 1, 1, 1]] call CBA_fnc_notify}] remoteExec ["call", [0, -2] select isDedicated];
+[format[localize LSTRING(OCAPSavedFrames), _endFrameNumber], 1, [1, 1, 1, 1]] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
 [
   [
     GVAR(missionName),
-    GVAR(captureFrameNo)
+    GVAR(captureFrameNo),
+    localize LSTRING(Status),
+    localize LSTRING(DiarySavedRecording1),
+    localize LSTRING(DiarySavedRecording2)
   ], {
-    params ["_missionName", "_endFrame"];
+    params ["_missionName", "_endFrame", "_statusStr", "_savedStr1", "_savedStr2"];
 
     player setDiarySubjectPicture [
       "OCAPInfo",
@@ -151,11 +156,11 @@ OCAPEXTLOG([_logMsg]);
     player createDiaryRecord [
       "OCAPInfo",
       [
-        localize LSTRING(Status),
+        _statusStr,
         format[
-          "<font color='#33FF33'>" + (localize LSTRING(DiarySavedRecording1)) + "</font><br/><br/>" + (localize LSTRING(DiarySavedRecording2)),
-          _missionName,
-          _endFrame
+          "<font color='#33FF33'>%1</font><br/><br/>%2",
+          format[_savedStr1, _missionName, _endFrame],
+          _savedStr2
         ]
       ]
     ];

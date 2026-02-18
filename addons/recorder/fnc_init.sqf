@@ -109,6 +109,10 @@ publicVariable QGVAR(restrictMarkersCompat);
 // Otherwise the flat map provides the English fallback.
 GVAR(tr) = createHashMapFromArray [
   [LSTRING(About), localize LSTRING(About)],
+  [LSTRING(AboutAddonVersion), localize LSTRING(AboutAddonVersion)],
+  [LSTRING(AboutExtVersion), localize LSTRING(AboutExtVersion)],
+  [LSTRING(AboutOverview), localize LSTRING(AboutOverview)],
+  [LSTRING(AboutStatusNote), localize LSTRING(AboutStatusNote)],
   [LSTRING(AlreadyRecording), localize LSTRING(AlreadyRecording)],
   [LSTRING(CaptureFrame), localize LSTRING(CaptureFrame)],
   [LSTRING(Controls), localize LSTRING(Controls)],
@@ -174,17 +178,17 @@ call FUNC(addEventMission);
           LSTRING(About) call GVAR(fnc_tr),
           (
             "<font size='20' face='PuristaBold'><font color='#BBBBBB'>OCAP</font><font color='#44AAFF'>2</font></font><br/>" +
-            "Addon version: " + GVARMAIN(version) +
+            format[LSTRING(AboutAddonVersion) call GVAR(fnc_tr), GVARMAIN(version)] +
             "<br/>" +
-            "Extension version: " + (EGVAR(extension,version) # 0) + " (" + (EGVAR(extension,version) # 1) + ", built " + (EGVAR(extension,version) # 2) + ")" +
+            format[LSTRING(AboutExtVersion) call GVAR(fnc_tr), EGVAR(extension,version) # 0, EGVAR(extension,version) # 1, EGVAR(extension,version) # 2] +
             "<br/>" +
             "<execute expression='call ocap_fnc_copyGitHubToClipboard;'>https://github.com/OCAP2/OCAP</execute>" +
             "<br/><br/>" +
-            "OCAP is a server-side Arma 3 recording suite that provides web-based playback of all units, vehicles, markers, and projectiles present, placed, and fired during a mission." +
+            (LSTRING(AboutOverview) call GVAR(fnc_tr)) +
             "<br/><br/>" +
-            "Recording status can be found in the Status section." +
+            (LSTRING(AboutStatusNote) call GVAR(fnc_tr)) +
             "<br/><br/>" +
-            LSTRING(Disclaimer) call GVAR(fnc_tr)
+            (LSTRING(Disclaimer) call GVAR(fnc_tr))
           )
         ]
       ];

@@ -76,6 +76,22 @@
                 <Original>About</Original>
                 <German>Info</German>
             </Key>
+            <Key ID="STR_OCAP_recorder_AboutAddonVersion">
+                <Original>Addon version: %1</Original>
+                <German>Addon-Version: %1</German>
+            </Key>
+            <Key ID="STR_OCAP_recorder_AboutExtVersion">
+                <Original>Extension version: %1 (%2, built %3)</Original>
+                <German>Extension-Version: %1 (%2, erstellt %3)</German>
+            </Key>
+            <Key ID="STR_OCAP_recorder_AboutOverview">
+                <Original>OCAP is a server-side Arma 3 recording suite that provides web-based playback of all units, vehicles, markers, and projectiles present, placed, and fired during a mission.</Original>
+                <German>OCAP ist ein serverseitiges Arma-3-Aufzeichnungstool, das eine webbasierte Wiedergabe aller Einheiten, Fahrzeuge, Marker und Projektile ermöglicht, die während einer Mission vorhanden, platziert und abgefeuert wurden.</German>
+            </Key>
+            <Key ID="STR_OCAP_recorder_AboutStatusNote">
+                <Original>Recording status can be found in the Status section.</Original>
+                <German>Der Aufnahmestatus ist im Bereich Status zu finden.</German>
+            </Key>
             <Key ID="STR_OCAP_recorder_CaptureFrame">
                 <Original>Capture frame:</Original>
                 <German>Aufnahme-Frame:</German>

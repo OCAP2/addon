@@ -4,24 +4,31 @@
         <Container name="Settings">
             <Key ID="STR_OCAP_main_Administrators">
                 <Original>Administrators</Original>
+                <German>Administratoren</German>
             </Key>
             <Key ID="STR_OCAP_main_Administrators_Tooltip">
                 <Original>An array or server-visible variable referencing one that is a list of playerUIDs. Additional briefing diary or UI elements may be available for more accessible control over OCAP's features. Takes effect on player server connection. Format: [] OR myAdminPUIDs | Default: []</Original>
+                <German>Ein Array oder eine serverweit sichtbare Variable, die eine Liste von playerUIDs referenziert. Zusätzliche Briefing-Tagebuch- oder UI-Elemente können für eine einfachere Steuerung der OCAP-Funktionen verfügbar sein. Wird bei Spielerverbindung zum Server wirksam. Format: [] ODER myAdminPUIDs | Standard: []</German>
             </Key>
             <Key ID="STR_OCAP_main_DebugMode">
                 <Original>Debug Mode</Original>
+                <German>Debug-Modus</German>
             </Key>
             <Key ID="STR_OCAP_main_DebugMode_Tooltip">
                 <Original>Enables increased logging of addon actions. Default: false</Original>
+                <German>Aktiviert erweiterte Protokollierung von Addon-Aktionen. Standard: false</German>
             </Key>
             <Key ID="STR_OCAP_main_RecordingEnabled">
                 <Original>Recording Enabled</Original>
+                <German>Aufnahme aktiviert</German>
             </Key>
             <Key ID="STR_OCAP_main_RecordingEnabled_Tooltip">
                 <Original>Turns on or off most recording functionality. Will not reset anything from existing session, will just stop recording most new data. Note: For record/pause switching, use the CBA events! Default: true</Original>
+                <German>Schaltet die meisten Aufnahmefunktionen ein oder aus. Setzt nichts aus der bestehenden Sitzung zurück, stoppt nur die Aufnahme neuer Daten. Hinweis: Zum Umschalten zwischen Aufnahme/Pause die CBA-Events verwenden! Standard: true</German>
             </Key>
             <Key ID="STR_OCAP_main_SettingsCore">
                 <Original>Core</Original>
+                <German>Kern</German>
             </Key>
         </Container>
     </Package>

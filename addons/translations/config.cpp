@@ -6,8 +6,16 @@ class CfgPatches
     name = "OCAP - Translations";
     author = "OCAP2 Team";
     url = "https://github.com/OCAP2/OCAP";
-    requiredAddons[] = {};
+    requiredAddons[] = {"cba_settings"};
     units[] = {};
     weapons[] = {};
+  };
+};
+
+class Extended_PreInit_EventHandlers
+{
+  class ocap_translations
+  {
+    init = "call compile preprocessFileLineNumbers '\x\ocap\addons\translations\XEH_preInit.sqf'";
   };
 };

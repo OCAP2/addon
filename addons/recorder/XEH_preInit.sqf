@@ -21,10 +21,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,autoStart),
     "CHECKBOX", // setting type
     [
-      localize LSTRING(AutoStartRecording), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(AutoStartRecording_Tooltip)
+      LSTRING(AutoStartRecording), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(AutoStartRecording_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsAutoStart)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsAutoStart)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -46,10 +46,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,minPlayerCount),
     "SLIDER", // setting type
     [
-      localize LSTRING(MinimumPlayerCount), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(MinimumPlayerCount_Tooltip)
+      LSTRING(MinimumPlayerCount), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(MinimumPlayerCount_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsAutoStart)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsAutoStart)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     [
         1, // min
         150, // max
@@ -80,10 +80,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,frameCaptureDelay),
     "SLIDER", // setting type
     [
-      localize LSTRING(FrameCaptureDelay), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(FrameCaptureDelay_Tooltip)
+      LSTRING(FrameCaptureDelay), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(FrameCaptureDelay_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsCore)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsCore)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     [
         0.30, // min
         10, // max
@@ -111,10 +111,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,preferACEUnconscious),
     "CHECKBOX", // setting type
     [
-      localize LSTRING(UseACE3Medical), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(UseACE3Medical_Tooltip)
+      LSTRING(UseACE3Medical), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(UseACE3Medical_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsCore)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsCore)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -145,10 +145,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,excludeClassFromRecord),
     "EDITBOX", // setting type
     [
-      localize LSTRING(ClassnamesToExclude), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(ClassnamesToExclude_Tooltip)
+      LSTRING(ClassnamesToExclude), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(ClassnamesToExclude_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsExclusions)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsExclusions)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     "['ACE_friesAnchorBar']", // default string value
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -173,10 +173,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,excludeKindFromRecord),
     "EDITBOX", // setting type
     [
-      localize LSTRING(KindOfToExclude), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(KindOfToExclude_Tooltip)
+      LSTRING(KindOfToExclude), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(KindOfToExclude_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsExclusions)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsExclusions)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     "['WeaponHolder']", // default string value
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -201,10 +201,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,excludeMarkerFromRecord),
     "EDITBOX", // setting type
     [
-      localize LSTRING(MarkerPrefixesExclude), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(MarkerPrefixesExclude_Tooltip)
+      LSTRING(MarkerPrefixesExclude), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(MarkerPrefixesExclude_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsExclusions)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsExclusions)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     "['SystemMarker_','ACE_BFT_']", // default string value
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -231,10 +231,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,trackTickets),
     "CHECKBOX", // setting type
     [
-      localize LSTRING(TicketTracking), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(TicketTracking_Tooltip)
+      LSTRING(TicketTracking), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(TicketTracking_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsExtraTracking)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsExtraTracking)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -256,10 +256,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,trackTimes),
     "CHECKBOX", // setting type
     [
-      localize LSTRING(MissionTimeTracking), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(MissionTimeTracking_Tooltip)
+      LSTRING(MissionTimeTracking), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(MissionTimeTracking_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsExtraTracking)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsExtraTracking)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     false, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -281,10 +281,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,trackTimeInterval),
     "SLIDER", // setting type
     [
-      localize LSTRING(MissionTimeTrackingInterval), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(MissionTimeTrackingInterval_Tooltip)
+      LSTRING(MissionTimeTrackingInterval), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(MissionTimeTrackingInterval_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsExtraTracking)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsExtraTracking)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     [
         5, // min
         25, // max
@@ -316,10 +316,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,saveTag),
     "EDITBOX", // setting type
     [
-      localize LSTRING(MissionTag), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(MissionTag_Tooltip)
+      LSTRING(MissionTag), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(MissionTag_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsSaveExport)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsSaveExport)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     "TvT", // default string value
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -341,10 +341,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,saveMissionEnded),
     "CHECKBOX", // setting type
     [
-      localize LSTRING(SaveOnEnd), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(SaveOnEnd_Tooltip)
+      LSTRING(SaveOnEnd), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(SaveOnEnd_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsSaveExport)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsSaveExport)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -366,10 +366,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,saveOnEmpty),
     "CHECKBOX", // setting type
     [
-      localize LSTRING(SaveOnEmpty), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(SaveOnEmpty_Tooltip)
+      LSTRING(SaveOnEmpty), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(SaveOnEmpty_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsSaveExport)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsSaveExport)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -391,10 +391,10 @@ GVAR(allSettings) = [
     QEGVAR(settings,minMissionTime),
     "SLIDER", // setting type
     [
-      localize LSTRING(MinimumSaveDuration), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(MinimumSaveDuration_Tooltip)
+      LSTRING(MinimumSaveDuration), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(MinimumSaveDuration_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsSaveExport)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsSaveExport)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     [
         1, // min
         120, // max

@@ -24,10 +24,10 @@ GVAR(allSettings) = [
     QGVARMAIN(enabled),
     "CHECKBOX", // setting type
     [
-      localize LSTRING(RecordingEnabled), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(RecordingEnabled_Tooltip)
+      LSTRING(RecordingEnabled), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(RecordingEnabled_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsCore)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsCore)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -49,10 +49,10 @@ GVAR(allSettings) = [
     QGVARMAIN(isDebug),
     "CHECKBOX", // setting type
     [
-      localize LSTRING(DebugMode), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(DebugMode_Tooltip)
+      LSTRING(DebugMode), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(DebugMode_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsCore)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsCore)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     false, // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
@@ -77,10 +77,10 @@ GVAR(allSettings) = [
     QGVARMAIN(administratorList),
     "EDITBOX", // setting type
     [
-      localize LSTRING(Administrators), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      localize LSTRING(Administrators_Tooltip)
+      LSTRING(Administrators), // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      LSTRING(Administrators_Tooltip)
     ],
-    [COMPONENT_NAME, localize LSTRING(SettingsCore)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    [COMPONENT_NAME, LSTRING(SettingsCore)], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     "[]", // default enabled
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.

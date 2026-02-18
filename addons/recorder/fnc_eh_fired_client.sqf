@@ -123,11 +123,11 @@ if ((_data select 17) isEqualTo "shotSubmunitions") then {
     ];
     _submunitionProjectile setVariable [QGVARMAIN(projectileData), _data];
     // add the rest of EHs to submunition
-    [_submunitionProjectile] call FUNCMAIN(addBulletEH);
+    [_submunitionProjectile] call FUNC(eh_fired_clientBullet);
   }];
 } else {
   // add the rest of EHs to projectile
-  [_projectile] call FUNCMAIN(addBulletEH);
+  [_projectile] call FUNC(eh_fired_clientBullet);
 };
 
 true;

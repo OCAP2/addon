@@ -11,25 +11,6 @@
 
 #include "script_component.hpp"
 
-// We need to ensure that the handleFiredMan function exists on the clients we expect to run it.
-// So we'll send the function to all clients and define it.
-// We need to make sure the function is available at the new name on the server, since it may be running these as well as the owner of AI.
-// Define directly on the server first (remoteExec is async and may not have
-// executed on the local machine by the time the class EH below fires).
-// FUNCMAIN(handleFiredMan) = ocap_fnc_handleFiredMan
-missionNamespace setVariable [QFUNCMAIN(handleFiredMan), FUNC(eh_fired_client)];
-// FUNCMAIN(addBulletEH) = ocap_fnc_addBulletEH
-missionNamespace setVariable [QFUNCMAIN(addBulletEH), FUNC(eh_fired_clientBullet)];
-// Send to all clients (JIP-queued so late joiners also receive the definitions)
-[FUNC(eh_fired_client), {
-  TRACE_1("Defining ocap_fnc_handleFiredMan",QFUNCMAIN(handleFiredMan));
-  missionNamespace setVariable [QFUNCMAIN(handleFiredMan), _this];
-}] remoteExec ["call", -2, true];
-[FUNC(eh_fired_clientBullet), {
-  TRACE_1("Defining ocap_fnc_addBulletEH",QFUNCMAIN(addBulletEH));
-  missionNamespace setVariable [QFUNCMAIN(addBulletEH), _this];
-}] remoteExec ["call", -2, true];
-
 // Now we'll do the server setup.
 // Wrap everything in a CBA Class Event Handler so when the server initializes any soldier, it'll set up the Local EH. The Local EH is global (ironically) when applied to a unit so it'll do what we need across the entire session and trigger the relevant machines on locality change.
 ["CAManBase", "init", {
@@ -41,7 +22,7 @@ missionNamespace setVariable [QFUNCMAIN(addBulletEH), FUNC(eh_fired_clientBullet
   if (local _entity) then {
     private _id = _entity addEventHandler ["FiredMan", {
       private _start = diag_tickTime;
-      _this call FUNCMAIN(handleFiredMan);
+      _this call FUNC(eh_fired_client);
       TRACE_1("Ran fired handler",diag_tickTime - _start);
     }];
     _entity setVariable [QGVARMAIN(firedManEHExists), true];
@@ -60,7 +41,7 @@ missionNamespace setVariable [QFUNCMAIN(addBulletEH), FUNC(eh_fired_clientBullet
     [_entity, {
       private _id = _this addEventHandler ["FiredMan", {
         private _start = diag_tickTime;
-        _this call FUNCMAIN(handleFiredMan);
+        _this call FUNC(eh_fired_client);
         TRACE_1("Ran fired handler",diag_tickTime - _start);
       }];
       _this setVariable [QGVARMAIN(firedManEHExists), true];
@@ -105,7 +86,7 @@ missionNamespace setVariable [QFUNCMAIN(addBulletEH), FUNC(eh_fired_clientBullet
       private _id = _entity addEventHandler ["FiredMan", {
         TRACE_2("FiredMan EH fired",clientOwner,_this);
         private _start = diag_tickTime;
-        _this call FUNCMAIN(handleFiredMan);
+        _this call FUNC(eh_fired_client);
         TRACE_1("Ran fired handler",diag_tickTime - _start);
       }];
       _entity setVariable [QGVARMAIN(firedManEHExists), true];

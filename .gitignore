@@ -5,3 +5,6 @@
 .hemttout/
 
 hemtt.exe
+
+.hemttprivatekey
+*.biprivatekey

@@ -81,10 +81,9 @@ GVAR(PFHObject) = [
             [
               _this select 0,
               format[
-                "<font color='#CCCCCC'>%1 %2 [%3]</font>",
+                "<font color='#CCCCCC'>%1 %2</font>",
                 _this select 1,
-                str (missionNamespace getVariable [QGVAR(captureFrameNo), 0]),
-                _this select 2
+                missionNamespace getVariable [QGVAR(captureFrameNo), _this select 2]
               ]
             ]
           ];

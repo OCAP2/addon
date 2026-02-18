@@ -145,7 +145,8 @@ private _endMessage = if (isNil "_message") then {if (_winSide == "") then {loca
 
 private _saveTag = if (!isNil "_tag") then {_tag} else {EGVAR(settings,saveTag)};
 [":SAVE:MISSION:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, _saveTag]] call EFUNC(extension,sendData);
-OCAPEXTLOG([format[localize LSTRING(SavedRecording),GVAR(missionName),_saveTag]]);
+private _logMsg = format[localize LSTRING(SavedRecording),GVAR(missionName),_saveTag];
+OCAPEXTLOG([_logMsg]);
 
 
 // notify players that the recording was saved with a 2 second delay to ensure the "stopped recording" entries populate first

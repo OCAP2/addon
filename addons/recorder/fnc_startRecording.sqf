@@ -47,7 +47,7 @@ _systemTimeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} 
 private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];
 _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 
-[[format _missionDateFormat, format _systemTimeFormat, localize LSTRING(Status)], { // add diary entry for clients on recording start
+[[format _missionDateFormat, format _systemTimeFormat, localize LSTRING(Status), localize LSTRING(DiaryRecordingStarted), localize LSTRING(InMissionTimeElapsed), localize LSTRING(MissionWorldTime), localize LSTRING(SystemTimeUTC)], { // add diary entry for clients on recording start
   [{!isNull player}, {
     private _t = round cba_missionTime;
     private _elapsedStr = format ["%1:%2", floor (_t / 60), [str (_t mod 60), "0" + str (_t mod 60)] select (_t mod 60 < 10)];
@@ -59,7 +59,7 @@ _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {st
       "OCAPInfo",
       [
         _this select 2,
-        format["<font color='#33FF33'>OCAP started recording.<br/>In-Mission Time Elapsed: %1<br/>Mission World Time: %2<br/>System Time UTC: %3</font>", _elapsedStr, _this#0, _this#1]
+        format["<font color='#33FF33'>%1<br/>%5 %2<br/>%6 %3<br/>%7 %4</font>", _this#3, _elapsedStr, _this#0, _this#1, _this#4, _this#5, _this#6]
       ]
     ];
   }, _this] call CBA_fnc_waitUntilAndExecute;

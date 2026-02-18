@@ -29,6 +29,8 @@ jobs:
           cp .hemttout/release/addons/ocap_translations.pbo .hemttout/client/@ocap_translations/addons/
           cp .hemttout/release/addons/ocap_translations.pbo.*.bisign .hemttout/client/@ocap_translations/addons/
           cp .hemttout/release/keys/*.bikey .hemttout/client/@ocap_translations/keys/
+          cp client/mod.cpp .hemttout/client/@ocap_translations/
+          cp logo_ocap.paa .hemttout/client/@ocap_translations/
           cd .hemttout/client && zip -r ../../releases/ocap-translations-latest.zip @ocap_translations
 
       - name: Upload release assets

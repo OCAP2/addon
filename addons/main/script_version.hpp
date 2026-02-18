@@ -3,19 +3,19 @@
 #define OCAP_SCRIPT_VERSION_HPP
 
 // DEFINE: VERSION
-#define VERSION 3.0
+#define VERSION 2.1
 
 // DEFINE: VERSION_STR
-#define VERSION_STR 3.0.0
+#define VERSION_STR 2.1.0
 
 // DEFINE: VERSION_AR
-#define VERSION_AR 3,0,0
+#define VERSION_AR 2,1,0
 
 // DEFINE: VERSION_REQUIRED
 #define VERSION_REQUIRED 2.10
 
-#define MAJOR 3
-#define MINOR 0
+#define MAJOR 2
+#define MINOR 1
 #define PATCH 0
 #define BUILD 0
 

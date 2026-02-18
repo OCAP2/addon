@@ -95,8 +95,7 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
       ];
 
       if (GVARMAIN(isDebug)) then {
-        private _killedEventMsg = localize LSTRING(KilledEvent);
-        OCAPEXTLOG(ARR4(_killedEventMsg,_killedFrame,_victimId,_killerId));
+        OCAPEXTLOG(ARR4("KILLED EVENT:",_killedFrame,_victimId,_killerId));
       };
 
       [":KILL:", [

@@ -53,9 +53,8 @@ private _markName = format["%1#%2/%3", QGVARMAIN(mine), _int, _placedPos];
 ]] call CBA_fnc_localEvent;
 
 if (GVARMAIN(isDebug)) then {
-  private _msg = localize LSTRING(ExplosivePlacedMarkerCreated);
-  format["%1, %2, %3", _msg, _markName, _explosiveDisp] SYSCHAT;
-  OCAPEXTLOG(ARR3(_msg,_markName,_explosiveDisp));
+  format["Created placed explosive marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
+  OCAPEXTLOG(ARR3("Created placed explosive marker",_markName,_explosiveDisp));
   private _debugArr = [_explosive, _explosivePic, format["%1 %2 - %3", str side group _unit, name _unit, _markTextLocal], [side group _unit] call BIS_fnc_sideColor];
   GVAR(liveDebugMagIcons) pushBack _debugArr;
   publicVariable QGVAR(liveDebugMagIcons);
@@ -71,9 +70,8 @@ _explosive addEventHandler ["Explode", {
   _data params ["_explosiveDisp", "_unit", "_placedPos", "_markName", "_int"];
 
   if (GVARMAIN(isDebug)) then {
-    private _msg = localize LSTRING(ExplosivePlacedMarkerRemoved);
-    format["%1, %2, %3", _msg, _markName, _explosiveDisp] SYSCHAT;
-    OCAPEXTLOG(ARR3(_msg,_markName,_explosiveDisp));
+    format["Removed explosive placed marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
+    OCAPEXTLOG(ARR3("Removed explosive placed marker",_markName,_explosiveDisp));
   };
 
   // Signals removal of the Minefield (triangle) marker when the explosive detonates
@@ -82,9 +80,8 @@ _explosive addEventHandler ["Explode", {
   private _detonationMarkName = format["Detonation#%1", _int];
 
   if (GVARMAIN(isDebug)) then {
-    private _msg = localize LSTRING(ExplosionMarkerCreated);
-    format["%1, %2, %3", _msg, _detonationMarkName, _explosiveDisp] SYSCHAT;
-    OCAPEXTLOG(ARR3(_msg,_detonationMarkName,_explosiveDisp));
+    format["Created explosive explosion marker, %1, %2", _detonationMarkName, _explosiveDisp] SYSCHAT;
+    OCAPEXTLOG(ARR3("Created explosive explosion marker",_detonationMarkName,_explosiveDisp));
   };
 
   // Signals creation of a Waypoint (X) marker on the timeline at the location the explosive detonated
@@ -95,9 +92,8 @@ _explosive addEventHandler ["Explode", {
   [{
     params ["_markName", "_explosiveDisp"];
     if (GVARMAIN(isDebug)) then {
-      private _msg = localize LSTRING(ExplosionMarkerRemoved);
-      format["%1, %2, %3", _msg, _markName, _explosiveDisp] SYSCHAT;
-      OCAPEXTLOG(ARR3(_msg,_markName,_explosiveDisp));
+      format["Removed explosive explosion marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
+      OCAPEXTLOG(ARR3("Removed explosive explosion marker",_markName,_explosiveDisp));
     };
     [QGVARMAIN(handleMarker), ["DELETED", _markName]] call CBA_fnc_localEvent;
   }, [_detonationMarkName, _explosiveDisp], GVAR(captureFrameNo) * 10] call CBA_fnc_waitAndExecute;

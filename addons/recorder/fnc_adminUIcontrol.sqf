@@ -103,7 +103,7 @@ private _adminUIDs = missionNamespace getVariable [QGVARMAIN(administratorList),
 
 if (isNil "_adminUIDs") exitWith {
 	// At this point, no adminUIDs are defined in missionNamespace or in CBA settings
-	WARNING(localize LSTRING(AdminListParseFail));
+	WARNING("Failed to parse administrator list setting. Please check its value!");
 
 	switch (_event) do {
 		case "connect": {
@@ -114,7 +114,7 @@ if (isNil "_adminUIDs") exitWith {
 			if !(_unit getVariable [QGVARMAIN(hasAdminControls), false]) then {
 				[_owner, _unit] call _fnc_addControls;
 				if (GVARMAIN(isDebug)) then {
-					format[localize LSTRING(OCAPControlAdminAdded), name _unit] SYSCHAT;
+					format["%1 was granted OCAP control by logging in as admin", name _unit] SYSCHAT;
 				};
 			};
 		};
@@ -123,7 +123,7 @@ if (isNil "_adminUIDs") exitWith {
 			if (_unit getVariable [QGVARMAIN(hasAdminControls), false]) then {
 				[_owner, _unit] call _fnc_removeControls;
 				if (GVARMAIN(isDebug)) then {
-					format[localize LSTRING(OCAPControlAdminRemoved), name _unit] SYSCHAT;
+					format["%1 had their admin controls removed due to logging out from admin", name _unit] SYSCHAT;
 				};
 			};
 		};
@@ -141,7 +141,7 @@ switch (_event) do {
 		if (_inAdminList) then {
 			[_owner, _unit] call _fnc_addControls;
 			if (GVARMAIN(isDebug)) then {
-				format[localize LSTRING(OCAPControlListAdded), name _unit] SYSCHAT;
+				format["%1 was granted OCAP control due to being in the administratorList", name _unit] SYSCHAT;
 			};
 		};
 	};
@@ -150,7 +150,7 @@ switch (_event) do {
 		if !(_unit getVariable [QGVARMAIN(hasAdminControls), false]) then {
 			[_owner, _unit] call _fnc_addControls;
 			if (GVARMAIN(isDebug)) then {
-				format[localize LSTRING(OCAPControlAdminAdded), name _unit] SYSCHAT;
+				format["%1 was granted OCAP control by logging in as admin", name _unit] SYSCHAT;
 			};
 		};
 	};
@@ -159,7 +159,7 @@ switch (_event) do {
 		if (_unit getVariable [QGVARMAIN(hasAdminControls), false]) then {
 			[_owner, _unit] call _fnc_removeControls;
 			if (GVARMAIN(isDebug)) then {
-				format[localize LSTRING(OCAPControlAdminRemoved), name _unit] SYSCHAT;
+				format["%1 had their admin controls removed due to logging out from admin", name _unit] SYSCHAT;
 			};
 		};
 	};

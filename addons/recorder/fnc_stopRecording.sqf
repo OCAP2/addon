@@ -30,16 +30,18 @@ _systemTimeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} 
 private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];
 _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 
-[QGVARMAIN(customEvent), ["generalEvent", localize LSTRING(RecordingPaused)]] call CBA_fnc_serverEvent;
-[localize LSTRING(RecordingPaused), 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+[QGVARMAIN(customEvent), ["generalEvent", "OCAP paused recording"]] call CBA_fnc_serverEvent;
+[{[localize LSTRING(RecordingPaused), 1, [1, 1, 1, 1]] call CBA_fnc_notify}] remoteExec ["call", [0, -2] select isDedicated];
 
-[[cba_missionTime, format _missionDateFormat, format _systemTimeFormat, localize LSTRING(Status), localize LSTRING(RecordingPaused), localize LSTRING(InMissionTimeElapsed), localize LSTRING(MissionWorldTime), localize LSTRING(SystemTimeUTC)], { // add diary entry for clients on recording pause
+[[cba_missionTime, format _missionDateFormat, format _systemTimeFormat], { // add diary entry for clients on recording pause
   [{!isNull player}, {
     player createDiaryRecord [
       "OCAPInfo",
       [
-        _this select 3,
-        format["<font color='#33FF33'>%1<br/>%5 %2<br/>%6 %3<br/>%7 %4</font>", _this select 4, _this#0, _this#1, _this#2, _this#5, _this#6, _this#7]
+        localize LSTRING(Status),
+        format["<font color='#33FF33'>%1<br/>%2 %3<br/>%4 %5<br/>%6 %7</font>",
+          localize LSTRING(RecordingPaused), localize LSTRING(InMissionTimeElapsed), _this#0,
+          localize LSTRING(MissionWorldTime), _this#1, localize LSTRING(SystemTimeUTC), _this#2]
       ]
     ];
     player setDiarySubjectPicture [

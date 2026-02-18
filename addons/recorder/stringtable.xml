@@ -1,38 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project name="OCAP">
     <Package name="recorder">
-        <Container name="Debug">
-            <Key ID="STR_OCAP_recorder_ExplosionMarkerCreated">
-                <Original>Created explosive explosion marker</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_ExplosionMarkerRemoved">
-                <Original>Removed explosive explosion marker</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_ExplosivePlacedMarkerCreated">
-                <Original>Created placed explosive marker</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_ExplosivePlacedMarkerRemoved">
-                <Original>Removed explosive placed marker</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_FrameProcessedIn">
-                <Original>Frame %1 processed in %2ms</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_KilledEvent">
-                <Original>KILLED EVENT:</Original>
-            </Key>
-        </Container>
         <Container name="ErrorsAndWarnings">
-            <Key ID="STR_OCAP_recorder_AdminListParseFail">
-                <Original>Failed to parse administrator list setting. Please check its value!</Original>
-            </Key>
             <Key ID="STR_OCAP_recorder_AlreadyRecording">
                 <Original>OCAP was asked to record and is already recording!</Original>
             </Key>
             <Key ID="STR_OCAP_recorder_MinimumDurationNotMet">
                 <Original>OCAP capture of %1 has not yet reached the minimum duration to save it. Recording will continue.</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_MinimumDurationNotMetLog">
-                <Original>Save attempted, but the minimum recording duration hasn't been met. Not saving, continuing to record.</Original>
             </Key>
             <Key ID="STR_OCAP_recorder_MinimumDurationNotMetNotify">
                 <Original>OCAP attempted to save, but the minimum recording duration hasn't been met. Recording will continue.</Original>
@@ -40,14 +14,8 @@
             <Key ID="STR_OCAP_recorder_RecordingNotStartedYet">
                 <Original>OCAP was asked to save, but recording hasn't started yet.</Original>
             </Key>
-            <Key ID="STR_OCAP_recorder_RecordingNotStartedYetLog">
-                <Original>Export data call received, but recording of this session hasn't yet started.</Original>
-            </Key>
             <Key ID="STR_OCAP_recorder_StartRecordingExtFailed">
                 <Original>OCAP failed to start recording: extension did not respond</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_StartRecordingTimeout">
-                <Original>Timeout waiting for new mission confirmation from extension. Recording will not start.</Original>
             </Key>
         </Container>
         <Container name="General">
@@ -95,35 +63,8 @@
             <Key ID="STR_OCAP_recorder_DiarySavedRecording2">
                 <Original>Upload results have been logged.</Original>
             </Key>
-            <Key ID="STR_OCAP_recorder_MissionEnded">
-                <Original>Mission ended</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_MissionEndedAutomatically">
-                <Original>Mission ended automatically</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_MissionStarted">
-                <Original>Mission has started!</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_OCAPControlAdminAdded">
-                <Original>%1 was granted OCAP control by logging in as admin</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_OCAPControlAdminRemoved">
-                <Original>%1 had their admin controls removed due to logging out from admin</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_OCAPControlListAdded">
-                <Original>%1 was granted OCAP control due to being in the administratorList</Original>
-            </Key>
             <Key ID="STR_OCAP_recorder_OCAPSavedFrames">
                 <Original>OCAP saved %1 frames successfully</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_RecordingEndedEmpty">
-                <Original>Recording ended due to server being empty</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_RecordingStartedLog">
-                <Original>started, time:</Original>
-            </Key>
-            <Key ID="STR_OCAP_recorder_SavedRecording">
-                <Original>Saved recording of mission %1 with tag %2</Original>
             </Key>
         </Container>
         <Container name="Settings">

@@ -32,11 +32,8 @@ if (!GVARMAIN(enabled)) exitWith {};
 
 // if recording started earlier and startTime has been noted, only restart the capture loop with any updated settings.
 if (GVAR(recording) && GVAR(captureFrameNo) > 10) exitWith {
-  private _msg = localize LSTRING(AlreadyRecording);
-  OCAPEXTLOG([_msg]);
-  [
-    [_msg, 1, [1, 1, 1, 1]]
-  ] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+  OCAPEXTLOG(["OCAP was asked to record and is already recording!"]);
+  [{[localize LSTRING(AlreadyRecording), 1, [1, 1, 1, 1]] call CBA_fnc_notify}] remoteExec ["call", [0, -2] select isDedicated];
 };
 
 GVAR(recording) = true;
@@ -47,7 +44,7 @@ _systemTimeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} 
 private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];
 _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 
-[[format _missionDateFormat, format _systemTimeFormat, localize LSTRING(Status), localize LSTRING(DiaryRecordingStarted), localize LSTRING(InMissionTimeElapsed), localize LSTRING(MissionWorldTime), localize LSTRING(SystemTimeUTC)], { // add diary entry for clients on recording start
+[[format _missionDateFormat, format _systemTimeFormat], { // add diary entry for clients on recording start
   [{!isNull player}, {
     private _t = round cba_missionTime;
     private _elapsedStr = format ["%1:%2", floor (_t / 60), [str (_t mod 60), "0" + str (_t mod 60)] select (_t mod 60 < 10)];
@@ -58,8 +55,10 @@ _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {st
     player createDiaryRecord [
       "OCAPInfo",
       [
-        _this select 2,
-        format["<font color='#33FF33'>%1<br/>%5 %2<br/>%6 %3<br/>%7 %4</font>", _this#3, _elapsedStr, _this#0, _this#1, _this#4, _this#5, _this#6]
+        localize LSTRING(Status),
+        format["<font color='#33FF33'>%1<br/>%2 %3<br/>%4 %5<br/>%6 %7</font>",
+          localize LSTRING(DiaryRecordingStarted), localize LSTRING(InMissionTimeElapsed), _elapsedStr,
+          localize LSTRING(MissionWorldTime), _this#0, localize LSTRING(SystemTimeUTC), _this#1]
       ]
     ];
   }, _this] call CBA_fnc_waitUntilAndExecute;
@@ -73,16 +72,16 @@ if (GVAR(captureFrameNo) == 0) then {
     [{EGVAR(database,dbValid)}, {
       call FUNC(captureLoop);
     }, [], 30, {
-      ERROR(localize LSTRING(StartRecordingTimeout));
-      [localize LSTRING(StartRecordingExtFailed), 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+      ERROR("Timeout waiting for new mission confirmation from extension. Recording will not start.");
+      [{[localize LSTRING(StartRecordingExtFailed), 1, [1, 0, 0, 1]] call CBA_fnc_notify}] remoteExec ["call", [0, -2] select isDedicated];
     }] call CBA_fnc_waitUntilAndExecute;
   } else {
     call FUNC(captureLoop);
   };
 };
 
-[QGVARMAIN(customEvent), ["generalEvent", localize LSTRING(RecordingStarted)]] call CBA_fnc_serverEvent;
-[localize LSTRING(RecordingStarted), 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+[QGVARMAIN(customEvent), ["generalEvent", "OCAP began recording"]] call CBA_fnc_serverEvent;
+[{[localize LSTRING(RecordingStarted), 1, [1, 1, 1, 1]] call CBA_fnc_notify}] remoteExec ["call", [0, -2] select isDedicated];
 
 // Log times
 [] call FUNC(updateTime);

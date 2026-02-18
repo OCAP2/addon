@@ -36,8 +36,8 @@ if (!isNil QGVAR(PFHObject)) then {
 if (isNil QGVAR(startTime)) then {
   GVAR(startTime) = time;
   publicVariable QGVAR(startTime);
-  OCAPEXTLOG(ARR3(__FILE__,QGVAR(recording) + localize LSTRING(RecordingStartedLog),GVAR(startTime)));
-  LOG(ARR3(__FILE__,QGVAR(recording) + localize LSTRING(RecordingStartedLog),GVAR(startTime)));
+  OCAPEXTLOG(ARR3(__FILE__,QGVAR(recording) + " started, time:",GVAR(startTime)));
+  LOG(ARR3(__FILE__,QGVAR(recording) + " started, time:",GVAR(startTime)));
 };
 
 GVAR(trackedVehicles) = createHashMap;
@@ -69,26 +69,19 @@ GVAR(PFHObject) = [
     // update diary record every ~320 seconds
     if (GVAR(captureFrameNo) % GVAR(diaryInterval) == 0) then {
       publicVariable QGVAR(captureFrameNo);
-      [
-        [
-          localize LSTRING(Status),
-          localize LSTRING(CaptureFrame),
-          localize LSTRING(NotYetReceived)
-        ],
-        {
+      [{
           player createDiaryRecord [
             "OCAPInfo",
             [
-              _this select 0,
+              localize LSTRING(Status),
               format[
                 "<font color='#CCCCCC'>%1 %2</font>",
-                _this select 1,
-                missionNamespace getVariable [QGVAR(captureFrameNo), _this select 2]
+                localize LSTRING(CaptureFrame),
+                missionNamespace getVariable [QGVAR(captureFrameNo), localize LSTRING(NotYetReceived)]
               ]
             ]
           ];
-        }
-      ] remoteExec ["call", 0, false];
+      }] remoteExec ["call", 0, false];
     };
 
     {
@@ -292,7 +285,7 @@ GVAR(PFHObject) = [
     { GVAR(trackedVehicles) deleteAt _x } forEach _toRemove;
 
     if (GVARMAIN(isDebug)) then {
-      private _logStr = format[localize LSTRING(FrameProcessedIn), GVAR(captureFrameNo), diag_tickTime - _loopStart];
+      private _logStr = format["Frame %1 processed in %2ms", GVAR(captureFrameNo), diag_tickTime - _loopStart];
       OCAPEXTLOG([_logStr]);
       _logStr SYSCHAT;
     };

@@ -29,9 +29,9 @@ Author:
 #include "script_component.hpp"
 
 if (isNil QGVAR(worldContext) || isNil QGVAR(missionContext)) exitWith {
-  ERROR(localize LSTRING(CannotReRegisterMission));
+  ERROR("Cannot re-register mission: cached world/mission context is nil. Full initDB required.");
 };
 
-INFO(localize LSTRING(ReRegisteringMission));
+INFO("Re-registering new mission with extension");
 GVAR(initTimer) = diag_tickTime;
 [":NEW:MISSION:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call EFUNC(extension,sendData);

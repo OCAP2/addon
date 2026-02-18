@@ -119,14 +119,7 @@ call FUNC(addEventMission);
 } forEach allPlayers;
 
 // remoteExec diary creation commands to clients listing version numbers and waiting start state
-[
-  [
-    localize LSTRING(About),
-    localize LSTRING(Disclaimer),
-    localize LSTRING(Status),
-    localize LSTRING(OCAPInitialized)
-  ],
-  {
+[{
     [{!isNil QGVARMAIN(version) && !isNil QEGVAR(extension,version)}, {
       player createDiarySubject ["OCAPInfo", "OCAP AAR", "\A3\ui_f\data\igui\cfg\simpleTasks\types\whiteboard_ca.paa"];
 
@@ -134,7 +127,7 @@ call FUNC(addEventMission);
       EGVAR(diary,about) = player createDiaryRecord [
         "OCAPInfo",
         [
-          _this select 0,
+          localize LSTRING(About),
           (
             "<font size='20' face='PuristaBold'><font color='#BBBBBB'>OCAP</font><font color='#44AAFF'>2</font></font><br/>" +
             "Addon version: " + GVARMAIN(version) +
@@ -147,7 +140,7 @@ call FUNC(addEventMission);
             "<br/><br/>" +
             "Recording status can be found in the Status section." +
             "<br/><br/>" +
-            _this select 1
+            localize LSTRING(Disclaimer)
           )
         ]
       ];
@@ -155,13 +148,12 @@ call FUNC(addEventMission);
       EGVAR(diary,status) = player createDiaryRecord [
         "OCAPInfo",
         [
-          _this select 2,
-          _this select 3
+          localize LSTRING(Status),
+          localize LSTRING(OCAPInitialized)
         ]
       ];
-    }, _this] call CBA_fnc_waitUntilAndExecute;
-  }
-] remoteExecCall ["call", [0, -2] select isDedicated, true];
+    }] call CBA_fnc_waitUntilAndExecute;
+}] remoteExecCall ["call", [0, -2] select isDedicated, true];
 
 
 // Support both methods of setting mission name.
@@ -211,7 +203,7 @@ call EFUNC(database,initDB);
   {(getClientStateNumber > 9 && (count allPlayers) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
   {
     call FUNC(startRecording);
-    [QGVARMAIN(customEvent), ["generalEvent", localize LSTRING(MissionStarted)]] call CBA_fnc_serverEvent;
+    [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
   }
 ] call CBA_fnc_waitUntilAndExecute;
 
@@ -222,7 +214,7 @@ call EFUNC(database,initDB);
     EGVAR(settings,saveOnEmpty) &&
     !isNil QGVAR(startTime) && (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime) && count (call CBA_fnc_players) == 0
   ) then {
-      [nil, localize LSTRING(RecordingEndedEmpty)] call FUNC(exportData);
+      [nil, "Recording ended due to server being empty"] call FUNC(exportData);
   };
 }, 30] call CBA_fnc_addPerFrameHandler;
 

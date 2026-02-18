@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project name="OCAP">
+  <Package name="database">
+    <Container name="Settings">
+      <Key ID="STR_OCAP_database_DatabaseRecordingEnabled">
+        <Original>Database Recording Enabled</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_DatabaseRecordingEnabled_Tooltip">
+        <Original>Turns on or off most recording functionality. Will not reset anything from existing session, will just stop recording most new data. Note: For record/pause switching, use the CBA events! Default: true</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_SettingsCore">
+        <Original>Core</Original>
+      </Key>
+    </Container>
+    <Container name="Information">
+      <Key ID="STR_OCAP_database_ModuleDisabled">
+        <Original>Module disabled, exiting.</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_ModuleEnabled">
+        <Original>Module enabled. Starting up...</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_ExtensionVersion">
+        <Original>Extension version: %1</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_ArmaDirectory">
+        <Original>Arma directory: %1</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_AddonDirectory">
+        <Original>Addon directory: %1</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_ExtensionLoggingPath">
+        <Original>Extension logging path: %1</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_ExtensionReady">
+        <Original>Extension ready.</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_InitializingStorage">
+        <Original>Initializing storage...</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_StorageInitialized">
+        <Original>Storage initialized: %1</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_MemoryOnlyMode">
+        <Original>Memory-only mode active - data will be exported to JSON file</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_SavingMissionAndWorld">
+        <Original>Saving mission and world to DB</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_MissionSavedToDB">
+        <Original>Mission saved to DB. Starting data send.</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_InitCompleted">
+        <Original>Initialization completed in %1ms</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_InitializingExtension">
+        <Original>Initializing extension...</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_ReRegisteringMission">
+        <Original>Re-registering new mission with extension</Original>
+      </Key>
+    </Container>
+    <Container name="ErrorsAndWarnings">
+      <Key ID="STR_OCAP_database_StorageInitError">
+        <Original>Storage initialization error: %1</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_SQLiteFallback">
+        <Original>SQLite is used as a local fallback due to Postgres connection error -- the 'migratebackups' command will need to be used to centralize your data!</Original>
+      </Key>
+      <Key ID="STR_OCAP_database_CannotReRegisterMission">
+        <Original>Cannot re-register mission: cached world/mission context is nil. Full initDB required.</Original>
+      </Key>
+    </Container>
+  </Package>
+</Project>

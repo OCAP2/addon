@@ -119,41 +119,49 @@ call FUNC(addEventMission);
 } forEach allPlayers;
 
 // remoteExec diary creation commands to clients listing version numbers and waiting start state
-{
-  [{!isNil QGVARMAIN(version) && !isNil QEGVAR(extension,version)}, {
-    player createDiarySubject ["OCAPInfo", "OCAP AAR", "\A3\ui_f\data\igui\cfg\simpleTasks\types\whiteboard_ca.paa"];
+[
+  [
+    localize LSTRING(About),
+    localize LSTRING(Disclaimer),
+    localize LSTRING(Status),
+    localize LSTRING(OCAPInitialized)
+  ],
+  {
+    [{!isNil QGVARMAIN(version) && !isNil QEGVAR(extension,version)}, {
+      player createDiarySubject ["OCAPInfo", "OCAP AAR", "\A3\ui_f\data\igui\cfg\simpleTasks\types\whiteboard_ca.paa"];
 
-    ocap_fnc_copyGitHubToClipboard = {copyToClipboard "https://github.com/OCAP2/OCAP"; systemChat "OCAP GitHub link copied to clipboard";};
-    EGVAR(diary,about) = player createDiaryRecord [
-      "OCAPInfo",
-      [
-        "About",
-        (
-          "<font size='20' face='PuristaBold'><font color='#BBBBBB'>OCAP</font><font color='#44AAFF'>2</font></font><br/>" +
-          "Addon version: " + GVARMAIN(version) +
-          "<br/>" +
-          "Extension version: " + (EGVAR(extension,version) # 0) + " (" + (EGVAR(extension,version) # 1) + ", built " + (EGVAR(extension,version) # 2) + ")" +
-          "<br/>" +
-          "<execute expression='call ocap_fnc_copyGitHubToClipboard;'>https://github.com/OCAP2/OCAP</execute>" +
-          "<br/><br/>" +
-          "OCAP is a server-side Arma 3 recording suite that provides web-based playback of all units, vehicles, markers, and projectiles present, placed, and fired during a mission." +
-          "<br/><br/>" +
-          "Recording status can be found in the Status section." +
-          "<br/><br/>" +
-          "DISCLAIMER: This mission may be recorded and made publicly available at the discretion of the server administrators. Please be aware that your actions during this mission will be tracked and attributed to your in-game username."
-        )
-      ]
-    ];
+      ocap_fnc_copyGitHubToClipboard = {copyToClipboard "https://github.com/OCAP2/OCAP"; systemChat "OCAP GitHub link copied to clipboard";};
+      EGVAR(diary,about) = player createDiaryRecord [
+        "OCAPInfo",
+        [
+          _this select 0,
+          (
+            "<font size='20' face='PuristaBold'><font color='#BBBBBB'>OCAP</font><font color='#44AAFF'>2</font></font><br/>" +
+            "Addon version: " + GVARMAIN(version) +
+            "<br/>" +
+            "Extension version: " + (EGVAR(extension,version) # 0) + " (" + (EGVAR(extension,version) # 1) + ", built " + (EGVAR(extension,version) # 2) + ")" +
+            "<br/>" +
+            "<execute expression='call ocap_fnc_copyGitHubToClipboard;'>https://github.com/OCAP2/OCAP</execute>" +
+            "<br/><br/>" +
+            "OCAP is a server-side Arma 3 recording suite that provides web-based playback of all units, vehicles, markers, and projectiles present, placed, and fired during a mission." +
+            "<br/><br/>" +
+            "Recording status can be found in the Status section." +
+            "<br/><br/>" +
+            _this select 1
+          )
+        ]
+      ];
 
-    EGVAR(diary,status) = player createDiaryRecord [
-      "OCAPInfo",
-      [
-        "Status",
-        "OCAP initialized."
-      ]
-    ];
-  }] call CBA_fnc_waitUntilAndExecute;
-} remoteExecCall ["call", [0, -2] select isDedicated, true];
+      EGVAR(diary,status) = player createDiaryRecord [
+        "OCAPInfo",
+        [
+          _this select 2,
+          _this select 3
+        ]
+      ];
+    }, _this] call CBA_fnc_waitUntilAndExecute;
+  }
+] remoteExecCall ["call", [0, -2] select isDedicated, true];
 
 
 // Support both methods of setting mission name.
@@ -203,7 +211,7 @@ call EFUNC(database,initDB);
   {(getClientStateNumber > 9 && (count allPlayers) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
   {
     call FUNC(startRecording);
-    [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
+    [QGVARMAIN(customEvent), ["generalEvent", localize LSTRING(MissionStarted)]] call CBA_fnc_serverEvent;
   }
 ] call CBA_fnc_waitUntilAndExecute;
 
@@ -214,7 +222,7 @@ call EFUNC(database,initDB);
     EGVAR(settings,saveOnEmpty) &&
     !isNil QGVAR(startTime) && (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime) && count (call CBA_fnc_players) == 0
   ) then {
-      [nil, "Recording ended due to server being empty"] call FUNC(exportData);
+      [nil, localize LSTRING(RecordingEndedEmpty)] call FUNC(exportData);
   };
 }, 30] call CBA_fnc_addPerFrameHandler;
 

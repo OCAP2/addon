@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project name="OCAP">
+  <Package name="main">
+    <Container name="Settings">
+      <Key ID="STR_OCAP_main_RecordingEnabled">
+        <Original>Recording Enabled</Original>
+      </Key>
+      <Key ID="STR_OCAP_main_RecordingEnabled_Tooltip">
+        <Original>Turns on or off most recording functionality. Will not reset anything from existing session, will just stop recording most new data. Note: For record/pause switching, use the CBA events! Default: true</Original>
+      </Key>
+      <Key ID="STR_OCAP_main_SettingsCore">
+        <Original>Core</Original>
+      </Key>
+      <Key ID="STR_OCAP_main_DebugMode">
+        <Original>Debug Mode</Original>
+      </Key>
+      <Key ID="STR_OCAP_main_DebugMode_Tooltip">
+        <Original>Enables increased logging of addon actions. Default: false</Original>
+      </Key>
+      <Key ID="STR_OCAP_main_Administrators">
+        <Original>Administrators</Original>
+      </Key>
+      <Key ID="STR_OCAP_main_Administrators_Tooltip">
+        <Original>An array or server-visible variable referencing one that is a list of playerUIDs. Additional briefing diary or UI elements may be available for more accessible control over OCAP's features. Takes effect on player server connection. Format: [] OR myAdminPUIDs | Default: []</Original>
+      </Key>
+    </Container>
+  </Package>
+</Project>

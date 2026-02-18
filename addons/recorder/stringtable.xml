@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project name="OCAP">
+  <Package name="recorder">
+    <Container name="Settings">
+      <Key ID="STR_OCAP_recorder_SettingsAutoStart">
+        <Original>Auto-Start Settings</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_AutoStartRecording">
+        <Original>Auto Start Recording</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_AutoStartRecording_Tooltip">
+        <Original>Automatically start OCAP recordings at session start. Default: true</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MinimumPlayerCount">
+        <Original>Minimum Player Count</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MinimumPlayerCount_Tooltip">
+        <Original>Auto-start will begin once this player count is reached. Default: 15</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_SettingsCore">
+        <Original>Core</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_FrameCaptureDelay">
+        <Original>Frame Capture Delay</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_FrameCaptureDelay_Tooltip">
+        <Original>Positioning, medical status, and crew states of units and vehicles will be captured every X number of seconds. Default: 1</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_UseACE3Medical">
+        <Original>Use ACE3 Medical</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_UseACE3Medical_Tooltip">
+        <Original>If true, will check ACE3 medical status on units. If false, or ACE3 isn't loaded, fall back to vanilla. Default: true</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_SettingsExclusions">
+        <Original>Exclusions</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_ClassnamesToExclude">
+        <Original>Classnames to Exclude</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_ClassnamesToExclude_Tooltip">
+        <Original>Array of object classnames that should be excluded from recording. Use single quotes! Default: ['ACE_friesAnchorBar', 'WeaponHolderSimulated']</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_KindOfToExclude">
+        <Original>Object KindOfs to Exclude</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_KindOfToExclude_Tooltip">
+        <Original>Array of classnames which, along with all child classes, should be excluded from recording. Use single quotes! Default: ['WeaponHolder']</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MarkerPrefixesExclude">
+        <Original>Marker Prefixes to Exclude</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MarkerPrefixesExclude_Tooltip">
+        <Original>Array of prefixes. Any markers matching these prefixes will be excluded from recording. Use single quotes! Default: ['SystemMarker_','ACE_BFT_']</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_SettingsExtraTracking">
+        <Original>Extra Tracking</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_TicketTracking">
+        <Original>Enable Ticket Tracking</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_TicketTracking_Tooltip">
+        <Original>Will track respawn ticket counts for missionNamespace and each playable faction every 30th frame. Default: true</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MissionTimeTracking">
+        <Original>Enable Mission Time Tracking</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MissionTimeTracking_Tooltip">
+        <Original>Will continuously track in-game world time during a mission. Useful for accelerated/skipped time scenarios. Default: false</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MissionTimeTrackingInterval">
+        <Original>Mission Time Tracking Interval</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MissionTimeTrackingInterval_Tooltip">
+        <Original>If time tracking is enabled, it will be checked every X capture frames. Default: 10</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_SettingsSaveExport">
+        <Original>Save/Export Settings</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MissionTag">
+        <Original>Mission Type Tag</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MissionTag_Tooltip">
+        <Original>If not overriden by the exportData CBA event or if a mission is auto-saved, this will be used to categorize and filter the recording in the database and web list of missions.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_SaveOnEnd">
+        <Original>Auto-save on MPEnded Event</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_SaveOnEnd_Tooltip">
+        <Original>If true, automatically save and export the mission when the MPEnded event fires. Default: true</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_SaveOnEmpty">
+        <Original>Auto-Save When No Players</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_SaveOnEmpty_Tooltip">
+        <Original>Will automatically save recording when there are 0 players on the server and existing data accounts for more time than the minimum save duration setting. Default: true</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MinimumSaveDuration">
+        <Original>Required Duration to Save</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MinimumSaveDuration_Tooltip">
+        <Original>A recording must be at least this long (in minutes) to auto-save. Calling an 'ocap_exportData' CBA server event will override this restriction. Default: 20</Original>
+      </Key>
+    </Container>
+    <Container name="General">
+      <Key ID="STR_OCAP_recorder_Controls">
+        <Original>Controls</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_Status">
+        <Original>Status</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_About">
+        <Original>About</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_CaptureFrame">
+        <Original>Capture frame:</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_NotYetReceived">
+        <Original>not yet received</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_OCAPInitialized">
+        <Original>OCAP initialized.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_RecordingStarted">
+        <Original>OCAP began recording</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_RecordingStopped">
+        <Original>OCAP stopped recording</Original>
+      </Key>
+    </Container>
+    <Container name="UI">
+      <Key ID="STR_OCAP_recorder_Disclaimer">
+        <Original>DISCLAIMER: This mission may be recorded and made publicly available at the discretion of the server administrators. Please be aware that your actions during this mission will be tracked and attributed to your in-game username.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_DiarySubjectTitle">
+        <Original>OCAP Admin</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_DiaryAdminControlsText">
+        <Original>These controls can be used to Start Recording, Pause Recording, and Save/Export the Recording. On the backend, these use the corresponding CBA server events that can be found in the documentation. Because of this, they override the default minimum duration required to save, so be aware that clicking "Stop and Export Recording" will save and upload your current recording regardless of its duration.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_StartRecording">
+        <Original>Start/Resume Recording</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_PauseRecording">
+        <Original>Pause Recording</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_StopRecording">
+        <Original>Stop and Export Recording</Original>
+      </Key>
+    </Container>
+    <Container name="Information">
+      <Key ID="STR_OCAP_recorder_OCAPControlAdminAdded">
+        <Original>%1 was granted OCAP control by logging in as admin</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_OCAPControlAdminRemoved">
+        <Original>%1 had their admin controls removed due to logging out from admin</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_OCAPControlListAdded">
+        <Original>%1 was granted OCAP control due to being in the administratorList</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_RecordingStartedLog">
+        <Original> started, time:</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_SavedRecording">
+        <Original>Saved recording of mission %1 with tag %2</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_DiarySavedRecording1">
+        <Original>OCAP capture of %1 has been exported with %2 frames saved.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_DiarySavedRecording2">
+        <Original>Upload results have been logged.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_RecordingEndedEmpty">
+        <Original>Recording ended due to server being empty</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MissionStarted">
+        <Original>Mission has started!</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MissionEnded">
+        <Original>Mission ended</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MissionEndedAutomatically">
+        <Original>Mission ended automatically</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_OCAPSavedFrames">
+        <Original>OCAP saved %1 frames successfully</Original>
+      </Key>
+    </Container>
+    <Container name="ErrorsAndWarnings">
+      <Key ID="STR_OCAP_recorder_AdminListParseFail">
+        <Original>Failed to parse administrator list setting. Please check its value!</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_RecordingNotStartedYet">
+        <Original>OCAP was asked to save, but recording hasn't started yet.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_RecordingNotStartedYetLog">
+        <Original>Export data call received, but recording of this session hasn't yet started.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MinimumDurationNotMet">
+        <Original>OCAP capture of %1 has not yet reached the minimum duration to save it. Recording will continue.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MinimumDurationNotMetNotify">
+        <Original>OCAP attempted to save, but the minimum recording duration hasn't been met. Recording will continue.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_MinimumDurationNotMetLog">
+        <Original>Save attempted, but the minimum recording duration hasn't been met. Not saving, continuing to record.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_AlreadyRecording">
+        <Original>OCAP was asked to record and is already recording!</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_StartRecordingTimeout">
+        <Original>Timeout waiting for new mission confirmation from extension. Recording will not start.</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_StartRecordingExtFailed">
+        <Original>OCAP failed to start recording: extension did not respond</Original>
+      </Key>
+    </Container>
+    <Container name="Debug">
+      <Key ID="STR_OCAP_recorder_FrameProcessedIn">
+        <Original>Frame %1 processed in %2ms</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_ExplosivePlacedMarkerCreated">
+        <Original>Created placed explosive marker</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_ExplosivePlacedMarkerRemoved">
+        <Original>Removed explosive placed marker</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_ExplosionMarkerCreated">
+        <Original>Created explosive explosion marker</Original>
+      </Key>
+      <Key ID="STR_OCAP_recorder_ExplosionMarkerRemoved">
+        <Original>Removed explosive explosion marker</Original>
+      </Key>
+    </Container>
+  </Package>
+</Project>

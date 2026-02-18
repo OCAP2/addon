@@ -1,11 +1,11 @@
 #include "script_component.hpp"
 
 if (!GVAR(enabled)) exitWith {
-  INFO("Module disabled, exiting.");
+  INFO(localize LSTRING(ModuleDisabled));
   true
 };
 
-INFO("Module enabled. Starting up...");
+INFO(localize LSTRING(ModuleEnabled));
 
 // Initialize DB
 GVAR(dbValid) = false;
@@ -26,32 +26,32 @@ addMissionEventHandler ["ExtensionCallback", {
     private _ver = _data#0;
     EGVAR(database,extensionVersion) = _ver;
     publicVariable QEGVAR(database,extensionVersion);
-    INFO_1("Extension version: %1",str _ver);
+    INFO_1(localize LSTRING(ExtensionVersion),str _ver);
   };
 
   if (_function isEqualTo ":GETDIR:ARMA:") exitWith {
     // arma dir return is automatic during extension init process
     private _dir = _data#0;
     GVAR(armaDir) = _dir;
-    INFO_1("Arma directory: %1",_dir);
+    INFO_1(localize LSTRING(ArmaDirectory),_dir);
   };
 
   if (_function isEqualTo ":GETDIR:MODULE:") exitWith {
     // module dir return is automatic during extension init process
     private _dir = _data#0;
     GVAR(addonDir) = _dir;
-    INFO_1("Addon directory: %1",_dir);
+    INFO_1(localize LSTRING(AddonDirectory),_dir);
   };
 
   if (_function isEqualTo ":GETDIR:OCAPLOG:") exitWith {
     // logging dir return is automatic during extension init process
     private _dir = _data#0;
     GVAR(logPath) = _dir;
-    INFO_1("Extension logging path: %1",_dir);
+    INFO_1(localize LSTRING(ExtensionLoggingPath),_dir);
   };
 
   if (_function isEqualTo ":EXT:READY:") exitWith {
-    INFO("Extension ready.");
+    INFO(localize LSTRING(ExtensionReady));
     // extension is ready, send version
     [":ADDON:VERSION:", [QUOTE(VERSION_STR)], 'ocap_recorder'] call EFUNC(extension,sendData);
 
@@ -62,25 +62,25 @@ addMissionEventHandler ["ExtensionCallback", {
     // get logging dir
     [":GETDIR:OCAPLOG:", [], 'ocap_recorder'] call EFUNC(extension,sendData);
 
-    INFO("Initializing storage...");
+    INFO(localize LSTRING(InitializingStorage));
     [":INIT:STORAGE:", [], 'ocap_recorder'] call EFUNC(extension,sendData);
   };
 
 
   if (_function isEqualTo ":STORAGE:ERROR:") exitWith {
     private _error = _data#0;
-    ERROR_MSG_1("Storage initialization error: %1",_error);
+    ERROR_MSG_1(localize LSTRING(StorageInitError),_error);
   };
 
 
   if (_function isEqualTo ":STORAGE:OK:") exitWith {
     private _engine = _data#0;
-    INFO_1("Storage initialized: %1",_engine);
+    INFO_1(localize LSTRING(StorageInitialized),_engine);
     if (toLower _engine isEqualTo "sqlite") then {
-      WARNING("SQLite is used as a local fallback due to Postgres connection error -- the 'migratebackups' command will need to be used to centralize your data!");
+      WARNING(localize LSTRING(SQLiteFallback));
     };
     if (toLower _engine isEqualTo "memory") then {
-      INFO("Memory-only mode active - data will be exported to JSON file");
+      INFO(localize LSTRING(MemoryOnlyMode));
     };
 
     // send mission data
@@ -149,14 +149,14 @@ addMissionEventHandler ["ExtensionCallback", {
     ]] call CBA_fnc_encodeJSON;
 
     // Save mission and world to DB
-    INFO("Saving mission and world to DB");
+    INFO(localize LSTRING(SavingMissionAndWorld));
     TRACE_2("World and mission context",GVAR(worldContext),GVAR(missionContext));
     [":NEW:MISSION:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call EFUNC(extension,sendData);
   };
 
   if (_function isEqualTo ":MISSION:OK:") exitWith {
-    INFO_1("Initialization completed in %1ms",diag_tickTime - GVAR(initTimer));
-    INFO("Mission saved to DB. Starting data send.");
+    INFO_1(localize LSTRING(InitCompleted),diag_tickTime - GVAR(initTimer));
+    INFO(localize LSTRING(MissionSavedToDB));
     GVAR(dbValid) = true;
 
     // Only run one-time setup on first init, not on re-registration after export
@@ -171,7 +171,7 @@ addMissionEventHandler ["ExtensionCallback", {
 }];
 
 
-INFO("Initializing extension...");
+INFO(localize LSTRING(InitializingExtension));
 GVAR(initTimer) = diag_tickTime;
 [":INIT:", []] call EFUNC(extension,sendData);
 true

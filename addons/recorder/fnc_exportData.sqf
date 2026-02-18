@@ -54,23 +54,32 @@ params ["_side", "_message", "_tag", ["_overrideLimits", false, [false]]];
 
 if (isNil QGVAR(startTime)) exitWith {
   // if recording hasn't started, there's nothing to save
-  LOG(["Export data call received, but recording of this session hasn't yet started."]);
+  LOG([localize LSTRING(RecordingNotStartedYetLog)]);
 
-  {
-    [{!isNull player}, {
-      player createDiaryRecord [
-        "OCAPInfo",
-        [
-          "Status",
-          "<font color='#33FF33'>OCAP was asked to save, but recording hasn't started yet.</font>"
-        ], taskNull, "", false
-      ];
-      player setDiarySubjectPicture [
-        "OCAPInfo",
-        "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
-      ];
-    }] call CBA_fnc_waitUntilAndExecute;
-  } remoteExecCall ["call", 0, true];
+  [
+    [
+      localize LSTRING(Status),
+      localize LSTRING(RecordingNotStartedYet)
+    ],
+    {
+      [{!isNull player}, {
+        player createDiaryRecord [
+          "OCAPInfo",
+          [
+            _this select 0,
+            format[
+              "<font color='#33FF33'>%1</font>",
+              _this select 1
+            ]
+          ], taskNull, "", false
+        ];
+        player setDiarySubjectPicture [
+          "OCAPInfo",
+          "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
+        ];
+      }, _this] call CBA_fnc_waitUntilAndExecute;
+    }
+  ] remoteExecCall ["call", 0, true];
 };
 
 
@@ -83,23 +92,32 @@ if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {
   // if the total duration in minutes is not met based on how many frames have been recorded & the frame capture delay,
   // then we won't save, but will continue recording in case admins want to save once that threshold is met.
   // allow this restriction to be overriden
-  LOG("Save attempted, but the minimum recording duration hasn't been met. Not saving, continuing to record.");
-  ["OCAP attempted to save, but the minimum recording duration hasn't been met. Recording will continue.", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
-  {
-    player createDiaryRecord [
-      "OCAPInfo",
-      [
-        "Status",
-        (
-          "<font color='#FFFF33'>OCAP capture of " + briefingName + " has not yet reached the minimum duration to save it. Recording will continue.</font>"
-        )
-      ]
-    ];
-    player setDiarySubjectPicture [
-      "OCAPInfo",
-      "\A3\ui_f\data\igui\cfg\simpleTasks\types\danger_ca.paa"
-    ];
-  } remoteExec ["call", 0, false];
+  LOG(localize LSTRING(MinimumDurationNotMetLog));
+  private _notifyMsg = localize LSTRING(MinimumDurationNotMetNotify);
+  [_notifyMsg, 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+  private _diaryMsg = format[localize LSTRING(MinimumDurationNotMet), briefingName];
+  [
+    [
+      localize LSTRING(Status),
+      _diaryMsg
+    ],
+    {
+      player createDiaryRecord [
+        "OCAPInfo",
+        [
+          _this select 0,
+          format[
+            "<font color='#FFFF33'>%1</font>",
+            _this select 1
+          ]
+        ]
+      ];
+      player setDiarySubjectPicture [
+        "OCAPInfo",
+        "\A3\ui_f\data\igui\cfg\simpleTasks\types\danger_ca.paa"
+      ];
+    }
+  ] remoteExec ["call", 0, false];
 };
 
 
@@ -112,7 +130,7 @@ if (!isNil QGVAR(PFHObject)) then {
 };
 
 private _winSide = if (isNil "_side") then {""} else {if (_side isEqualTo sideUnknown) then {""} else {str _side}};
-private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mission ended"} else {""}} else {_message};
+private _endMessage = if (isNil "_message") then {if (_winSide == "") then {localize LSTRING(MissionEnded)} else {""}} else {_message};
 
 [":EVENT:", [
   _endFrameNumber,
@@ -127,30 +145,38 @@ private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mis
 
 private _saveTag = if (!isNil "_tag") then {_tag} else {EGVAR(settings,saveTag)};
 [":SAVE:MISSION:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, _saveTag]] call EFUNC(extension,sendData);
-OCAPEXTLOG(ARR4("Saved recording of mission",GVAR(missionName),"with tag",_saveTag));
+OCAPEXTLOG([format[localize LSTRING(SavedRecording),GVAR(missionName),_saveTag]]);
 
 
 // notify players that the recording was saved with a 2 second delay to ensure the "stopped recording" entries populate first
-[format["OCAP saved %1 frames successfully", _endFrameNumber], 1, [1, 1, 1, 1]] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
-[[GVAR(missionName), GVAR(captureFrameNo)], {
-  params ["_missionName", "_endFrame"];
+[format[localize LSTRING(OCAPSavedFrames), _endFrameNumber], 1, [1, 1, 1, 1]] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+[
+  [
+    GVAR(missionName),
+    GVAR(captureFrameNo),
+    localize LSTRING(Status),
+    localize LSTRING(DiarySavedRecording1),
+    localize LSTRING(DiarySavedRecording2)
+  ], {
+    params ["_missionName", "_endFrame"];
 
-  player setDiarySubjectPicture [
-    "OCAPInfo",
-    "\A3\ui_f\data\igui\cfg\simpleTasks\types\upload_ca.paa"
-  ];
-  player createDiaryRecord [
-    "OCAPInfo",
-    [
-      "Status",
-      format[
-        "<font color='#33FF33'>OCAP capture of %1 has been exported with %2 frames saved.</font><br/><br/>Upload results have been logged.",
-        _missionName,
-        _endFrame
+    player setDiarySubjectPicture [
+      "OCAPInfo",
+      "\A3\ui_f\data\igui\cfg\simpleTasks\types\upload_ca.paa"
+    ];
+    player createDiaryRecord [
+      "OCAPInfo",
+      [
+        _this select 2,
+        format[
+          "<font color='#33FF33'>" + (_this select 3) + "</font><br/><br/>" + (_this select 4),
+          _missionName,
+          _endFrame
+        ]
       ]
-    ]
-  ];
-}] remoteExec ["call", [0, -2] select isDedicated, true];
+    ];
+  }
+] remoteExec ["call", [0, -2] select isDedicated, true];
 
 // reset vars in case a new recording is started
 GVAR(captureFrameNo) = 0;

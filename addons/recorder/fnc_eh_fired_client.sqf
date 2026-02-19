@@ -109,19 +109,10 @@ private _data = [
 
 _projectile setVariable [QGVARMAIN(projectileData), _data];
 
-// Track mine placement with a marker (mirrors ACE explosive tracking)
+// Send mine projectile data immediately so placement is recorded
+// even if the mine never detonates (Deleted EH would never fire)
 if (_weapon == "put") then {
-  private _int = floor random 99999;
-  private _pos = getPosASL _projectile;
-  private _markName = format ["%1#%2/%3", QGVARMAIN(mine), _int, _pos];
-  _projectile setVariable [QGVARMAIN(mineMarker), _markName];
-
-  // Reuse existing handleMarker infrastructure directly
-  [QGVARMAIN(handleMarker), [
-    "CREATED", _markName, _firer, _pos,
-    "Minefield", "ICON", [1,1], 0, "Solid", "ColorRed", 1,
-    format ["%1", _muzzleDisplay], true
-  ]] call CBA_fnc_serverEvent;
+  [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_serverEvent;
 };
 
 // carryover variables to submunitions

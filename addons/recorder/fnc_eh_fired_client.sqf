@@ -109,6 +109,12 @@ private _data = [
 
 _projectile setVariable [QGVARMAIN(projectileData), _data];
 
+// Send mine projectile data immediately so placement is recorded
+// even if the mine never detonates (Deleted EH would never fire)
+if (_weapon == "put") then {
+  [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_serverEvent;
+};
+
 // carryover variables to submunitions
 if ((_data select 17) isEqualTo "shotSubmunitions") then {
   _projectile addEventHandler ["SubmunitionCreated", {

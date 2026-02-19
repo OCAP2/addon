@@ -114,7 +114,7 @@ _projectile addEventHandler ["Explode", {
   // If this was a placed mine, remove placement marker
   private _markName = _projectile getVariable [QGVARMAIN(mineMarker), ""];
   if (_markName != "") then {
-    [QGVARMAIN(mineDetonated), [_markName]] call CBA_fnc_serverEvent;
+    [QGVARMAIN(handleMarker), ["DELETED", _markName]] call CBA_fnc_serverEvent;
   };
 
   private _data = _projectile getVariable QGVARMAIN(projectileData);

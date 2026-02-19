@@ -116,8 +116,12 @@ if (_weapon == "put") then {
   private _markName = format ["%1#%2/%3", QGVARMAIN(mine), _int, _pos];
   _projectile setVariable [QGVARMAIN(mineMarker), _markName];
 
-  // Send mine placement marker to server
-  [QGVARMAIN(minePlaced), [_markName, _pos, _muzzleDisplay, _firer]] call CBA_fnc_serverEvent;
+  // Reuse existing handleMarker infrastructure directly
+  [QGVARMAIN(handleMarker), [
+    "CREATED", _markName, _firer, _pos,
+    "Minefield", "ICON", [1,1], 0, "Solid", "ColorRed", 1,
+    format ["%1", _muzzleDisplay], true
+  ]] call CBA_fnc_serverEvent;
 };
 
 // carryover variables to submunitions

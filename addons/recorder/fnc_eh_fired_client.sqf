@@ -109,6 +109,16 @@ private _data = [
 
 _projectile setVariable [QGVARMAIN(projectileData), _data];
 
+// Track mine placement with a marker (mirrors ACE explosive tracking)
+if (_weapon == "put") then {
+  private _int = floor random 99999;
+  private _markName = format ["%1#%2/%3", QGVARMAIN(mine), _int, getPosASL _projectile];
+  _projectile setVariable [QGVARMAIN(mineMarker), _markName];
+
+  // Send mine placement marker to server
+  [QGVARMAIN(minePlaced), [_markName, getPosASL _projectile, _muzzleDisplay, _firer]] call CBA_fnc_serverEvent;
+};
+
 // carryover variables to submunitions
 if ((_data select 17) isEqualTo "shotSubmunitions") then {
   _projectile addEventHandler ["SubmunitionCreated", {

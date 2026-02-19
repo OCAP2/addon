@@ -130,3 +130,23 @@
     [":PROJECTILE:", _this] call EFUNC(extension,sendData);
   };
 }] call CBA_fnc_addEventHandler;
+
+// Mine placement marker — mirrors ACE fnc_aceExplosives pattern
+[QGVARMAIN(minePlaced), {
+  params ["_markName", "_pos", "_muzzleDisplay", "_firer"];
+  if (!SHOULDSAVEEVENTS) exitWith {};
+
+  [QGVARMAIN(handleMarker), [
+    "CREATED", _markName, _firer, _pos,
+    "Minefield", "ICON", [1,1], 0, "Solid", "ColorRed", 1,
+    format ["%1", _muzzleDisplay], true
+  ]] call CBA_fnc_localEvent;
+}] call CBA_fnc_addEventHandler;
+
+// Mine detonation — remove placement marker
+[QGVARMAIN(mineDetonated), {
+  params ["_markName"];
+  if (!SHOULDSAVEEVENTS) exitWith {};
+
+  [QGVARMAIN(handleMarker), ["DELETED", _markName]] call CBA_fnc_localEvent;
+}] call CBA_fnc_addEventHandler;

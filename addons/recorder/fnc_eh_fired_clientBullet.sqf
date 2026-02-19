@@ -111,6 +111,12 @@ _projectile addEventHandler ["Explode", {
 	params ["_projectile", "_pos", "_velocity"];
   TRACE_3("Explode",_projectile,_pos,_velocity);
 
+  // If this was a placed mine, remove placement marker
+  private _markName = _projectile getVariable [QGVARMAIN(mineMarker), ""];
+  if (_markName != "") then {
+    [QGVARMAIN(mineDetonated), [_markName]] call CBA_fnc_serverEvent;
+  };
+
   private _data = _projectile getVariable QGVARMAIN(projectileData);
   // just log position
   (_data select 14) pushBack [

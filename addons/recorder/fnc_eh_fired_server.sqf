@@ -11,6 +11,17 @@
 
 #include "script_component.hpp"
 
+// OCAP is a server-side addon — clients don't have it installed.
+// CBA PREP only runs where the PBO is loaded, so FUNC(eh_fired_client)
+// and FUNC(eh_fired_clientBullet) won't exist on clients.
+// Send the compiled functions to all clients (JIP-queued for late joiners).
+[FUNC(eh_fired_client), {
+  missionNamespace setVariable [QFUNC(eh_fired_client), _this];
+}] remoteExec ["call", -2, true];
+[FUNC(eh_fired_clientBullet), {
+  missionNamespace setVariable [QFUNC(eh_fired_clientBullet), _this];
+}] remoteExec ["call", -2, true];
+
 // Now we'll do the server setup.
 // Wrap everything in a CBA Class Event Handler so when the server initializes any soldier, it'll set up the Local EH. The Local EH is global (ironically) when applied to a unit so it'll do what we need across the entire session and trigger the relevant machines on locality change.
 ["CAManBase", "init", {

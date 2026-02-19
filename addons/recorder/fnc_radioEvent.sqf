@@ -31,7 +31,7 @@ if (_mod isEqualTo "TFAR") then {
 
   [
     ":RADIO:", [
-      EGVAR(recorder,captureFrameNo),
+      GVAR(captureFrameNo),
       _ocapId,
       _radio,
       _typeRadio,

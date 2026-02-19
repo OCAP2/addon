@@ -66,11 +66,11 @@ _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {st
 }] remoteExec ["call", [0, -2] select isDedicated, true];
 
 if (GVAR(captureFrameNo) == 0) then {
-  if (!EGVAR(database,dbValid)) then {
+  if (!EGVAR(extension,sessionReady)) then {
     // Previous recording was exported — re-register new mission with extension
-    call EFUNC(database,newMission);
+    call EFUNC(extension,newMission);
     // Wait for extension to confirm new mission before starting capture
-    [{EGVAR(database,dbValid)}, {
+    [{EGVAR(extension,sessionReady)}, {
       call FUNC(captureLoop);
     }, [], 30, {
       ERROR("Timeout waiting for new mission confirmation from extension. Recording will not start.");

@@ -1,17 +1,12 @@
 #include "script_component.hpp"
 
-if (!GVAR(enabled)) exitWith {
-  INFO("Module disabled, exiting.");
-  true
-};
-
 INFO("Module enabled. Starting up...");
 
-// Initialize DB
-GVAR(dbValid) = false;
+// Initialize session
+GVAR(sessionReady) = false;
 
 
-// when the extension is ready, it'll send a callback which will set dbValid to true and let the other functions being sending data
+// when the extension is ready, it'll send a callback which will set sessionReady to true and let the other functions being sending data
 addMissionEventHandler ["ExtensionCallback", {
   params ["_name", "_function", "_dataArr"];
 
@@ -24,8 +19,8 @@ addMissionEventHandler ["ExtensionCallback", {
   if (_function isEqualTo ":VERSION:") exitWith {
     // version return is automatic during extension init process
     private _ver = _data#0;
-    EGVAR(database,extensionVersion) = _ver;
-    publicVariable QEGVAR(database,extensionVersion);
+    GVAR(dllVersion) = _ver;
+    publicVariable QGVAR(dllVersion);
     INFO_1("Extension version: %1",str _ver);
   };
 
@@ -53,17 +48,17 @@ addMissionEventHandler ["ExtensionCallback", {
   if (_function isEqualTo ":EXT:READY:") exitWith {
     INFO("Extension ready.");
     // extension is ready, send version
-    [":ADDON:VERSION:", [QUOTE(VERSION_STR)], 'ocap_recorder'] call EFUNC(extension,sendData);
+    [":ADDON:VERSION:", [QUOTE(VERSION_STR)], 'ocap_recorder'] call FUNC(sendData);
 
     // get arma dir and module dir
-    [":GETDIR:ARMA:", [], 'ocap_recorder'] call EFUNC(extension,sendData);
-    [":GETDIR:MODULE:", [], 'ocap_recorder'] call EFUNC(extension,sendData);
+    [":GETDIR:ARMA:", [], 'ocap_recorder'] call FUNC(sendData);
+    [":GETDIR:MODULE:", [], 'ocap_recorder'] call FUNC(sendData);
 
     // get logging dir
-    [":GETDIR:OCAPLOG:", [], 'ocap_recorder'] call EFUNC(extension,sendData);
+    [":GETDIR:OCAPLOG:", [], 'ocap_recorder'] call FUNC(sendData);
 
     INFO("Initializing storage...");
-    [":INIT:STORAGE:", [], 'ocap_recorder'] call EFUNC(extension,sendData);
+    [":INIT:STORAGE:", [], 'ocap_recorder'] call FUNC(sendData);
   };
 
 
@@ -132,7 +127,7 @@ addMissionEventHandler ["ExtensionCallback", {
       ["extensionBuildVersion", EGVAR(extension,version) # 0],
       ["extensionBuildCommit", EGVAR(extension,version) # 1],
       ["extensionBuildDate", EGVAR(extension,version) # 2],
-      ["ocapRecorderExtensionVersion", EGVAR(database,version)],
+      ["ocapRecorderExtensionVersion", GVAR(dllVersion)],
       ["playableSlots", [
           playableSlotsNumber east,
           playableSlotsNumber west,
@@ -148,30 +143,21 @@ addMissionEventHandler ["ExtensionCallback", {
       ]]
     ]] call CBA_fnc_encodeJSON;
 
-    // Save mission and world to DB
-    INFO("Saving mission and world to DB");
+    // Save mission and world context
+    INFO("Saving mission and world context");
     TRACE_2("World and mission context",GVAR(worldContext),GVAR(missionContext));
-    [":NEW:MISSION:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call EFUNC(extension,sendData);
+    [":NEW:MISSION:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData);
   };
 
   if (_function isEqualTo ":MISSION:OK:") exitWith {
     INFO_1("Initialization completed in %1ms",diag_tickTime - GVAR(initTimer));
-    INFO("Mission saved to DB. Starting data send.");
-    GVAR(dbValid) = true;
-
-    // Only run one-time setup on first init, not on re-registration after export
-    if (isNil QGVAR(initialSetupDone)) then {
-      GVAR(initialSetupDone) = true;
-      [] spawn FUNC(getStaticObjects);
-      call FUNC(addEventHandlers);
-      call EFUNC(recorder,eh_fired_server);
-      call EFUNC(recorder,telemetryLoop);
-    };
+    INFO("Mission registered. Starting data send.");
+    GVAR(sessionReady) = true;
   };
 }];
 
 
 INFO("Initializing extension...");
 GVAR(initTimer) = diag_tickTime;
-[":INIT:", []] call EFUNC(extension,sendData);
+[":INIT:", []] call FUNC(sendData);
 true

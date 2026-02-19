@@ -35,4 +35,9 @@ PREP(telemetryLoop);
 
 PREP(aceExplosives);
 
+PREP(addEventIntegrations);
+PREP(getStaticObjects);
+PREP(handleChatMessage);
+PREP(radioEvent);
+
 PREP(exportData);

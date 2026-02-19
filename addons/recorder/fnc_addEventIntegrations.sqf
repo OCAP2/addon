@@ -2,8 +2,6 @@
 
 // remoteExec to all machines with JIP -- will trigger when local
 
-if (!GVAR(enabled)) exitWith {};
-
 {
   // log chat
 	addMissionEventHandler ["HandleChatMessage", {
@@ -36,15 +34,15 @@ if (!GVAR(enabled)) exitWith {};
       _lastDamageSource = _unit getVariable ["ace_medical_lastDamageSoruce", objNull];
       _lastDamageID = _lastDamageSource getVariable [QGVARMAIN(id), -1];
 
-      [ // remoteExec back to server for db check
+      [ // remoteExec back to server for session check
         [
-          EGVAR(recorder,captureFrameNo),
+          GVAR(captureFrameNo),
           _ocapID,
           _unit getVariable ["ace_medical_causeOfDeath", "UNKNOWN"],
           _lastDamageID
         ],
         {
-          if (GVAR(dbValid) && GVAR(enabled)) then {
+          if (EGVAR(extension,sessionReady) && SHOULDSAVEEVENTS) then {
             [":ACE3:DEATH:", _this] call EFUNC(extension,sendData);
           };
         }
@@ -63,9 +61,9 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
       _ocapID = _unit getVariable [QGVARMAIN(id), -1];
       if (_ocapID isEqualTo -1) exitWith {};
 
-      if (GVAR(dbValid) && GVAR(enabled)) then {
+      if (EGVAR(extension,sessionReady) && SHOULDSAVEEVENTS) then {
         [":ACE3:UNCONSCIOUS:", [
-          EGVAR(recorder,captureFrameNo),
+          GVAR(captureFrameNo),
           _ocapID,
           _isUnconscious
         ]] call EFUNC(extension,sendData);
@@ -200,5 +198,3 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
 
   missionNamespace setVariable [QGVARMAIN(radioEventsInitialized), true];
 } remoteExec ["call", [0, -2] select isDedicated, true];
-
-

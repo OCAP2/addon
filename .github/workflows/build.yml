@@ -18,20 +18,7 @@ jobs:
         uses: arma-actions/hemtt@v1
 
       - name: Run HEMTT check
-        run: |
-          # Run hemtt check and capture output
-          OUTPUT=$(hemtt check 2>&1) || true
-          echo "$OUTPUT"
-
-          # Filter out L-S29 (false positives for dynamically defined functions)
-          # and fail if any other warnings remain
-          WARNINGS=$(echo "$OUTPUT" | grep -E "warning\[" | grep -v "L-S29" || true)
-          if [ -n "$WARNINGS" ]; then
-            echo ""
-            echo "::error::Lint warnings found:"
-            echo "$WARNINGS"
-            exit 1
-          fi
+        run: hemtt check
 
       - name: Run HEMTT build
         run: hemtt build

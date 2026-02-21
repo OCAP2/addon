@@ -179,8 +179,8 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
       // round frequency from Hz to MHz with 3 decimal places
       _freq = (_freq / 1000000) toFixed 3;
 
-      // store radioId on unit for stop event (acre_stoppedSpeaking doesn't provide it)
-      _unit setVariable [QGVAR(acre_lastRadioId), _radioId];
+      // store computed radio info on unit for stop event (acre_stoppedSpeaking doesn't provide it)
+      _unit setVariable [QGVAR(acre_lastRadioInfo), [_radioName, _typeRadio, _channel, _freq]];
 
       [
         "ACRE", [
@@ -203,16 +203,11 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
 
       _ownerId = _thisArgs;
 
-      private _radioId = _unit getVariable [QGVAR(acre_lastRadioId), ""];
-      if (_radioId isEqualTo "") exitWith {};
+      private _radioInfo = _unit getVariable [QGVAR(acre_lastRadioInfo), []];
+      if (_radioInfo isEqualTo []) exitWith {};
+      _unit setVariable [QGVAR(acre_lastRadioInfo), nil];
 
-      private _radioName = [_radioId] call acre_api_fnc_getDisplayName;
-      private _channel = [_radioId] call acre_api_fnc_getRadioChannel;
-      private _baseRadio = [_radioId] call acre_api_fnc_getBaseRadio;
-      private _freq = [_baseRadio, "default", _channel, "frequencyTX"] call acre_api_fnc_getPresetChannelField;
-
-      private _typeRadio = ["LR", "SR"] select (_baseRadio == "ACRE_PRC343");
-      _freq = (_freq / 1000000) toFixed 3;
+      _radioInfo params ["_radioName", "_typeRadio", "_channel", "_freq"];
 
       [
         "ACRE", [

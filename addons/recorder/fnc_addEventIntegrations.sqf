@@ -141,7 +141,7 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
       // channels are returned on a 0 index, so fix that
       _channel = _channel + 1;
       // round frequency to the nearest 3 significant digits
-      _freq = _freq toFixed 3;
+      _freq = (parseNumber _freq) toFixed 3;
 
       [
           "TFAR", [

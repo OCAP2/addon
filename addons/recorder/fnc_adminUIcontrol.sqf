@@ -142,7 +142,7 @@ switch (_event) do {
 	case "connect": {
 		// A player just joined the mission
 		// if they are in the admin list OR already a server admin, add the diary entry
-		if (_inAdminList || {admin _owner > 0}) then {
+		if ((_inAdminList || {admin _owner > 0}) && {!(_unit getVariable [QGVARMAIN(hasAdminControls), false])}) then {
 			[_owner, _unit] call _fnc_addControls;
 			if (GVARMAIN(isDebug)) then {
 				private _reason = if (_inAdminList) then {"being in the administratorList"} else {"being a server admin"};

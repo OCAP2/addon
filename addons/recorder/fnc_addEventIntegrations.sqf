@@ -160,41 +160,74 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
 
 
   // ACRE2 support
-  // wip
-  // if (isClass (configFile >> "CfgPatches" >> "acre_main")) then {
-  //   ["acre_startedSpeaking", {
-          // if (!SHOULDSAVEEVENTS) exitWith {};
-  //     _this params ["_unit", "_onRadio", "_radioId", "_speakingType"];
-  //     if !(_onRadio) exitWith {};
+  if (isClass (configFile >> "CfgPatches" >> "acre_main")) then {
+    ["acre_startedSpeaking", {
+      _this params ["_unit", "_onRadio", "_radioId", "_speakingType"];
+      if (!_onRadio) exitWith {};
+      if (!SHOULDSAVEEVENTS) exitWith {};
 
-  //     _ownerId = _thisArgs;
+      _ownerId = _thisArgs;
 
-  // if (!(missionNamespace getVariable [QEGVAR(recorder,recording), false])) exitWith {};
+      private _radioName = [_radioId] call acre_api_fnc_getDisplayName;
+      private _channel = [_radioId] call acre_api_fnc_getRadioChannel;
+      private _baseRadio = [_radioId] call acre_api_fnc_getBaseRadio;
+      private _freq = [_baseRadio, "default", _channel, "frequencyTX"] call acre_api_fnc_getPresetChannelField;
 
+      // PRC-343 is a short-range item radio, all others are long-range
+      private _typeRadio = ["LR", "SR"] select (_baseRadio == "ACRE_PRC343");
 
-  //     ["ACRE_PRC343_ID_1"] call acre_api_fnc_getDisplayName;
-  //     diag_log format ["ACRE started speaking: %1 - %2 - %3", _this, _radioId, _speakingType];
+      // round frequency from Hz to MHz with 3 decimal places
+      _freq = (_freq / 1000000) toFixed 3;
 
-  //     // _unitId = _unit call BIS_fnc_netId;
-  //     // [_unitId, true] remoteExec [QFUNC(radioEvent), _ownerId];
+      // store radioId on unit for stop event (acre_stoppedSpeaking doesn't provide it)
+      _unit setVariable [QGVAR(acre_lastRadioId), _radioId];
 
+      [
+        "ACRE", [
+          _unit,
+          _radioName,
+          _typeRadio,
+          "Start",
+          _channel,
+          false,
+          _freq,
+          0
+        ]
+      ] remoteExec [QFUNC(radioEvent), _ownerId];
+    }, remoteExecutedOwner] call CBA_fnc_addEventHandlerArgs;
 
+    ["acre_stoppedSpeaking", {
+      _this params ["_unit", "_onRadio"];
+      if (!_onRadio) exitWith {};
+      if (!SHOULDSAVEEVENTS) exitWith {};
 
-  //   }, remoteExecutedOwner] call CBA_fnc_addEventHandlerArgs;
+      _ownerId = _thisArgs;
 
-  //   ["acre_stoppedSpeaking", {
-  //     _this params ["_unit", "_onRadio"];
-  //     if !(_onRadio) exitWith {};
+      private _radioId = _unit getVariable [QGVAR(acre_lastRadioId), ""];
+      if (_radioId isEqualTo "") exitWith {};
 
-  //     _ownerId = _thisArgs;
-  //     TRACE_1("ACRE stopped speaking", _this);
+      private _radioName = [_radioId] call acre_api_fnc_getDisplayName;
+      private _channel = [_radioId] call acre_api_fnc_getRadioChannel;
+      private _baseRadio = [_radioId] call acre_api_fnc_getBaseRadio;
+      private _freq = [_baseRadio, "default", _channel, "frequencyTX"] call acre_api_fnc_getPresetChannelField;
 
-  //     // _unitId = _unit call BIS_fnc_netId;
-  //     // [_unitId, false] remoteExec [QFUNC(radioEvent), _ownerId];
+      private _typeRadio = ["LR", "SR"] select (_baseRadio == "ACRE_PRC343");
+      _freq = (_freq / 1000000) toFixed 3;
 
-  //     _unit setVariable [QGVARMAIN(isSpeakingRadio), false, _ownerId];
-  //   }, remoteExecutedOwner] call CBA_fnc_addEventHandlerArgs;
-  // };
+      [
+        "ACRE", [
+          _unit,
+          _radioName,
+          _typeRadio,
+          "Stop",
+          _channel,
+          false,
+          _freq,
+          0
+        ]
+      ] remoteExec [QFUNC(radioEvent), _ownerId];
+    }, remoteExecutedOwner] call CBA_fnc_addEventHandlerArgs;
+  };
 
   missionNamespace setVariable [QGVARMAIN(radioEventsInitialized), true];
 } remoteExec ["call", [0, -2] select isDedicated, true];

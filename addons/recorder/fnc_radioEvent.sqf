@@ -43,3 +43,37 @@ if (_mod isEqualTo "TFAR") then {
     ]
   ] call EFUNC(extension,sendData);
 };
+
+if (_mod isEqualTo "ACRE") then {
+  _data params [
+    ["_unit", objNull, [objNull]],
+    ["_radio", "", [""]],
+    ["_typeRadio", "", [""]],
+    ["_typeTransmission", "", [""]],
+    "_channel",
+    ["_isAdditional", false, [false]],
+    "_freq",
+    "_code"
+  ];
+
+  private _ocapId = _unit getVariable [QGVARMAIN(id), -1];
+  if (
+    _ocapId isEqualTo -1 ||
+    _channel isEqualTo -1 ||
+    _freq isEqualTo -1
+  ) exitWith {};
+
+  [
+    ":RADIO:", [
+      GVAR(captureFrameNo),
+      _ocapId,
+      _radio,
+      _typeRadio,
+      _typeTransmission,
+      _channel,
+      _isAdditional,
+      _freq,
+      _code
+    ]
+  ] call EFUNC(extension,sendData);
+};

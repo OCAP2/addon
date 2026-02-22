@@ -53,6 +53,11 @@ GVAR(PFHObject) = [
   {
     private _loopStart = diag_tickTime;
 
+    // Increment BEFORE processing so frames start at 1, not 0.
+    // Frame 0 is reserved as sentinel for "not yet recording" (see fnc_init.sqf).
+    GVAR(captureFrameNo) = GVAR(captureFrameNo) + 1;
+    publicVariable QGVAR(captureFrameNo);
+
     if (GVAR(captureFrameNo) == 10 || (GVAR(captureFrameNo) > 10 && EGVAR(settings,trackTimes) && GVAR(captureFrameNo) % EGVAR(settings,trackTimeInterval) == 0)) then {
       [] call FUNC(updateTime);
     };
@@ -286,8 +291,6 @@ GVAR(PFHObject) = [
       _logStr SYSCHAT;
     };
 
-    GVAR(captureFrameNo) = GVAR(captureFrameNo) + 1;
-    publicVariable QGVAR(captureFrameNo);
   },
   GVAR(frameCaptureDelay), // delay
   [], // args

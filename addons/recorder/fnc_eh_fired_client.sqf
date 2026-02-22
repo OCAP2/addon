@@ -111,16 +111,12 @@ _projectile setVariable [QGVARMAIN(projectileData), _data];
 
 // Handle placed objects (mines, explosives) — separate lifecycle from projectiles
 if (_weapon == "put") then {
-  // Assign unique OCAP ID to placed object (same counter as soldiers/vehicles)
-  private _placedId = GVAR(nextId);
-  GVAR(nextId) = GVAR(nextId) + 1;
-  _projectile setVariable [QGVARMAIN(placedId), _placedId];
   _projectile setVariable [QGVARMAIN(detonated), false];
 
-  // Build :NEW:PLACED: data
+  // Build :NEW:PLACED: data — placedId assigned server-side (GVAR(nextId) only exists there)
   private _placedData = [
     EGVAR(recorder,captureFrameNo),                                        // 0: captureFrameNo
-    _placedId,                                                              // 1: placedId
+    -1,                                                                     // 1: placedId (assigned by server)
     typeOf _projectile,                                                     // 2: className
     _data select 11,                                                        // 3: displayName (magazineDisplay)
     (getPosASL _projectile) joinString ",",                                 // 4: position
@@ -130,7 +126,7 @@ if (_weapon == "put") then {
     _data select 19                                                         // 8: magazineIcon
   ];
 
-  [QGVARMAIN(handlePlacedData), [_placedData]] call CBA_fnc_serverEvent;
+  [QGVARMAIN(handlePlacedData), [_placedData, _projectile]] call CBA_fnc_serverEvent;
 
   // Attach simplified EHs for placed object lifecycle
   _projectile addEventHandler ["Explode", {

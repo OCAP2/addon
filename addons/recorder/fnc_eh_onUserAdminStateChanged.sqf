@@ -27,9 +27,8 @@
 
 params ["_networkId", "_loggedIn", "_votedIn"];
 
-_userInfo = (getUserInfo _networkId);
-if (isNil "_userInfo") exitWith {};
-_object = _userInfo select 10;
+_userInfo = getUserInfo _networkId;
+if (_userInfo isEqualTo []) exitWith {};
 
 if (_loggedIn && !_votedIn) exitWith {
 	// if user has become admin by logging, not voting, trigger control addition check

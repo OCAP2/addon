@@ -130,3 +130,17 @@
     [":PROJECTILE:", _this] call EFUNC(extension,sendData);
   };
 }] call CBA_fnc_addEventHandler;
+
+// Handle placed object creation events (mines, explosives)
+[QGVARMAIN(handlePlacedData), {
+  params ["_data"];
+  TRACE_1("Sending placed object data to extension",_data);
+  [":NEW:PLACED:", _data] call EFUNC(extension,sendData);
+}] call CBA_fnc_addEventHandler;
+
+// Handle placed object lifecycle events (detonation, deletion)
+[QGVARMAIN(handlePlacedEvent), {
+  params ["_data"];
+  TRACE_1("Sending placed event data to extension",_data);
+  [":PLACED:EVENT:", _data] call EFUNC(extension,sendData);
+}] call CBA_fnc_addEventHandler;

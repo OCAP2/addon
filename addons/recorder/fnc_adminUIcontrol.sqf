@@ -104,7 +104,14 @@ if (isNil "_adminUIDs") exitWith {
 
 	switch (_event) do {
 		case "connect": {
-			// A player just joined the mission and no admin list exists - skip
+			// A player just joined the mission and no admin list exists
+			// Still check if they are currently a server admin (e.g. mission loaded while already admin)
+			if (admin _owner > 0 && {!(_unit getVariable [QGVARMAIN(hasAdminControls), false])}) then {
+				[_owner, _unit] call _fnc_addControls;
+				if (GVARMAIN(isDebug)) then {
+					format["%1 was granted OCAP control by being a server admin", name _unit] SYSCHAT;
+				};
+			};
 		};
 		case "login": {
 			// A player just logged in so add controls if they don't already have them
@@ -134,11 +141,12 @@ private _inAdminList = _playerUID in _adminUIDs;
 switch (_event) do {
 	case "connect": {
 		// A player just joined the mission
-		    // if they are an admin, we add the diary entry
-		if (_inAdminList) then {
+		// if they are in the admin list OR already a server admin, add the diary entry
+		if ((_inAdminList || {admin _owner > 0}) && {!(_unit getVariable [QGVARMAIN(hasAdminControls), false])}) then {
 			[_owner, _unit] call _fnc_addControls;
 			if (GVARMAIN(isDebug)) then {
-				format["%1 was granted OCAP control due to being in the administratorList", name _unit] SYSCHAT;
+				private _reason = if (_inAdminList) then {"being in the administratorList"} else {"being a server admin"};
+				format["%1 was granted OCAP control due to %2", name _unit, _reason] SYSCHAT;
 			};
 		};
 	};

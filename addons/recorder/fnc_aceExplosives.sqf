@@ -4,13 +4,17 @@ FILE: fnc_aceExplosives.sqf
 FUNCTION: OCAP_recorder_fnc_aceExplosives
 
 Description:
-  Adds marker on the mine's position to the recording timeline.
-  Uses Explode event handler to detect detonation and indicates it with a 10-frame long red X before removing the marker.
+  Integrates ACE3-placed explosives into the placed object pipeline.
+  Sends :NEW:PLACED: data and attaches lifecycle EHs (HitExplosion, Explode,
+  Deleted) identical to vanilla mines in fnc_eh_fired_client.sqf.
 
   Called by <ace_explosives_place> CBA listener.
 
 Parameters:
-  None
+  _explosive - Object: the placed explosive
+  _dir       - Number: direction
+  _pitch     - Number: pitch
+  _unit      - Object: the unit that placed the explosive
 
 Returns:
   Nothing
@@ -34,68 +38,76 @@ if (!SHOULDSAVEEVENTS) exitWith {};
 
 params ["_explosive", "_dir", "_pitch", "_unit"];
 
-private _int = random(2000);
-
+// Resolve explosive metadata from config
 private _explType = typeOf _explosive;
 private _explosiveMag = getText(configFile >> "CfgAmmo" >> _explType >> "defaultMagazine");
 private _explosiveDisp = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "displayName");
 private _explosivePic = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "picture");
 
-private _placedPos = getPosASL _explosive;
-_unit addOwnedMine _explosive;
+// Get placer's OCAP ID
+private _unitOcapId = _unit getVariable [QGVARMAIN(id), -1];
+if (_unitOcapId isEqualTo -1) exitWith {};
 
-private _markTextLocal = format["%1", _explosiveDisp];
-private _markName = format["%1#%2/%3", QGVARMAIN(mine), _int, _placedPos];
+_explosive setVariable [QGVARMAIN(detonated), false];
 
-// Signals creation of a Minefield (triangle) marker on the timeline at the location the explosive was armed.
-[QGVARMAIN(handleMarker), [
-  "CREATED", _markName, _unit, _placedPos, "Minefield", "ICON", [1,1], 0, "Solid", "ColorRed", 1, _markTextLocal, true
-]] call CBA_fnc_localEvent;
+// Build :NEW:PLACED: data — same format as vanilla mines in fnc_eh_fired_client.sqf
+private _placedData = [
+  EGVAR(recorder,captureFrameNo),                                        // 0: captureFrameNo
+  -1,                                                                     // 1: placedId (assigned by server)
+  _explType,                                                              // 2: className
+  _explosiveDisp,                                                         // 3: displayName
+  (getPosASL _explosive) joinString ",",                                  // 4: position
+  _unitOcapId,                                                            // 5: firerOcapId
+  str (side group _unit),                                                 // 6: side
+  "put",                                                                  // 7: weapon
+  _explosivePic                                                           // 8: magazineIcon
+];
 
-if (GVARMAIN(isDebug)) then {
-  private _debugArr = [_explosive, _explosivePic, format["%1 %2 - %3", str side group _unit, name _unit, _markTextLocal], [side group _unit] call BIS_fnc_sideColor];
-  GVAR(liveDebugMagIcons) pushBack _debugArr;
-  publicVariable QGVAR(liveDebugMagIcons);
-};
+[QGVARMAIN(handlePlacedData), [_placedData, _explosive]] call CBA_fnc_serverEvent;
 
-// Use Explode event handler instead of polling for null
-_explosive addEventHandler ["Explode", {
-  params ["_explosive", "_damage", "_source", "_instigator"];
-
-  private _data = _explosive getVariable [QGVAR(explosiveData), []];
-  if (_data isEqualTo []) exitWith {};
-
-  _data params ["_explosiveDisp", "_unit", "_placedPos", "_markName", "_int"];
-
-  if (GVARMAIN(isDebug)) then {
-    format["Removed explosive placed marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
-    OCAPEXTLOG(ARR3("Removed explosive placed marker",_markName,_explosiveDisp));
-  };
-
-  // Signals removal of the Minefield (triangle) marker when the explosive detonates
-  [QGVARMAIN(handleMarker), ["DELETED", _markName]] call CBA_fnc_localEvent;
-
-  private _detonationMarkName = format["Detonation#%1", _int];
-
-  if (GVARMAIN(isDebug)) then {
-    format["Created explosive explosion marker, %1, %2", _detonationMarkName, _explosiveDisp] SYSCHAT;
-    OCAPEXTLOG(ARR3("Created explosive explosion marker",_detonationMarkName,_explosiveDisp));
-  };
-
-  // Signals creation of a Waypoint (X) marker on the timeline at the location the explosive detonated
-  [QGVARMAIN(handleMarker), [
-    "CREATED", _detonationMarkName, _unit, _placedPos, "waypoint", "ICON", [1,1], 0, "Solid", "ColorRed", 1, format["%1", _explosiveDisp], true
-  ]] call CBA_fnc_localEvent;
-
-  [{
-    params ["_markName", "_explosiveDisp"];
-    if (GVARMAIN(isDebug)) then {
-      format["Removed explosive explosion marker, %1, %2", _markName, _explosiveDisp] SYSCHAT;
-      OCAPEXTLOG(ARR3("Removed explosive explosion marker",_markName,_explosiveDisp));
-    };
-    [QGVARMAIN(handleMarker), ["DELETED", _markName]] call CBA_fnc_localEvent;
-  }, [_detonationMarkName, _explosiveDisp], GVAR(captureFrameNo) * 10] call CBA_fnc_waitAndExecute;
+// Attach lifecycle EHs — identical to vanilla path in fnc_eh_fired_client.sqf
+_explosive addEventHandler ["HitExplosion", {
+  params ["_explosive", "_hitEntity", "_explosiveOwner", "_hitThings"];
+  if (isNull _hitEntity) exitWith {};
+  if (count _hitThings isEqualTo 0) exitWith {};
+  private _hitOcapId = _hitEntity getVariable [QGVARMAIN(id), -1];
+  if (_hitOcapId isEqualTo -1) exitWith {};
+  private _placedId = _explosive getVariable [QGVARMAIN(placedId), -1];
+  private _eventData = [
+    EGVAR(recorder,captureFrameNo),                                      // 0: captureFrameNo
+    _placedId,                                                            // 1: placedId
+    "hit",                                                                // 2: eventType
+    (getPosASL _hitEntity) joinString ",",                                // 3: position (victim pos)
+    _hitOcapId                                                            // 4: hitEntityOcapId
+  ];
+  [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
 }];
 
-// Store data on the explosive for retrieval in the event handler
-_explosive setVariable [QGVAR(explosiveData), [_explosiveDisp, _unit, _placedPos, _markName, _int]];
+_explosive addEventHandler ["Explode", {
+  params ["_explosive", "_pos", "_velocity"];
+  if (_explosive getVariable [QGVARMAIN(detonated), true]) exitWith {};
+  _explosive setVariable [QGVARMAIN(detonated), true];
+  private _placedId = _explosive getVariable [QGVARMAIN(placedId), -1];
+  private _eventData = [
+    EGVAR(recorder,captureFrameNo),                                      // 0: captureFrameNo
+    _placedId,                                                            // 1: placedId
+    "detonated",                                                          // 2: eventType
+    _pos joinString ","                                                   // 3: position
+  ];
+  [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
+}];
+
+_explosive addEventHandler ["Deleted", {
+  params ["_explosive"];
+  // Only send "deleted" if not already detonated (avoid double-send)
+  if (_explosive getVariable [QGVARMAIN(detonated), true]) exitWith {};
+  _explosive setVariable [QGVARMAIN(detonated), true];
+  private _placedId = _explosive getVariable [QGVARMAIN(placedId), -1];
+  private _eventData = [
+    EGVAR(recorder,captureFrameNo),                                      // 0: captureFrameNo
+    _placedId,                                                            // 1: placedId
+    "deleted",                                                            // 2: eventType
+    (getPosASL _explosive) joinString ","                                 // 3: position
+  ];
+  [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
+}];

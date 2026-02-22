@@ -109,25 +109,92 @@ private _data = [
 
 _projectile setVariable [QGVARMAIN(projectileData), _data];
 
-// carryover variables to submunitions
-if ((_data select 17) isEqualTo "shotSubmunitions") then {
-  _projectile addEventHandler ["SubmunitionCreated", {
-    params ["_projectile", "_submunitionProjectile"];
-    private _data = +(_projectile getVariable QGVARMAIN(projectileData));
-    _data set [17, getText(configOf _submunitionProjectile >> "simulation")]; // actual sim type
-    _data set [18, true]; // isSub = true
-    (_data select 14) pushBack [
-      diag_tickTime,
-      EGVAR(recorder,captureFrameNo),
-      (getPosASL _submunitionProjectile) joinString ","
+// Handle placed objects (mines, explosives) — separate lifecycle from projectiles
+if (_weapon == "put") then {
+  _projectile setVariable [QGVARMAIN(detonated), false];
+
+  // Build :NEW:PLACED: data — placedId assigned server-side (GVAR(nextId) only exists there)
+  private _placedData = [
+    EGVAR(recorder,captureFrameNo),                                        // 0: captureFrameNo
+    -1,                                                                     // 1: placedId (assigned by server)
+    typeOf _projectile,                                                     // 2: className
+    _data select 11,                                                        // 3: displayName (magazineDisplay)
+    (getPosASL _projectile) joinString ",",                                 // 4: position
+    _firerOcapId,                                                           // 5: firerOcapId
+    str (side group _firer),                                                // 6: side
+    _weapon,                                                                // 7: weapon
+    _data select 19                                                         // 8: magazineIcon
+  ];
+
+  [QGVARMAIN(handlePlacedData), [_placedData, _projectile]] call CBA_fnc_serverEvent;
+
+  // Attach simplified EHs for placed object lifecycle
+  _projectile addEventHandler ["HitExplosion", {
+    params ["_projectile", "_hitEntity", "_projectileOwner", "_hitThings"];
+    if (isNull _hitEntity) exitWith {};
+    if (count _hitThings isEqualTo 0) exitWith {};
+    private _hitOcapId = _hitEntity getVariable [QGVARMAIN(id), -1];
+    if (_hitOcapId isEqualTo -1) exitWith {};
+    private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
+    private _eventData = [
+      EGVAR(recorder,captureFrameNo),                                      // 0: captureFrameNo
+      _placedId,                                                            // 1: placedId
+      "hit",                                                                // 2: eventType
+      (getPosASL _hitEntity) joinString ",",                                // 3: position (victim pos)
+      _hitOcapId                                                            // 4: hitEntityOcapId
     ];
-    _submunitionProjectile setVariable [QGVARMAIN(projectileData), _data];
-    // add the rest of EHs to submunition
-    [_submunitionProjectile] call FUNC(eh_fired_clientBullet);
+    [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
+  }];
+
+  _projectile addEventHandler ["Explode", {
+    params ["_projectile", "_pos", "_velocity"];
+    if (_projectile getVariable [QGVARMAIN(detonated), true]) exitWith {};
+    _projectile setVariable [QGVARMAIN(detonated), true];
+    private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
+    private _eventData = [
+      EGVAR(recorder,captureFrameNo),                                      // 0: captureFrameNo
+      _placedId,                                                            // 1: placedId
+      "detonated",                                                          // 2: eventType
+      _pos joinString ","                                                   // 3: position
+    ];
+    [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
+  }];
+
+  _projectile addEventHandler ["Deleted", {
+    params ["_projectile"];
+    // Only send "deleted" if not already detonated (avoid double-send)
+    if (_projectile getVariable [QGVARMAIN(detonated), true]) exitWith {};
+    _projectile setVariable [QGVARMAIN(detonated), true];
+    private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
+    private _eventData = [
+      EGVAR(recorder,captureFrameNo),                                      // 0: captureFrameNo
+      _placedId,                                                            // 1: placedId
+      "deleted",                                                            // 2: eventType
+      (getPosASL _projectile) joinString ","                                // 3: position
+    ];
+    [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
   }];
 } else {
-  // add the rest of EHs to projectile
-  [_projectile] call FUNC(eh_fired_clientBullet);
+  // carryover variables to submunitions
+  if ((_data select 17) isEqualTo "shotSubmunitions") then {
+    _projectile addEventHandler ["SubmunitionCreated", {
+      params ["_projectile", "_submunitionProjectile"];
+      private _data = +(_projectile getVariable QGVARMAIN(projectileData));
+      _data set [17, getText(configOf _submunitionProjectile >> "simulation")]; // actual sim type
+      _data set [18, true]; // isSub = true
+      (_data select 14) pushBack [
+        diag_tickTime,
+        EGVAR(recorder,captureFrameNo),
+        (getPosASL _submunitionProjectile) joinString ","
+      ];
+      _submunitionProjectile setVariable [QGVARMAIN(projectileData), _data];
+      // add the rest of EHs to submunition
+      [_submunitionProjectile] call FUNC(eh_fired_clientBullet);
+    }];
+  } else {
+    // add the rest of EHs to projectile
+    [_projectile] call FUNC(eh_fired_clientBullet);
+  };
 };
 
 true;

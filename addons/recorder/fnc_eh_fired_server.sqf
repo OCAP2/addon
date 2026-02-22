@@ -130,3 +130,22 @@
     [":PROJECTILE:", _this] call EFUNC(extension,sendData);
   };
 }] call CBA_fnc_addEventHandler;
+
+// Handle placed object creation events (mines, explosives)
+// ID assignment happens here because GVAR(nextId) only exists on the server
+[QGVARMAIN(handlePlacedData), {
+  params ["_data", "_projectile"];
+  private _placedId = GVAR(nextId);
+  GVAR(nextId) = GVAR(nextId) + 1;
+  _data set [1, _placedId];
+  _projectile setVariable [QGVARMAIN(placedId), _placedId, true];
+  TRACE_2("Sending placed object data to extension",_placedId,_data);
+  [":NEW:PLACED:", _data] call EFUNC(extension,sendData);
+}] call CBA_fnc_addEventHandler;
+
+// Handle placed object lifecycle events (detonation, deletion)
+[QGVARMAIN(handlePlacedEvent), {
+  params ["_data"];
+  TRACE_1("Sending placed event data to extension",_data);
+  [":PLACED:EVENT:", _data] call EFUNC(extension,sendData);
+}] call CBA_fnc_addEventHandler;

@@ -129,6 +129,23 @@ if (_weapon == "put") then {
   [QGVARMAIN(handlePlacedData), [_placedData, _projectile]] call CBA_fnc_serverEvent;
 
   // Attach simplified EHs for placed object lifecycle
+  _projectile addEventHandler ["HitExplosion", {
+    params ["_projectile", "_hitEntity", "_projectileOwner", "_hitThings"];
+    if (isNull _hitEntity) exitWith {};
+    if (count _hitThings isEqualTo 0) exitWith {};
+    private _hitOcapId = _hitEntity getVariable [QGVARMAIN(id), -1];
+    if (_hitOcapId isEqualTo -1) exitWith {};
+    private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
+    private _eventData = [
+      EGVAR(recorder,captureFrameNo),                                      // 0: captureFrameNo
+      _placedId,                                                            // 1: placedId
+      "hit",                                                                // 2: eventType
+      (getPosASL _hitEntity) joinString ",",                                // 3: position (victim pos)
+      _hitOcapId                                                            // 4: hitEntityOcapId
+    ];
+    [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
+  }];
+
   _projectile addEventHandler ["Explode", {
     params ["_projectile", "_pos", "_velocity"];
     if (_projectile getVariable [QGVARMAIN(detonated), true]) exitWith {};

@@ -79,6 +79,9 @@ GVAR(autoStart) = EGVAR(settings,autoStart);
 */
 GVAR(minMissionTime) = EGVAR(settings,minMissionTime);
 
+GVAR(excludeKindList) = parseSimpleArray EGVAR(settings,excludeKindFromRecord);
+GVAR(excludeClassList) = parseSimpleArray EGVAR(settings,excludeClassFromRecord);
+
 /*
   VARIABLE: OCAP_version
   Global variable that represents the version of OCAP addon being used [String]

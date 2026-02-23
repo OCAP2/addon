@@ -182,7 +182,7 @@ GVAR(PFHObject) = [
         _class = _vehType call FUNC(getClass);
         private _vic = _x;
         private _toExcludeKind = false;
-        private _kindList = parseSimpleArray EGVAR(settings,excludeKindFromRecord);
+        private _kindList = GVAR(excludeKindList);
         if (_kindList isNotEqualTo []) then {
           {
             if (_vic isKindOf _x) exitWith {
@@ -191,7 +191,7 @@ GVAR(PFHObject) = [
           } forEach _kindList;
         };
         private _toExcludeClass = false;
-        private _classList = parseSimpleArray EGVAR(settings,excludeClassFromRecord);
+        private _classList = GVAR(excludeClassList);
         if (_classList isNotEqualTo []) then {
           {
             if (typeOf _vic == _x) exitWith {

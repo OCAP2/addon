@@ -180,22 +180,24 @@ GVAR(PFHObject) = [
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
         _vehType = typeOf _x;
         _class = _vehType call FUNC(getClass);
+        private _vic = _x;
         private _toExcludeKind = false;
-        if (parseSimpleArray EGVAR(settings,excludeKindFromRecord) isNotEqualTo []) then {
-          private _vic = _x;
+        private _kindList = parseSimpleArray EGVAR(settings,excludeKindFromRecord);
+        if (_kindList isNotEqualTo []) then {
           {
             if (_vic isKindOf _x) exitWith {
               _toExcludeKind = true;
             };
-          } forEach (parseSimpleArray EGVAR(settings,excludeKindFromRecord));
+          } forEach _kindList;
         };
         private _toExcludeClass = false;
-        if (parseSimpleArray EGVAR(settings,excludeClassFromRecord) isNotEqualTo []) then {
+        private _classList = parseSimpleArray EGVAR(settings,excludeClassFromRecord);
+        if (_classList isNotEqualTo []) then {
           {
             if (typeOf _vic == _x) exitWith {
               _toExcludeClass = true;
             };
-          } forEach (parseSimpleArray EGVAR(settings,excludeClassFromRecord));
+          } forEach _classList;
         };
         if ((_class isEqualTo "unknown") || _toExcludeKind || _toExcludeClass) exitWith {
           LOG(ARR2("WARNING: vehicle is defined as 'unknown' or exclude:",_vehType));

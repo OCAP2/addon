@@ -147,6 +147,14 @@ GVAR(PFHObject) = [
         _pos = getPosASL _x;
         private _unitGroup = group _x;
 
+        private _scores = getPlayerScores _x;
+        private _scoresStr = _x getVariable [QGVAR(lastScoresStr), ""];
+        if (_scores isNotEqualTo (_x getVariable [QGVAR(lastScores), []])) then {
+          _scoresStr = _scores joinString ",";
+          _x setVariable [QGVAR(lastScores), _scores];
+          _x setVariable [QGVAR(lastScoresStr), _scoresStr];
+        };
+
         private _unitData = [
           (_x getVariable QGVARMAIN(id)), //1
           _pos, //2
@@ -159,7 +167,7 @@ GVAR(PFHObject) = [
           GVAR(captureFrameNo), // frame 9
           if (!isNil "ace_medical_status_fnc_hasStableVitals") then {BOOL([_x] call ace_medical_status_fnc_hasStableVitals)} else {true}, // 10
           if (!isNil "ace_medical_status_fnc_isBeingDragged") then {BOOL([_x] call ace_medical_status_fnc_isBeingDragged)} else {false}, // 11
-          (getPlayerScores _x) joinString ",", // scores 12
+          _scoresStr, // scores 12
           _x call CBA_fnc_vehicleRole, // vehicle role 13
           if (!isNull objectParent _x) then {(objectParent _x) getVariable [QGVARMAIN(id), -1]} else {-1}, // 14
           stance _x, // 15

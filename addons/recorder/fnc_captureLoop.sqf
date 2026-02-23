@@ -166,7 +166,7 @@ GVAR(PFHObject) = [
           if (alive _x) then {name _x} else {""}, //6
           BOOL(isPlayer _x), //7
           _unitRole, //8
-          GVAR(captureFrameNo), // frame 9
+          0, // frame placeholder for comparison (set before sending) 9
           if (!isNil "ace_medical_status_fnc_hasStableVitals") then {BOOL([_x] call ace_medical_status_fnc_hasStableVitals)} else {true}, // 10
           if (!isNil "ace_medical_status_fnc_isBeingDragged") then {BOOL([_x] call ace_medical_status_fnc_isBeingDragged)} else {false}, // 11
           _scoresStr, // scores 12
@@ -177,9 +177,10 @@ GVAR(PFHObject) = [
           str side _unitGroup // 17 side (dynamic)
         ];
 
-        if (_x getVariable ["unitData", []] isNotEqualTo _unitData) then {
+        if (_x getVariable [QGVARMAIN(unitData), []] isNotEqualTo _unitData) then {
+          _x setVariable [QGVARMAIN(unitData), +_unitData];
+          _unitData set [8, GVAR(captureFrameNo)];
           [":SOLDIER:STATE:", _unitData] call EFUNC(extension,sendData);
-          _x setVariable [QGVARMAIN(unitData), _unitData];
         };
       };
       false

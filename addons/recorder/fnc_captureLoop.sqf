@@ -213,7 +213,8 @@ GVAR(PFHObject) = [
           _class, //3
           getText (configFile >> "CfgVehicles" >> _vehType >> "displayName"), //4
           typeOf _x, //5
-          format ["%1", [_x] call BIS_fnc_getVehicleCustomization] //6
+          format ["%1", [_x] call BIS_fnc_getVehicleCustomization], //6
+          str side _x //7
         ];
         _x setVariable [QGVARMAIN(newVehicleData), _newVehicleData];
 

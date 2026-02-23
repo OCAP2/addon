@@ -91,7 +91,7 @@ publicVariable QGVARMAIN(version);
   Global variable that represents the version of OCAP extension being used [String]
 */
 diag_log text "[OCAP] Fetching extension version...";
-EGVAR(extension,version) = ([":VERSION:", []] call EFUNC(extension,sendData));
+EGVAR(extension,version) = ([":SYS:VERSION:", []] call EFUNC(extension,sendData));
 diag_log text format ["[OCAP] Extension version result: %1 (type: %2)", EGVAR(extension,version), typeName EGVAR(extension,version)];
 publicVariable QEGVAR(extension,version);
 

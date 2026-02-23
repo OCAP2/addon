@@ -112,7 +112,7 @@ GVAR(PFHObject) = [
 
         [
           {missionNamespace getVariable [QEGVAR(extension,sessionReady), false]},
-          {[":NEW:SOLDIER:", _this] call EFUNC(extension,sendData);},
+          {[":SOLDIER:CREATE:", _this] call EFUNC(extension,sendData);},
           _newUnit,
           30
         ] call CBA_fnc_waitUntilAndExecute;
@@ -168,7 +168,7 @@ GVAR(PFHObject) = [
         ];
 
         if (_x getVariable ["unitData", []] isNotEqualTo _unitData) then {
-          [":NEW:SOLDIER:STATE:", _unitData] call EFUNC(extension,sendData);
+          [":SOLDIER:STATE:", _unitData] call EFUNC(extension,sendData);
           _x setVariable [QGVARMAIN(unitData), _unitData];
         };
       };
@@ -217,7 +217,7 @@ GVAR(PFHObject) = [
 
         [
           {missionNamespace getVariable [QEGVAR(extension,sessionReady), false]},
-          {[":NEW:VEHICLE:", _this] call EFUNC(extension,sendData);},
+          {[":VEHICLE:CREATE:", _this] call EFUNC(extension,sendData);},
           _newVehicleData,
           30
         ] call CBA_fnc_waitUntilAndExecute;
@@ -260,11 +260,11 @@ GVAR(PFHObject) = [
         // Stop tracking parachutes/ejection seats that are empty or dead
         if ((_x getVariable [QGVARMAIN(vehicleClass), ""]) isEqualTo "parachute" && {!((alive _x) && {_crew isNotEqualTo []})}) then {
           _vehicleData set [3, 0];
-          [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
+          [":VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
           _x setVariable [QGVARMAIN(exclude), true, true];
           GVAR(trackedVehicles) deleteAt _ocapId;
         } else {
-          [":NEW:VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
+          [":VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
           GVAR(trackedVehicles) set [_ocapId, [_x, _pos, round getDir _x, side _x, vectorDir _x, vectorUp _x]];
         };
       };
@@ -276,7 +276,7 @@ GVAR(PFHObject) = [
     {
       (GVAR(trackedVehicles) get _x) params ["_obj", "_lastPos", "_lastDir", "_lastSide", "_lastVectorDir", "_lastVectorUp"];
       if (isNull _obj) then {
-        [":NEW:VEHICLE:STATE:", [
+        [":VEHICLE:STATE:", [
           _x, _lastPos, _lastDir, 0, [], GVAR(captureFrameNo),
           0, 1, false, false, _lastSide, _lastVectorDir, _lastVectorUp, 0, 0
         ]] call EFUNC(extension,sendData);

@@ -32,7 +32,7 @@ params ["_id", "_uid", "_name", "_jip", "_owner", "_idstr"];
 if (_owner isEqualTo 2) exitWith {};
 
 // log to timeline
-[":EVENT:", [
+[":EVENT:GENERAL:", [
   GVAR(captureFrameNo),
   "connected",
   _name,

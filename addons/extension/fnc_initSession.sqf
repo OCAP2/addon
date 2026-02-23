@@ -16,7 +16,7 @@ addMissionEventHandler ["ExtensionCallback", {
 
   TRACE_3("ExtensionCallback",_name,_function,_data);
 
-  if (_function isEqualTo ":VERSION:") exitWith {
+  if (_function isEqualTo ":SYS:VERSION:") exitWith {
     // version return is automatic during extension init process
     private _ver = _data#0;
     GVAR(dllVersion) = _ver;
@@ -24,41 +24,41 @@ addMissionEventHandler ["ExtensionCallback", {
     INFO_1("Extension version: %1",str _ver);
   };
 
-  if (_function isEqualTo ":GETDIR:ARMA:") exitWith {
+  if (_function isEqualTo ":SYS:DIR:ARMA:") exitWith {
     // arma dir return is automatic during extension init process
     private _dir = _data#0;
     GVAR(armaDir) = _dir;
     INFO_1("Arma directory: %1",_dir);
   };
 
-  if (_function isEqualTo ":GETDIR:MODULE:") exitWith {
+  if (_function isEqualTo ":SYS:DIR:MODULE:") exitWith {
     // module dir return is automatic during extension init process
     private _dir = _data#0;
     GVAR(addonDir) = _dir;
     INFO_1("Addon directory: %1",_dir);
   };
 
-  if (_function isEqualTo ":GETDIR:OCAPLOG:") exitWith {
+  if (_function isEqualTo ":SYS:DIR:LOG:") exitWith {
     // logging dir return is automatic during extension init process
     private _dir = _data#0;
     GVAR(logPath) = _dir;
     INFO_1("Extension logging path: %1",_dir);
   };
 
-  if (_function isEqualTo ":EXT:READY:") exitWith {
+  if (_function isEqualTo ":SYS:READY:") exitWith {
     INFO("Extension ready.");
     // extension is ready, send version
-    [":ADDON:VERSION:", [QUOTE(VERSION_STR)], 'ocap_recorder'] call FUNC(sendData);
+    [":SYS:ADDON_VERSION:", [QUOTE(VERSION_STR)], 'ocap_recorder'] call FUNC(sendData);
 
     // get arma dir and module dir
-    [":GETDIR:ARMA:", [], 'ocap_recorder'] call FUNC(sendData);
-    [":GETDIR:MODULE:", [], 'ocap_recorder'] call FUNC(sendData);
+    [":SYS:DIR:ARMA:", [], 'ocap_recorder'] call FUNC(sendData);
+    [":SYS:DIR:MODULE:", [], 'ocap_recorder'] call FUNC(sendData);
 
     // get logging dir
-    [":GETDIR:OCAPLOG:", [], 'ocap_recorder'] call FUNC(sendData);
+    [":SYS:DIR:LOG:", [], 'ocap_recorder'] call FUNC(sendData);
 
     INFO("Initializing storage...");
-    [":INIT:STORAGE:", [], 'ocap_recorder'] call FUNC(sendData);
+    [":STORAGE:INIT:", [], 'ocap_recorder'] call FUNC(sendData);
   };
 
 
@@ -146,7 +146,7 @@ addMissionEventHandler ["ExtensionCallback", {
     // Save mission and world context
     INFO("Saving mission and world context");
     TRACE_2("World and mission context",GVAR(worldContext),GVAR(missionContext));
-    [":NEW:MISSION:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData);
+    [":MISSION:START:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData);
   };
 
   if (_function isEqualTo ":MISSION:OK:") exitWith {
@@ -159,5 +159,5 @@ addMissionEventHandler ["ExtensionCallback", {
 
 INFO("Initializing extension...");
 GVAR(initTimer) = diag_tickTime;
-[":INIT:", []] call FUNC(sendData);
+[":SYS:INIT:", []] call FUNC(sendData);
 true

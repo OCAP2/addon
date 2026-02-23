@@ -128,14 +128,14 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
 
       private _logParams = (str [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]);
 
-      [":NEW:MARKER:", [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call EFUNC(extension,sendData);
+      [":MARKER:CREATE:", [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call EFUNC(extension,sendData);
     };
 
     case "UPDATED":{
 
       if (_mrk_name in GVAR(trackedMarkers)) then {
         if (isNil "_dir") then {_dir = 0};
-        [":NEW:MARKER:STATE:", [_mrk_name, GVAR(captureFrameNo), _pos, _dir, _alpha]] call EFUNC(extension,sendData);
+        [":MARKER:STATE:", [_mrk_name, GVAR(captureFrameNo), _pos, _dir, _alpha]] call EFUNC(extension,sendData);
       };
     };
 
@@ -148,7 +148,7 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
           OCAPEXTLOG(ARR3("MARKER:DELETE: Marker",_mrk_name,"deleted"));
         };
 
-        [":DELETE:MARKER:", [_mrk_name, GVAR(captureFrameNo)]] call EFUNC(extension,sendData);
+        [":MARKER:DELETE:", [_mrk_name, GVAR(captureFrameNo)]] call EFUNC(extension,sendData);
         GVAR(trackedMarkers) = GVAR(trackedMarkers) - [_mrk_name];
       };
     };

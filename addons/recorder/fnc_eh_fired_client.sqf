@@ -113,7 +113,7 @@ _projectile setVariable [QGVARMAIN(projectileData), _data];
 if (_weapon == "put") then {
   _projectile setVariable [QGVARMAIN(detonated), false];
 
-  // Build :NEW:PLACED: data — placedId assigned server-side (GVAR(nextId) only exists there)
+  // Build :PLACED:CREATE: data — placedId assigned server-side (GVAR(nextId) only exists there)
   private _placedData = [
     EGVAR(recorder,captureFrameNo),                                        // 0: captureFrameNo
     -1,                                                                     // 1: placedId (assigned by server)

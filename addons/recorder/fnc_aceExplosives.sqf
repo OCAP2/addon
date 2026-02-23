@@ -5,7 +5,7 @@ FUNCTION: OCAP_recorder_fnc_aceExplosives
 
 Description:
   Integrates ACE3-placed explosives into the placed object pipeline.
-  Sends :NEW:PLACED: data and attaches lifecycle EHs (HitExplosion, Explode,
+  Sends :PLACED:CREATE: data and attaches lifecycle EHs (HitExplosion, Explode,
   Deleted) identical to vanilla mines in fnc_eh_fired_client.sqf.
 
   Called by <ace_explosives_place> CBA listener.
@@ -50,7 +50,7 @@ if (_unitOcapId isEqualTo -1) exitWith {};
 
 _explosive setVariable [QGVARMAIN(detonated), false];
 
-// Build :NEW:PLACED: data — same format as vanilla mines in fnc_eh_fired_client.sqf
+// Build :PLACED:CREATE: data — same format as vanilla mines in fnc_eh_fired_client.sqf
 private _placedData = [
   EGVAR(recorder,captureFrameNo),                                        // 0: captureFrameNo
   -1,                                                                     // 1: placedId (assigned by server)

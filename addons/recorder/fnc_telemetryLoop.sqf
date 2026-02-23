@@ -7,7 +7,7 @@ FUNCTION: OCAP_recorder_fnc_telemetryLoop
 
 Description:
   Collects server telemetry data every 10 seconds and sends a single
-  :TELEMETRY: command to the extension. The extension handles routing
+  :TELEMETRY:FRAME: command to the extension. The extension handles routing
   to mission recording (FPS) and InfluxDB (all metrics).
 
 Parameters:
@@ -102,7 +102,7 @@ Author:
     } forEach (allUsers apply {getUserInfo _x});
 
     // Single telemetry call — extension handles routing and formatting
-    [":TELEMETRY:", [
+    [":TELEMETRY:FRAME:", [
       GVAR(captureFrameNo),
       [diag_fps, diag_fpsmin],
       _sideData,

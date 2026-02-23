@@ -35,7 +35,7 @@ if (_date isEqualTo []) then {
 };
 _missionDateFormat append (_date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 
-[":NEW:TIME:STATE:", [
+[":TIME:STATE:", [
   GVAR(captureFrameNo),
   format _systemTimeFormat,
   format _missionDateFormat,

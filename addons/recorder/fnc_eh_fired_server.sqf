@@ -127,7 +127,7 @@
   TRACE_1("Sending fired data to extension",_data);
   _data spawn {
     sleep 2;
-    [":PROJECTILE:", _this] call EFUNC(extension,sendData);
+    [":EVENT:PROJECTILE:", _this] call EFUNC(extension,sendData);
   };
 }] call CBA_fnc_addEventHandler;
 
@@ -140,7 +140,7 @@
   _data set [1, _placedId];
   _projectile setVariable [QGVARMAIN(placedId), _placedId, true];
   TRACE_2("Sending placed object data to extension",_placedId,_data);
-  [":NEW:PLACED:", _data] call EFUNC(extension,sendData);
+  [":PLACED:CREATE:", _data] call EFUNC(extension,sendData);
 }] call CBA_fnc_addEventHandler;
 
 // Handle placed object lifecycle events (detonation, deletion)

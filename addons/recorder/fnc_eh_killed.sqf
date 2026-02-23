@@ -98,7 +98,7 @@ if !(_victim getvariable [QGVARMAIN(isKilled),false]) then {
         OCAPEXTLOG(ARR4("KILLED EVENT",_killedFrame,_victimId,_killerId));
       };
 
-      [":KILL:", [
+      [":EVENT:KILL:", [
         _killedFrame,
         _victimId,
         _killerId,

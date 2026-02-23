@@ -27,7 +27,7 @@
 
 params ["_unit", "_id", "_uid", "_name"];
 
-[":EVENT:", [
+[":EVENT:GENERAL:", [
   GVAR(captureFrameNo),
   "disconnected",
   _name,

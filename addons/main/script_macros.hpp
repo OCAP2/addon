@@ -21,7 +21,7 @@
 
 // MACRO: LOG
 // Used for logging messages to the extension (ocap-ext log file).
-#define OCAPEXTLOG(_args) [":LOG:", _args] call EFUNC(extension,sendData)
+#define OCAPEXTLOG(_args) [":SYS:LOG:", _args] call EFUNC(extension,sendData)
 
 // MACRO: SYSCHAT
 // Used for debug purposes to send a string to all clients with interfaces.

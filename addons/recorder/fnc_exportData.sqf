@@ -114,7 +114,7 @@ if (!isNil QGVAR(PFHObject)) then {
 private _winSide = if (isNil "_side") then {""} else {if (_side isEqualTo sideUnknown) then {""} else {str _side}};
 private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mission ended"} else {""}} else {_message};
 
-[":EVENT:", [
+[":EVENT:GENERAL:", [
   _endFrameNumber,
   "endMission",
   "",
@@ -126,7 +126,7 @@ private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mis
 
 
 private _saveTag = if (!isNil "_tag") then {_tag} else {EGVAR(settings,saveTag)};
-[":SAVE:MISSION:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, _saveTag]] call EFUNC(extension,sendData);
+[":MISSION:SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, _saveTag]] call EFUNC(extension,sendData);
 OCAPEXTLOG(ARR4("Saved recording of mission",GVAR(missionName),"with tag",_saveTag));
 
 

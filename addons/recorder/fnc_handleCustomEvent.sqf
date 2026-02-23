@@ -61,7 +61,7 @@ params [
   ["_extraData", createHashMap, [createHashMap, []]]
 ];
 
-[":EVENT:", [
+[":EVENT:GENERAL:", [
   GVAR(captureFrameNo),
   _eventName,
   _eventMessage,

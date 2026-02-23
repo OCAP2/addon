@@ -30,7 +30,7 @@ if (_mod isEqualTo "TFAR") then {
   ) exitWith {};
 
   [
-    ":RADIO:", [
+    ":EVENT:RADIO:", [
       GVAR(captureFrameNo),
       _ocapId,
       _radio,
@@ -64,7 +64,7 @@ if (_mod isEqualTo "ACRE") then {
   ) exitWith {};
 
   [
-    ":RADIO:", [
+    ":EVENT:RADIO:", [
       GVAR(captureFrameNo),
       _ocapId,
       _radio,

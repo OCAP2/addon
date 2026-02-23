@@ -34,4 +34,4 @@ if (isNil QGVAR(worldContext) || isNil QGVAR(missionContext)) exitWith {
 
 INFO("Re-registering new mission with extension");
 GVAR(initTimer) = diag_tickTime;
-[":NEW:MISSION:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData);
+[":MISSION:START:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData);

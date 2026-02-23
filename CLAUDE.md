@@ -97,5 +97,9 @@ Author:
 ---------------------------------------------------------------------------- */
 ```
 
+### Extension Commands
+
+Commands sent to the extension DLL via `callExtension` follow a `:RESOURCE:ACTION:` naming convention. New commands must use this pattern — resource noun first, then verb/qualifier (e.g., `:SOLDIER:CREATE:`, `:EVENT:KILL:`, `:SYS:INIT:`).
+
 ### ACE3 Integration
 ACE3 support is optional with graceful fallback. `fnc_aceExplosives.sqf` handles placed explosives and detonation tracking.

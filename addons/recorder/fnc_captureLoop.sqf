@@ -180,9 +180,9 @@ GVAR(PFHObject) = [
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
         _vehType = typeOf _x;
         _class = _vehType call FUNC(getClass);
+        private _vic = _x;
         private _toExcludeKind = false;
         if (parseSimpleArray EGVAR(settings,excludeKindFromRecord) isNotEqualTo []) then {
-          private _vic = _x;
           {
             if (_vic isKindOf _x) exitWith {
               _toExcludeKind = true;

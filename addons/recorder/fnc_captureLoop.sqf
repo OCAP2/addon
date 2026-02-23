@@ -130,9 +130,11 @@ GVAR(PFHObject) = [
       };
       if (!_justInitialized && {!_isExcluded}) then {
         private _unitRole = _x getVariable [QGVARMAIN(unitType), ""];
-        if (GVAR(captureFrameNo) % 10 == 0 || _unitRole == "") then {
+        private _weapons = [primaryWeapon _x, secondaryWeapon _x];
+        if (_weapons isNotEqualTo (_x getVariable [QGVAR(lastWeapons), []]) || _unitRole == "") then {
           _unitRole = [_x] call FUNC(getUnitType);
           _x setVariable [QGVARMAIN(unitType), _unitRole];
+          _x setVariable [QGVAR(lastWeapons), _weapons];
         };
 
         private _lifeState = 0;

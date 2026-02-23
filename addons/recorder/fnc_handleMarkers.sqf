@@ -161,6 +161,12 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
 
 // handle created markers
 {
+  GVAR(excludeMarkerList) = if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) then {
+    parseSimpleArray EGVAR(settings,excludeMarkerFromRecord)
+  } else {
+    []
+  };
+
   /*
     Event Handler: MarkerCreated
     Description:
@@ -181,13 +187,11 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
     // check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
     // if value is undefined, then skip
     private _isExcluded = false;
-    if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) then {
-      {
-        if ((str _marker) find _x >= 0) exitWith {
-          _isExcluded = true;
-        };
-      } forEach (parseSimpleArray EGVAR(settings,excludeMarkerFromRecord));
-    };
+    {
+      if ((str _marker) find _x >= 0) exitWith {
+        _isExcluded = true;
+      };
+    } forEach GVAR(excludeMarkerList);
     if (_isExcluded) exitWith {};
 
     private _event = _this;
@@ -234,13 +238,11 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
     // check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
     // if value is undefined, then skip
     private _isExcluded = false;
-    if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) then {
-      {
-        if ((str _marker) find _x >= 0) exitWith {
-          _isExcluded = true;
-        };
-      } forEach (parseSimpleArray EGVAR(settings,excludeMarkerFromRecord));
-    };
+    {
+      if ((str _marker) find _x >= 0) exitWith {
+        _isExcluded = true;
+      };
+    } forEach GVAR(excludeMarkerList);
     if (_isExcluded) exitWith {};
 
     private _pos = ATLToASL (markerPos [_marker, true]);
@@ -269,13 +271,11 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
     // check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
     // if value is undefined, then skip
     private _isExcluded = false;
-    if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) then {
-      {
-        if ((str _marker) find _x > -1) exitWith {
-          _isExcluded = true;
-        };
-      } forEach (parseSimpleArray EGVAR(settings,excludeMarkerFromRecord));
-    };
+    {
+      if ((str _marker) find _x > -1) exitWith {
+        _isExcluded = true;
+      };
+    } forEach GVAR(excludeMarkerList);
     if (_isExcluded) exitWith {};
 
     [QGVARMAIN(handleMarker), ["DELETED", _marker, player]] call CBA_fnc_serverEvent;
@@ -294,13 +294,11 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
       // check for excluded values in marker name. if name contains at least one value, skip sending traffic to server
       // if value is undefined, then skip
       private _isExcluded = false;
-      if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) then {
-        {
-          if ((_marker) find _x >= 0) exitWith {
-            _isExcluded = true;
-          };
-        } forEach (parseSimpleArray EGVAR(settings,excludeMarkerFromRecord));
-      };
+      {
+        if ((_marker) find _x >= 0) exitWith {
+          _isExcluded = true;
+        };
+      } forEach GVAR(excludeMarkerList);
       if (_isExcluded) then {continue};
 
 

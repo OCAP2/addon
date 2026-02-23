@@ -82,6 +82,12 @@ GVAR(minMissionTime) = EGVAR(settings,minMissionTime);
 GVAR(excludeKindList) = parseSimpleArray EGVAR(settings,excludeKindFromRecord);
 GVAR(excludeClassList) = parseSimpleArray EGVAR(settings,excludeClassFromRecord);
 
+GVAR(excludeMarkerList) = if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) then {
+  parseSimpleArray EGVAR(settings,excludeMarkerFromRecord)
+} else {
+  []
+};
+
 /*
   VARIABLE: OCAP_version
   Global variable that represents the version of OCAP addon being used [String]

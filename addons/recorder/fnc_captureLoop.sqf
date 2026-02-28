@@ -139,7 +139,7 @@ GVAR(PFHObject) = [
 
         private _lifeState = 0;
         if (alive _x) then {
-          if (EGVAR(settings,preferACEUnconscious) && !isNil "ace_common_fnc_isAwake") then {
+          if (EGVAR(settings,preferACEUnconscious) && GVAR(hasACEIsAwake)) then {
             _lifeState = if ([_x] call ace_common_fnc_isAwake) then {1} else {2};
           } else {
             _lifeState = if (lifeState _x isEqualTo "INCAPACITATED") then {2} else {1};
@@ -157,6 +157,7 @@ GVAR(PFHObject) = [
           _x setVariable [QGVAR(lastScoresStr), _scoresStr];
         };
 
+        private _parent = objectParent _x;
         private _unitData = [
           (_x getVariable QGVARMAIN(id)), //1
           _pos, //2
@@ -167,11 +168,11 @@ GVAR(PFHObject) = [
           BOOL(isPlayer _x), //7
           _unitRole, //8
           0, // frame placeholder for comparison (set before sending) 9
-          if (!isNil "ace_medical_status_fnc_hasStableVitals") then {BOOL([_x] call ace_medical_status_fnc_hasStableVitals)} else {true}, // 10
-          if (!isNil "ace_medical_status_fnc_isBeingDragged") then {BOOL([_x] call ace_medical_status_fnc_isBeingDragged)} else {false}, // 11
+          if (GVAR(hasACEStableVitals)) then {BOOL([_x] call ace_medical_status_fnc_hasStableVitals)} else {true}, // 10
+          if (GVAR(hasACEIsBeingDragged)) then {BOOL([_x] call ace_medical_status_fnc_isBeingDragged)} else {false}, // 11
           _scoresStr, // scores 12
           _x call CBA_fnc_vehicleRole, // vehicle role 13
-          if (!isNull objectParent _x) then {(objectParent _x) getVariable [QGVARMAIN(id), -1]} else {-1}, // 14
+          if (!isNull _parent) then {_parent getVariable [QGVARMAIN(id), -1]} else {-1}, // 14
           stance _x, // 15
           groupID _unitGroup, // 16 group name (dynamic)
           str side _unitGroup // 17 side (dynamic)
@@ -183,8 +184,7 @@ GVAR(PFHObject) = [
           [":SOLDIER:STATE:", _unitData] call EFUNC(extension,sendData);
         };
       };
-      false
-    } count (allUnits + allDeadMen);
+    } forEach (allUnits + allDeadMen);
 
     {
       private _justInitialized = false;
@@ -238,6 +238,7 @@ GVAR(PFHObject) = [
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(vehicleClass), _class];
+        _x setVariable [QGVARMAIN(hasTurret), (_x weaponsTurret [0]) isNotEqualTo []];
         _x setVariable [QGVARMAIN(isInitialized), true, true];
         _justInitialized = true;
       };
@@ -246,18 +247,24 @@ GVAR(PFHObject) = [
         {
           if (_x getVariable [QGVARMAIN(isInitialized), false]) then {
             _crew pushBack (_x getVariable QGVARMAIN(id));
-          }; false
-        } count (crew _x);
+          };
+        } forEach (crew _x);
         _pos = getPosASL _x;
 
-        ([_x, [0], true] call CBA_fnc_turretDir) params ["_turretAz", "_turretEl"];
+        private _turretAz = 0;
+        private _turretEl = 0;
+        if (_x getVariable [QGVARMAIN(hasTurret), false]) then {
+          private _turretResult = [_x, [0], true] call CBA_fnc_turretDir;
+          _turretAz = _turretResult select 0;
+          _turretEl = _turretResult select 1;
+        };
         private _vehicleData = [
           (_x getVariable QGVARMAIN(id)), //1
           _pos, //2
           round getDir _x, //3
           BOOL(alive _x), //4
           _crew, //5
-          GVAR(captureFrameNo), // 6
+          0, // frame placeholder for comparison (set before sending) 6
           fuel _x, // 7
           damage _x, // 8
           isEngineOn _x, // 9
@@ -274,16 +281,20 @@ GVAR(PFHObject) = [
         // Stop tracking parachutes/ejection seats that are empty or dead
         if ((_x getVariable [QGVARMAIN(vehicleClass), ""]) isEqualTo "parachute" && {!((alive _x) && {_crew isNotEqualTo []})}) then {
           _vehicleData set [3, 0];
+          _vehicleData set [5, GVAR(captureFrameNo)];
           [":VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
           _x setVariable [QGVARMAIN(exclude), true, true];
           GVAR(trackedVehicles) deleteAt _ocapId;
         } else {
-          [":VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
-          GVAR(trackedVehicles) set [_ocapId, [_x, _pos, round getDir _x, side _x, vectorDir _x, vectorUp _x]];
+          if (_x getVariable [QGVARMAIN(vehicleData), []] isNotEqualTo _vehicleData) then {
+            _x setVariable [QGVARMAIN(vehicleData), +_vehicleData];
+            _vehicleData set [5, GVAR(captureFrameNo)];
+            [":VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
+            GVAR(trackedVehicles) set [_ocapId, [_x, _pos, round getDir _x, side _x, vectorDir _x, vectorUp _x]];
+          };
         };
       };
-      false
-    } count vehicles;
+    } forEach vehicles;
 
     // Detect disappeared vehicles (deleted/garbage-collected) and send final dead state
     private _toRemove = [];

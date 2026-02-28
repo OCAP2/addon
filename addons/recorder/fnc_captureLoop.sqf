@@ -139,7 +139,7 @@ GVAR(PFHObject) = [
 
         private _lifeState = 0;
         if (alive _x) then {
-          if (EGVAR(settings,preferACEUnconscious) && !isNil "ace_common_fnc_isAwake") then {
+          if (EGVAR(settings,preferACEUnconscious) && GVAR(hasACEIsAwake)) then {
             _lifeState = if ([_x] call ace_common_fnc_isAwake) then {1} else {2};
           } else {
             _lifeState = if (lifeState _x isEqualTo "INCAPACITATED") then {2} else {1};
@@ -157,6 +157,7 @@ GVAR(PFHObject) = [
           _x setVariable [QGVAR(lastScoresStr), _scoresStr];
         };
 
+        private _parent = objectParent _x;
         private _unitData = [
           (_x getVariable QGVARMAIN(id)), //1
           _pos, //2
@@ -167,11 +168,11 @@ GVAR(PFHObject) = [
           BOOL(isPlayer _x), //7
           _unitRole, //8
           0, // frame placeholder for comparison (set before sending) 9
-          if (!isNil "ace_medical_status_fnc_hasStableVitals") then {BOOL([_x] call ace_medical_status_fnc_hasStableVitals)} else {true}, // 10
-          if (!isNil "ace_medical_status_fnc_isBeingDragged") then {BOOL([_x] call ace_medical_status_fnc_isBeingDragged)} else {false}, // 11
+          if (GVAR(hasACEStableVitals)) then {BOOL([_x] call ace_medical_status_fnc_hasStableVitals)} else {true}, // 10
+          if (GVAR(hasACEIsBeingDragged)) then {BOOL([_x] call ace_medical_status_fnc_isBeingDragged)} else {false}, // 11
           _scoresStr, // scores 12
           _x call CBA_fnc_vehicleRole, // vehicle role 13
-          if (!isNull objectParent _x) then {(objectParent _x) getVariable [QGVARMAIN(id), -1]} else {-1}, // 14
+          if (!isNull _parent) then {_parent getVariable [QGVARMAIN(id), -1]} else {-1}, // 14
           stance _x, // 15
           groupID _unitGroup, // 16 group name (dynamic)
           str side _unitGroup // 17 side (dynamic)

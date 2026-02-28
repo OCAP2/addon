@@ -88,6 +88,10 @@ GVAR(excludeMarkerList) = if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) t
   []
 };
 
+GVAR(hasACEIsAwake) = !isNil "ace_common_fnc_isAwake";
+GVAR(hasACEStableVitals) = !isNil "ace_medical_status_fnc_hasStableVitals";
+GVAR(hasACEIsBeingDragged) = !isNil "ace_medical_status_fnc_isBeingDragged";
+
 /*
   VARIABLE: OCAP_version
   Global variable that represents the version of OCAP addon being used [String]

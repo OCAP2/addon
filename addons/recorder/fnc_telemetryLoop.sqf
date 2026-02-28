@@ -38,6 +38,11 @@ Author:
     // [2] Per-side entity counts: [east, west, independent, civilian]
     // Each side: [[serverLocal], [remote]]
     // Each locality: [units_total, units_alive, units_dead, groups, vehicles, weaponholders]
+    private _totalAlive = 0;
+    private _totalDead = 0;
+    private _totalGroups = 0;
+    private _totalVeh = 0;
+    private _totalWH = 0;
     private _sideData = [];
     {
       private _s = _x;
@@ -100,17 +105,21 @@ Author:
         [_localUnits, _localAlive, _localDead, _localGroups, _localVeh, _localWH],
         [_remoteUnits, _remoteAlive, _remoteDead, _remoteGroups, _remoteVeh, _remoteWH]
       ];
+      _totalAlive = _totalAlive + _localAlive + _remoteAlive;
+      _totalDead = _totalDead + _localDead + _remoteDead;
+      _totalGroups = _totalGroups + _localGroups + _remoteGroups;
+      _totalVeh = _totalVeh + _localVeh + _remoteVeh;
+      _totalWH = _totalWH + _localWH + _remoteWH;
     } forEach [east, west, independent, civilian];
 
     // [3] Global entity counts
-    private _weaponholders = {_x isKindOf "WeaponHolderSimulated"} count _vehicles;
     private _playersAlive = {alive _x} count _allPlayers;
     private _globalCounts = [
-      {alive _x} count _allUnits,
-      count _allDeadMen,
-      count _allGroups,
-      count _vehicles - _weaponholders,
-      _weaponholders,
+      _totalAlive,
+      _totalDead,
+      _totalGroups,
+      _totalVeh,
+      _totalWH,
       _playersAlive,
       count _allPlayers - _playersAlive,
       count _allPlayers

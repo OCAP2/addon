@@ -239,6 +239,7 @@ GVAR(PFHObject) = [
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(vehicleClass), _class];
+        _x setVariable [QGVARMAIN(hasTurret), (_x weaponsTurret [0]) isNotEqualTo []];
         _x setVariable [QGVARMAIN(isInitialized), true, true];
         _justInitialized = true;
       };
@@ -251,7 +252,13 @@ GVAR(PFHObject) = [
         } count (crew _x);
         _pos = getPosASL _x;
 
-        ([_x, [0], true] call CBA_fnc_turretDir) params ["_turretAz", "_turretEl"];
+        private _turretAz = 0;
+        private _turretEl = 0;
+        if (_x getVariable [QGVARMAIN(hasTurret), false]) then {
+          private _turretResult = [_x, [0], true] call CBA_fnc_turretDir;
+          _turretAz = _turretResult select 0;
+          _turretEl = _turretResult select 1;
+        };
         private _vehicleData = [
           (_x getVariable QGVARMAIN(id)), //1
           _pos, //2

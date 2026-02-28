@@ -258,7 +258,7 @@ GVAR(PFHObject) = [
           round getDir _x, //3
           BOOL(alive _x), //4
           _crew, //5
-          GVAR(captureFrameNo), // 6
+          0, // frame placeholder for comparison (set before sending) 6
           fuel _x, // 7
           damage _x, // 8
           isEngineOn _x, // 9
@@ -275,12 +275,17 @@ GVAR(PFHObject) = [
         // Stop tracking parachutes/ejection seats that are empty or dead
         if ((_x getVariable [QGVARMAIN(vehicleClass), ""]) isEqualTo "parachute" && {!((alive _x) && {_crew isNotEqualTo []})}) then {
           _vehicleData set [3, 0];
+          _vehicleData set [5, GVAR(captureFrameNo)];
           [":VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
           _x setVariable [QGVARMAIN(exclude), true, true];
           GVAR(trackedVehicles) deleteAt _ocapId;
         } else {
-          [":VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
-          GVAR(trackedVehicles) set [_ocapId, [_x, _pos, round getDir _x, side _x, vectorDir _x, vectorUp _x]];
+          if (_x getVariable [QGVARMAIN(vehicleData), []] isNotEqualTo _vehicleData) then {
+            _x setVariable [QGVARMAIN(vehicleData), +_vehicleData];
+            _vehicleData set [5, GVAR(captureFrameNo)];
+            [":VEHICLE:STATE:", _vehicleData] call EFUNC(extension,sendData);
+            GVAR(trackedVehicles) set [_ocapId, [_x, _pos, round getDir _x, side _x, vectorDir _x, vectorUp _x]];
+          };
         };
       };
       false

@@ -91,11 +91,11 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
       };
 
       if (_sideOfMarker in ["EMPTY", "LOGIC", "UNKNOWN"] ||
-      (["Projectile#", _mrk_name] call BIS_fnc_inString) ||
-      (["Detonation#", _mrk_name] call BIS_fnc_inString) ||
-      (["Mine#", _mrk_name] call BIS_fnc_inString) ||
-      (["ObjectMarker", _mrk_name] call BIS_fnc_inString) ||
-      (["moduleCoverMap", _mrk_name] call BIS_fnc_inString) ||
+      ("Projectile#" in _mrk_name) ||
+      ("Detonation#" in _mrk_name) ||
+      ("Mine#" in _mrk_name) ||
+      ("ObjectMarker" in _mrk_name) ||
+      ("moduleCoverMap" in _mrk_name) ||
       _forceGlobal) then {_sideOfMarker = -1};
 
       private ["_polylinePos"];

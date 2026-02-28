@@ -31,7 +31,7 @@ private _typePic = getText (configOf _unitToCheck >> "icon");
 
 switch (true) do {
   case (
-    ["Officer", _typePic] call BIS_fnc_inString
+    "Officer" in _typePic
   ): {_role = "Officer"};
   case (
     _unitToCheck == leader group _unitToCheck

@@ -130,9 +130,11 @@ GVAR(PFHObject) = [
       };
       if (!_justInitialized && {!_isExcluded}) then {
         private _unitRole = _x getVariable [QGVARMAIN(unitType), ""];
-        if (GVAR(captureFrameNo) % 10 == 0 || _unitRole == "") then {
+        private _weapons = [primaryWeapon _x, secondaryWeapon _x];
+        if (_weapons isNotEqualTo (_x getVariable [QGVAR(lastWeapons), []]) || _unitRole == "") then {
           _unitRole = [_x] call FUNC(getUnitType);
           _x setVariable [QGVARMAIN(unitType), _unitRole];
+          _x setVariable [QGVAR(lastWeapons), _weapons];
         };
 
         private _lifeState = 0;
@@ -147,6 +149,14 @@ GVAR(PFHObject) = [
         _pos = getPosASL _x;
         private _unitGroup = group _x;
 
+        private _scores = getPlayerScores _x;
+        private _scoresStr = _x getVariable [QGVAR(lastScoresStr), ""];
+        if (_scores isNotEqualTo (_x getVariable [QGVAR(lastScores), []])) then {
+          _scoresStr = _scores joinString ",";
+          _x setVariable [QGVAR(lastScores), _scores];
+          _x setVariable [QGVAR(lastScoresStr), _scoresStr];
+        };
+
         private _unitData = [
           (_x getVariable QGVARMAIN(id)), //1
           _pos, //2
@@ -156,10 +166,10 @@ GVAR(PFHObject) = [
           if (alive _x) then {name _x} else {""}, //6
           BOOL(isPlayer _x), //7
           _unitRole, //8
-          GVAR(captureFrameNo), // frame 9
+          0, // frame placeholder for comparison (set before sending) 9
           if (!isNil "ace_medical_status_fnc_hasStableVitals") then {BOOL([_x] call ace_medical_status_fnc_hasStableVitals)} else {true}, // 10
           if (!isNil "ace_medical_status_fnc_isBeingDragged") then {BOOL([_x] call ace_medical_status_fnc_isBeingDragged)} else {false}, // 11
-          (getPlayerScores _x) joinString ",", // scores 12
+          _scoresStr, // scores 12
           _x call CBA_fnc_vehicleRole, // vehicle role 13
           if (!isNull objectParent _x) then {(objectParent _x) getVariable [QGVARMAIN(id), -1]} else {-1}, // 14
           stance _x, // 15
@@ -167,9 +177,10 @@ GVAR(PFHObject) = [
           str side _unitGroup // 17 side (dynamic)
         ];
 
-        if (_x getVariable ["unitData", []] isNotEqualTo _unitData) then {
+        if (_x getVariable [QGVARMAIN(unitData), []] isNotEqualTo _unitData) then {
+          _x setVariable [QGVARMAIN(unitData), +_unitData];
+          _unitData set [8, GVAR(captureFrameNo)];
           [":SOLDIER:STATE:", _unitData] call EFUNC(extension,sendData);
-          _x setVariable [QGVARMAIN(unitData), _unitData];
         };
       };
       false
@@ -182,7 +193,7 @@ GVAR(PFHObject) = [
         _class = _vehType call FUNC(getClass);
         private _vic = _x;
         private _toExcludeKind = false;
-        private _kindList = parseSimpleArray EGVAR(settings,excludeKindFromRecord);
+        private _kindList = GVAR(excludeKindList);
         if (_kindList isNotEqualTo []) then {
           {
             if (_vic isKindOf _x) exitWith {
@@ -191,7 +202,7 @@ GVAR(PFHObject) = [
           } forEach _kindList;
         };
         private _toExcludeClass = false;
-        private _classList = parseSimpleArray EGVAR(settings,excludeClassFromRecord);
+        private _classList = GVAR(excludeClassList);
         if (_classList isNotEqualTo []) then {
           {
             if (typeOf _vic == _x) exitWith {

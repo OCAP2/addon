@@ -41,25 +41,64 @@ Author:
     private _sideData = [];
     {
       private _s = _x;
-      private _sUnits = _allUnits select {side _x isEqualTo _s};
-      private _sDead = _allDeadMen select {side _x isEqualTo _s};
-      private _sGroups = _allGroups select {side _x isEqualTo _s};
-      private _sVeh = _vehicles select {side _x isEqualTo _s};
+      private _localUnits = 0;
+      private _localAlive = 0;
+      private _remoteUnits = 0;
+      private _remoteAlive = 0;
+      {
+        if (side _x isEqualTo _s) then {
+          if (local _x) then {
+            _localUnits = _localUnits + 1;
+            if (alive _x) then { _localAlive = _localAlive + 1 };
+          } else {
+            _remoteUnits = _remoteUnits + 1;
+            if (alive _x) then { _remoteAlive = _remoteAlive + 1 };
+          };
+        };
+      } forEach _allUnits;
 
-      private _localUnits = _sUnits select {local _x};
-      private _remoteUnits = _sUnits select {!local _x};
-      private _localDead = _sDead select {local _x};
-      private _remoteDead = _sDead select {!local _x};
-      private _localGroups = _sGroups select {local _x};
-      private _remoteGroups = _sGroups select {!local _x};
-      private _localVeh = _sVeh select {local _x && !(_x isKindOf "WeaponHolderSimulated")};
-      private _remoteVeh = _sVeh select {!local _x && !(_x isKindOf "WeaponHolderSimulated")};
-      private _localWH = _sVeh select {local _x && _x isKindOf "WeaponHolderSimulated"};
-      private _remoteWH = _sVeh select {!local _x && _x isKindOf "WeaponHolderSimulated"};
+      private _localDead = 0;
+      private _remoteDead = 0;
+      {
+        if (side _x isEqualTo _s) then {
+          if (local _x) then {
+            _localDead = _localDead + 1;
+          } else {
+            _remoteDead = _remoteDead + 1;
+          };
+        };
+      } forEach _allDeadMen;
+
+      private _localGroups = 0;
+      private _remoteGroups = 0;
+      {
+        if (side _x isEqualTo _s) then {
+          if (local _x) then {
+            _localGroups = _localGroups + 1;
+          } else {
+            _remoteGroups = _remoteGroups + 1;
+          };
+        };
+      } forEach _allGroups;
+
+      private _localVeh = 0;
+      private _remoteVeh = 0;
+      private _localWH = 0;
+      private _remoteWH = 0;
+      {
+        if (side _x isEqualTo _s) then {
+          private _isWH = _x isKindOf "WeaponHolderSimulated";
+          if (local _x) then {
+            if (_isWH) then { _localWH = _localWH + 1 } else { _localVeh = _localVeh + 1 };
+          } else {
+            if (_isWH) then { _remoteWH = _remoteWH + 1 } else { _remoteVeh = _remoteVeh + 1 };
+          };
+        };
+      } forEach _vehicles;
 
       _sideData pushBack [
-        [count _localUnits, {alive _x} count _localUnits, count _localDead, count _localGroups, count _localVeh, count _localWH],
-        [count _remoteUnits, {alive _x} count _remoteUnits, count _remoteDead, count _remoteGroups, count _remoteVeh, count _remoteWH]
+        [_localUnits, _localAlive, _localDead, _localGroups, _localVeh, _localWH],
+        [_remoteUnits, _remoteAlive, _remoteDead, _remoteGroups, _remoteVeh, _remoteWH]
       ];
     } forEach [east, west, independent, civilian];
 

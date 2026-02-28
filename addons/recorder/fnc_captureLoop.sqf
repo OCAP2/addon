@@ -184,8 +184,7 @@ GVAR(PFHObject) = [
           [":SOLDIER:STATE:", _unitData] call EFUNC(extension,sendData);
         };
       };
-      false
-    } count (allUnits + allDeadMen);
+    } forEach (allUnits + allDeadMen);
 
     {
       private _justInitialized = false;
@@ -248,8 +247,8 @@ GVAR(PFHObject) = [
         {
           if (_x getVariable [QGVARMAIN(isInitialized), false]) then {
             _crew pushBack (_x getVariable QGVARMAIN(id));
-          }; false
-        } count (crew _x);
+          };
+        } forEach (crew _x);
         _pos = getPosASL _x;
 
         private _turretAz = 0;
@@ -295,8 +294,7 @@ GVAR(PFHObject) = [
           };
         };
       };
-      false
-    } count vehicles;
+    } forEach vehicles;
 
     // Detect disappeared vehicles (deleted/garbage-collected) and send final dead state
     private _toRemove = [];

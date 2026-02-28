@@ -36,8 +36,4 @@ params ["_unit", "_id", "_uid", "_name"];
   ]] call CBA_fnc_encodeJSON
 ]] call EFUNC(extension,sendData);
 
-if (_unit getVariable [QGVARMAIN(isInitialized), false]) then {
-	_unit setVariable [QGVARMAIN(exclude), true];
-};
-
 false;

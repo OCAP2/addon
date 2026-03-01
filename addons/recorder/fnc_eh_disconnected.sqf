@@ -37,7 +37,11 @@ params ["_unit", "_id", "_uid", "_name"];
 ]] call EFUNC(extension,sendData);
 
 if (_unit getVariable [QGVARMAIN(isInitialized), false]) then {
-	_unit setVariable [QGVARMAIN(exclude), true];
+  [":SOLDIER:DELETE:", [
+    _unit getVariable [QGVARMAIN(id), -1],
+    GVAR(captureFrameNo)
+  ]] call EFUNC(extension,sendData);
+  _unit setVariable [QGVARMAIN(exclude), true];
 };
 
 false;

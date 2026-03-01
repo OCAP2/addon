@@ -36,8 +36,6 @@ if (!isNil QGVAR(startTime)) exitWith {
   call FUNC(startRecording)
 };
 
-// "debug_console" callExtension format["clientState: %1 (%2) | %3", getClientState, getClientStateNumber, __FILE__];
-
 // VARIABLE: OCAP_recorder_recording
 // Global variable that represents whether or not recording is active [Bool]
 GVAR(recording) = false;
@@ -87,6 +85,8 @@ GVAR(excludeMarkerList) = if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) t
 } else {
   []
 };
+
+INFO_4("Settings snapshot — frameCaptureDelay: %1 | autoStart: %2 | minPlayerCount: %3 | minMissionTime: %4",GVAR(frameCaptureDelay),GVAR(autoStart),EGVAR(settings,minPlayerCount),GVAR(minMissionTime));
 
 GVAR(hasACEIsAwake) = !isNil "ace_common_fnc_isAwake";
 GVAR(hasACEStableVitals) = !isNil "ace_medical_status_fnc_hasStableVitals";

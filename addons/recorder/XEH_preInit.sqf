@@ -85,7 +85,7 @@ GVAR(allSettings) = [
     ],
     [COMPONENT_NAME, "Core"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     [
-        0.30, // min
+        0.10, // min
         10, // max
         1, // default
         2, // trailing decimals

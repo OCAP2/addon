@@ -39,6 +39,7 @@ Author:
 // Persistent global variable on server that defines unique marker names currently being tracked.
 // Entries are added at marker create events and removed at marker delete events to avoid duplicate processing.
 GVAR(trackedMarkers) = []; // Markers which we save into replay
+GVAR(trackedMarkerStates) = createHashMap;
 
 // VARIABLE: OCAP_listener_markers
 // Contains handle for <OCAP_handleMarker> CBA event handler.
@@ -129,13 +130,24 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
       private _logParams = (str [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]);
 
       [":MARKER:CREATE:", [_mrk_name, _dir, _type, _text, _captureFrameNo, -1, _mrk_owner, _mrk_color, _size, _sideOfMarker, _pos, _shape, _alpha, _brush]] call EFUNC(extension,sendData);
+
+      // Seed state cache for diff tracking on updates
+      GVAR(trackedMarkerStates) set [_mrk_name, [_pos, _dir, _alpha, _text, _mrk_color, str _size, _type, _brush, _shape]];
     };
 
     case "UPDATED":{
 
       if (_mrk_name in GVAR(trackedMarkers)) then {
         if (isNil "_dir") then {_dir = 0};
-        [":MARKER:STATE:", [_mrk_name, GVAR(captureFrameNo), _pos, _dir, _alpha]] call EFUNC(extension,sendData);
+
+        private _currentState = [_pos, _dir, _alpha, _text, _color, str _size, _type, _brush, _shape];
+        private _lastState = GVAR(trackedMarkerStates) getOrDefault [_mrk_name, []];
+
+        if (_currentState isEqualTo _lastState) exitWith {};
+
+        GVAR(trackedMarkerStates) set [_mrk_name, _currentState];
+
+        [":MARKER:STATE:", [_mrk_name, GVAR(captureFrameNo), _pos, _dir, _alpha, _text, _color, str _size, _type, _brush, _shape]] call EFUNC(extension,sendData);
       };
     };
 
@@ -150,6 +162,7 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
 
         [":MARKER:DELETE:", [_mrk_name, GVAR(captureFrameNo)]] call EFUNC(extension,sendData);
         GVAR(trackedMarkers) = GVAR(trackedMarkers) - [_mrk_name];
+        GVAR(trackedMarkerStates) deleteAt _mrk_name;
       };
     };
   };
@@ -246,8 +259,24 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
     if (_isExcluded) exitWith {};
 
     private _pos = ATLToASL (markerPos [_marker, true]);
+    private _dir = markerDir _marker;
+    private _alpha = markerAlpha _marker;
+    private _text = markerText _marker;
+    private _color = markerColor _marker;
+    private _size = markerSize _marker;
+    private _type = markerType _marker;
+    private _brush = markerBrush _marker;
+    private _shape = markerShape _marker;
 
-    [QGVARMAIN(handleMarker), ["UPDATED", _marker, player, _pos, "", "", "", markerDir _marker, "", "", markerAlpha _marker]] call CBA_fnc_serverEvent;
+    // Convert color from config name to hex
+    private _mrk_color = "";
+    if (_color == "Default") then {
+      _mrk_color = (configfile >> "CfgMarkers" >> _type >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
+    } else {
+      _mrk_color = (configfile >> "CfgMarkerColors" >> _color >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
+    };
+
+    [QGVARMAIN(handleMarker), ["UPDATED", _marker, player, _pos, _type, _shape, _size, _dir, _brush, _mrk_color, _alpha, _text]] call CBA_fnc_serverEvent;
   }];
 
   // handle marker deletions

@@ -26,6 +26,7 @@
 }] remoteExec ["call", -2, true];
 
 GVAR(trackedProjectiles) = createHashMap;
+GVAR(trackedPlacedObjects) = createHashMap;
 
 // Now we'll do the server setup.
 // Wrap everything in a CBA Class Event Handler so when the server initializes any soldier, it'll set up the Local EH. The Local EH is global (ironically) when applied to a unit so it'll do what we need across the entire session and trigger the relevant machines on locality change.
@@ -147,35 +148,11 @@ GVAR(trackedProjectiles) = createHashMap;
   TRACE_2("Sending placed object data to extension",_placedId,_data);
   [":PLACED:CREATE:", _data] call EFUNC(extension,sendData);
 
-  // Server-side fallback: when the placer disconnects the mine transfers to
-  // the server and the client-side Explode/Deleted EHs are lost.  Re-add them
-  // here via the Local EH so detonation is still captured.
-  _projectile addEventHandler ["Local", {
-    params ["_entity", "_isLocal"];
-    if (!_isLocal) exitWith {};
-    // Mine just became local to this machine (server) — add lifecycle EHs
-    _entity setVariable [QGVARMAIN(detonated), false];
-
-    _entity addEventHandler ["Explode", {
-      params ["_projectile", "_pos"];
-      if (_projectile getVariable [QGVARMAIN(detonated), true]) exitWith {};
-      _projectile setVariable [QGVARMAIN(detonated), true];
-      private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
-      [QGVARMAIN(handlePlacedEvent), [[
-        GVAR(captureFrameNo), _placedId, "detonated", _pos joinString ","
-      ]]] call CBA_fnc_localEvent;
-    }];
-
-    _entity addEventHandler ["Deleted", {
-      params ["_projectile"];
-      if (_projectile getVariable [QGVARMAIN(detonated), true]) exitWith {};
-      _projectile setVariable [QGVARMAIN(detonated), true];
-      private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
-      [QGVARMAIN(handlePlacedEvent), [[
-        GVAR(captureFrameNo), _placedId, "deleted", (getPosASL _projectile) joinString ","
-      ]]] call CBA_fnc_localEvent;
-    }];
-  }];
+  // Track placed object for server-side fallback — when the placer disconnects
+  // the mine transfers to the server and client-side Explode/Deleted EHs are lost.
+  // A periodic check (below) detects the locality change and re-adds the EHs.
+  // (Local EH is not supported on mine/explosive objects.)
+  GVAR(trackedPlacedObjects) set [_placedId, _projectile];
 }] call CBA_fnc_addEventHandler;
 
 // Handle placed object lifecycle events (detonation, deletion)
@@ -243,4 +220,45 @@ GVAR(trackedProjectiles) = createHashMap;
     };
   } forEach GVAR(trackedProjectiles);
   { GVAR(trackedProjectiles) deleteAt _x } forEach _toRemove;
+}, 30] call CBA_fnc_addPerFrameHandler;
+
+// Placed object locality check — detect mines/explosives that transferred to
+// the server (e.g. placer disconnected) and re-add lifecycle EHs.
+// Local EH is not supported on mine objects, so we poll instead.
+[{
+  private _toRemove = [];
+  {
+    private _obj = _y;
+    if (isNull _obj) then {
+      _toRemove pushBack _x;
+    } else {
+      if (local _obj && {!(_obj getVariable [QGVARMAIN(serverPlacedEHs), false])}) then {
+        _obj setVariable [QGVARMAIN(serverPlacedEHs), true];
+        _obj setVariable [QGVARMAIN(detonated), false];
+
+        _obj addEventHandler ["Explode", {
+          params ["_projectile", "_pos"];
+          if (_projectile getVariable [QGVARMAIN(detonated), true]) exitWith {};
+          _projectile setVariable [QGVARMAIN(detonated), true];
+          private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
+          [QGVARMAIN(handlePlacedEvent), [[
+            GVAR(captureFrameNo), _placedId, "detonated", _pos joinString ","
+          ]]] call CBA_fnc_localEvent;
+        }];
+
+        _obj addEventHandler ["Deleted", {
+          params ["_projectile"];
+          if (_projectile getVariable [QGVARMAIN(detonated), true]) exitWith {};
+          _projectile setVariable [QGVARMAIN(detonated), true];
+          private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
+          [QGVARMAIN(handlePlacedEvent), [[
+            GVAR(captureFrameNo), _placedId, "deleted", (getPosASL _projectile) joinString ","
+          ]]] call CBA_fnc_localEvent;
+        }];
+
+        TRACE_1("Added server-side EHs to placed object after locality transfer",_x);
+      };
+    };
+  } forEach GVAR(trackedPlacedObjects);
+  { GVAR(trackedPlacedObjects) deleteAt _x } forEach _toRemove;
 }, 30] call CBA_fnc_addPerFrameHandler;

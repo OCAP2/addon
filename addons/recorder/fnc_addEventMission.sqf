@@ -71,15 +71,12 @@ if (isNil QEGVAR(EH,EntityRespawned)) then {
     // Reset unit back to normal
     _entity setvariable [QGVARMAIN(isKilled), false];
 
-    // Stop tracking old unit — send final dead state before excluding
+    // Stop tracking old unit — report removal to extension
     if (_corpse getVariable [QGVARMAIN(isInitialized), false]) then {
-      private _unitData = _corpse getVariable [QGVARMAIN(unitData), []];
-      if (_unitData isEqualType [] && {_unitData isNotEqualTo []}) then {
-        private _lastData = +_unitData;
-        _lastData set [3, 0];
-        _lastData set [8, GVAR(captureFrameNo)];
-        [":SOLDIER:STATE:", _lastData] call EFUNC(extension,sendData);
-      };
+      [":SOLDIER:DELETE:", [
+        _corpse getVariable [QGVARMAIN(id), -1],
+        GVAR(captureFrameNo)
+      ]] call EFUNC(extension,sendData);
       _corpse setVariable [QGVARMAIN(exclude), true];
 
       [_entity, true] spawn FUNC(addUnitEventHandlers);

@@ -1,5 +1,6 @@
-// This function will receive an existing projectile or submunition and add the rest of the projectile event handlers.
-// These state handlers will track changes in bullet trajectory and its impact on nearby units.
+// Bullet-only projectile event handlers (shotBullet simulation type).
+// Accumulates trajectory and hit data locally, sends to server on Deleted EH.
+// Non-bullet projectiles use fnc_eh_fired_clientProjectile.sqf (server-side lifecycle).
 #include "script_component.hpp"
 params ["_projectile"];
 
@@ -20,9 +21,6 @@ if (
   (_data select 17) isEqualTo "shotSubmunitions" &&
   {(_data select 18) isEqualTo false}
 ) exitWith {};
-
-// Sent flag (index 20) — prevents duplicate sends between Deleted EH and PFH failsafe
-_data set [20, false];
 
 // HitExplosion
 // Tracks a detonation of an explosive round, including the recipient and any nearby units who took damage.
@@ -129,8 +127,6 @@ _projectile addEventHandler ["Deleted", {
 	params ["_projectile"];
   private _data = _projectile getVariable QGVARMAIN(projectileData);
   if (isNil "_data") exitWith {};
-  if (_data select 20) exitWith {}; // already sent by PFH failsafe
-  _data set [20, true];
   (_data select 14) pushBack [
     diag_tickTime,
     EGVAR(recorder,captureFrameNo),
@@ -139,29 +135,6 @@ _projectile addEventHandler ["Deleted", {
   TRACE_1("Projectile data",_data);
   [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_serverEvent;
 }];
-
-// Periodic position sampling for non-bullet projectiles (runs on owning client)
-// Passes _data by reference in args so it survives projectile deletion.
-// Acts as failsafe sender when the Deleted EH doesn't fire (e.g. locality
-// transfer on dedicated server, or engine cleanup bypassing Deleted).
-if ((_data select 17) isNotEqualTo "shotBullet") then {
-  [{
-    params ["_args", "_handle"];
-    _args params ["_projectile", "_data"];
-    if (isNull _projectile) exitWith {
-      if !(_data select 20) then {
-        _data set [20, true];
-        [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_serverEvent;
-      };
-      [_handle] call CBA_fnc_removePerFrameHandler;
-    };
-    (_data select 14) pushBack [
-      diag_tickTime,
-      EGVAR(recorder,captureFrameNo),
-      (getPosASL _projectile) joinString ","
-    ];
-  }, EGVAR(settings,frameCaptureDelay), [_projectile, _data]] call CBA_fnc_addPerFrameHandler;
-};
 
 TRACE_1("Finished applying EH",_projectile);
 true

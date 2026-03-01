@@ -1,8 +1,8 @@
 // After a lot of determination, in the end, engine limitations in Arma 3 with clientside projectile simulation means that the best source of truth for state is the owner.
 
 // To achieve this, we'll do a few things.
-// First, we'll remoteExec two functions to all clients.
-// The first,
+// First, we'll remoteExec three functions to all clients:
+// eh_fired_client, eh_fired_clientBullet, and eh_fired_clientProjectile.
 
 // We'll use the Local EH to detect changes of unit locality. Add the EH for the soldier unit on the new owner, and remove it on the old. This EH only triggers on two machines so it limits the overall impact of doing so and validates duplicate records are not sent to the server.
 // https://community.bistudio.com/wiki/Arma_3:_Event_Handlers#Local

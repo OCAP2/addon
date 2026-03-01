@@ -12,6 +12,7 @@ if (isNil "_projectile") exitWith {
 // Array passed by reference: Deleted EH reads via projectile variable, PFH via args.
 private _state = [false];
 _projectile setVariable [QGVARMAIN(projectileState), _state];
+_projectile setVariable [QGVARMAIN(projectileTempKey), _tempKey];
 
 // HitExplosion — explosive detonation near entities
 _projectile addEventHandler ["HitExplosion", {
@@ -122,9 +123,6 @@ _projectile addEventHandler ["Deleted", {
     (getPosASL _projectile) joinString ","
   ]]] call CBA_fnc_serverEvent;
 }, EGVAR(settings,frameCaptureDelay), [_projectile, _tempKey, _state]] call CBA_fnc_addPerFrameHandler;
-
-// Store temp key on projectile for EH access
-_projectile setVariable [QGVARMAIN(projectileTempKey), _tempKey];
 
 TRACE_1("Finished applying projectile EHs",_projectile);
 true

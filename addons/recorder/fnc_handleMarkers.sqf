@@ -139,6 +139,14 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
 
       if (_mrk_name in GVAR(trackedMarkers)) then {
         if (isNil "_dir") then {_dir = 0};
+
+        private _currentState = [_pos, _dir, _alpha, _text, _color, str _size, _type, _brush, _shape];
+        private _lastState = GVAR(trackedMarkerStates) getOrDefault [_mrk_name, []];
+
+        if (_currentState isEqualTo _lastState) exitWith {};
+
+        GVAR(trackedMarkerStates) set [_mrk_name, _currentState];
+
         [":MARKER:STATE:", [_mrk_name, GVAR(captureFrameNo), _pos, _dir, _alpha, _text, _color, str _size, _type, _brush, _shape]] call EFUNC(extension,sendData);
       };
     };
@@ -267,13 +275,6 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
     } else {
       _mrk_color = (configfile >> "CfgMarkerColors" >> _color >> "color") call BIS_fnc_colorConfigToRGBA call bis_fnc_colorRGBtoHTML;
     };
-
-    private _currentState = [_pos, _dir, _alpha, _text, _mrk_color, str _size, _type, _brush, _shape];
-    private _lastState = GVAR(trackedMarkerStates) getOrDefault [_marker, []];
-
-    if (_currentState isEqualTo _lastState) exitWith {};
-
-    GVAR(trackedMarkerStates) set [_marker, _currentState];
 
     [QGVARMAIN(handleMarker), ["UPDATED", _marker, player, _pos, _type, _shape, _size, _dir, _brush, _mrk_color, _alpha, _text]] call CBA_fnc_serverEvent;
   }];

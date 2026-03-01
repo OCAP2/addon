@@ -188,12 +188,31 @@ if (_weapon == "put") then {
         (getPosASL _submunitionProjectile) joinString ","
       ];
       _submunitionProjectile setVariable [QGVARMAIN(projectileData), _data];
-      // add the rest of EHs to submunition
-      [_submunitionProjectile] call FUNC(eh_fired_clientBullet);
+
+      // Route child based on simulation type
+      if ((_data select 17) isEqualTo "shotBullet") then {
+        [_submunitionProjectile] call FUNC(eh_fired_clientBullet);
+      } else {
+        // Non-bullet submunition — server-side lifecycle
+        private _counter = missionNamespace getVariable ["OCAP_projectileCounter", 0];
+        missionNamespace setVariable ["OCAP_projectileCounter", _counter + 1];
+        private _tempKey = format ["%1_%2", clientOwner, _counter];
+        [QGVARMAIN(handleProjectileInit), [_tempKey, _data]] call CBA_fnc_serverEvent;
+        [_submunitionProjectile, _tempKey] call FUNC(eh_fired_clientProjectile);
+      };
     }];
   } else {
-    // add the rest of EHs to projectile
-    [_projectile] call FUNC(eh_fired_clientBullet);
+    if ((_data select 17) isEqualTo "shotBullet") then {
+      // Bullet — client-side lifecycle (unchanged)
+      [_projectile] call FUNC(eh_fired_clientBullet);
+    } else {
+      // Non-bullet projectile — server-side lifecycle
+      private _counter = missionNamespace getVariable ["OCAP_projectileCounter", 0];
+      missionNamespace setVariable ["OCAP_projectileCounter", _counter + 1];
+      private _tempKey = format ["%1_%2", clientOwner, _counter];
+      [QGVARMAIN(handleProjectileInit), [_tempKey, _data]] call CBA_fnc_serverEvent;
+      [_projectile, _tempKey] call FUNC(eh_fired_clientProjectile);
+    };
   };
 };
 

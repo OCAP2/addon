@@ -1,5 +1,6 @@
-// This function will receive an existing projectile or submunition and add the rest of the projectile event handlers.
-// These state handlers will track changes in bullet trajectory and its impact on nearby units.
+// Bullet-only projectile event handlers (shotBullet simulation type).
+// Accumulates trajectory and hit data locally, sends to server on Deleted EH.
+// Non-bullet projectiles use fnc_eh_fired_clientProjectile.sqf (server-side lifecycle).
 #include "script_component.hpp"
 params ["_projectile"];
 
@@ -125,6 +126,7 @@ _projectile addEventHandler ["Explode", {
 _projectile addEventHandler ["Deleted", {
 	params ["_projectile"];
   private _data = _projectile getVariable QGVARMAIN(projectileData);
+  if (isNil "_data") exitWith {};
   (_data select 14) pushBack [
     diag_tickTime,
     EGVAR(recorder,captureFrameNo),
@@ -133,23 +135,6 @@ _projectile addEventHandler ["Deleted", {
   TRACE_1("Projectile data",_data);
   [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_serverEvent;
 }];
-
-// Periodic position sampling for non-bullet projectiles (runs on owning client)
-if ((_data select 17) isNotEqualTo "shotBullet") then {
-  [{
-    params ["_args", "_handle"];
-    _args params ["_projectile"];
-    if (isNull _projectile) exitWith {
-      [_handle] call CBA_fnc_removePerFrameHandler;
-    };
-    private _data = _projectile getVariable QGVARMAIN(projectileData);
-    (_data select 14) pushBack [
-      diag_tickTime,
-      EGVAR(recorder,captureFrameNo),
-      (getPosASL _projectile) joinString ","
-    ];
-  }, EGVAR(settings,frameCaptureDelay), [_projectile]] call CBA_fnc_addPerFrameHandler;
-};
 
 TRACE_1("Finished applying EH",_projectile);
 true

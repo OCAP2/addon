@@ -1,8 +1,8 @@
 // After a lot of determination, in the end, engine limitations in Arma 3 with clientside projectile simulation means that the best source of truth for state is the owner.
 
 // To achieve this, we'll do a few things.
-// First, we'll remoteExec two functions to all clients.
-// The first,
+// First, we'll remoteExec three functions to all clients:
+// eh_fired_client, eh_fired_clientBullet, and eh_fired_clientProjectile.
 
 // We'll use the Local EH to detect changes of unit locality. Add the EH for the soldier unit on the new owner, and remove it on the old. This EH only triggers on two machines so it limits the overall impact of doing so and validates duplicate records are not sent to the server.
 // https://community.bistudio.com/wiki/Arma_3:_Event_Handlers#Local
@@ -21,6 +21,12 @@
 [FUNC(eh_fired_clientBullet), {
   missionNamespace setVariable [QFUNC(eh_fired_clientBullet), _this];
 }] remoteExec ["call", -2, true];
+[FUNC(eh_fired_clientProjectile), {
+  missionNamespace setVariable [QFUNC(eh_fired_clientProjectile), _this];
+}] remoteExec ["call", -2, true];
+
+GVAR(trackedProjectiles) = createHashMap;
+GVAR(trackedPlacedObjects) = createHashMap;
 
 // Now we'll do the server setup.
 // Wrap everything in a CBA Class Event Handler so when the server initializes any soldier, it'll set up the Local EH. The Local EH is global (ironically) when applied to a unit so it'll do what we need across the entire session and trigger the relevant machines on locality change.
@@ -141,6 +147,12 @@
   _projectile setVariable [QGVARMAIN(placedId), _placedId, true];
   TRACE_2("Sending placed object data to extension",_placedId,_data);
   [":PLACED:CREATE:", _data] call EFUNC(extension,sendData);
+
+  // Track placed object for server-side fallback — when the placer disconnects
+  // the mine transfers to the server and client-side Explode/Deleted EHs are lost.
+  // A periodic check (below) detects the locality change and re-adds the EHs.
+  // (Local EH is not supported on mine/explosive objects.)
+  GVAR(trackedPlacedObjects) set [_placedId, _projectile];
 }] call CBA_fnc_addEventHandler;
 
 // Handle placed object lifecycle events (detonation, deletion)
@@ -149,3 +161,104 @@
   TRACE_1("Sending placed event data to extension",_data);
   [":PLACED:EVENT:", _data] call EFUNC(extension,sendData);
 }] call CBA_fnc_addEventHandler;
+
+// Handle non-bullet projectile lifecycle — server accumulates data from clients
+// and sends EVENT:PROJECTILE when the projectile is done.
+
+// Initial projectile data from client — store in hashmap
+[QGVARMAIN(handleProjectileInit), {
+  params ["_tempKey", "_data"];
+  TRACE_2("Projectile init",_tempKey,_data select 17);
+  GVAR(trackedProjectiles) set [_tempKey, [_data, diag_tickTime]];
+}] call CBA_fnc_addEventHandler;
+
+// Position update from client — append to stored positions array
+[QGVARMAIN(handleProjectilePos), {
+  params ["_tempKey", "_pos"];
+  private _entry = GVAR(trackedProjectiles) get _tempKey;
+  if (isNil "_entry") exitWith {};
+  ((_entry select 0) select 14) pushBack _pos;
+}] call CBA_fnc_addEventHandler;
+
+// Hit event from client — append hit data and position
+[QGVARMAIN(handleProjectileHit), {
+  params ["_tempKey", "_hitData", "_pos"];
+  private _entry = GVAR(trackedProjectiles) get _tempKey;
+  if (isNil "_entry") exitWith {};
+  private _data = _entry select 0;
+  (_data select 16) pushBack _hitData;
+  (_data select 14) pushBack _pos;
+}] call CBA_fnc_addEventHandler;
+
+// Projectile done signal — send accumulated data to extension and clean up
+[QGVARMAIN(handleProjectileDone), {
+  params ["_tempKey", ["_finalPos", []]];
+  private _entry = GVAR(trackedProjectiles) getOrDefault [_tempKey, []];
+  if (_entry isEqualTo []) exitWith {
+    TRACE_1("Projectile done for unknown key (already sent or timed out)",_tempKey);
+  };
+  private _data = _entry select 0;
+  if (count _finalPos > 0) then {
+    (_data select 14) pushBack _finalPos;
+  };
+  GVAR(trackedProjectiles) deleteAt _tempKey;
+  TRACE_1("Projectile done, sending to extension",_tempKey);
+  [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_localEvent;
+}] call CBA_fnc_addEventHandler;
+
+// Timeout PFH — clean up orphaned projectiles every 30s
+// Covers edge cases where client crashes or PFH failsafe doesn't fire
+[{
+  private _toRemove = [];
+  private _now = diag_tickTime;
+  {
+    (_y) params ["_data", "_creationTime"];
+    if (_now - _creationTime > 120) then {
+      _toRemove pushBack _x;
+      TRACE_1("Projectile timeout, sending data",_x);
+      [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_localEvent;
+    };
+  } forEach GVAR(trackedProjectiles);
+  { GVAR(trackedProjectiles) deleteAt _x } forEach _toRemove;
+}, 30] call CBA_fnc_addPerFrameHandler;
+
+// Placed object locality check — detect mines/explosives that transferred to
+// the server (e.g. placer disconnected) and re-add lifecycle EHs.
+// Local EH is not supported on mine objects, so we poll instead.
+[{
+  private _toRemove = [];
+  {
+    private _obj = _y;
+    if (isNull _obj) then {
+      _toRemove pushBack _x;
+    } else {
+      if (local _obj && {!(_obj getVariable [QGVARMAIN(serverPlacedEHs), false])}) then {
+        _obj setVariable [QGVARMAIN(serverPlacedEHs), true];
+        _obj setVariable [QGVARMAIN(detonated), false];
+
+        _obj addEventHandler ["Explode", {
+          params ["_projectile", "_pos"];
+          if (_projectile getVariable [QGVARMAIN(detonated), true]) exitWith {};
+          _projectile setVariable [QGVARMAIN(detonated), true];
+          private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
+          [QGVARMAIN(handlePlacedEvent), [[
+            GVAR(captureFrameNo), _placedId, "detonated", _pos joinString ","
+          ]]] call CBA_fnc_localEvent;
+        }];
+
+        _obj addEventHandler ["Deleted", {
+          params ["_projectile"];
+          if (_projectile getVariable [QGVARMAIN(detonated), true]) exitWith {};
+          _projectile setVariable [QGVARMAIN(detonated), true];
+          private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
+          [QGVARMAIN(handlePlacedEvent), [[
+            GVAR(captureFrameNo), _placedId, "deleted", (getPosASL _projectile) joinString ","
+          ]]] call CBA_fnc_localEvent;
+        }];
+
+        TRACE_1("Added server-side EHs to placed object after locality transfer",_x);
+      };
+    };
+  } forEach GVAR(trackedPlacedObjects);
+  { GVAR(trackedPlacedObjects) deleteAt _x } forEach _toRemove;
+}, 30] call CBA_fnc_addPerFrameHandler;

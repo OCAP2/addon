@@ -72,12 +72,15 @@ if (isNil QEGVAR(EH,EntityRespawned)) then {
     _entity setvariable [QGVARMAIN(isKilled), false];
 
     // Stop tracking old unit — report removal to extension
+    // Skip when entity == corpse (respawnOnStart reuses the same object)
     if (_corpse getVariable [QGVARMAIN(isInitialized), false]) then {
-      [":SOLDIER:DELETE:", [
-        _corpse getVariable [QGVARMAIN(id), -1],
-        GVAR(captureFrameNo)
-      ]] call EFUNC(extension,sendData);
-      _corpse setVariable [QGVARMAIN(exclude), true];
+      if (_entity != _corpse) then {
+        [":SOLDIER:DELETE:", [
+          _corpse getVariable [QGVARMAIN(id), -1],
+          GVAR(captureFrameNo)
+        ]] call EFUNC(extension,sendData);
+        _corpse setVariable [QGVARMAIN(exclude), true];
+      };
 
       [_entity, true] spawn FUNC(addUnitEventHandlers);
     };

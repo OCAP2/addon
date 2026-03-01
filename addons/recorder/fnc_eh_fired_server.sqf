@@ -21,6 +21,11 @@
 [FUNC(eh_fired_clientBullet), {
   missionNamespace setVariable [QFUNC(eh_fired_clientBullet), _this];
 }] remoteExec ["call", -2, true];
+[FUNC(eh_fired_clientProjectile), {
+  missionNamespace setVariable [QFUNC(eh_fired_clientProjectile), _this];
+}] remoteExec ["call", -2, true];
+
+GVAR(trackedProjectiles) = createHashMap;
 
 // Now we'll do the server setup.
 // Wrap everything in a CBA Class Event Handler so when the server initializes any soldier, it'll set up the Local EH. The Local EH is global (ironically) when applied to a unit so it'll do what we need across the entire session and trigger the relevant machines on locality change.
@@ -179,3 +184,63 @@
   TRACE_1("Sending placed event data to extension",_data);
   [":PLACED:EVENT:", _data] call EFUNC(extension,sendData);
 }] call CBA_fnc_addEventHandler;
+
+// Handle non-bullet projectile lifecycle — server accumulates data from clients
+// and sends EVENT:PROJECTILE when the projectile is done.
+
+// Initial projectile data from client — store in hashmap
+[QGVARMAIN(handleProjectileInit), {
+  params ["_tempKey", "_data"];
+  TRACE_2("Projectile init",_tempKey,_data select 17);
+  GVAR(trackedProjectiles) set [_tempKey, [_data, diag_tickTime]];
+}] call CBA_fnc_addEventHandler;
+
+// Position update from client — append to stored positions array
+[QGVARMAIN(handleProjectilePos), {
+  params ["_tempKey", "_pos"];
+  private _entry = GVAR(trackedProjectiles) get _tempKey;
+  if (isNil "_entry") exitWith {};
+  ((_entry select 0) select 14) pushBack _pos;
+}] call CBA_fnc_addEventHandler;
+
+// Hit event from client — append hit data and position
+[QGVARMAIN(handleProjectileHit), {
+  params ["_tempKey", "_hitData", "_pos"];
+  private _entry = GVAR(trackedProjectiles) get _tempKey;
+  if (isNil "_entry") exitWith {};
+  private _data = _entry select 0;
+  (_data select 16) pushBack _hitData;
+  (_data select 14) pushBack _pos;
+}] call CBA_fnc_addEventHandler;
+
+// Projectile done signal — send accumulated data to extension and clean up
+[QGVARMAIN(handleProjectileDone), {
+  params ["_tempKey", ["_finalPos", []]];
+  private _entry = GVAR(trackedProjectiles) getOrDefault [_tempKey, []];
+  if (_entry isEqualTo []) exitWith {
+    TRACE_1("Projectile done for unknown key (already sent or timed out)",_tempKey);
+  };
+  private _data = _entry select 0;
+  if (count _finalPos > 0) then {
+    (_data select 14) pushBack _finalPos;
+  };
+  GVAR(trackedProjectiles) deleteAt _tempKey;
+  TRACE_1("Projectile done, sending to extension",_tempKey);
+  [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_localEvent;
+}] call CBA_fnc_addEventHandler;
+
+// Timeout PFH — clean up orphaned projectiles every 30s
+// Covers edge cases where client crashes or PFH failsafe doesn't fire
+[{
+  private _toRemove = [];
+  private _now = diag_tickTime;
+  {
+    (_y) params ["_data", "_creationTime"];
+    if (_now - _creationTime > 120) then {
+      _toRemove pushBack _x;
+      TRACE_1("Projectile timeout, sending data",_x);
+      [QGVARMAIN(handleFiredManData), [_data]] call CBA_fnc_localEvent;
+    };
+  } forEach GVAR(trackedProjectiles);
+  { GVAR(trackedProjectiles) deleteAt _x } forEach _toRemove;
+}, 30] call CBA_fnc_addPerFrameHandler;

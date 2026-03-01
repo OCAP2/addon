@@ -126,7 +126,10 @@ private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mis
 
 
 private _saveTag = if (!isNil "_tag") then {_tag} else {EGVAR(settings,saveTag)};
+INFO_3("Saving recording — mission: %1 | frames: %2 | tag: %3",GVAR(missionName),_endFrameNumber,_saveTag);
+private _saveStart = diag_tickTime;
 [":MISSION:SAVE:", [worldName, GVAR(missionName), getMissionConfigValue ["author", ""], GVAR(frameCaptureDelay), _endFrameNumber, _saveTag]] call EFUNC(extension,sendData);
+INFO_2("Recording saved — took %1 ms | mission: %2",round ((diag_tickTime - _saveStart) * 1000),GVAR(missionName));
 OCAPEXTLOG(ARR4("Saved recording of mission",GVAR(missionName),"with tag",_saveTag));
 
 

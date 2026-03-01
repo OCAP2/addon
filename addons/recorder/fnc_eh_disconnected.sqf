@@ -36,4 +36,15 @@ params ["_unit", "_id", "_uid", "_name"];
   ]] call CBA_fnc_encodeJSON
 ]] call EFUNC(extension,sendData);
 
+if (_unit getVariable [QGVARMAIN(isInitialized), false]) then {
+  private _unitData = _unit getVariable [QGVARMAIN(unitData), []];
+  if (_unitData isEqualType [] && {_unitData isNotEqualTo []}) then {
+    private _lastData = +_unitData;
+    _lastData set [3, 0];
+    _lastData set [8, GVAR(captureFrameNo)];
+    [":SOLDIER:STATE:", _lastData] call EFUNC(extension,sendData);
+  };
+  _unit setVariable [QGVARMAIN(exclude), true];
+};
+
 false;

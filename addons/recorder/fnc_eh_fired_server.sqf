@@ -141,6 +141,36 @@
   _projectile setVariable [QGVARMAIN(placedId), _placedId, true];
   TRACE_2("Sending placed object data to extension",_placedId,_data);
   [":PLACED:CREATE:", _data] call EFUNC(extension,sendData);
+
+  // Server-side fallback: when the placer disconnects the mine transfers to
+  // the server and the client-side Explode/Deleted EHs are lost.  Re-add them
+  // here via the Local EH so detonation is still captured.
+  _projectile addEventHandler ["Local", {
+    params ["_entity", "_isLocal"];
+    if (!_isLocal) exitWith {};
+    // Mine just became local to this machine (server) — add lifecycle EHs
+    _entity setVariable [QGVARMAIN(detonated), false];
+
+    _entity addEventHandler ["Explode", {
+      params ["_projectile", "_pos"];
+      if (_projectile getVariable [QGVARMAIN(detonated), true]) exitWith {};
+      _projectile setVariable [QGVARMAIN(detonated), true];
+      private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
+      [QGVARMAIN(handlePlacedEvent), [[
+        GVAR(captureFrameNo), _placedId, "detonated", _pos joinString ","
+      ]]] call CBA_fnc_localEvent;
+    }];
+
+    _entity addEventHandler ["Deleted", {
+      params ["_projectile"];
+      if (_projectile getVariable [QGVARMAIN(detonated), true]) exitWith {};
+      _projectile setVariable [QGVARMAIN(detonated), true];
+      private _placedId = _projectile getVariable [QGVARMAIN(placedId), -1];
+      [QGVARMAIN(handlePlacedEvent), [[
+        GVAR(captureFrameNo), _placedId, "deleted", (getPosASL _projectile) joinString ","
+      ]]] call CBA_fnc_localEvent;
+    }];
+  }];
 }] call CBA_fnc_addEventHandler;
 
 // Handle placed object lifecycle events (detonation, deletion)

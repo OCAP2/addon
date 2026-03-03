@@ -225,16 +225,6 @@ call EFUNC(extension,initSession);
   }
 ] call CBA_fnc_waitUntilAndExecute;
 
-// Auto-save on empty - checked every 30 seconds
-// If a recording has been started, exceeds min mission time, and no players are on the server, auto-save
-[{
-  if (
-    EGVAR(settings,saveOnEmpty) &&
-    !isNil QGVAR(startTime) && (GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime) && count (call CBA_fnc_players) == 0
-  ) then {
-      [nil, "Recording ended due to server being empty"] call FUNC(exportData);
-  };
-}, 30] call CBA_fnc_addPerFrameHandler;
 
 if (isNil QGVAR(entityMonitorsInitialized)) then {
   call FUNC(entityMonitors);

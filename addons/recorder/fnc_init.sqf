@@ -85,6 +85,8 @@ GVAR(excludeMarkerList) = if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) t
 } else {
   []
 };
+// Zeus UI markers must always be excluded regardless of CBA setting
+GVAR(excludeMarkerList) pushBackUnique "RscAttribute";
 
 INFO_4("Settings snapshot — frameCaptureDelay: %1 | autoStart: %2 | minPlayerCount: %3 | minMissionTime: %4",GVAR(frameCaptureDelay),GVAR(autoStart),EGVAR(settings,minPlayerCount),GVAR(minMissionTime));
 

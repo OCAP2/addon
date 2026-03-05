@@ -48,7 +48,7 @@ if (_unit getVariable [QGVARMAIN(isInitialized), false]) then {
 if (
   EGVAR(settings,saveOnEmpty) &&
   !isNil QGVAR(startTime) &&
-  {count ((call CBA_fnc_players) - [_unit]) == 0} &&
+  {(call CBA_fnc_players) - [_unit] isEqualTo []} &&
   {(GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime)}
 ) then {
   [nil, "Recording ended due to server being empty"] call FUNC(exportData);

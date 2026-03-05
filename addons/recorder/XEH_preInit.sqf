@@ -186,7 +186,7 @@ GVAR(allSettings) = [
   /*
     CBA Setting: OCAP_settings_excludeMarkerFromRecord
     Description:
-      Array of prefixes. Any markers matching these prefixes will be excluded from recording. Use single quotes! Default: ['SystemMarker_','ACE_BFT_']
+      Array of prefixes. Any markers matching these prefixes will be excluded from recording. Use single quotes! Default: ['SystemMarker_','ACE_BFT_','RscAttribute']
 
     Setting Name:
       Marker Prefixes To Exclude
@@ -195,17 +195,17 @@ GVAR(allSettings) = [
       Stringified Array
 
     Example:
-      > "['SystemMarker_','ACE_BFT_']"
+      > "['SystemMarker_','ACE_BFT_','RscAttribute']"
   */
   [
     QEGVAR(settings,excludeMarkerFromRecord),
     "EDITBOX", // setting type
     [
       "Marker Prefixes to Exclude", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      "Array of prefixes. Any markers matching these prefixes will be excluded from recording. Use single quotes! Default: ['SystemMarker_','ACE_BFT_']"
+      "Array of prefixes. Any markers matching these prefixes will be excluded from recording. Use single quotes! Default: ['SystemMarker_','ACE_BFT_','RscAttribute']"
     ],
     [COMPONENT_NAME, "Exclusions"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
-    "['SystemMarker_','ACE_BFT_']", // default string value
+    "['SystemMarker_','ACE_BFT_','RscAttribute']", // default string value
     true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
     {}, // function that will be executed once on mission start and every time the setting is changed.
     false // requires restart to apply

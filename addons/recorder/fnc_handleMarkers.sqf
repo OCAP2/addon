@@ -178,8 +178,6 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
   } else {
     []
   };
-  // Zeus UI markers must always be excluded regardless of CBA setting
-  GVAR(excludeMarkerList) pushBackUnique "RscAttribute";
 
   /*
     Event Handler: MarkerCreated

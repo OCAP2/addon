@@ -114,14 +114,13 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
       } else {if (_dir isEqualTo "") then {_dir = 0}};
 
       private _captureFrameNo = GVAR(captureFrameNo);
-      if (_creationTime > 0) then {
+      if (_creationTime > 0 && _creationTime < time) then {
         private _delta = time - _creationTime;
-        private _lastFrameTime = (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) + GVAR(startTime);
-        if (_delta > (time - _lastFrameTime)) then { // marker was initially created in some frame(s) before
-          _captureFrameNo = ceil _lastFrameTime - (_delta / GVAR(frameCaptureDelay));
-          private _logParams = (str [GVAR(captureFrameNo), time, _creationTime, _delta, _lastFrameTime, _captureFrameNo]);
+        if (_delta > GVAR(frameCaptureDelay)) then { // marker was initially created in some frame(s) before
+          _captureFrameNo = (floor ((_creationTime - GVAR(startTime)) / GVAR(frameCaptureDelay))) max 1;
 
           if (GVARMAIN(isDebug)) then {
+            private _logParams = (str [GVAR(captureFrameNo), time, _creationTime, _delta, _captureFrameNo]);
             OCAPEXTLOG(ARR2("CREATE:MARKER: adjust frame ",_logParams));
           };
         };

@@ -136,6 +136,8 @@ call FUNC(trackSectors);
   OCAP_listener_record - Handle for <OCAP_record> listener.
   OCAP_listener_pause - Handle for <OCAP_pause> listener.
   OCAP_listener_exportData - Handle for <OCAP_exportData> listener.
+  OCAP_listener_setFocusStart - Handle for <OCAP_setFocusStart> listener.
+  OCAP_listener_setFocusEnd - Handle for <OCAP_setFocusEnd> listener.
 */
 
 
@@ -305,4 +307,48 @@ if (isNil QEGVAR(listener,exportData)) then {
     _this call FUNC(exportData);
   }] call CBA_fnc_addEventHandler;
   OCAPEXTLOG(["Initialized exportData listener"]);
+};
+
+/*
+  CBA Event: OCAP_setFocusStart
+  Description:
+    Sets the playback focus start frame. Uses current capture frame if no
+    frame number is provided. Calls <OCAP_recorder_fnc_setFocusStart>.
+
+  Parameters:
+    0 - Event name [String]
+    1 - Event data [Array]
+      1.0 - (optional) Frame number [Number]
+
+  Example:
+    > ["OCAP_setFocusStart"] call CBA_fnc_serverEvent;
+    > ["OCAP_setFocusStart", [120]] call CBA_fnc_serverEvent;
+*/
+if (isNil QEGVAR(listener,setFocusStart)) then {
+  EGVAR(listener,setFocusStart) = [QGVARMAIN(setFocusStart), {
+    _this call FUNC(setFocusStart);
+  }] call CBA_fnc_addEventHandler;
+  OCAPEXTLOG(["Initialized setFocusStart listener"]);
+};
+
+/*
+  CBA Event: OCAP_setFocusEnd
+  Description:
+    Sets the playback focus end frame. Uses current capture frame if no
+    frame number is provided. Calls <OCAP_recorder_fnc_setFocusEnd>.
+
+  Parameters:
+    0 - Event name [String]
+    1 - Event data [Array]
+      1.0 - (optional) Frame number [Number]
+
+  Example:
+    > ["OCAP_setFocusEnd"] call CBA_fnc_serverEvent;
+    > ["OCAP_setFocusEnd", [850]] call CBA_fnc_serverEvent;
+*/
+if (isNil QEGVAR(listener,setFocusEnd)) then {
+  EGVAR(listener,setFocusEnd) = [QGVARMAIN(setFocusEnd), {
+    _this call FUNC(setFocusEnd);
+  }] call CBA_fnc_addEventHandler;
+  OCAPEXTLOG(["Initialized setFocusEnd listener"]);
 };

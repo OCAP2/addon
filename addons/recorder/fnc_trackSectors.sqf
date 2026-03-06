@@ -26,13 +26,13 @@ Author:
 #include "script_component.hpp"
 
 // --- Single-sector mode: attach EH to one sector ---
-if (_this isEqualType []) exitWith {
+if (_this isEqualType [] && {count _this > 0}) exitWith {
   params ["_sector"];
   if (_sector getVariable [QGVAR(sectorTracked), false]) exitWith {};
   _sector setVariable [QGVAR(sectorTracked), true];
 
-  [_sector, "OwnerChanged", {
-    params ["_sector", "_oldOwner", "_newOwner"];
+  [_sector, "ownerChanged", {
+    params ["_sector", "_newOwner", "_oldOwner"];
     if (!SHOULDSAVEEVENTS) exitWith {};
     if (_newOwner isEqualTo sideUnknown) exitWith {};
 

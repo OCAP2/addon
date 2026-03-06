@@ -31,9 +31,6 @@
 // Used to determine if events should currently be saved based on <OCAP_recorder_recording> and <OCAP_recorder_startTime>.
 #define SHOULDSAVEEVENTS ((missionNamespace getVariable [QEGVAR(recorder,recording), false]) && missionNamespace getVariable [QEGVAR(recorder,startTime), -1] > -1)
 
-#define DEBUG_MODE_NORMAL
-// #define DEBUG_MODE_FULL
-
 // DEFINE: BOOL
 // Forces a true/false return of input.
 #define BOOL(_cond) ([0,1] select (_cond))
@@ -47,7 +44,6 @@
 #define ARR6(_arg1, _arg2, _arg3, _arg4, _arg5, _arg6) [_arg1, _arg2, _arg3, _arg4, _arg5, _arg6]
 
 // https://github.com/CBATeam/CBA_A3/blob/master/addons/main/script_macros_common.hpp
-#undef DEBUG_MODE_NORMAL
 #include "\x\cba\addons\main\script_macros_common.hpp"
 #include "\x\cba\addons\xeh\script_xeh.hpp"
 

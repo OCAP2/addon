@@ -117,6 +117,9 @@ if (isNil QEGVAR(listener,markers)) then {
   call FUNC(handleMarkers);
 };
 
+// Track sector control module ownership changes
+call FUNC(trackSectors);
+
 
 
 // Section: CBA Events

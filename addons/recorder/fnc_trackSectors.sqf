@@ -31,7 +31,7 @@ if (_this isEqualType []) exitWith {
   if (_sector getVariable [QGVAR(sectorTracked), false]) exitWith {};
   _sector setVariable [QGVAR(sectorTracked), true];
 
-  _sector addEventHandler ["OwnerChanged", {
+  [_sector, "OwnerChanged", {
     params ["_sector", "_oldOwner", "_newOwner"];
     if (!SHOULDSAVEEVENTS) exitWith {};
     if (_newOwner isEqualTo sideUnknown) exitWith {};
@@ -42,7 +42,7 @@ if (_this isEqualType []) exitWith {
 
     [QGVARMAIN(customEvent), ["captured", format ["%1,sector", _name]]] call CBA_fnc_localEvent;
     INFO_3("Sector captured: %1 — %2 -> %3",_name,_oldOwner,_newOwner);
-  }];
+  }] call BIS_fnc_addScriptedEventHandler;
 };
 
 // --- Init mode: track all existing sectors + Zeus monitoring ---

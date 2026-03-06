@@ -34,14 +34,16 @@ if (_this isEqualType [] && {count _this > 0}) exitWith {
   [_sector, "ownerChanged", {
     params ["_sector", "_newOwner", "_oldOwner"];
     if (!SHOULDSAVEEVENTS) exitWith {};
-    if (_newOwner isEqualTo sideUnknown) exitWith {};
 
     private _name = _sector getVariable ["Name", ""];
     if (_name isEqualTo "") then { _name = vehicleVarName _sector };
     if (_name isEqualTo "") then { _name = str _sector };
 
-    [QGVARMAIN(customEvent), ["captured", format ["%1,sector", _name]]] call CBA_fnc_localEvent;
-    INFO_3("Sector captured: %1 — %2 -> %3",_name,_oldOwner,_newOwner);
+    if (_newOwner isEqualTo sideUnknown) then {
+      [QGVARMAIN(customEvent), ["contested", format ["%1,sector", _name]]] call CBA_fnc_localEvent;
+    } else {
+      [QGVARMAIN(customEvent), ["captured", format ["%1,sector", _name]]] call CBA_fnc_localEvent;
+    };
   }] call BIS_fnc_addScriptedEventHandler;
 };
 

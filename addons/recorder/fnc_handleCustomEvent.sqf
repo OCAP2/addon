@@ -4,40 +4,31 @@
   FUNCTION: OCAP_recorder_fnc_handleCustomEvent
 
   Description:
-    Sends custom event data to the extension to save it to the timeline. This custom event data is later read by Javascript in the web component to determine how it should be displayed.
+    Routes custom events to the extension with typed positional args based on
+    event type. Sector events (captured/contested/capturedFlag) send structured
+    fields; endMission sends side and message; all other events use the legacy
+    format with JSON-encoded extraData.
 
     Applied during initialization of OCAP in <OCAP_recorder_fnc_init>.
 
   Parameters:
-    _type - classifier for the type of event. used to determine text & icon [[String], one of: "flag", "generalEvent"]
-    _unit - name of the unit that performed the action [String]
-    _unitColor - (optional) color for the unit's name shown in Events list and for the pulse on the map [[String], Hex RGB, defaults "" and will show as white]
-    _objectiveColor - (optional) color representing the icon in Events list [[String], Hex RGB, defaults "" and will show as white]
-    _position - (optional) the location to pulse on the map [<PositionATL>, default nil]
+    _eventName    - event type classifier [String]
+    _eventMessage - event payload [String or Array, depends on event type]
+    _extraData    - (optional) additional data for generic events [HashMap or Array, default createHashMap]
 
   Returns:
-    Nothing
+    true
 
   Examples:
     (start code)
-    ["ocap_handleCustomEvent", ["eventType", "eventMessage"]] call CBA_fnc_serverEvent;
+    // Sector captured with structured data (sent by fnc_trackSectors)
+    [QGVARMAIN(customEvent), ["captured", ["sector", "Sector Alpha", [100, 200, 0]]]] call CBA_fnc_localEvent;
 
-    // saves a general event to the timeline
-    ["ocap_handleCustomEvent", ["generalEvent", "eventText"]] call CBA_fnc_serverEvent;
+    // End mission with side and message
+    [QGVARMAIN(customEvent), ["endMission", [str west, "BLUFOR controlled all sectors!"]]] call CBA_fnc_localEvent;
 
-    // indicates a flag has been captured
-    ["ocap_handleCustomEvent", ["captured", [
-      "flag",
-      name _unit,
-      str side group _unit,
-      "#FF0000",
-      getPosAtl _flag
-    ]]] call call CBA_fnc_serverEvent;
-
-
-    // Sector captures are tracked automatically when trackSectors setting is enabled.
-    // Manual example for custom sector-like objectives:
-    ["ocap_handleCustomEvent", ["captured", "Sector Alpha,sector"]] call CBA_fnc_serverEvent;
+    // Generic event with optional extra data
+    [QGVARMAIN(customEvent), ["generalEvent", "Some event text"]] call CBA_fnc_serverEvent;
     (end code)
 
   Public:
@@ -56,10 +47,48 @@ params [
   ["_extraData", createHashMap, [createHashMap, []]]
 ];
 
-[":EVENT:GENERAL:", [
-  GVAR(captureFrameNo),
-  _eventName,
-  _eventMessage,
-  [_extraData] call CBA_fnc_encodeJSON
-]] call EFUNC(extension,sendData);
+switch (_eventName) do {
+  case "captured";
+  case "contested";
+  case "capturedFlag": {
+    private _args = [GVAR(captureFrameNo), _eventName];
+
+    if (_eventMessage isEqualType []) then {
+      // Array format: ["objectType", "unitName", ...maybePosition...]
+      _args pushBack (_eventMessage param [0, ""]);
+      _args pushBack (_eventMessage param [1, ""]);
+      {
+        if (_x isEqualType [] && {count _x >= 2} && {(_x # 0) isEqualType 0}) exitWith {
+          _args append _x;
+        };
+      } forEach _eventMessage;
+    } else {
+      // String format (legacy backward compat)
+      _args pushBack _eventMessage;
+    };
+
+    [":EVENT:GENERAL:", _args] call EFUNC(extension,sendData);
+  };
+
+  case "endMission": {
+    private _side = "";
+    private _message = "";
+    if (_eventMessage isEqualType []) then {
+      _side = _eventMessage param [0, ""];
+      _message = _eventMessage param [1, ""];
+    } else {
+      _message = _eventMessage;
+    };
+    [":EVENT:GENERAL:", [GVAR(captureFrameNo), _eventName, _side, _message]] call EFUNC(extension,sendData);
+  };
+
+  default {
+    [":EVENT:GENERAL:", [
+      GVAR(captureFrameNo),
+      _eventName,
+      _eventMessage,
+      [_extraData] call CBA_fnc_encodeJSON
+    ]] call EFUNC(extension,sendData);
+  };
+};
 true

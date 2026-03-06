@@ -39,10 +39,11 @@ if (_this isEqualType [] && {count _this > 0}) exitWith {
     if (_name isEqualTo "") then { _name = vehicleVarName _sector };
     if (_name isEqualTo "") then { _name = str _sector };
 
+    private _pos = getPosATL _sector;
     if (_newOwner isEqualTo sideUnknown) then {
-      [QGVARMAIN(customEvent), ["contested", format ["%1,sector", _name]]] call CBA_fnc_localEvent;
+      [QGVARMAIN(customEvent), ["contested", ["sector", _name, _pos]]] call CBA_fnc_localEvent;
     } else {
-      [QGVARMAIN(customEvent), ["captured", format ["%1,sector", _name]]] call CBA_fnc_localEvent;
+      [QGVARMAIN(customEvent), ["captured", ["sector", _name, _pos]]] call CBA_fnc_localEvent;
     };
   }] call BIS_fnc_addScriptedEventHandler;
 };

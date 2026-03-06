@@ -140,6 +140,23 @@ call FUNC(trackSectors);
   OCAP_listener_setFocusEnd - Handle for <OCAP_setFocusEnd> listener.
 */
 
+/*
+  Function: OCAP_recorder_isAuthorizedEventCaller
+  Description:
+    Authorization check for admin-level CBA server events (record, pause,
+    exportData, setFocusStart, setFocusEnd). Allows server-local execution
+    (mission scripts) and clients with OCAP admin controls (Arma server
+    admins or players in OCAP_administratorList).
+
+  Returns:
+    true if caller is authorized, false otherwise [Boolean]
+*/
+GVAR(isAuthorizedEventCaller) = {
+  if (remoteExecutedOwner isEqualTo 0) exitWith {true};
+  private _callerUnit = (allPlayers select {owner _x isEqualTo remoteExecutedOwner}) param [0, objNull];
+  _callerUnit getVariable [QGVARMAIN(hasAdminControls), false]
+};
+
 
 if (isClass (configFile >> "CfgPatches" >> "ace_advanced_throwing")) then {
   if (isNil QEGVAR(listener,aceThrowing)) then {
@@ -267,6 +284,9 @@ if (isNil QEGVAR(listener,counterEvent)) then {
 */
 if (isNil QEGVAR(listener,record)) then {
   EGVAR(listener,record) = [QGVARMAIN(record), {
+    if !(call GVAR(isAuthorizedEventCaller)) exitWith {
+      WARNING("Unauthorized OCAP_record call blocked");
+    };
     call FUNC(startRecording);
   }] call CBA_fnc_addEventHandler;
   OCAPEXTLOG(["Initialized record listener"]);
@@ -282,6 +302,9 @@ if (isNil QEGVAR(listener,record)) then {
 */
 if (isNil QEGVAR(listener,pause)) then {
   EGVAR(listener,pause) = [QGVARMAIN(pause), {
+    if !(call GVAR(isAuthorizedEventCaller)) exitWith {
+      WARNING("Unauthorized OCAP_pause call blocked");
+    };
     call FUNC(stopRecording);
   }] call CBA_fnc_addEventHandler;
   OCAPEXTLOG(["Initialized pause listener"]);
@@ -303,6 +326,9 @@ if (isNil QEGVAR(listener,pause)) then {
 */
 if (isNil QEGVAR(listener,exportData)) then {
   EGVAR(listener,exportData) = [QGVARMAIN(exportData), {
+    if !(call GVAR(isAuthorizedEventCaller)) exitWith {
+      WARNING("Unauthorized OCAP_exportData call blocked");
+    };
     _this set [3, true];
     _this call FUNC(exportData);
   }] call CBA_fnc_addEventHandler;
@@ -326,6 +352,9 @@ if (isNil QEGVAR(listener,exportData)) then {
 */
 if (isNil QEGVAR(listener,setFocusStart)) then {
   EGVAR(listener,setFocusStart) = [QGVARMAIN(setFocusStart), {
+    if !(call GVAR(isAuthorizedEventCaller)) exitWith {
+      WARNING("Unauthorized OCAP_setFocusStart call blocked");
+    };
     _this call FUNC(setFocusStart);
   }] call CBA_fnc_addEventHandler;
   OCAPEXTLOG(["Initialized setFocusStart listener"]);
@@ -348,6 +377,9 @@ if (isNil QEGVAR(listener,setFocusStart)) then {
 */
 if (isNil QEGVAR(listener,setFocusEnd)) then {
   EGVAR(listener,setFocusEnd) = [QGVARMAIN(setFocusEnd), {
+    if !(call GVAR(isAuthorizedEventCaller)) exitWith {
+      WARNING("Unauthorized OCAP_setFocusEnd call blocked");
+    };
     _this call FUNC(setFocusEnd);
   }] call CBA_fnc_addEventHandler;
   OCAPEXTLOG(["Initialized setFocusEnd listener"]);

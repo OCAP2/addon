@@ -117,11 +117,8 @@ private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mis
 [":EVENT:GENERAL:", [
   _endFrameNumber,
   "endMission",
-  "",
-  [createHashMapFromArray [
-    ["winSide", _winSide],
-    ["message", _endMessage]
-  ]] call CBA_fnc_encodeJSON
+  _winSide,
+  _endMessage
 ]] call EFUNC(extension,sendData);
 
 

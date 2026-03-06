@@ -43,3 +43,6 @@ PREP(handleChatMessage);
 PREP(radioEvent);
 
 PREP(exportData);
+
+PREP(setFocusStart);
+PREP(setFocusEnd);

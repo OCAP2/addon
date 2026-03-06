@@ -35,14 +35,9 @@
     ]]] call call CBA_fnc_serverEvent;
 
 
-    // Not yet implemented
-    ["ocap_handleCustomEvent", ["captured", [
-      "sector",
-      name _unit,
-      str side group _unit,
-      "#FF0000",
-      getPosAtl _sectorObject
-    ]]] call call CBA_fnc_serverEvent;
+    // Sector captures are tracked automatically when trackSectors setting is enabled.
+    // Manual example for custom sector-like objectives:
+    ["ocap_handleCustomEvent", ["captured", "Sector Alpha,sector"]] call CBA_fnc_serverEvent;
     (end code)
 
   Public:

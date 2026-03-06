@@ -297,6 +297,31 @@ GVAR(allSettings) = [
     false // requires restart to apply
   ],
 
+  /*
+    CBA Setting: OCAP_settings_trackSectors
+    Description:
+      Automatically record sector capture events when ModuleSector_F ownership changes. Default: true
+
+    Setting Name:
+      Enable Sector Capture Tracking
+
+    Value Type:
+      Boolean
+  */
+  [
+    QEGVAR(settings,trackSectors),
+    "CHECKBOX",
+    [
+      "Enable Sector Capture Tracking",
+      "Automatically record sector capture events when ModuleSector_F ownership changes. Default: true"
+    ],
+    [COMPONENT_NAME, "Extra Tracking"],
+    true,
+    true,
+    {},
+    false
+  ],
+
 
 
   // Section: Save/Export Settings

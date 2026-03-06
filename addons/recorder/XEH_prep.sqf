@@ -38,6 +38,7 @@ PREP(aceExplosives);
 
 PREP(addEventIntegrations);
 PREP(getStaticObjects);
+PREP(trackSectors);
 PREP(handleChatMessage);
 PREP(radioEvent);
 

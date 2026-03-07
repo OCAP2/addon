@@ -114,9 +114,8 @@ if (!isNil QGVAR(PFHObject)) then {
 private _winSide = if (isNil "_side") then {""} else {if (_side isEqualTo sideUnknown) then {""} else {str _side}};
 private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mission ended"} else {""}} else {_message};
 
-[":EVENT:GENERAL:", [
+[":EVENT:ENDMISSION:", [
   _endFrameNumber,
-  "endMission",
   _winSide,
   _endMessage
 ]] call EFUNC(extension,sendData);

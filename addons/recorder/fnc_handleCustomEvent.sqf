@@ -5,9 +5,9 @@
 
   Description:
     Routes custom events to the extension with typed positional args based on
-    event type. Sector events (captured/contested/capturedFlag) send structured
-    fields; endMission sends side and message; all other events use the legacy
-    format with JSON-encoded extraData.
+    event type. Sector events (captured/contested/capturedFlag) use :EVENT:SECTOR:
+    with structured fields; endMission uses :EVENT:ENDMISSION: with side and
+    message; all other events use :EVENT:GENERAL: with JSON-encoded extraData.
 
     Applied during initialization of OCAP in <OCAP_recorder_fnc_init>.
 
@@ -67,7 +67,7 @@ switch (_eventName) do {
       _args pushBack _eventMessage;
     };
 
-    [":EVENT:GENERAL:", _args] call EFUNC(extension,sendData);
+    [":EVENT:SECTOR:", _args] call EFUNC(extension,sendData);
   };
 
   case "endMission": {
@@ -79,7 +79,7 @@ switch (_eventName) do {
     } else {
       _message = _eventMessage;
     };
-    [":EVENT:GENERAL:", [GVAR(captureFrameNo), _eventName, _side, _message]] call EFUNC(extension,sendData);
+    [":EVENT:ENDMISSION:", [GVAR(captureFrameNo), _side, _message]] call EFUNC(extension,sendData);
   };
 
   default {

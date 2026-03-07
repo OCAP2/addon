@@ -39,7 +39,7 @@ if (_this isEqualType [] && {count _this > 0}) exitWith {
     if (_name isEqualTo "") then { _name = vehicleVarName _sector };
     if (_name isEqualTo "") then { _name = str _sector };
 
-    private _pos = getPosATL _sector;
+    private _pos = getPosASL _sector;
     if (_newOwner isEqualTo sideUnknown) then {
       [QGVARMAIN(customEvent), ["contested", ["sector", _name, "", _pos]]] call CBA_fnc_localEvent;
     } else {

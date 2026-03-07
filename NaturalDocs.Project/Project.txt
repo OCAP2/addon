@@ -1,0 +1,6 @@
+Title: OCAP2
+Subtitle: Operations Capture and Playback
+
+Source Folder: ../addons
+
+HTML Output Folder: ../docs-output

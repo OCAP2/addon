@@ -8,3 +8,5 @@ hemtt.exe
 
 .hemttprivatekey
 *.biprivatekey
+
+docs-output/

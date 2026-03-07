@@ -5,9 +5,10 @@
 
   Description:
     Routes custom events to the extension with typed positional args based on
-    event type. Sector events (captured/contested/capturedFlag) use :EVENT:SECTOR:
-    with structured fields; endMission uses :EVENT:ENDMISSION: with side and
-    message; all other events use :EVENT:GENERAL: with JSON-encoded extraData.
+    event type. Sector events (captured/contested) use :EVENT:SECTOR: with
+    structured fields; endMission uses :EVENT:ENDMISSION: with side and
+    message; all other events (including capturedFlag) use :EVENT:GENERAL:
+    with JSON-encoded extraData.
 
     Applied during initialization of OCAP in <OCAP_recorder_fnc_init>.
 
@@ -22,7 +23,7 @@
   Examples:
     (start code)
     // Sector captured with structured data (sent by fnc_trackSectors)
-    [QGVARMAIN(customEvent), ["captured", ["sector", "Sector Alpha", [100, 200, 0]]]] call CBA_fnc_localEvent;
+    [QGVARMAIN(customEvent), ["captured", ["sector", "Sector Alpha", str west, "", getPos _sector]]] call CBA_fnc_localEvent;
 
     // End mission with side and message
     [QGVARMAIN(customEvent), ["endMission", [str west, "BLUFOR controlled all sectors!"]]] call CBA_fnc_localEvent;
@@ -49,14 +50,15 @@ params [
 
 switch (_eventName) do {
   case "captured";
-  case "contested";
-  case "capturedFlag": {
+  case "contested": {
     private _args = [GVAR(captureFrameNo), _eventName];
 
     if (_eventMessage isEqualType []) then {
-      // Array format: ["objectType", "unitName", ...maybePosition...]
-      _args pushBack (_eventMessage param [0, ""]);
-      _args pushBack (_eventMessage param [1, ""]);
+      // Array format: [objectType, unitName, side, color, [posX, posY, posZ]]
+      _args pushBack (_eventMessage param [0, "", [""]]);
+      _args pushBack (_eventMessage param [1, "", [""]]);
+      _args pushBack (_eventMessage param [2, "", [""]]);
+      _args pushBack (_eventMessage param [3, "", [""]]);
       {
         if (_x isEqualType [] && {count _x >= 2} && {(_x # 0) isEqualType 0}) exitWith {
           _args append _x;

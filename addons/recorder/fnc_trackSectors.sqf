@@ -41,9 +41,9 @@ if (_this isEqualType [] && {count _this > 0}) exitWith {
 
     private _pos = getPosATL _sector;
     if (_newOwner isEqualTo sideUnknown) then {
-      [QGVARMAIN(customEvent), ["contested", ["sector", _name, "", _pos]]] call CBA_fnc_localEvent;
+      [QGVARMAIN(customEvent), ["contested", ["sector", _name, "", "", _pos]]] call CBA_fnc_localEvent;
     } else {
-      [QGVARMAIN(customEvent), ["captured", ["sector", _name, str _newOwner, _pos]]] call CBA_fnc_localEvent;
+      [QGVARMAIN(customEvent), ["captured", ["sector", _name, str _newOwner, "", _pos]]] call CBA_fnc_localEvent;
     };
   }] call BIS_fnc_addScriptedEventHandler;
 };

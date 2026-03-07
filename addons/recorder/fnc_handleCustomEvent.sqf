@@ -23,7 +23,7 @@
   Examples:
     (start code)
     // Sector captured with structured data (sent by fnc_trackSectors)
-    [QGVARMAIN(customEvent), ["captured", ["sector", "Sector Alpha", str west, getPos _sector]]] call CBA_fnc_localEvent;
+    [QGVARMAIN(customEvent), ["captured", ["sector", "Sector Alpha", str west, getPosASL _sector]]] call CBA_fnc_localEvent;
 
     // End mission with side and message
     [QGVARMAIN(customEvent), ["endMission", [str west, "BLUFOR controlled all sectors!"]]] call CBA_fnc_localEvent;

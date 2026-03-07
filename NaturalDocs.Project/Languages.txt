@@ -1,0 +1,6 @@
+Language: SQF
+
+   Extensions: sqf hpp
+
+   Line Comments: //
+   Block Comments: /* */

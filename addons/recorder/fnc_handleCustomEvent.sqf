@@ -22,8 +22,8 @@
 
   Examples:
     (start code)
-    // Sector captured with structured data (sent by fnc_trackSectors)
-    [QGVARMAIN(customEvent), ["captured", ["sector", "Sector Alpha", [100, 200, 0]]]] call CBA_fnc_localEvent;
+    // Sector/flag captured with structured data (sent by fnc_trackSectors)
+    [QGVARMAIN(customEvent), ["captured", ["flag", name _unit, str side group _unit, "#FF0000", getPosAtl _flag]]] call CBA_fnc_serverEvent;
 
     // End mission with side and message
     [QGVARMAIN(customEvent), ["endMission", [str west, "BLUFOR controlled all sectors!"]]] call CBA_fnc_localEvent;
@@ -55,10 +55,10 @@ switch (_eventName) do {
 
     if (_eventMessage isEqualType []) then {
       // Array format: [objectType, unitName, side, color, [posX, posY, posZ]]
-      // color is not captured by the extension
       _args pushBack (_eventMessage param [0, "", [""]]);
       _args pushBack (_eventMessage param [1, "", [""]]);
       _args pushBack (_eventMessage param [2, "", [""]]);
+      _args pushBack (_eventMessage param [3, "", [""]]);
       {
         if (_x isEqualType [] && {count _x >= 2} && {(_x # 0) isEqualType 0}) exitWith {
           _args append _x;

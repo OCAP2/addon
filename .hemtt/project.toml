@@ -9,6 +9,9 @@ include = [
     "logo_ocap.paa",
 ]
 
+[version]
+git_hash = 0
+
 [lints.sqf]
 # Suppress errors until code is fixed
 command_case = false

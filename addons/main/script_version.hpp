@@ -1,10 +1,7 @@
 // The current version of OCAP.
+// MAJOR, MINOR, PATCH are defined by HEMTT from git tags.
 #ifndef OCAP_SCRIPT_VERSION_HPP
 #define OCAP_SCRIPT_VERSION_HPP
-
-#define MAJOR 2
-#define MINOR 1
-#define PATCH 0
 
 #define VERSION MAJOR.MINOR
 #define VERSION_STR MAJOR.MINOR.PATCH

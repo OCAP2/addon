@@ -26,22 +26,25 @@ Author:
 #include "script_component.hpp"
 
 // --- Single-sector mode: attach EH to one sector ---
-if (_this isEqualType []) exitWith {
+if (_this isEqualType [] && {count _this > 0}) exitWith {
   params ["_sector"];
   if (_sector getVariable [QGVAR(sectorTracked), false]) exitWith {};
   _sector setVariable [QGVAR(sectorTracked), true];
 
-  [_sector, "OwnerChanged", {
-    params ["_sector", "_oldOwner", "_newOwner"];
+  [_sector, "ownerChanged", {
+    params ["_sector", "_newOwner", "_oldOwner"];
     if (!SHOULDSAVEEVENTS) exitWith {};
-    if (_newOwner isEqualTo sideUnknown) exitWith {};
 
     private _name = _sector getVariable ["Name", ""];
     if (_name isEqualTo "") then { _name = vehicleVarName _sector };
     if (_name isEqualTo "") then { _name = str _sector };
 
-    [QGVARMAIN(customEvent), ["captured", format ["%1,sector", _name]]] call CBA_fnc_localEvent;
-    INFO_3("Sector captured: %1 — %2 -> %3",_name,_oldOwner,_newOwner);
+    private _pos = getPosATL _sector;
+    if (_newOwner isEqualTo sideUnknown) then {
+      [QGVARMAIN(customEvent), ["contested", ["sector", _name, _pos]]] call CBA_fnc_localEvent;
+    } else {
+      [QGVARMAIN(customEvent), ["captured", ["sector", _name, _pos]]] call CBA_fnc_localEvent;
+    };
   }] call BIS_fnc_addScriptedEventHandler;
 };
 

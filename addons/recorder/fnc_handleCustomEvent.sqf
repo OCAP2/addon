@@ -57,7 +57,7 @@ switch (_eventName) do {
       // Array format: ["objectType", "unitName", "side"?, "color"?, [posX, posY, posZ]?]
       _args pushBack (_eventMessage param [0, ""]);
       _args pushBack (_eventMessage param [1, ""]);
-      _args pushBack (_eventMessage param [2, ""]);
+      _args pushBack (_eventMessage param [2, "", [""]]);
       {
         if (_x isEqualType [] && {count _x >= 2} && {(_x # 0) isEqualType 0}) exitWith {
           _args append _x;

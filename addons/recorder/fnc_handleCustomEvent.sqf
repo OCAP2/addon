@@ -23,7 +23,7 @@
   Examples:
     (start code)
     // Sector captured with structured data (sent by fnc_trackSectors)
-    [QGVARMAIN(customEvent), ["captured", ["sector", "Sector Alpha", str west, "", getPos _sector]]] call CBA_fnc_localEvent;
+    [QGVARMAIN(customEvent), ["captured", ["sector", "Sector Alpha", str west, getPos _sector]]] call CBA_fnc_localEvent;
 
     // End mission with side and message
     [QGVARMAIN(customEvent), ["endMission", [str west, "BLUFOR controlled all sectors!"]]] call CBA_fnc_localEvent;
@@ -54,11 +54,10 @@ switch (_eventName) do {
     private _args = [GVAR(captureFrameNo), _eventName];
 
     if (_eventMessage isEqualType []) then {
-      // Array format: [objectType, unitName, side, color, [posX, posY, posZ]]
+      // Array format: [objectType, unitName, side, [posX, posY, posZ]]
       _args pushBack (_eventMessage param [0, "", [""]]);
       _args pushBack (_eventMessage param [1, "", [""]]);
       _args pushBack (_eventMessage param [2, "", [""]]);
-      _args pushBack (_eventMessage param [3, "", [""]]);
       {
         if (_x isEqualType [] && {count _x >= 2} && {(_x # 0) isEqualType 0}) exitWith {
           _args append _x;

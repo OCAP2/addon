@@ -54,9 +54,10 @@ switch (_eventName) do {
     private _args = [GVAR(captureFrameNo), _eventName];
 
     if (_eventMessage isEqualType []) then {
-      // Array format: ["objectType", "unitName", "side"?, "color"?, [posX, posY, posZ]?]
-      _args pushBack (_eventMessage param [0, ""]);
-      _args pushBack (_eventMessage param [1, ""]);
+      // Array format: [objectType, unitName, side, color, [posX, posY, posZ]]
+      // color is not captured by the extension
+      _args pushBack (_eventMessage param [0, "", [""]]);
+      _args pushBack (_eventMessage param [1, "", [""]]);
       _args pushBack (_eventMessage param [2, "", [""]]);
       {
         if (_x isEqualType [] && {count _x >= 2} && {(_x # 0) isEqualType 0}) exitWith {

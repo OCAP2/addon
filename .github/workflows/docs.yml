@@ -28,16 +28,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
       - name: Install Natural Docs
-        run: dotnet tool install --global Natural_Docs --version 2.3.1
+        run: |
+          curl -sL "https://www.naturaldocs.org/download/natural_docs/2.4/Natural_Docs_2.4_Development_Release_2.Linux.x64.zip" -o nd.zip
+          unzip -q nd.zip -d naturaldocs
+          chmod +x "naturaldocs/Natural Docs/NaturalDocs"
 
       - name: Generate documentation
-        run: NaturalDocs NaturalDocs.Project --rebuild
+        run: |
+          mkdir -p docs-output
+          "naturaldocs/Natural Docs/NaturalDocs" NaturalDocs.Project --rebuild
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

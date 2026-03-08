@@ -185,22 +185,7 @@ if (isClass (configFile >> "CfgPatches" >> "ace_explosives")) then {
 };
 
 
-/*
-  CBA Event: OCAP_customEvent
-  Description:
-    Event listener for custom event text to be added to the timeline. Calls <OCAP_recorder_fnc_handleCustomEvent> when triggered.
-
-  Parameters:
-    0 - Event name [String]
-    1 - Event data [Array]
-      1.0 - Always "generalEvent" [String]
-      1.1 - Custom event text [String]
-
-  Example:
-    > ["OCAP_customEvent", ["generalEvent", "The warehouse has been secured!"]] call CBA_fnc_serverEvent;
-    > [QGVARMAIN(customEvent), ["generalEvent", "The warehouse has been secured!"]] call CBA_fnc_serverEvent;
-
-*/
+// See <OCAP_recorder_fnc_handleCustomEvent> for usage and examples
 if (isNil QEGVAR(listener,customEvent)) then {
   EGVAR(listener,customEvent) = [QGVARMAIN(customEvent), {
     _this call FUNC(handleCustomEvent);

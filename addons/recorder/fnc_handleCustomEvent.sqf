@@ -21,15 +21,27 @@
     true
 
   Examples:
+    These examples use the expanded event name "OCAP_customEvent" so they can be
+    called from user-defined mission scripts without requiring the CBA macros.
+
     (start code)
-    // Sector captured with structured data (sent by fnc_trackSectors)
-    [QGVARMAIN(customEvent), ["captured", ["sector", "Sector Alpha", str west, getPosASL _sector]]] call CBA_fnc_localEvent;
+    // Sector captured with structured data
+    ["OCAP_customEvent", ["captured", ["sector", "Sector Alpha", str west, getPosASL _sector]]] call CBA_fnc_localEvent;
+
+    // Sector contested (no owning side)
+    ["OCAP_customEvent", ["contested", ["sector", "Sector Alpha", "", getPosASL _sector]]] call CBA_fnc_localEvent;
 
     // End mission with side and message
-    [QGVARMAIN(customEvent), ["endMission", [str west, "BLUFOR controlled all sectors!"]]] call CBA_fnc_localEvent;
+    ["OCAP_customEvent", ["endMission", [str west, "BLUFOR controlled all sectors!"]]] call CBA_fnc_localEvent;
 
-    // Generic event with optional extra data
-    [QGVARMAIN(customEvent), ["generalEvent", "Some event text"]] call CBA_fnc_serverEvent;
+    // End mission with just a message (no side)
+    ["OCAP_customEvent", ["endMission", "Mission complete!"]] call CBA_fnc_localEvent;
+
+    // Generic event — any unrecognized event name goes through the general handler
+    ["OCAP_customEvent", ["generalEvent", "Some event text"]] call CBA_fnc_serverEvent;
+
+    // Custom event name — works the same as generalEvent via the default handler
+    ["OCAP_customEvent", ["myCustomEvent", "Player reached the extraction zone"]] call CBA_fnc_serverEvent;
     (end code)
 
   Public:

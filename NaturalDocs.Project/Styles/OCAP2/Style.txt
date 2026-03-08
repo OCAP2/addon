@@ -1,0 +1,3 @@
+Inherit: Default
+
+Frame OnLoad: NDThemes.SetAvailableThemes([["Dark","Dark"],["Light","Light"],["Auto","Auto:Light/Dark"],["Black","Black"]])

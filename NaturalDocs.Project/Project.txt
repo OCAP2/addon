@@ -8,6 +8,7 @@
 
 Title: OCAP2
 Subtitle: Operations Capture and Playback
+Style: OCAP2
 
 
 # This is where you put general information about your project.  None of these

@@ -34,6 +34,9 @@ jobs:
           unzip -q nd.zip -d naturaldocs
           chmod +x "naturaldocs/Natural Docs/NaturalDocs"
 
+      - name: Install custom styles
+        run: cp -r NaturalDocs.Project/Styles/* "naturaldocs/Natural Docs/Styles/"
+
       - name: Generate documentation
         run: |
           mkdir -p docs-output

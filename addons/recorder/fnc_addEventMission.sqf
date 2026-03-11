@@ -80,6 +80,9 @@ if (isNil QEGVAR(EH,EntityRespawned)) then {
           GVAR(captureFrameNo)
         ]] call EFUNC(extension,sendData);
         _corpse setVariable [QGVARMAIN(exclude), true];
+        if (!isNil QGVAR(trackedUnits)) then {
+          GVAR(trackedUnits) deleteAt (_corpse getVariable [QGVARMAIN(id), -1]);
+        };
       };
 
       [_entity, true] spawn FUNC(addUnitEventHandlers);

@@ -42,6 +42,9 @@ if (_unit getVariable [QGVARMAIN(isInitialized), false]) then {
     GVAR(captureFrameNo)
   ]] call EFUNC(extension,sendData);
   _unit setVariable [QGVARMAIN(exclude), true];
+  if (!isNil QGVAR(trackedUnits)) then {
+    GVAR(trackedUnits) deleteAt (_unit getVariable [QGVARMAIN(id), -1]);
+  };
 };
 
 // saveOnEmpty: if this was the last player, save immediately

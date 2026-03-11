@@ -41,6 +41,7 @@ if (isNil QGVAR(startTime)) then {
 };
 
 GVAR(trackedVehicles) = createHashMap;
+GVAR(trackedUnits) = createHashMap;
 
 // Pre-compute frame intervals that depend on frameCaptureDelay (constant for the mission)
 // Must be GVARs, not private — PFH code runs in a different scope.
@@ -120,6 +121,7 @@ GVAR(PFHObject) = [
         [_x] spawn FUNC(addUnitEventHandlers);
         GVAR(nextId) = GVAR(nextId) + 1;
         _x setVariable [QGVARMAIN(isInitialized), true, true];
+        GVAR(trackedUnits) set [_x getVariable [QGVARMAIN(id), -1], _x];
         _justInitialized = true;
       };
       // Re-include units that have become player-controlled again (e.g., reconnected players)
@@ -185,6 +187,19 @@ GVAR(PFHObject) = [
         };
       };
     } forEach (allUnits + allDeadMen);
+
+    // Detect disappeared units (deleted/garbage-collected) and report removal
+    private _toRemoveUnits = [];
+    {
+      if (isNull _y) then {
+        [":SOLDIER:DELETE:", [
+          _x,
+          GVAR(captureFrameNo)
+        ]] call EFUNC(extension,sendData);
+        _toRemoveUnits pushBack _x;
+      };
+    } forEach GVAR(trackedUnits);
+    { GVAR(trackedUnits) deleteAt _x } forEach _toRemoveUnits;
 
     {
       private _justInitialized = false;
@@ -304,6 +319,10 @@ GVAR(PFHObject) = [
         [":VEHICLE:STATE:", [
           _x, _lastPos, _lastDir, 0, [], GVAR(captureFrameNo),
           0, 1, false, false, _lastSide, _lastVectorDir, _lastVectorUp, 0, 0
+        ]] call EFUNC(extension,sendData);
+        [":VEHICLE:DELETE:", [
+          _x,
+          GVAR(captureFrameNo)
         ]] call EFUNC(extension,sendData);
         _toRemove pushBack _x;
       };

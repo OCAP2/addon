@@ -125,6 +125,38 @@ GVAR(trackedPlacedObjects) = createHashMap;
 // allow inheritance, don't exclude anything, and apply retroactively
 }, true, [], true] call CBA_fnc_addClassEventHandler;
 
+// Fallback for static weapons whose shots bypass FiredMan on the gunner unit.
+// ACE Crew Served Weapons (CSW) fires the vehicle weapon via forceWeaponFire,
+// which may not trigger the unit's FiredMan EH. Additionally, for mortars with
+// allowFireOnLoad, ACE creates a temporary AI agent as gunner when the seat is
+// empty (solo mortar use) — this agent has no OCAP ID.
+// The dedup guard in eh_fired_client prevents double-tracking when both fire.
+["StaticWeapon", "Fired", {
+  params ["_vehicle", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile"];
+
+  if (!local _vehicle) exitWith {};
+
+  // If FiredMan already handled this projectile, skip
+  if (!isNil {_projectile getVariable QGVARMAIN(projectileData)}) exitWith {};
+
+  private _firer = gunner _vehicle;
+  if (isNull _firer) exitWith {};
+
+  // ACE CSW agent fallback: when the gunner is a temporary agent (no OCAP ID),
+  // the actual operator is stored as ace_csw_reloader on the vehicle.
+  if ((_firer getVariable [QGVARMAIN(id), -1]) isEqualTo -1) then {
+    private _reloader = _vehicle getVariable ["ace_csw_reloader", objNull];
+    if (!isNull _reloader) then {
+      _firer = _reloader;
+    };
+  };
+
+  // Forward to existing handlers with FiredMan-compatible params
+  private _params = [_firer, _weapon, _muzzle, _mode, _ammo, _magazine, _projectile, _vehicle];
+  _params call FUNC(eh_fired_client);
+  _params call FUNC(eh_firedMan);
+}, true, [], true] call CBA_fnc_addClassEventHandler;
+
 
 // Finally, we'll add a CBA Event Handler to take in the pre-processed fired data here on the server and send it to the extension.
 [QGVARMAIN(handleFiredManData), {

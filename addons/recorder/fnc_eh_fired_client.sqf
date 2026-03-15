@@ -15,6 +15,11 @@ if (isNil "_projectile") exitWith {
   false;
 };
 
+// Dedup guard — when both FiredMan (unit) and Fired (vehicle) EHs fire for the
+// same shot, only the first one to run should process.  The second sees
+// projectileData already set and exits.
+if (!isNil {_projectile getVariable QGVARMAIN(projectileData)}) exitWith {false};
+
 // Zeus remote control fix: FiredMan fires on the controller's body, not the
 // controlled unit. bis_fnc_moduleRemoteControl_unit (local to the controller's
 // machine) gives us the actual unit doing the firing.

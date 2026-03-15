@@ -46,8 +46,8 @@ params ["_firer", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_project
 private _controlledUnit = missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", objNull];
 if (!isNull _controlledUnit && {_controlledUnit getVariable ["BIS_fnc_moduleRemoteControl_owner", objNull] isEqualTo _firer}) then {
 	_firer = _controlledUnit;
-	_vehicle = vehicle _controlledUnit;
-	if (_vehicle isEqualTo _controlledUnit) then { _vehicle = objNull; };
+	private _controlledVehicle = vehicle _controlledUnit;
+	_vehicle = if (_controlledVehicle isEqualTo _controlledUnit) then {objNull} else {_controlledVehicle};
 };
 
 // not sent in ACE Throwing events

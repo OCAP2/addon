@@ -125,6 +125,83 @@ GVAR(trackedPlacedObjects) = createHashMap;
 // allow inheritance, don't exclude anything, and apply retroactively
 }, true, [], true] call CBA_fnc_addClassEventHandler;
 
+// Fallback for static weapons whose shots bypass FiredMan on the gunner unit.
+// ACE Crew Served Weapons (CSW) fires the vehicle weapon via forceWeaponFire,
+// which may not trigger the unit's FiredMan EH. Additionally, for mortars with
+// allowFireOnLoad, ACE creates a temporary AI agent as gunner when the seat is
+// empty (solo mortar use) — this agent has no OCAP ID.
+// The dedup guard in eh_fired_client prevents double-tracking when both fire.
+//
+// Like FiredMan above, the Fired EH must live on the machine that owns the
+// vehicle. We use the same Init + Local + remoteExec pattern: add on init,
+// transfer on locality change. Only eh_fired_client is called (not eh_firedMan)
+// because eh_firedMan is server-only and the EH may run on a client.
+// eh_fired_client already handles weapon attribution (lastFired) via broadcast,
+// and ACE CSW handles setShotParents for its own projectiles.
+["StaticWeapon", "init", {
+  params ["_entity"];
+
+  if (local _entity) then {
+    private _id = _entity addEventHandler ["Fired", {
+      params ["_vehicle", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile"];
+      if (!isNil {_projectile getVariable QGVARMAIN(projectileData)}) exitWith {};
+      private _firer = gunner _vehicle;
+      if (isNull _firer) exitWith {};
+      if ((_firer getVariable [QGVARMAIN(id), -1]) isEqualTo -1) then {
+        private _reloader = _vehicle getVariable ["ace_csw_reloader", objNull];
+        if (!isNull _reloader) then { _firer = _reloader; };
+      };
+      [_firer, _weapon, _muzzle, _mode, _ammo, _magazine, _projectile, _vehicle] call FUNC(eh_fired_client);
+    }];
+    _entity setVariable [QGVARMAIN(staticFiredEHExists), true];
+    _entity setVariable [QGVARMAIN(staticFiredEH), _id];
+  } else {
+    [_entity, {
+      private _id = _this addEventHandler ["Fired", {
+        params ["_vehicle", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile"];
+        if (!isNil {_projectile getVariable QGVARMAIN(projectileData)}) exitWith {};
+        private _firer = gunner _vehicle;
+        if (isNull _firer) exitWith {};
+        if ((_firer getVariable [QGVARMAIN(id), -1]) isEqualTo -1) then {
+          private _reloader = _vehicle getVariable ["ace_csw_reloader", objNull];
+          if (!isNull _reloader) then { _firer = _reloader; };
+        };
+        [_firer, _weapon, _muzzle, _mode, _ammo, _magazine, _projectile, _vehicle] call FUNC(eh_fired_client);
+      }];
+      _this setVariable [QGVARMAIN(staticFiredEHExists), true];
+      _this setVariable [QGVARMAIN(staticFiredEH), _id];
+    }] remoteExec ["call", owner _entity];
+  };
+
+  _entity addEventHandler ["Local", {
+    params ["_entity", "_isLocal"];
+    private _staticFiredEHExists = _entity getVariable [QGVARMAIN(staticFiredEHExists), false];
+
+    if (!_isLocal && _staticFiredEHExists) then {
+      _entity removeEventHandler ["Fired", _entity getVariable QGVARMAIN(staticFiredEH)];
+      _entity setVariable [QGVARMAIN(staticFiredEHExists), false];
+      _entity setVariable [QGVARMAIN(staticFiredEH), nil];
+    };
+
+    if (_isLocal && !_staticFiredEHExists) then {
+      private _id = _entity addEventHandler ["Fired", {
+        params ["_vehicle", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile"];
+        if (!isNil {_projectile getVariable QGVARMAIN(projectileData)}) exitWith {};
+        private _firer = gunner _vehicle;
+        if (isNull _firer) exitWith {};
+        if ((_firer getVariable [QGVARMAIN(id), -1]) isEqualTo -1) then {
+          private _reloader = _vehicle getVariable ["ace_csw_reloader", objNull];
+          if (!isNull _reloader) then { _firer = _reloader; };
+        };
+        [_firer, _weapon, _muzzle, _mode, _ammo, _magazine, _projectile, _vehicle] call FUNC(eh_fired_client);
+      }];
+      _entity setVariable [QGVARMAIN(staticFiredEHExists), true];
+      _entity setVariable [QGVARMAIN(staticFiredEH), _id];
+    };
+  }];
+
+}, true, [], true] call CBA_fnc_addClassEventHandler;
+
 
 // Finally, we'll add a CBA Event Handler to take in the pre-processed fired data here on the server and send it to the extension.
 [QGVARMAIN(handleFiredManData), {

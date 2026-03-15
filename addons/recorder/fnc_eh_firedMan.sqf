@@ -41,20 +41,14 @@ if (!SHOULDSAVEEVENTS) exitWith {};
 
 params ["_firer", "_weapon", "_muzzle", "_mode", "_ammo", "_magazine", "_projectile", "_vehicle"];
 
-private _initialProjPos = getPosASL _projectile;
-if (getPos _firer distance _initialProjPos > 50 || vehicle _firer isKindOf "Air") then {
-	// if projectile in unscheduled environment is > 50m from FiredMan then likely remote controlled
-	  // we should find the actual firing entity
-	private _nearest = [_initialProjPos, allUnits select {
-		!isPlayer _x
-	}, 75] call CBA_fnc_getNearest;
-	if (count _nearest > 0) then {
-		_firer = _nearest#0;
-	};
+// Zeus remote control fix: FiredMan fires on the controller's body, not the
+// controlled unit. Swap to the actual controlled unit for correct attribution.
+private _controlledUnit = missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", objNull];
+if (!isNull _controlledUnit && {_controlledUnit getVariable ["BIS_fnc_moduleRemoteControl_owner", objNull] isEqualTo _firer}) then {
+	_firer = _controlledUnit;
+	private _controlledVehicle = vehicle _controlledUnit;
+	_vehicle = if (_controlledVehicle isEqualTo _controlledUnit) then {objNull} else {_controlledVehicle};
 };
-
-// missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", _firer];
-// _unit getVariable ["BIS_fnc_moduleRemoteControl_owner", objNull];
 
 // not sent in ACE Throwing events
 if (isNil "_vehicle") then {

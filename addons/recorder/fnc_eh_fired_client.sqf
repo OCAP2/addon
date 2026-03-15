@@ -15,6 +15,18 @@ if (isNil "_projectile") exitWith {
   false;
 };
 
+// Zeus remote control fix: FiredMan fires on the controller's body, not the
+// controlled unit. bis_fnc_moduleRemoteControl_unit (local to the controller's
+// machine) gives us the actual unit doing the firing.
+private _controlledUnit = missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", objNull];
+if (!isNull _controlledUnit && {_controlledUnit getVariable ["BIS_fnc_moduleRemoteControl_owner", objNull] isEqualTo _firer}) then {
+  TRACE_2("Swapping firer from Zeus body to remote-controlled unit",name _firer,name _controlledUnit);
+  _firer = _controlledUnit;
+  // Fix _vehicle — Zeus body isn't in the static weapon, but the controlled unit is
+  private _controlledVehicle = vehicle _controlledUnit;
+  _vehicle = if (_controlledVehicle isEqualTo _controlledUnit) then {objNull} else {_controlledVehicle};
+};
+
 // get ocap id of firer
 private _firerOcapId = _firer getVariable [QGVARMAIN(id), -1];
 if (_firerOcapId isEqualTo -1) exitWith {

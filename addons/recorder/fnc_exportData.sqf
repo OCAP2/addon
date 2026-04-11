@@ -134,6 +134,9 @@ OCAPEXTLOG(ARR4("Queued recording of mission",GVAR(missionName),"with tag",_save
 
 // Interim "saving..." toast; the final result comes from :MISSION:SAVED:
 [format["OCAP saving %1 (%2 frames) — upload will follow", briefingName, _endFrameNumber], 1, [1, 1, 1, 1]] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+// Interim diary record. The final "exported successfully" / "upload failed"
+// record is appended from the :MISSION:SAVED: ExtensionCallback handler in
+// fnc_initSession.sqf once the async save completes.
 [[GVAR(missionName), GVAR(captureFrameNo)], {
   params ["_missionName", "_endFrame"];
 
@@ -146,7 +149,7 @@ OCAPEXTLOG(ARR4("Queued recording of mission",GVAR(missionName),"with tag",_save
     [
       "Status",
       format[
-        "<font color='#33FF33'>OCAP capture of %1 has been exported with %2 frames saved.</font><br/><br/>Upload results have been logged.",
+        "<font color='#FFFF33'>OCAP capture of %1 with %2 frames is being saved and uploaded.</font><br/><br/>Final status will be reported when the upload completes.",
         _missionName,
         _endFrame
       ]

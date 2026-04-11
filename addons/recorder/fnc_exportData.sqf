@@ -123,14 +123,17 @@ private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mis
 
 private _saveTag = if (!isNil "_tag") then {_tag} else {EGVAR(settings,saveTag)};
 INFO_3("Saving recording — mission: %1 | frames: %2 | tag: %3",GVAR(missionName),_endFrameNumber,_saveTag);
-private _saveStart = diag_tickTime;
+
+// Save is now asynchronous — the extension returns immediately and will fire
+// a :MISSION:SAVED: ExtensionCallback when the write + upload finishes.
+// The final success/failure notification is driven from that callback in
+// fnc_initSession.sqf.
+INFO_2("Mission save queued — mission: %1 | frames: %2",GVAR(missionName),_endFrameNumber);
 [":MISSION:SAVE:", []] call EFUNC(extension,sendData);
-INFO_2("Recording saved — took %1 ms | mission: %2",round ((diag_tickTime - _saveStart) * 1000),GVAR(missionName));
-OCAPEXTLOG(ARR4("Saved recording of mission",GVAR(missionName),"with tag",_saveTag));
+OCAPEXTLOG(ARR4("Queued recording of mission",GVAR(missionName),"with tag",_saveTag));
 
-
-// notify players that the recording was saved with a 2 second delay to ensure the "stopped recording" entries populate first
-[format["OCAP saved %1 frames successfully", _endFrameNumber], 1, [1, 1, 1, 1]] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+// Interim "saving..." toast; the final result comes from :MISSION:SAVED:
+[format["OCAP saving %1 (%2 frames) — upload will follow", briefingName, _endFrameNumber], 1, [1, 1, 1, 1]] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
 [[GVAR(missionName), GVAR(captureFrameNo)], {
   params ["_missionName", "_endFrame"];
 

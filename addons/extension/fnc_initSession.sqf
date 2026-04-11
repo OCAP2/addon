@@ -154,6 +154,49 @@ addMissionEventHandler ["ExtensionCallback", {
     INFO("Mission registered. Starting data send.");
     GVAR(sessionReady) = true;
   };
+
+  if (_function isEqualTo ":MISSION:SAVED:") exitWith {
+    // Payload shapes:
+    //   ["ok", path]
+    //   ["partial", path, error]
+    //   ["error", error]
+    private _status = _data param [0, ""];
+    private _detail = _data param [1, ""];
+    private _extra  = _data param [2, ""];
+
+    switch (_status) do {
+      case "ok": {
+        INFO_1("Mission save complete — path: %1",_detail);
+        GVAR(lastSaveResult) = ["ok", _detail];
+        [
+          format["OCAP saved %1 successfully", briefingName],
+          2,
+          [0, 0.8, 0, 1]
+        ] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+      };
+      case "partial": {
+        WARNING_2("Mission save complete but upload failed — path: %1 error: %2",_detail,_extra);
+        GVAR(lastSaveResult) = ["partial", _detail, _extra];
+        [
+          format["OCAP saved locally (%1) but upload failed: %2", _detail, _extra],
+          2,
+          [1, 0.8, 0, 1]
+        ] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+      };
+      case "error": {
+        ERROR_MSG_1("Mission save failed: %1",_detail);
+        GVAR(lastSaveResult) = ["error", _detail];
+        [
+          format["OCAP save failed: %1", _detail],
+          2,
+          [1, 0, 0, 1]
+        ] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+      };
+      default {
+        WARNING_1("Unknown :MISSION:SAVED: status: %1",_status);
+      };
+    };
+  };
 }];
 
 

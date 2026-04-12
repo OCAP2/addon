@@ -154,6 +154,78 @@ addMissionEventHandler ["ExtensionCallback", {
     INFO("Mission registered. Starting data send.");
     GVAR(sessionReady) = true;
   };
+
+  if (_function isEqualTo ":MISSION:SAVED:") exitWith {
+    // Payload shapes:
+    //   ["ok", path]
+    //   ["partial", path, error]
+    //   ["error", error]
+    // Type-check each field: if the extension ever sends something
+    // unexpected, fall back to an empty string rather than crashing
+    // the callback handler with a type error in the switch below.
+    private _status = _data param [0, "", [""]];
+    private _detail = _data param [1, "", [""]];
+    private _extra  = _data param [2, "", [""]];
+
+    // finalDiary appends a final status entry to the OCAPInfo diary
+    // subject so the interim "being saved" record from fnc_exportData.sqf
+    // is followed by the authoritative outcome.
+    private _finalDiary = {
+      params ["_diaryHtml"];
+      [[_diaryHtml], {
+        params ["_html"];
+        player createDiaryRecord [
+          "OCAPInfo",
+          ["Status", _html]
+        ];
+      }] remoteExec ["call", [0, -2] select isDedicated, true];
+    };
+
+    switch (_status) do {
+      case "ok": {
+        INFO_1("Mission save complete — path: %1",_detail);
+        GVAR(lastSaveResult) = ["ok", _detail];
+        [
+          format["OCAP saved %1 successfully", briefingName],
+          2,
+          [0, 0.8, 0, 1]
+        ] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+        [format[
+          "<font color='#33FF33'>OCAP capture of %1 has been exported and uploaded successfully.</font>",
+          briefingName
+        ]] call _finalDiary;
+      };
+      case "partial": {
+        WARNING_2("Mission save complete but upload failed — path: %1 error: %2",_detail,_extra);
+        GVAR(lastSaveResult) = ["partial", _detail, _extra];
+        [
+          format["OCAP saved locally (%1) but upload failed: %2", _detail, _extra],
+          2,
+          [1, 0.8, 0, 1]
+        ] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+        [format[
+          "<font color='#FFCC00'>OCAP capture of %1 was saved locally to %2, but the upload to the web server failed:</font><br/>%3",
+          briefingName, _detail, _extra
+        ]] call _finalDiary;
+      };
+      case "error": {
+        ERROR_MSG_1("Mission save failed: %1",_detail);
+        GVAR(lastSaveResult) = ["error", _detail];
+        [
+          format["OCAP save failed: %1", _detail],
+          2,
+          [1, 0, 0, 1]
+        ] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+        [format[
+          "<font color='#FF3333'>OCAP save of %1 failed:</font><br/>%2",
+          briefingName, _detail
+        ]] call _finalDiary;
+      };
+      default {
+        WARNING_1("Unknown :MISSION:SAVED: status: %1",_status);
+      };
+    };
+  };
 }];
 
 

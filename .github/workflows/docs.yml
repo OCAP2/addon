@@ -43,7 +43,7 @@ jobs:
           "naturaldocs/Natural Docs/NaturalDocs" NaturalDocs.Project --rebuild
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs-output
 

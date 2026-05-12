@@ -38,6 +38,14 @@ if (!SHOULDSAVEEVENTS) exitWith {};
 
 params ["_explosive", "_dir", "_pitch", "_unit"];
 
+// ace_explosives_place is a CBA global event — it fires on every machine. On a
+// dedicated server the explosive's position has not yet network-synced when the
+// event fires (getPosASL returns 0,0,~0). Only the placer (where the object is
+// local) has the authoritative position at this moment, so gate execution to it.
+// The placer then ships the data to the server via CBA_fnc_serverEvent below,
+// matching the vanilla mine path in fnc_eh_fired_client.sqf.
+if (!local _explosive) exitWith {};
+
 // Resolve explosive metadata from config
 private _explType = typeOf _explosive;
 private _explosiveMag = getText(configFile >> "CfgAmmo" >> _explType >> "defaultMagazine");

@@ -92,34 +92,41 @@ _explosive addEventHandler ["Deleted", {
   [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
 }];
 
-// Send :PLACED:CREATE: only from the placer. ace_explosives_place is a CBA
-// global event, so it fires on every machine — but on a dedicated server the
-// explosive's position has not yet network-synced (getPosASL returns 0,0,~0).
-// Only the machine that owns the object has the authoritative position at
-// this moment, matching the vanilla mine path in fnc_eh_fired_client.sqf.
-if (!local _explosive) exitWith {};
+// Send :PLACED:CREATE: from the server only — captureFrameNo and the placed-id
+// counter (GVAR(nextId)) live there, and the server is where the position
+// eventually syncs. Delay the read briefly: ace_explosives_place fires before
+// the explosive's position has settled on the server (getPosASL initially
+// returns 0,0,~0; correct after ~1s), which previously caused recordings to
+// show charges at the map origin.
+if (!isServer) exitWith {};
 
-// Resolve explosive metadata from config
-private _explType = typeOf _explosive;
-private _explosiveMag = getText(configFile >> "CfgAmmo" >> _explType >> "defaultMagazine");
-private _explosiveDisp = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "displayName");
-private _explosivePic = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "picture");
+[{
+  params ["_explosive", "_unit"];
+  if (isNull _explosive || {isNull _unit}) exitWith {};
 
-// Get placer's OCAP ID
-private _unitOcapId = _unit getVariable [QGVARMAIN(id), -1];
-if (_unitOcapId isEqualTo -1) exitWith {};
+  // Get placer's OCAP ID
+  private _unitOcapId = _unit getVariable [QGVARMAIN(id), -1];
+  if (_unitOcapId isEqualTo -1) exitWith {};
 
-// Build :PLACED:CREATE: data — same format as vanilla mines in fnc_eh_fired_client.sqf
-private _placedData = [
-  EGVAR(recorder,captureFrameNo),                                        // 0: captureFrameNo
-  -1,                                                                     // 1: placedId (assigned by server)
-  _explType,                                                              // 2: className
-  _explosiveDisp,                                                         // 3: displayName
-  (getPosASL _explosive) joinString ",",                                  // 4: position
-  _unitOcapId,                                                            // 5: firerOcapId
-  str (side group _unit),                                                 // 6: side
-  "put",                                                                  // 7: weapon
-  _explosivePic                                                           // 8: magazineIcon
-];
+  // Resolve explosive metadata from config
+  private _explType = typeOf _explosive;
+  private _explosiveMag = getText(configFile >> "CfgAmmo" >> _explType >> "defaultMagazine");
+  private _explosiveDisp = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "displayName");
+  private _explosivePic = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "picture");
 
-[QGVARMAIN(handlePlacedData), [_placedData, _explosive]] call CBA_fnc_serverEvent;
+  // Build :PLACED:CREATE: data — same format as vanilla mines in fnc_eh_fired_client.sqf
+  private _placedData = [
+    EGVAR(recorder,captureFrameNo),                                        // 0: captureFrameNo
+    -1,                                                                     // 1: placedId (assigned by server)
+    _explType,                                                              // 2: className
+    _explosiveDisp,                                                         // 3: displayName
+    (getPosASL _explosive) joinString ",",                                  // 4: position
+    _unitOcapId,                                                            // 5: firerOcapId
+    str (side group _unit),                                                 // 6: side
+    "put",                                                                  // 7: weapon
+    _explosivePic                                                           // 8: magazineIcon
+  ];
+
+  // handlePlacedData is registered server-side, so localEvent is sufficient
+  [QGVARMAIN(handlePlacedData), [_placedData, _explosive]] call CBA_fnc_localEvent;
+}, [_explosive, _unit], 1] call CBA_fnc_waitAndExecute;

@@ -92,12 +92,11 @@ _explosive addEventHandler ["Deleted", {
   [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
 }];
 
-// Send :PLACED:CREATE: from the server only — captureFrameNo and the placed-id
-// counter (GVAR(nextId)) live there, and the server is where the position
-// eventually syncs. Delay the read briefly: ace_explosives_place fires before
-// the explosive's position has settled on the server (getPosASL initially
-// returns 0,0,~0; correct after ~1s), which previously caused recordings to
-// show charges at the map origin.
+// Send :PLACED:CREATE: from the server only, after a brief settle delay.
+// ace_explosives_place fires before the explosive's position has synced on
+// the server (getPosASL initially returns 0,0,~0; correct after ~1s), which
+// previously caused recordings to show charges at the map origin. Reading
+// after the delay on the server gives the authoritative settled position.
 if (!isServer) exitWith {};
 
 [{

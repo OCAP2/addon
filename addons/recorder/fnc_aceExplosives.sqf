@@ -38,42 +38,14 @@ if (!SHOULDSAVEEVENTS) exitWith {};
 
 params ["_explosive", "_dir", "_pitch", "_unit"];
 
-// ace_explosives_place is a CBA global event — it fires on every machine. On a
-// dedicated server the explosive's position has not yet network-synced when the
-// event fires (getPosASL returns 0,0,~0). Only the placer (where the object is
-// local) has the authoritative position at this moment, so gate execution to it.
-// The placer then ships the data to the server via CBA_fnc_serverEvent below,
-// matching the vanilla mine path in fnc_eh_fired_client.sqf.
-if (!local _explosive) exitWith {};
-
-// Resolve explosive metadata from config
-private _explType = typeOf _explosive;
-private _explosiveMag = getText(configFile >> "CfgAmmo" >> _explType >> "defaultMagazine");
-private _explosiveDisp = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "displayName");
-private _explosivePic = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "picture");
-
-// Get placer's OCAP ID
-private _unitOcapId = _unit getVariable [QGVARMAIN(id), -1];
-if (_unitOcapId isEqualTo -1) exitWith {};
-
 _explosive setVariable [QGVARMAIN(detonated), false];
 
-// Build :PLACED:CREATE: data — same format as vanilla mines in fnc_eh_fired_client.sqf
-private _placedData = [
-  EGVAR(recorder,captureFrameNo),                                        // 0: captureFrameNo
-  -1,                                                                     // 1: placedId (assigned by server)
-  _explType,                                                              // 2: className
-  _explosiveDisp,                                                         // 3: displayName
-  (getPosASL _explosive) joinString ",",                                  // 4: position
-  _unitOcapId,                                                            // 5: firerOcapId
-  str (side group _unit),                                                 // 6: side
-  "put",                                                                  // 7: weapon
-  _explosivePic                                                           // 8: magazineIcon
-];
-
-[QGVARMAIN(handlePlacedData), [_placedData, _explosive]] call CBA_fnc_serverEvent;
-
-// Attach lifecycle EHs — identical to vanilla path in fnc_eh_fired_client.sqf
+// Attach lifecycle EHs on every machine. addEventHandler is local, and the
+// EH only fires on the machine that owns the object at event-time, so
+// registering everywhere keeps tracking resilient to locality transfers
+// (e.g. placer disconnect → object transfers to server or another client).
+// The server-side polling in fnc_eh_fired_server.sqf is a secondary safety
+// net for the server-takeover case.
 _explosive addEventHandler ["HitExplosion", {
   params ["_explosive", "_hitEntity", "_explosiveOwner", "_hitThings"];
   if (isNull _hitEntity) exitWith {};
@@ -119,3 +91,35 @@ _explosive addEventHandler ["Deleted", {
   ];
   [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
 }];
+
+// Send :PLACED:CREATE: only from the placer. ace_explosives_place is a CBA
+// global event, so it fires on every machine — but on a dedicated server the
+// explosive's position has not yet network-synced (getPosASL returns 0,0,~0).
+// Only the machine that owns the object has the authoritative position at
+// this moment, matching the vanilla mine path in fnc_eh_fired_client.sqf.
+if (!local _explosive) exitWith {};
+
+// Resolve explosive metadata from config
+private _explType = typeOf _explosive;
+private _explosiveMag = getText(configFile >> "CfgAmmo" >> _explType >> "defaultMagazine");
+private _explosiveDisp = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "displayName");
+private _explosivePic = getText(configFile >> "CfgMagazines" >> _explosiveMag >> "picture");
+
+// Get placer's OCAP ID
+private _unitOcapId = _unit getVariable [QGVARMAIN(id), -1];
+if (_unitOcapId isEqualTo -1) exitWith {};
+
+// Build :PLACED:CREATE: data — same format as vanilla mines in fnc_eh_fired_client.sqf
+private _placedData = [
+  EGVAR(recorder,captureFrameNo),                                        // 0: captureFrameNo
+  -1,                                                                     // 1: placedId (assigned by server)
+  _explType,                                                              // 2: className
+  _explosiveDisp,                                                         // 3: displayName
+  (getPosASL _explosive) joinString ",",                                  // 4: position
+  _unitOcapId,                                                            // 5: firerOcapId
+  str (side group _unit),                                                 // 6: side
+  "put",                                                                  // 7: weapon
+  _explosivePic                                                           // 8: magazineIcon
+];
+
+[QGVARMAIN(handlePlacedData), [_placedData, _explosive]] call CBA_fnc_serverEvent;

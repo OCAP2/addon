@@ -4,8 +4,13 @@
 // First, we'll remoteExec three functions to all clients:
 // eh_fired_client, eh_fired_clientBullet, and eh_fired_clientProjectile.
 
-// We'll use the Local EH to detect changes of unit locality. Add the EH for the soldier unit on the new owner, and remove it on the old. This EH only triggers on two machines so it limits the overall impact of doing so and validates duplicate records are not sent to the server.
-// https://community.bistudio.com/wiki/Arma_3:_Event_Handlers#Local
+// We use a Local EH to detect locality changes and migrate the FiredMan/HandleDamage
+// handlers to follow the unit's owner. The Local EH only fires on machines where it
+// was added (https://community.bistudio.com/wiki/Arma_3:_Event_Handlers#Local) — since
+// OCAP is server-side only, the EH lives on the server. When locality leaves the
+// server (e.g. a player slots into a pre-placed AI), the server must remoteExec the
+// install code to the new owner; otherwise the player's machine has no FiredMan EH
+// and their shots are never recorded.
 
 
 
@@ -28,8 +33,47 @@
 GVAR(trackedProjectiles) = createHashMap;
 GVAR(trackedPlacedObjects) = createHashMap;
 
+// Install block — adds the FiredMan/HandleDamage handlers on whichever machine
+// owns the unit. FUNC/QGVARMAIN macros are expanded here at compile time on the
+// server (the only machine with the PBO). When this code block is shipped to a
+// client via remoteExec ["call", ...], it carries the expanded global-variable
+// references; `ocap_recorder_fnc_eh_fired_client` is populated on every client by
+// the JIP remoteExec at the top of this file.
+GVAR(ownerInstallBlock) = {
+  private _id = _this addEventHandler ["FiredMan", {
+    private _start = diag_tickTime;
+    _this call FUNC(eh_fired_client);
+    TRACE_1("Ran fired handler",diag_tickTime - _start);
+  }];
+  _this setVariable [QGVARMAIN(firedManEHExists), true];
+  _this setVariable [QGVARMAIN(firedManEH), _id];
+
+  // HandleDamage stores the ammo classname on the victim for kill attribution
+  private _hdId = _this addEventHandler ["HandleDamage", {
+    params ["_unit", "", "", "", "_projectile"];
+    if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
+      _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
+    };
+  }];
+  _this setVariable [QGVARMAIN(handleDamageEHExists), true];
+  _this setVariable [QGVARMAIN(handleDamageEH), _hdId];
+};
+
+GVAR(ownerRemoveBlock) = {
+  if (_this getVariable [QGVARMAIN(firedManEHExists), false]) then {
+    _this removeEventHandler ["FiredMan", _this getVariable QGVARMAIN(firedManEH)];
+    _this setVariable [QGVARMAIN(firedManEHExists), false];
+    _this setVariable [QGVARMAIN(firedManEH), nil];
+  };
+  if (_this getVariable [QGVARMAIN(handleDamageEHExists), false]) then {
+    _this removeEventHandler ["HandleDamage", _this getVariable QGVARMAIN(handleDamageEH)];
+    _this setVariable [QGVARMAIN(handleDamageEHExists), false];
+    _this setVariable [QGVARMAIN(handleDamageEH), nil];
+  };
+};
+
 // Now we'll do the server setup.
-// Wrap everything in a CBA Class Event Handler so when the server initializes any soldier, it'll set up the Local EH. The Local EH is global (ironically) when applied to a unit so it'll do what we need across the entire session and trigger the relevant machines on locality change.
+// Wrap everything in a CBA Class Event Handler so when the server initializes any soldier, it'll set up the Local EH.
 ["CAManBase", "init", {
   params ["_entity"];
 
@@ -37,87 +81,28 @@ GVAR(trackedPlacedObjects) = createHashMap;
   // For local entities (server-owned AI), add directly — remoteExec to owner 0
   // (not-yet-networked entities) causes the object reference to deserialize as null.
   if (local _entity) then {
-    private _id = _entity addEventHandler ["FiredMan", {
-      private _start = diag_tickTime;
-      _this call FUNC(eh_fired_client);
-      TRACE_1("Ran fired handler",diag_tickTime - _start);
-    }];
-    _entity setVariable [QGVARMAIN(firedManEHExists), true];
-    _entity setVariable [QGVARMAIN(firedManEH), _id];
-
-    // HandleDamage stores the ammo classname on the victim for kill attribution
-    private _hdId = _entity addEventHandler ["HandleDamage", {
-      params ["_unit", "", "", "", "_projectile"];
-      if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
-        _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
-      };
-    }];
-    _entity setVariable [QGVARMAIN(handleDamageEHExists), true];
-    _entity setVariable [QGVARMAIN(handleDamageEH), _hdId];
+    _entity call GVAR(ownerInstallBlock);
   } else {
-    [_entity, {
-      private _id = _this addEventHandler ["FiredMan", {
-        private _start = diag_tickTime;
-        _this call FUNC(eh_fired_client);
-        TRACE_1("Ran fired handler",diag_tickTime - _start);
-      }];
-      _this setVariable [QGVARMAIN(firedManEHExists), true];
-      _this setVariable [QGVARMAIN(firedManEH), _id];
-
-      private _hdId = _this addEventHandler ["HandleDamage", {
-        params ["_unit", "", "", "", "_projectile"];
-        if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
-          _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
-        };
-      }];
-      _this setVariable [QGVARMAIN(handleDamageEHExists), true];
-      _this setVariable [QGVARMAIN(handleDamageEH), _hdId];
-    }] remoteExec ["call", owner _entity];
+    [_entity, GVAR(ownerInstallBlock)] remoteExec ["call", owner _entity];
   };
 
-
-  // Again, we will add a single Local EH for the unit on the server, but it has global effect so this is sufficient.
+  // Local EH on the server detects locality changes. Per BIS wiki, this EH only fires
+  // on machines where it was added — since clients don't have OCAP, the EH lives on
+  // the server only. We can't rely on a Local EH firing on the new owner: when the
+  // server loses locality (player slotting into pre-placed AI is the common case),
+  // we must remoteExec the install to the new owner. When the server regains locality
+  // (e.g. owner disconnect), we install directly here.
   _entity addEventHandler ["Local", {
-    // This code will be run on both the machine giving up ownership and the machine receiving ownership.
     params ["_entity", "_isLocal"];
 
-    // If the unit is NO LONGER local, remove the EH and the CBA EH.
-    // We need to see if it exists already.
-    private _firedManEHExists = _entity getVariable [QGVARMAIN(firedManEHExists), false];
-    private _handleDamageEHExists = _entity getVariable [QGVARMAIN(handleDamageEHExists), false];
-
-    // If the unit is NO LONGER local, and the EH exists, remove it.
-    if (!_isLocal && _firedManEHExists) then {
-      _entity removeEventHandler ["FiredMan", _entity getVariable QGVARMAIN(firedManEH)];
-      _entity setVariable [QGVARMAIN(firedManEHExists), false];
-      _entity setVariable [QGVARMAIN(firedManEH), nil];
-    };
-    if (!_isLocal && _handleDamageEHExists) then {
-      _entity removeEventHandler ["HandleDamage", _entity getVariable QGVARMAIN(handleDamageEH)];
-      _entity setVariable [QGVARMAIN(handleDamageEHExists), false];
-      _entity setVariable [QGVARMAIN(handleDamageEH), nil];
-    };
-
-    // If the unit is NOW local and the EH doesn't exist, add it.
-    if (_isLocal && !_firedManEHExists) then {
-      private _id = _entity addEventHandler ["FiredMan", {
-        TRACE_2("FiredMan EH fired",clientOwner,_this);
-        private _start = diag_tickTime;
-        _this call FUNC(eh_fired_client);
-        TRACE_1("Ran fired handler",diag_tickTime - _start);
-      }];
-      _entity setVariable [QGVARMAIN(firedManEHExists), true];
-      _entity setVariable [QGVARMAIN(firedManEH), _id];
-    };
-    if (_isLocal && !_handleDamageEHExists) then {
-      private _hdId = _entity addEventHandler ["HandleDamage", {
-        params ["_unit", "", "", "", "_projectile"];
-        if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
-          _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
-        };
-      }];
-      _entity setVariable [QGVARMAIN(handleDamageEHExists), true];
-      _entity setVariable [QGVARMAIN(handleDamageEH), _hdId];
+    if (_isLocal) then {
+      // Server gained locality — install on server directly.
+      _entity call GVAR(ownerInstallBlock);
+    } else {
+      // Server lost locality — clean up server EHs and install on the new owner.
+      // `owner _entity` returns the new owner at this point (locality has already changed).
+      _entity call GVAR(ownerRemoveBlock);
+      [_entity, GVAR(ownerInstallBlock)] remoteExec ["call", owner _entity];
     };
   }];
 

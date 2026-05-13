@@ -40,6 +40,14 @@ GVAR(trackedPlacedObjects) = createHashMap;
 // references; `ocap_recorder_fnc_eh_fired_client` is populated on every client by
 // the JIP remoteExec at the top of this file.
 GVAR(ownerInstallBlock) = {
+  // Idempotent: clear any leftover EH from a previous ownership cycle before
+  // adding a new one. The server's Local EH cleanup runs server-side only, so
+  // a client that previously owned this unit still carries its old EH; if the
+  // unit returns to that client we would otherwise stack a second EH and emit
+  // duplicate :EVENT:PROJECTILE: records.
+  if (_this getVariable [QGVARMAIN(firedManEHExists), false]) then {
+    _this removeEventHandler ["FiredMan", _this getVariable QGVARMAIN(firedManEH)];
+  };
   private _id = _this addEventHandler ["FiredMan", {
     private _start = diag_tickTime;
     _this call FUNC(eh_fired_client);
@@ -49,6 +57,9 @@ GVAR(ownerInstallBlock) = {
   _this setVariable [QGVARMAIN(firedManEH), _id];
 
   // HandleDamage stores the ammo classname on the victim for kill attribution
+  if (_this getVariable [QGVARMAIN(handleDamageEHExists), false]) then {
+    _this removeEventHandler ["HandleDamage", _this getVariable QGVARMAIN(handleDamageEH)];
+  };
   private _hdId = _this addEventHandler ["HandleDamage", {
     params ["_unit", "", "", "", "_projectile"];
     if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {

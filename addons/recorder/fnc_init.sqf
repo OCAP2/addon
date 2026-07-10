@@ -86,6 +86,12 @@ GVAR(excludeMarkerList) = if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) t
   []
 };
 
+GVAR(excludeVarNameList) = if (!isNil QEGVAR(settings,excludeVarNameFromRecord)) then {
+  parseSimpleArray EGVAR(settings,excludeVarNameFromRecord)
+} else {
+  []
+};
+
 INFO_4("Settings snapshot — frameCaptureDelay: %1 | autoStart: %2 | minPlayerCount: %3 | minMissionTime: %4",GVAR(frameCaptureDelay),GVAR(autoStart),EGVAR(settings,minPlayerCount),GVAR(minMissionTime));
 
 GVAR(hasACEIsAwake) = !isNil "ace_common_fnc_isAwake";

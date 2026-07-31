@@ -13,7 +13,7 @@ Arma 3 addon for Operation Capture and Playback (OCAP). Records gameplay data du
 
 ## Installation
 
-Subscribe via Steam Workshop or download the latest release and place the `@OCAP` folder in your Arma 3 directory.
+Download the latest release from [GitHub Releases](https://github.com/OCAP2/addon/releases) and place the `@ocap` folder in your Arma 3 directory.
 
 ## Building from Source
 

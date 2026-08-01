@@ -214,7 +214,7 @@ GVAR(allSettings) = [
   /*
     CBA Setting: OCAP_settings_excludeVarNameFromRecord
     Description:
-      Array of vehicle variable names (vehicleVarName) that should be excluded from recording. Use single quotes! Default: []
+      Array of editor variable names (vehicleVarName). Any unit or vehicle whose variable name matches will be excluded from recording. Matching is case-insensitive. Use single quotes! Default: []
 
     Setting Name:
       Variable Names to Exclude
@@ -230,7 +230,7 @@ GVAR(allSettings) = [
     "EDITBOX", // setting type
     [
       "Variable Names to Exclude", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      "Array of vehicle variable names (vehicleVarName) to exclude from recording. Use single quotes! Default: []"
+      "Array of editor variable names (vehicleVarName) to exclude from recording. Case-insensitive. Use single quotes! Default: []"
     ],
     [COMPONENT_NAME, "Exclusions"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     "[]", // default string value
@@ -238,7 +238,6 @@ GVAR(allSettings) = [
     {}, // function that will be executed once on mission start and every time the setting is changed.
     false // requires restart to apply
   ],
-
 
   // Section: Extra Tracking
 

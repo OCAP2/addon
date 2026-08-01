@@ -86,8 +86,10 @@ GVAR(excludeMarkerList) = if (!isNil QEGVAR(settings,excludeMarkerFromRecord)) t
   []
 };
 
+// Lowercased once here so lookups in the capture loop can be case-insensitive,
+// matching how class/kind exclusions behave.
 GVAR(excludeVarNameList) = if (!isNil QEGVAR(settings,excludeVarNameFromRecord)) then {
-  parseSimpleArray EGVAR(settings,excludeVarNameFromRecord)
+  (parseSimpleArray EGVAR(settings,excludeVarNameFromRecord)) apply {toLower _x}
 } else {
   []
 };

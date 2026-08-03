@@ -136,7 +136,7 @@ call FUNC(telemetryLoop);
 // where players connected before OCAP initialized don't get diary entries)
 // Wait for getUserInfo to be populated before calling, as it may not be ready during postInit
 {
-  private _pid = str owner _x;
+  private _pid = getPlayerID _x;
   [{
     private _info = getUserInfo _this;
     !isNil "_info" && {_info isEqualType [] && {count _info >= 11}}

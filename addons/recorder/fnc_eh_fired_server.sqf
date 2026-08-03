@@ -77,7 +77,7 @@ GVAR(trackedPlacedObjects) = createHashMap;
     params ["_entity"];
     if !(_entity isKindOf "CAManBase") exitWith {};
     _thisArgs params ["_fnc_addHandlers"];
-    if (local _entity) exitWith _fnc_addHandlers;
+    if (local _entity) exitWith {_entity call _fnc_addHandlers};
 
     // EntityCreated fires on remote respawning units before variables are synced. We need to wait one frame before adding handlers. CBA_fnc_execNextFrame would be preferred if CBA was available on all clients.
     [_entity, _fnc_addHandlers] spawn {

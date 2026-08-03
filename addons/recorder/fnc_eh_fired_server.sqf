@@ -29,12 +29,11 @@ GVAR(trackedProjectiles) = createHashMap;
 GVAR(trackedPlacedObjects) = createHashMap;
 
 // Globally broadcast and initialize fired events for all units and future units. This avoids the need to track locality changes from server-to-client or client-to-client (e.g. group leader changes).
+// Note that handlers are added on each executing machine directly. The old remoteExec-to-owner path was removed because not-yet-networked entities (owner 0) deserialize as objNull.
 {
   private _fnc_addHandlers = {
     params ["_entity"];
 
-    // Local entities should always have event handlers added directly — remoteExec to owner 0
-    // (not-yet-networked entities) causes the object reference to deserialize as null.
 
     // eh_fired_client depends on CBA for sending projectile events back to the server. If a client doesn't have CBA, this FiredMan EH won't work.
     if (isClass (configFile >> "CfgPatches" >> "cba_xeh")) then {

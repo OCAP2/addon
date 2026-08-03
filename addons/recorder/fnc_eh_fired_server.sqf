@@ -36,16 +36,19 @@ GVAR(trackedPlacedObjects) = createHashMap;
     // Local entities should always have event handlers added directly — remoteExec to owner 0
     // (not-yet-networked entities) causes the object reference to deserialize as null.
 
-    private _id = _entity addEventHandler ["FiredMan", {
-      // FiredMan can sometimes fire on remote units which is not desired here. All clients have their own EHs so we don't need to handle remote units.
-      params ["_unit"];
-      if (!local _unit) exitWith {};
-      private _start = diag_tickTime;
-      _this call FUNC(eh_fired_client);
-      TRACE_1("Ran fired handler",diag_tickTime - _start);
-    }];
-    _entity setVariable [QGVARMAIN(firedManEHExists), true];
-    _entity setVariable [QGVARMAIN(firedManEH), _id];
+    // eh_fired_client depends on CBA for sending projectile events back to the server. If a client doesn't have CBA, this FiredMan EH won't work.
+    if (isClass (configFile >> "CfgPatches" >> "cba_xeh")) then {
+      private _id = _entity addEventHandler ["FiredMan", {
+        // FiredMan can sometimes fire on remote units which is not desired here. All clients have their own EHs so we don't need to handle remote units.
+        params ["_unit"];
+        if (!local _unit) exitWith {};
+        private _start = diag_tickTime;
+        _this call FUNC(eh_fired_client);
+        TRACE_1("Ran fired handler",diag_tickTime - _start);
+      }];
+      _entity setVariable [QGVARMAIN(firedManEHExists), true];
+      _entity setVariable [QGVARMAIN(firedManEH), _id];
+    };
 
     // HandleDamage stores the ammo classname on the victim for kill attribution
     private _hdId = _entity addEventHandler ["HandleDamage", {
@@ -58,6 +61,10 @@ GVAR(trackedPlacedObjects) = createHashMap;
     }];
     _entity setVariable [QGVARMAIN(handleDamageEHExists), true];
     _entity setVariable [QGVARMAIN(handleDamageEH), _hdId];
+  };
+
+  if (!isClass (configFile >> "CfgPatches" >> "cba_xeh")) exitWith {
+    WARNING("CBA is not loaded. Your projectiles will not be tracked in recordings!");
   };
 
   // Initialize on existing units first, then handle all subsequent units.

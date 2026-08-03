@@ -39,8 +39,8 @@ GVAR(trackedPlacedObjects) = createHashMap;
     // eh_fired_client depends on CBA for sending projectile events back to the server. If a client doesn't have CBA, this FiredMan EH won't work.
     if (isClass (configFile >> "CfgPatches" >> "cba_xeh")) then {
       private _id = _entity addEventHandler ["FiredMan", {
-        // FiredMan can sometimes fire on remote units which is not desired here. All clients have their own EHs so we don't need to handle remote units.
         params ["_unit"];
+        // FiredMan can sometimes fire on remote units which is not desired here. All clients have their own EHs so we don't need to handle remote units.
         if (!local _unit) exitWith {};
         private _start = diag_tickTime;
         _this call FUNC(eh_fired_client);
@@ -52,8 +52,8 @@ GVAR(trackedPlacedObjects) = createHashMap;
 
     // HandleDamage stores the ammo classname on the victim for kill attribution
     private _hdId = _entity addEventHandler ["HandleDamage", {
-      // HandleDamage should never fire on remote units, but we'll check anyway to avoid double-send.
       params ["_unit", "", "", "", "_projectile"];
+      // HandleDamage should never fire on remote units, but we'll check anyway to avoid double-send.
       if (!local _unit) exitWith {};
       if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
         _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];

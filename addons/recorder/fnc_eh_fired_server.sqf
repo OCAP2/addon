@@ -28,9 +28,9 @@
 GVAR(trackedProjectiles) = createHashMap;
 GVAR(trackedPlacedObjects) = createHashMap;
 
-// Wrap everything in a CBA Class Event Handler and broadcast it so when any soldier is initialized, all clients will set up EHs on them. This avoids the need to track locality changes from server-to-client or client-to-client (e.g. group leader changes).
+// Globally broadcast and initialize fired events for all units and future units. This avoids the need to track locality changes from server-to-client or client-to-client (e.g. group leader changes).
 {
-  ["CAManBase", "init", {
+  private _fnc_addHandlers = {
     params ["_entity"];
 
     // Local entities should always have event handlers added directly — remoteExec to owner 0
@@ -58,10 +58,19 @@ GVAR(trackedPlacedObjects) = createHashMap;
     }];
     _entity setVariable [QGVARMAIN(handleDamageEHExists), true];
     _entity setVariable [QGVARMAIN(handleDamageEH), _hdId];
+  };
 
-  // for the class event handler,
-  // allow inheritance, don't exclude anything, and apply retroactively
-  }, true, [], true] call CBA_fnc_addClassEventHandler;
+  // Initialize on existing units first, then handle all subsequent units.
+  {_x call _fnc_addHandlers} forEach allUnits;
+  addMissionEventHandler ["EntityCreated", {
+    params ["_entity"];
+    _thisArgs params ["_fnc_addHandlers"];
+
+    if (_entity isKindOf "CAManBase") then {
+      _entity call _fnc_addHandlers;
+    };
+  }, [_fnc_addHandlers]];
+
 } remoteExec ["call", 0, true];
 
 

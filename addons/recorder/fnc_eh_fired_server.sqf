@@ -4,8 +4,8 @@
 // First, we'll remoteExec three functions to all clients:
 // eh_fired_client, eh_fired_clientBullet, and eh_fired_clientProjectile.
 
-// We'll use the Local EH to detect changes of unit locality. Add the EH for the soldier unit on the new owner, and remove it on the old. This EH only triggers on two machines so it limits the overall impact of doing so and validates duplicate records are not sent to the server.
-// https://community.bistudio.com/wiki/Arma_3:_Event_Handlers#Local
+// Afterwards, we'll ask every client to register event handlers on all units + future units with the EntityCreated mission EH. Object EHs like FiredMan and HandleDamage generally fire where the unit is local, which limits its overall performance impact and validates duplicate records are not sent to the server.
+// https://community.bistudio.com/wiki/Arma_3:_Mission_Event_Handlers#EntityCreated
 
 
 

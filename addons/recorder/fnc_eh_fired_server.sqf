@@ -34,9 +34,12 @@ GVAR(trackedPlacedObjects) = createHashMap;
   private _fnc_addHandlers = {
     params ["_entity"];
 
-
+    // Event handlers are preserved across respawning units, so we must check to avoid duplicate handlers.
     // eh_fired_client depends on CBA for sending projectile events back to the server. If a client doesn't have CBA, this FiredMan EH won't work.
-    if (isClass (configFile >> "CfgPatches" >> "cba_xeh")) then {
+    if (
+      isClass (configFile >> "CfgPatches" >> "cba_xeh") &&
+      isNil {_entity getVariable QGVARMAIN(firedManEHExists)}
+    ) then {
       private _id = _entity addEventHandler ["FiredMan", {
         params ["_unit"];
         // FiredMan can sometimes fire on remote units which is not desired here. All clients have their own EHs so we don't need to handle remote units.
@@ -50,16 +53,18 @@ GVAR(trackedPlacedObjects) = createHashMap;
     };
 
     // HandleDamage stores the ammo classname on the victim for kill attribution
-    private _hdId = _entity addEventHandler ["HandleDamage", {
-      params ["_unit", "", "", "", "_projectile"];
-      // HandleDamage should never fire on remote units, but we'll check anyway to avoid double-send.
-      if (!local _unit) exitWith {};
-      if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
-        _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
-      };
-    }];
-    _entity setVariable [QGVARMAIN(handleDamageEHExists), true];
-    _entity setVariable [QGVARMAIN(handleDamageEH), _hdId];
+    if (isNil {_entity getVariable QGVARMAIN(handleDamageEHExists)}) then {
+      private _hdId = _entity addEventHandler ["HandleDamage", {
+        params ["_unit", "", "", "", "_projectile"];
+        // HandleDamage should never fire on remote units, but we'll check anyway to avoid double-send.
+        if (!local _unit) exitWith {};
+        if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
+          _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
+        };
+      }];
+      _entity setVariable [QGVARMAIN(handleDamageEHExists), true];
+      _entity setVariable [QGVARMAIN(handleDamageEH), _hdId];
+    };
   };
 
   if (!isClass (configFile >> "CfgPatches" >> "cba_xeh")) then {
@@ -70,9 +75,14 @@ GVAR(trackedPlacedObjects) = createHashMap;
   {_x call _fnc_addHandlers} forEach allUnits;
   addMissionEventHandler ["EntityCreated", {
     params ["_entity"];
+    if !(_entity isKindOf "CAManBase") exitWith {};
     _thisArgs params ["_fnc_addHandlers"];
+    if (local _entity) exitWith _fnc_addHandlers;
 
-    if (_entity isKindOf "CAManBase") then {
+    // EntityCreated fires on remote respawning units before variables are synced. We need to wait one frame before adding handlers. CBA_fnc_execNextFrame would be preferred if CBA was available on all clients.
+    [_entity, _fnc_addHandlers] spawn {
+      params ["_entity", "_fnc_addHandlers"];
+      sleep 0.001;
       _entity call _fnc_addHandlers;
     };
   }, [_fnc_addHandlers]];

@@ -63,7 +63,7 @@ GVAR(trackedPlacedObjects) = createHashMap;
     _entity setVariable [QGVARMAIN(handleDamageEH), _hdId];
   };
 
-  if (!isClass (configFile >> "CfgPatches" >> "cba_xeh")) exitWith {
+  if (!isClass (configFile >> "CfgPatches" >> "cba_xeh")) then {
     WARNING("CBA is not loaded. Your projectiles will not be tracked in recordings!");
   };
 

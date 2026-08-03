@@ -7,8 +7,6 @@
 
     This function uses the <OCAP_EH_Connected> event handler to log "connected" events to the timeline.
 
-    It also calls <OCAP_recorder_fnc_adminUIControl> to apply the admin UI if the player is in <OCAP_administratorList>.
-
   Parameters:
     See the wiki for details. <https://community.bistudio.com/wiki/Arma_3:_Mission_Event_Handlers#PlayerConnected>
 
@@ -40,6 +38,3 @@ if (_owner isEqualTo 2) exitWith {};
     ["playerUid", _uid]
   ]] call CBA_fnc_encodeJSON
 ]] call EFUNC(extension,sendData);
-
-// trigger admin control check for all connecting players
-[_idstr, "connect"] call FUNC(adminUIcontrol);

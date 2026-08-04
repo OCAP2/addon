@@ -46,5 +46,5 @@ if (!isNull _playerObject) exitWith {
 }, {
 	[_this, "connect"] call FUNC(adminUIcontrol);
 }, _networkId, 30, {
-	diag_log text format ["[OCAP] (recorder) WARNING: connecting player object is null for PID: %1", _networkId];
+	diag_log text format ["[OCAP] (recorder) WARNING: connecting player object is null for PID: %1", _this];
 }] call CBA_fnc_waitUntilAndExecute;

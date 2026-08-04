@@ -132,8 +132,7 @@ call FUNC(eh_fired_server);
 call FUNC(telemetryLoop);
 [] spawn FUNC(getStaticObjects);
 
-// Check already-connected players for admin controls (fixes race condition
-// where players connected before OCAP initialized don't get diary entries)
+// Check non-JIP players for admin controls, as postInit is too late for <OCAP_recorder_fnc_eh_onUserSelectedPlayer> to fire.
 // Wait for getUserInfo to be populated before calling, as it may not be ready during postInit
 {
   private _pid = getPlayerID _x;

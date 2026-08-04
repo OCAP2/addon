@@ -28,7 +28,7 @@
 
 params ["_networkId", "_playerObject"];
 
-// Unlike PlayerConnected EH, this event does not fire for non-JIP players. Admins in this case are handled by <OCAP_recorder_fnc_init>.
+// For non-JIP players, OnUserSelectedPlayer fires between preInit and postInit. Since we're initializing in postInit, this function will be too late to handle non-JIP players. Admins in this case are handled by <OCAP_recorder_fnc_init>.
 // In rare cases, _playerObject may be objNull despite Arma 3 v2.18 allowing the event to be postponed.
 if (isNull _playerObject) exitWith {
 	diag_log text format ["[OCAP] (recorder) WARNING: connecting player object is null for PID: %1", _networkId];

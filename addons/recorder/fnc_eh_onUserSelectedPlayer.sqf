@@ -29,14 +29,22 @@
 params ["_networkId", "_playerObject"];
 
 // For non-JIP players, OnUserSelectedPlayer fires between preInit and postInit. Since we're initializing in postInit, this function will be too late to handle non-JIP players. Admins in this case are handled by <OCAP_recorder_fnc_init>.
-// In rare cases, _playerObject may be objNull despite Arma 3 v2.18 allowing the event to be postponed.
-if (isNull _playerObject) exitWith {
-	diag_log text format ["[OCAP] (recorder) WARNING: connecting player object is null for PID: %1", _networkId];
+if (!isNull _playerObject) exitWith {
+	_playerObject addEventHandler ["Local", {
+		params ["_playerObject"];
+		_playerObject removeEventHandler [_thisEvent, _thisEventHandler];
+
+		private _networkId = getPlayerID _playerObject;
+		[_networkId, "connect"] call FUNC(adminUIcontrol);
+	}];
 };
 
-_playerObject addEventHandler ["Local", {
-	params ["_playerObject"];
-	_playerObject removeEventHandler [_thisEvent, _thisEventHandler];
-	private _networkId = getPlayerID _playerObject;
-	[_networkId, "connect"] call FUNC(adminUIcontrol);
-}];
+// In rare cases, _playerObject may be objNull despite Arma 3 v2.18 allowing the event to be postponed.
+// Make a last ditch attempt to wait for the player object to be set (similar to <OCAP_recorder_fnc_init>).
+[{
+	!isNull (getUserInfo _this param [10, objNull, [objNull]])
+}, {
+	[_this, "connect"] call FUNC(adminUIcontrol);
+}, _networkId, 30, {
+	diag_log text format ["[OCAP] (recorder) WARNING: connecting player object is null for PID: %1", _networkId];
+}] call CBA_fnc_waitUntilAndExecute;

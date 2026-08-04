@@ -6,8 +6,8 @@
 	  Description:
 	    Runs checks to determine if a player should have the administrative diary entry added or removed upon joining the mission or logging in/out as admin.
 
-	    - <OCAP_recorder_fnc_eh_connected> at mission start to determine if a player is in <OCAP_administratorList>
 	    - <OCAP_recorder_fnc_eh_onUserAdminStateChanged> to add/remove when a player logs in or out as admin on the server
+	    - <OCAP_recorder_fnc_eh_onUserSelectedPlayer> at mission start to determine if a player is in <OCAP_administratorList>
 
 	  Parameters:
 	    _PID - PlayerID indicating unique network client on the server [String]

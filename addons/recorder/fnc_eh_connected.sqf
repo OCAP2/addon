@@ -32,6 +32,3 @@ if (_owner isEqualTo 2) exitWith {};
 // Log immediately during an active session, otherwise preserve the event for
 // frame 0 of the next recording.
 ["connected", _name, _uid] call FUNC(recordPlayerConnectionEvent);
-
-// Trigger admin control check for all connecting players
-[_idstr, "connect"] call FUNC(adminUIcontrol);

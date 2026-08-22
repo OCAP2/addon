@@ -4,8 +4,8 @@
 // First, we'll remoteExec three functions to all clients:
 // eh_fired_client, eh_fired_clientBullet, and eh_fired_clientProjectile.
 
-// We'll use the Local EH to detect changes of unit locality. Add the EH for the soldier unit on the new owner, and remove it on the old. This EH only triggers on two machines so it limits the overall impact of doing so and validates duplicate records are not sent to the server.
-// https://community.bistudio.com/wiki/Arma_3:_Event_Handlers#Local
+// Afterwards, we'll ask every client to register event handlers on all units + future units with the EntityCreated mission EH. Object EHs like FiredMan and HandleDamage generally fire where the unit is local, which limits its overall performance impact and validates duplicate records are not sent to the server.
+// https://community.bistudio.com/wiki/Arma_3:_Mission_Event_Handlers#EntityCreated
 
 
 
@@ -28,80 +28,22 @@
 GVAR(trackedProjectiles) = createHashMap;
 GVAR(trackedPlacedObjects) = createHashMap;
 
-// Now we'll do the server setup.
-// Wrap everything in a CBA Class Event Handler so when the server initializes any soldier, it'll set up the Local EH. The Local EH is global (ironically) when applied to a unit so it'll do what we need across the entire session and trigger the relevant machines on locality change.
-["CAManBase", "init", {
-  params ["_entity"];
+// Globally broadcast and initialize fired events for all units and future units. This avoids the need to track locality changes from server-to-client or client-to-client (e.g. group leader changes).
+// Note that handlers are added on each executing machine directly. The old remoteExec-to-owner path was removed because not-yet-networked entities (owner 0) deserialize as objNull.
+{
+  private _fnc_addHandlers = {
+    params ["_entity"];
 
-  // When object is inited, add the EH to the owner machine.
-  // For local entities (server-owned AI), add directly — remoteExec to owner 0
-  // (not-yet-networked entities) causes the object reference to deserialize as null.
-  if (local _entity) then {
-    private _id = _entity addEventHandler ["FiredMan", {
-      private _start = diag_tickTime;
-      _this call FUNC(eh_fired_client);
-      TRACE_1("Ran fired handler",diag_tickTime - _start);
-    }];
-    _entity setVariable [QGVARMAIN(firedManEHExists), true];
-    _entity setVariable [QGVARMAIN(firedManEH), _id];
-
-    // HandleDamage stores the ammo classname on the victim for kill attribution
-    private _hdId = _entity addEventHandler ["HandleDamage", {
-      params ["_unit", "", "", "", "_projectile"];
-      if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
-        _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
-      };
-    }];
-    _entity setVariable [QGVARMAIN(handleDamageEHExists), true];
-    _entity setVariable [QGVARMAIN(handleDamageEH), _hdId];
-  } else {
-    [_entity, {
-      private _id = _this addEventHandler ["FiredMan", {
-        private _start = diag_tickTime;
-        _this call FUNC(eh_fired_client);
-        TRACE_1("Ran fired handler",diag_tickTime - _start);
-      }];
-      _this setVariable [QGVARMAIN(firedManEHExists), true];
-      _this setVariable [QGVARMAIN(firedManEH), _id];
-
-      private _hdId = _this addEventHandler ["HandleDamage", {
-        params ["_unit", "", "", "", "_projectile"];
-        if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
-          _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
-        };
-      }];
-      _this setVariable [QGVARMAIN(handleDamageEHExists), true];
-      _this setVariable [QGVARMAIN(handleDamageEH), _hdId];
-    }] remoteExec ["call", owner _entity];
-  };
-
-
-  // Again, we will add a single Local EH for the unit on the server, but it has global effect so this is sufficient.
-  _entity addEventHandler ["Local", {
-    // This code will be run on both the machine giving up ownership and the machine receiving ownership.
-    params ["_entity", "_isLocal"];
-
-    // If the unit is NO LONGER local, remove the EH and the CBA EH.
-    // We need to see if it exists already.
-    private _firedManEHExists = _entity getVariable [QGVARMAIN(firedManEHExists), false];
-    private _handleDamageEHExists = _entity getVariable [QGVARMAIN(handleDamageEHExists), false];
-
-    // If the unit is NO LONGER local, and the EH exists, remove it.
-    if (!_isLocal && _firedManEHExists) then {
-      _entity removeEventHandler ["FiredMan", _entity getVariable QGVARMAIN(firedManEH)];
-      _entity setVariable [QGVARMAIN(firedManEHExists), false];
-      _entity setVariable [QGVARMAIN(firedManEH), nil];
-    };
-    if (!_isLocal && _handleDamageEHExists) then {
-      _entity removeEventHandler ["HandleDamage", _entity getVariable QGVARMAIN(handleDamageEH)];
-      _entity setVariable [QGVARMAIN(handleDamageEHExists), false];
-      _entity setVariable [QGVARMAIN(handleDamageEH), nil];
-    };
-
-    // If the unit is NOW local and the EH doesn't exist, add it.
-    if (_isLocal && !_firedManEHExists) then {
+    // Event handlers are preserved across respawning units, so we must check to avoid duplicate handlers.
+    // eh_fired_client depends on CBA for sending projectile events back to the server. If a client doesn't have CBA, this FiredMan EH won't work.
+    if (
+      isClass (configFile >> "CfgPatches" >> "cba_xeh") &&
+      isNil {_entity getVariable QGVARMAIN(firedManEHExists)}
+    ) then {
       private _id = _entity addEventHandler ["FiredMan", {
-        TRACE_2("FiredMan EH fired",clientOwner,_this);
+        params ["_unit"];
+        // FiredMan can sometimes fire on remote units which is not desired here. All clients have their own EHs so we don't need to handle remote units.
+        if (!local _unit) exitWith {};
         private _start = diag_tickTime;
         _this call FUNC(eh_fired_client);
         TRACE_1("Ran fired handler",diag_tickTime - _start);
@@ -109,9 +51,13 @@ GVAR(trackedPlacedObjects) = createHashMap;
       _entity setVariable [QGVARMAIN(firedManEHExists), true];
       _entity setVariable [QGVARMAIN(firedManEH), _id];
     };
-    if (_isLocal && !_handleDamageEHExists) then {
+
+    // HandleDamage stores the ammo classname on the victim for kill attribution
+    if (isNil {_entity getVariable QGVARMAIN(handleDamageEHExists)}) then {
       private _hdId = _entity addEventHandler ["HandleDamage", {
         params ["_unit", "", "", "", "_projectile"];
+        // HandleDamage should never fire on remote units, but we'll check anyway to avoid double-send.
+        if (!local _unit) exitWith {};
         if (_projectile isNotEqualTo "" && {_projectile isNotEqualTo (_unit getVariable [QGVARMAIN(lastDamageAmmo), ""])}) then {
           _unit setVariable [QGVARMAIN(lastDamageAmmo), _projectile, 2];
         };
@@ -119,11 +65,29 @@ GVAR(trackedPlacedObjects) = createHashMap;
       _entity setVariable [QGVARMAIN(handleDamageEHExists), true];
       _entity setVariable [QGVARMAIN(handleDamageEH), _hdId];
     };
-  }];
+  };
 
-// for the class event handler,
-// allow inheritance, don't exclude anything, and apply retroactively
-}, true, [], true] call CBA_fnc_addClassEventHandler;
+  if (!isClass (configFile >> "CfgPatches" >> "cba_xeh")) then {
+    WARNING("CBA is not loaded. Your projectiles will not be tracked in recordings!");
+  };
+
+  // Initialize on existing units first, then handle all subsequent units.
+  {_x call _fnc_addHandlers} forEach allUnits;
+  addMissionEventHandler ["EntityCreated", {
+    params ["_entity"];
+    if !(_entity isKindOf "CAManBase") exitWith {};
+    _thisArgs params ["_fnc_addHandlers"];
+    if (local _entity) exitWith {_entity call _fnc_addHandlers};
+
+    // EntityCreated fires on remote respawning units before variables are synced. We need to wait one frame before adding handlers. CBA_fnc_execNextFrame would be preferred if CBA was available on all clients.
+    [_entity, _fnc_addHandlers] spawn {
+      params ["_entity", "_fnc_addHandlers"];
+      sleep 0.001;
+      _entity call _fnc_addHandlers;
+    };
+  }, [_fnc_addHandlers]];
+
+} remoteExec ["call", 0, true];
 
 
 // Finally, we'll add a CBA Event Handler to take in the pre-processed fired data here on the server and send it to the extension.

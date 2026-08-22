@@ -53,6 +53,15 @@ if (isNil QEGVAR(EH,OnUserAdminStateChanged)) then {
   OCAPEXTLOG(["Initialized OnUserAdminStateChanged EH"]);
 };
 
+if (isNil QEGVAR(EH,OnUserSelectedPlayer)) then {
+  // Event Handler: OCAP_EH_OnUserSelectedPlayer
+  // Handle for the "OnUserSelectedPlayer" mission event handler. Fired when a player object is selected for user. Calls <OCAP_recorder_fnc_eh_onUserSelectedPlayer>.
+  EGVAR(EH,OnUserSelectedPlayer) = addMissionEventHandler ["OnUserSelectedPlayer", {
+    _this call FUNC(eh_onUserSelectedPlayer);
+  }];
+  OCAPEXTLOG(["Initialized OnUserSelectedPlayer EH"]);
+};
+
 if (isNil QEGVAR(EH,EntityKilled)) then {
   // Event Handler: OCAP_EH_EntityKilled
   // Handle for the "EntityKilled" mission event handler. Fired when an entity is killed. Calls <OCAP_recorder_fnc_eh_killed>.

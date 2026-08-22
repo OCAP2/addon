@@ -89,9 +89,16 @@ GVAR(PFHObject) = [
     {
       private _justInitialized = false;
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
-        if (
-          _x isKindOf "Logic"
-        ) exitWith {
+        if (_x isKindOf "Logic") exitWith {
+          _x setVariable [QGVARMAIN(exclude), true, true];
+          _x setVariable [QGVARMAIN(isInitialized), true, true];
+        };
+        // Check pre-set OCAP_main_exclude variable for per-object exclusion via editor init field
+        if (_x getVariable [QGVARMAIN(exclude), false]) exitWith {
+          _x setVariable [QGVARMAIN(isInitialized), true, true];
+        };
+        // Check vehicleVarName against centralized exclude list
+        if (GVAR(excludeVarNameList) isNotEqualTo [] && {toLower (vehicleVarName _x) in GVAR(excludeVarNameList)}) exitWith {
           _x setVariable [QGVARMAIN(exclude), true, true];
           _x setVariable [QGVARMAIN(isInitialized), true, true];
         };
@@ -126,7 +133,9 @@ GVAR(PFHObject) = [
       };
       // Re-include units that have become player-controlled again (e.g., reconnected players)
       private _isExcluded = _x getVariable [QGVARMAIN(exclude), false];
-      if (_isExcluded && {isPlayer _x}) then {
+      // Only units that were actually recorded (have an ID) may be re-included, otherwise
+      // an intentionally excluded playable unit would be reported without ever being created.
+      if (_isExcluded && {isPlayer _x} && {(_x getVariable [QGVARMAIN(id), -1]) > -1}) then {
         _x setVariable [QGVARMAIN(exclude), false];
         _isExcluded = false;
       };
@@ -204,6 +213,15 @@ GVAR(PFHObject) = [
     {
       private _justInitialized = false;
       if !(_x getVariable [QGVARMAIN(isInitialized), false]) then {
+        // Check pre-set OCAP_main_exclude variable for per-object exclusion via editor init field
+        if (_x getVariable [QGVARMAIN(exclude), false]) exitWith {
+          _x setVariable [QGVARMAIN(isInitialized), true, true];
+        };
+        // Check vehicleVarName against centralized exclude list
+        if (GVAR(excludeVarNameList) isNotEqualTo [] && {toLower (vehicleVarName _x) in GVAR(excludeVarNameList)}) exitWith {
+          _x setVariable [QGVARMAIN(exclude), true, true];
+          _x setVariable [QGVARMAIN(isInitialized), true, true];
+        };
         _vehType = typeOf _x;
         _class = _vehType call FUNC(getClass);
         private _vic = _x;

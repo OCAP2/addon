@@ -23,6 +23,7 @@ PREP(eh_disconnected);
 PREP(recordPlayerConnectionEvent);
 PREP(flushPlayerConnectionEvents);
 PREP(eh_onUserAdminStateChanged);
+PREP(eh_onUserSelectedPlayer);
 PREP(adminUIcontrol);
 
 PREP(eh_firedMan);

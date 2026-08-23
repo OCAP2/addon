@@ -27,12 +27,38 @@ hemtt release      # Release build with signed PBOs
 ## Configuration
 
 All settings are configurable in-game via CBA Settings (Options > Addon Options > OCAP).
+Player Detail Tracking names and tooltips are stringtable entries
+(`addons/recorder/stringtable.xml`) so they follow the game language.
 
 Key settings:
 - **Recording Enabled** - Master toggle
 - **Auto Start Recording** - Start recording when minimum player count is reached
 - **Minimum Player Count** - Players required for auto-start
 - **Frame Capture Delay** - Interval between position captures (seconds)
+
+### Player Detail Tracking
+
+Optional per-player snapshots (gear, medical, stamina, radios) sampled on each
+client and stored as extra events. AI is not sampled. Defaults, intervals and
+the `force` block live in [docs/player-detail-tracking.md](docs/player-detail-tracking.md).
+
+Pinned production values:
+
+```sqf
+force OCAP_settings_trackPlayerInventory = true;
+force OCAP_settings_playerInventoryInterval = 120;
+force OCAP_settings_trackPlayerInventoryOnDeath = true;
+force OCAP_settings_trackPlayerMedical = true;
+force OCAP_settings_playerMedicalInterval = 60;
+force OCAP_settings_playerMedicalCriticalInterval = 10;
+force OCAP_settings_trackPlayerStamina = true;
+force OCAP_settings_playerStaminaInterval = 30;
+force OCAP_settings_trackPlayerRadio = true;
+force OCAP_settings_playerRadioInterval = 120;
+force OCAP_settings_trackPlayerSnapshotDiffs = true;
+force OCAP_settings_radioShortRangeMeters = 5000;
+force OCAP_settings_radioLongRangeMeters = 20000;
+```
 
 ## License
 

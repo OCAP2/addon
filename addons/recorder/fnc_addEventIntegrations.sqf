@@ -226,3 +226,7 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
 
   missionNamespace setVariable [QGVARMAIN(radioEventsInitialized), true];
 } remoteExec ["call", [0, -2] select isDedicated, true];
+
+// Player-owned data must be sampled where the player is local. The installer
+// sends self-contained code because OCAP is normally loaded server-side only.
+call FUNC(installPlayerTrackingClients);

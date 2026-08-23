@@ -161,6 +161,9 @@ OCAPEXTLOG(ARR4("Queued recording of mission",GVAR(missionName),"with tag",_save
 GVAR(captureFrameNo) = 0;
 publicVariable QGVAR(captureFrameNo);
 GVAR(startTime) = nil;
+// Clients watch startTime to know a new recording began and their snapshot chain restarted.
+publicVariable QGVAR(startTime);
+GVAR(playerSnapshotState) = createHashMap;
 {
   _x setVariable [QGVARMAIN(isInitialized), nil];
   _x setVariable [QGVARMAIN(exclude), nil];

@@ -452,6 +452,149 @@ GVAR(allSettings) = [
     false
   ],
 
+  [
+    QEGVAR(settings,trackPlayerInventory),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerInventory), LSTRING(Settings_TrackPlayerInventory_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,playerInventoryInterval),
+    "SLIDER",
+    [LSTRING(Settings_PlayerInventoryInterval), LSTRING(Settings_PlayerInventoryInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [10, 1800, 120, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackPlayerInventoryOnDeath),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerInventoryOnDeath), LSTRING(Settings_TrackPlayerInventoryOnDeath_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackPlayerMedical),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerMedical), LSTRING(Settings_TrackPlayerMedical_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,playerMedicalInterval),
+    "SLIDER",
+    [LSTRING(Settings_PlayerMedicalInterval), LSTRING(Settings_PlayerMedicalInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [5, 300, 60, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,playerMedicalCriticalInterval),
+    "SLIDER",
+    [LSTRING(Settings_PlayerMedicalCriticalInterval), LSTRING(Settings_PlayerMedicalCriticalInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [1, 120, 10, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackPlayerStamina),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerStamina), LSTRING(Settings_TrackPlayerStamina_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,playerStaminaInterval),
+    "SLIDER",
+    [LSTRING(Settings_PlayerStaminaInterval), LSTRING(Settings_PlayerStaminaInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [5, 300, 30, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackPlayerRadio),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerRadio), LSTRING(Settings_TrackPlayerRadio_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,playerRadioInterval),
+    "SLIDER",
+    [LSTRING(Settings_PlayerRadioInterval), LSTRING(Settings_PlayerRadioInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [10, 1800, 120, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackPlayerSnapshotDiffs),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerSnapshotDiffs), LSTRING(Settings_TrackPlayerSnapshotDiffs_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,radioShortRangeMeters),
+    "SLIDER",
+    [LSTRING(Settings_RadioShortRangeMeters), LSTRING(Settings_RadioShortRangeMeters_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [100, 20000, 5000, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,radioLongRangeMeters),
+    "SLIDER",
+    [LSTRING(Settings_RadioLongRangeMeters), LSTRING(Settings_RadioLongRangeMeters_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [1000, 100000, 20000, 0, false],
+    true,
+    {},
+    false
+  ],
+
 
 
   // Section: Save/Export Settings

@@ -47,6 +47,11 @@ PREP(trackSectors);
 PREP(handleChatMessage);
 PREP(radioEvent);
 
+PREP(installPlayerTrackingClients);
+PREP(submitPlayerSnapshot);
+PREP(diffSnapshotPayload);
+PREP(recordRadioPropagation);
+
 PREP(exportData);
 
 PREP(setFocusStart);

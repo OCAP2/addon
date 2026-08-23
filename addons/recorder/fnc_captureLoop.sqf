@@ -59,6 +59,12 @@ GVAR(PFHObject) = [
     GVAR(captureFrameNo) = GVAR(captureFrameNo) + 1;
     publicVariable QGVAR(captureFrameNo);
 
+    // Stamp TFAR and ACRE range settings on the first recorded frame so
+    // playback can reuse the mission's values instead of only the baked defaults.
+    if (GVAR(captureFrameNo) == 1) then {
+      call FUNC(recordRadioPropagation);
+    };
+
     if (GVAR(captureFrameNo) == 10 || (GVAR(captureFrameNo) > 10 && EGVAR(settings,trackTimes) && GVAR(captureFrameNo) % EGVAR(settings,trackTimeInterval) == 0)) then {
       [] call FUNC(updateTime);
     };

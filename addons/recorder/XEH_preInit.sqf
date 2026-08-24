@@ -595,6 +595,17 @@ GVAR(allSettings) = [
     false
   ],
 
+  [
+    QEGVAR(settings,trackServerFps),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackServerFps), LSTRING(Settings_TrackServerFps_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_ServerPerformance)],
+    true,
+    true,
+    {},
+    false
+  ],
+
 
 
   // Section: Save/Export Settings

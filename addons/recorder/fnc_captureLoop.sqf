@@ -33,6 +33,10 @@ if (!isNil QGVAR(PFHObject)) then {
   [GVAR(PFHObject)] call CBA_fnc_deletePerFrameHandlerObject;
   GVAR(PFHObject) = nil;
 };
+if (!isNil QGVAR(serverFpsPFH)) then {
+  [GVAR(serverFpsPFH)] call CBA_fnc_removePerFrameHandler;
+  GVAR(serverFpsPFH) = nil;
+};
 if (isNil QGVAR(startTime)) then {
   GVAR(startTime) = time;
   publicVariable QGVAR(startTime);
@@ -47,6 +51,17 @@ GVAR(trackedUnits) = createHashMap;
 // Must be GVARs, not private — PFH code runs in a different scope.
 GVAR(ticketInterval) = round (30 / GVAR(frameCaptureDelay));
 GVAR(diaryInterval) = round (320 / GVAR(frameCaptureDelay));
+
+GVAR(recordServerFps) = {
+  if !(SHOULDSAVEEVENTS) exitWith {};
+  if !(EGVAR(settings,trackServerFps)) exitWith {};
+  [":EVENT:GENERAL:", [
+    GVAR(captureFrameNo),
+    "serverFps",
+    [createHashMapFromArray [["fps", diag_fps]]] call CBA_fnc_encodeJSON
+  ]] call EFUNC(extension,sendData);
+};
+GVAR(serverFpsPFH) = [GVAR(recordServerFps), 10] call CBA_fnc_addPerFrameHandler;
 
 // Variable: OCAP_PFHObject
 // The CBA PerFrameHandler object that is created and used to run the capture loop.
@@ -63,6 +78,12 @@ GVAR(PFHObject) = [
     // playback can reuse the mission's values instead of only the baked defaults.
     if (GVAR(captureFrameNo) == 1) then {
       call FUNC(recordRadioPropagation);
+    };
+
+    // Capture immediately so the Stats panel has a value from the start.
+    // The dedicated CBA PFH records subsequent samples every 10 seconds.
+    if (GVAR(captureFrameNo) == 1) then {
+      call GVAR(recordServerFps);
     };
 
     if (GVAR(captureFrameNo) == 10 || (GVAR(captureFrameNo) > 10 && EGVAR(settings,trackTimes) && GVAR(captureFrameNo) % EGVAR(settings,trackTimeInterval) == 0)) then {

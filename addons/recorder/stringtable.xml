@@ -273,5 +273,19 @@
                 <Finnish>Tallentaa vaniljakestävyyden, kannetun painon ja ACE Advanced Fatiguen, jos se on ladattu. Oletus: kyllä</Finnish>
             </Key>
         </Container>
+        <Container name="Settings_ServerPerformance">
+            <Key ID="STR_OCAP_recorder_Settings_Category_ServerPerformance">
+                <Original>Server Performance</Original>
+                <English>Server Performance</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackServerFps">
+                <Original>Track Server FPS</Original>
+                <English>Track Server FPS</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackServerFps_Desc">
+                <Original>Record the server FPS at mission start and every 10 seconds. Default: true</Original>
+                <English>Record the server FPS at mission start and every 10 seconds. Default: true</English>
+            </Key>
+        </Container>
     </Package>
 </Project>

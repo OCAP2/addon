@@ -110,6 +110,10 @@ if (!isNil QGVAR(PFHObject)) then {
   [GVAR(PFHObject)] call CBA_fnc_deletePerFrameHandlerObject;
   GVAR(PFHObject) = nil;
 };
+if (!isNil QGVAR(serverFpsPFH)) then {
+  [GVAR(serverFpsPFH)] call CBA_fnc_removePerFrameHandler;
+  GVAR(serverFpsPFH) = nil;
+};
 
 private _winSide = if (isNil "_side") then {""} else {if (_side isEqualTo sideUnknown) then {""} else {str _side}};
 private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mission ended"} else {""}} else {_message};

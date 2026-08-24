@@ -58,7 +58,13 @@ force OCAP_settings_playerRadioInterval = 120;
 force OCAP_settings_trackPlayerSnapshotDiffs = true;
 force OCAP_settings_radioShortRangeMeters = 5000;
 force OCAP_settings_radioLongRangeMeters = 20000;
+force OCAP_settings_trackServerFps = true;
 ```
+
+### Server Performance
+
+`OCAP_settings_trackServerFps` defaults to `true`. It records server `diag_fps`
+at recording start and every 10 seconds for the web playback Stats panel.
 
 ## License
 

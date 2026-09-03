@@ -168,11 +168,15 @@ GVAR(startTime) = nil;
 // Clients watch startTime to know a new recording began and their snapshot chain restarted.
 publicVariable QGVAR(startTime);
 GVAR(playerSnapshotState) = createHashMap;
+GVAR(zeusByUid) = createHashMap;
+GVAR(zeusLastCamera) = createHashMap;
 {
   _x setVariable [QGVARMAIN(isInitialized), nil];
   _x setVariable [QGVARMAIN(exclude), nil];
   _x setVariable [QGVARMAIN(id), nil];
   _x setVariable [QGVARMAIN(unitType), nil];
+  _x setVariable [QGVAR(lastZeusCuratorId), nil];
+  _x setVariable [QGVAR(zeusId), nil];
 } count (allUnits + allDeadMen + vehicles);
 GVAR(nextId) = 0;
 EGVAR(extension,sessionReady) = false;

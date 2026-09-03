@@ -50,6 +50,9 @@ PREP(radioEvent);
 PREP(installPlayerTrackingClients);
 PREP(submitPlayerSnapshot);
 PREP(diffSnapshotPayload);
+PREP(ensureZeusEntity);
+PREP(trackZeus);
+PREP(submitZeusCamera);
 PREP(recordRadioPropagation);
 
 PREP(exportData);

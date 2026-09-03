@@ -606,6 +606,28 @@ GVAR(allSettings) = [
     false
   ],
 
+  [
+    QEGVAR(settings,trackZeus),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackZeus), LSTRING(Settings_TrackZeus_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Zeus)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,zeusCameraInterval),
+    "SLIDER",
+    [LSTRING(Settings_ZeusCameraInterval), LSTRING(Settings_ZeusCameraInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Zeus)],
+    [0.25, 10, 1, 1, false],
+    true,
+    {},
+    false
+  ],
+
 
 
   // Section: Save/Export Settings

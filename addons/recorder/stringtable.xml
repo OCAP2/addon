@@ -287,5 +287,27 @@
                 <English>Record the server FPS at mission start and every 10 seconds. Default: true</English>
             </Key>
         </Container>
+        <Container name="Settings_Zeus">
+            <Key ID="STR_OCAP_recorder_Settings_Category_Zeus">
+                <Original>Zeus Tracking</Original>
+                <English>Zeus Tracking</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackZeus">
+                <Original>Track Zeus Remote Control</Original>
+                <English>Track Zeus Remote Control</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackZeus_Desc">
+                <Original>Record when Zeus remote-controls a unit, and sample the curator camera while the Zeus interface is open. Default: true</Original>
+                <English>Record when Zeus remote-controls a unit, and sample the curator camera while the Zeus interface is open. Default: true</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ZeusCameraInterval">
+                <Original>Zeus Camera Interval</Original>
+                <English>Zeus Camera Interval</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ZeusCameraInterval_Desc">
+                <Original>Seconds between curator-camera samples while Zeus is flying the map. Default: 1</Original>
+                <English>Seconds between curator-camera samples while Zeus is flying the map. Default: 1</English>
+            </Key>
+        </Container>
     </Package>
 </Project>

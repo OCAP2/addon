@@ -47,7 +47,9 @@ if (isNil QGVAR(playerTrackingSettingNames)) then {
     QEGVAR(settings,playerRadioInterval),
     QEGVAR(settings,trackPlayerSnapshotDiffs),
     QEGVAR(settings,radioShortRangeMeters),
-    QEGVAR(settings,radioLongRangeMeters)
+    QEGVAR(settings,radioLongRangeMeters),
+    QEGVAR(settings,trackZeus),
+    QEGVAR(settings,zeusCameraInterval)
   ];
 
   GVAR(publishPlayerTrackingSettings) = {
@@ -1292,4 +1294,34 @@ call GVAR(publishPlayerTrackingSettings);
       ["periodic", _kinds, player] call OCAP_recorder_client_capturePlayerState;
     };
   }, 5] call CBA_fnc_addPerFrameHandler;
+
+  // curatorCamera exists only on the Zeus client. The player-detail PFH above
+  // also exits when the body has no OCAP id, which is the normal case for a
+  // virtual curator slot — this sampler must stay independent of that.
+  if (isNil "OCAP_recorder_client_zeusCameraPFH") then {
+    OCAP_recorder_client_zeusCameraLast = -1e10;
+    OCAP_recorder_client_zeusCameraPFH = [{
+      private _startTime = missionNamespace getVariable [QEGVAR(recorder,startTime), -1];
+      private _isRecording = (missionNamespace getVariable [QEGVAR(recorder,recording), false]) && {_startTime > -1};
+      if (!_isRecording || {isNull player}) exitWith {};
+      if !(missionNamespace getVariable [QEGVAR(settings,trackZeus), true]) exitWith {};
+      if (isNull curatorCamera) exitWith {};
+      if (isNull (getAssignedCuratorLogic player)) exitWith {};
+
+      private _now = CBA_missionTime;
+      private _interval = missionNamespace getVariable [QEGVAR(settings,zeusCameraInterval), 1];
+      if (_now - OCAP_recorder_client_zeusCameraLast < _interval) exitWith {};
+      OCAP_recorder_client_zeusCameraLast = _now;
+
+      private _pos = getPosASL curatorCamera;
+      private _dirVec = vectorDir curatorCamera;
+      [player, createHashMapFromArray [
+        ["x", _pos select 0],
+        ["y", _pos select 1],
+        ["dir", getDir curatorCamera],
+        ["fov", getObjectFOV curatorCamera],
+        ["pitch", _dirVec select 2]
+      ]] remoteExecCall [QFUNC(submitZeusCamera), 2];
+    }, 0.25] call CBA_fnc_addPerFrameHandler;
+  };
 } remoteExec ["call", [0, -2] select isDedicated, QGVAR(playerTrackingBootstrapJip)];

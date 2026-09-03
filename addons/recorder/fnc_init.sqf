@@ -70,6 +70,8 @@ GVAR(autoRestartAfterEmptyPending) = false;
   snapshots as diffs. [HashMap]
 */
 GVAR(playerSnapshotState) = createHashMap;
+GVAR(zeusByUid) = createHashMap;
+GVAR(zeusLastCamera) = createHashMap;
 
 
 

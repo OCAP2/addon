@@ -376,6 +376,8 @@ GVAR(PFHObject) = [
     } forEach (keys GVAR(trackedVehicles));
     { GVAR(trackedVehicles) deleteAt _x } forEach _toRemove;
 
+    call FUNC(trackZeus);
+
     if (GVARMAIN(isDebug)) then {
       private _logStr = format["Frame %1 processed in %2ms", GVAR(captureFrameNo), diag_tickTime - _loopStart];
       OCAPEXTLOG([_logStr]);

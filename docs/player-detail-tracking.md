@@ -36,9 +36,9 @@ to clients after init.
 | Critical Medical Snapshot Interval | `OCAP_settings_playerMedicalCriticalInterval` | 10 s | ACE unconscious / cardiac arrest. Range 1–120. A wake-up also writes on the next PFH. |
 | Track Player Stamina | `OCAP_settings_trackPlayerStamina` | true | Vanilla pool + ACE Advanced Fatigue when present. Also writes when carried load/mass changes. |
 | Stamina Snapshot Interval | `OCAP_settings_playerStaminaInterval` | 30 s | Range 5–300 |
-| Track Player Radio Settings | `OCAP_settings_trackPlayerRadio` | true | TFAR and/or ACRE2. Every carried TFAR SW is probed; empty lists are not written when neither mod is loaded |
+| Track Player Radio Settings | `OCAP_settings_trackPlayerRadio` | true | TFAR and/or ACRE2. Every carried TFAR SW is probed; nothing is written until the unit has actually carried a radio |
 | Radio Snapshot Interval | `OCAP_settings_playerRadioInterval` | 120 s | Also writes on frequency / channel / carried-SW change. Range 10–1800 |
-| Store Player Snapshots as Diffs | `OCAP_settings_trackPlayerSnapshotDiffs` | true | Unchanged snapshots are dropped; a full keyframe every 20 diffs |
+| Store Player Snapshots as Diffs | `OCAP_settings_trackPlayerSnapshotDiffs` | true | Unchanged snapshots are dropped; arrays are patched entry by entry; a full keyframe every 20 diffs |
 | Fallback TFAR SW Range | `OCAP_settings_radioShortRangeMeters` | 5000 | Used only when the radio has no `tf_range`. Range 100–20 000 |
 | Fallback TFAR LR Range | `OCAP_settings_radioLongRangeMeters` | 20000 | Same, for long-range radios. Range 1 000–100 000 |
 
@@ -64,6 +64,67 @@ force OCAP_settings_trackServerFps = true;
 If a deployment restricts `CfgRemoteExec`, whitelist
 `OCAP_recorder_fnc_submitPlayerSnapshot` for clients → server or the snapshots
 never arrive.
+
+## What a gear entry carries
+
+An item on the wire is its class, its count, and — for the lists the profile card
+groups, meaning container cargo and magazines — a `cat` of `magazines`,
+`grenades` or `medical`. `items` is the default and is left off.
+
+Two things it deliberately does **not** carry:
+
+- **The icon path.** The web UI used to guess an item's category by
+  substring-matching the `.paa` path, which cost about 3 MB per recording for a
+  path no browser can load. The recorder resolves the category from config
+  instead: ACE's `ACE_isMedicalItem` (which ACE also sets on the vanilla
+  `FirstAidKit` and `Medikit`, and which KAM sets on its own items), the
+  magazines listed under the engine's `Throw` muzzles, and `CfgMagazines`
+  membership. That is the same source ACE's own arsenal uses.
+An item also carries its **display name**, but read with `getTextRaw` rather than
+`getText`. `getText` resolves a stringtable reference in the *recording server's*
+language, so a Czech server froze "Mapa" and "Obvaz (Elastický)" into recordings
+shown to viewers in eight locales. `getTextRaw` returns what the config actually
+holds:
+
+- a **literal** — the text the mod author typed, which is English — and that is
+  what gets recorded. On a real mission take this covers about 95% of classes:
+  "5.56mm 30rnd Tracer Mag", "40mm HE Grenade Round (L123)", "Bergen MTP
+  Rifleman H (B) [BAF]".
+- a **`$STR_...` reference** — which SQF cannot read in any language but the one
+  the game is running, and there is no way to ask for English. The name is built
+  from the class instead, which is English by construction: `ACE_elasticBandage`
+  becomes "Elastic Bandage" and `ItemMap` becomes "Map". This is what happens for
+  vanilla and ACE items.
+
+Either way the recording holds an English name for every item, including the two
+medical labels the recorder resolves itself (IV bags and medications). The web UI
+only derives a name when a recording does not carry one at all.
+
+Recordings made before this change are converted by
+`python/convert_recording_gear.py`, which translates a recorded name into English
+through the mods' own stringtables and keeps it exactly as recorded when they have
+no English for it.
+
+## Snapshot diffs
+
+A follow-up snapshot carries only what changed. Nested HashMaps are walked, and
+an array whose entries have a unique `class`, `slot` or `part` is patched entry
+by entry:
+
+```json
+{"diffOf": 40, "unitId": 7, "set": {
+  "magazines": {"$key": "class",
+                "put": [{"class": "UK3CB_BAF_556_30Rnd", "totalRounds": 269}],
+                "del": ["Chemlight_green"]}}}
+```
+
+`put` upserts (merging onto the entry already there), `del` removes, and `ord`
+appears only when put and del alone would leave the entries out of order —
+`assignedItems` is read positionally by the Arsenal export, so its order is data.
+Arrays with no unique identifier are still replaced whole.
+
+Before this, one round leaving a magazine rewrote the player's entire magazine
+list; it was the single largest cost in a recording.
 
 ## Medical layering
 

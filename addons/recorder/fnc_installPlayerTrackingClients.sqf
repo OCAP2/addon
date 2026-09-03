@@ -78,45 +78,202 @@ call GVAR(publishPlayerTrackingSettings);
   // ACE body part order. Every per-part array in ACE and KAT is indexed by this.
   OCAP_recorder_client_bodyParts = ["head", "body", "leftarm", "rightarm", "leftleg", "rightleg"];
 
-  // Config lookups are the expensive part of a gear snapshot, and the same class
-  // shows up in every snapshot, so resolved descriptors are cached for the session.
-  OCAP_recorder_client_itemDescriptorCache = createHashMap;
-  OCAP_recorder_client_getItemDescriptor = {
+  // Throwables are exactly the magazines the engine's Throw weapon can fire, which
+  // is how ACE's own arsenal separates grenades from ammunition.
+  OCAP_recorder_client_throwableClasses = [];
+  {
+    {
+      OCAP_recorder_client_throwableClasses pushBackUnique toLower _x;
+    } forEach getArray (configFile >> "CfgWeapons" >> "Throw" >> _x >> "magazines");
+  } forEach getArray (configFile >> "CfgWeapons" >> "Throw" >> "muzzles");
+
+  // The web UI used to guess an item's category by substring-matching the `.paa`
+  // icon path the snapshot carried, which cost megabytes per recording for a
+  // string no browser can load. The category is resolved here from config instead
+  // and travels as a short label. "items" is the default and is left off the wire.
+  OCAP_recorder_client_itemCategoryCache = createHashMap;
+  OCAP_recorder_client_getItemCategory = {
     params [["_className", "", [""]]];
+    if (_className isEqualTo "") exitWith {"items"};
 
-    private _cached = OCAP_recorder_client_itemDescriptorCache get _className;
-    if (!isNil "_cached") exitWith {+_cached};
+    private _cached = OCAP_recorder_client_itemCategoryCache get _className;
+    if (!isNil "_cached") exitWith {_cached};
 
-    private _displayName = "";
-    private _picture = "";
+    // ACE and KAM both flag every medical item with ACE_isMedicalItem, and ACE
+    // sets it on the two vanilla ones as well. Without ACE, name those directly.
+    private _category = "items";
+    if (_className in ["FirstAidKit", "Medikit"]) then {_category = "medical"};
+    {
+      private _config = configFile >> _x >> _className;
+      if (isClass _config && {getNumber (_config >> "ACE_isMedicalItem") == 1}) exitWith {
+        _category = "medical";
+      };
+    } forEach ["CfgWeapons", "CfgMagazines"];
+
+    if (_category isEqualTo "items") then {
+      switch (true) do {
+        case (toLower _className in OCAP_recorder_client_throwableClasses): {_category = "grenades"};
+        case (isClass (configFile >> "CfgMagazines" >> _className)): {_category = "magazines"};
+      };
+    };
+
+    OCAP_recorder_client_itemCategoryCache set [_className, _category];
+    _category
+  };
+
+  // An item's display name is worth recording, but `getText` resolves a
+  // stringtable reference in the *recording server's* language, which froze Czech
+  // item names into recordings the web UI then showed to viewers in every locale.
+  //
+  // `getTextRaw` hands back what the config actually holds. A mod author who
+  // typed the name in is giving us English, so that is used as-is. A "$STR_..."
+  // reference cannot be read in another language from SQF, so the name is derived
+  // from the class instead, which is English by construction. Either way nothing
+  // localized reaches the recording.
+  //
+  // Keep the derivation in step with ui/src/data/gearDisplayName.ts and
+  // python/convert_recording_gear.py, which derive the same label.
+  OCAP_recorder_client_displayNamePrefixes = [
+    "uk3cb_baf_", "rhsgref_", "rhsusf_", "rhssaf_", "immersion_",
+    "uk3cb_", "acex_", "rksl_", "acre_", "tfar_", "ace_", "kat_", "cba_",
+    "rhs_", "cup_", "tfr_"
+  ];
+  OCAP_recorder_client_displayNameCache = createHashMap;
+
+  // The label an item falls back to when its config name is a stringtable
+  // reference: the class, cleaned up. Always English, because a class always is.
+  OCAP_recorder_client_deriveNameFromClass = {
+    params [["_className", "", [""]]];
+    if (_className isEqualTo "") exitWith {""};
+
+    // TFAR clones each carried handheld into a per-instance class holding its
+    // channel state (TFAR_anprc152_54); the prototype is the name worth showing.
+    private _base = _className;
+    if (_base regexMatch "(?i)(tfar|tf)_.+_\d+") then {
+      _base = _base regexReplace ["_\d+$", ""];
+    };
+
+    private _lower = toLower _base;
+    {
+      if ((_lower find _x) == 0 && {count _base > count _x}) exitWith {
+        _base = _base select [count _x];
+      };
+    } forEach OCAP_recorder_client_displayNamePrefixes;
+
+    // "ItemMap", "ItemGPS": the Item prefix is engine bookkeeping, not a name.
+    if (_base regexMatch "Item[A-Z].*") then {_base = _base select [4]};
+
+    // Split on separators and at every lowercase-to-uppercase step, but never
+    // between a digit and a letter, so L85A2 stays a single word.
+    private _words = [];
+    private _word = "";
+    {
+      private _char = toString [_x];
+      if (_char in ["_", " ", "-"]) then {
+        if (_word isNotEqualTo "") then {_words pushBack _word; _word = ""};
+      } else {
+        if (_word isNotEqualTo "" && {_char regexMatch "[A-Z]"} &&
+          {(_word select [count _word - 1]) regexMatch "[a-z]"}) then {
+          _words pushBack _word;
+          _word = "";
+        };
+        _word = _word + _char;
+      };
+    } forEach toArray _base;
+    if (_word isNotEqualTo "") then {_words pushBack _word};
+
+    private _name = (_words apply {
+      // A word the mod author already capitalised is left exactly as written.
+      if (_x isNotEqualTo toLower _x) then {
+        _x
+      } else {
+        // anprc152 -> ANPRC152: a letter run followed by a digit run is a designator.
+        if (_x regexMatch "[A-Za-z]{2,6}\d{2,4}") then {
+          toUpper _x
+        } else {
+          (toUpper (_x select [0, 1])) + (_x select [1])
+        };
+      };
+    }) joinString " ";
+
+    if (_name isEqualTo "") then {_name = _className};
+    _name
+  };
+
+  // The English display name for an item. Every gear entry gets one, so the
+  // recording carries names rather than leaving a reader to work them out.
+  //
+  // `getText` was the problem: it resolves a stringtable reference in the
+  // *recording server's* language, which is how Czech item names reached viewers
+  // in eight locales. `getTextRaw` returns what the config actually holds, and
+  // that answers one of two ways:
+  //
+  //   - a literal, which is the text the mod author typed and so is English. On a
+  //     real mission take this covers about 95% of the classes a player carries:
+  //     "5.56mm 30rnd Tracer Mag", "40mm HE Grenade Round (L123)".
+  //   - a "$STR_..." reference, which SQF can only read in the language the game
+  //     is running. There is no way to ask for English, so the name is built from
+  //     the class instead, which is English by construction: "ACE_elasticBandage"
+  //     becomes "Elastic Bandage" and "ItemMap" becomes "Map".
+  //
+  // Either way the recording only ever holds English.
+  OCAP_recorder_client_gearDisplayName = {
+    params [["_className", "", [""]]];
+    if (_className isEqualTo "") exitWith {""};
+
+    private _cached = OCAP_recorder_client_displayNameCache get _className;
+    if (!isNil "_cached") exitWith {_cached};
+
+    private _raw = "";
     {
       private _config = configFile >> _x >> _className;
       if (isClass _config) exitWith {
-        _displayName = getText (_config >> "displayName");
-        _picture = getText (_config >> "picture");
+        _raw = getTextRaw (_config >> "displayName");
       };
     } forEach ["CfgWeapons", "CfgMagazines", "CfgVehicles", "CfgGlasses"];
 
-    if (_displayName isEqualTo "") then {_displayName = _className};
-    private _descriptor = createHashMapFromArray [
-      ["class", _className],
-      ["name", _displayName],
-      ["picture", _picture]
-    ];
-    OCAP_recorder_client_itemDescriptorCache set [_className, _descriptor];
-    +_descriptor
+    // getTextRaw hands back an array for a config entry written as one.
+    if (_raw isEqualType []) then {_raw = _raw param [0, ""]};
+    if (!(_raw isEqualType "")) then {_raw = ""};
+    _raw = trim _raw;
+
+    private _name = if (_raw isEqualTo "" || {(_raw select [0, 1]) isEqualTo "$"}) then {
+      [_className] call OCAP_recorder_client_deriveNameFromClass
+    } else {
+      _raw
+    };
+
+    OCAP_recorder_client_displayNameCache set [_className, _name];
+    _name
+  };
+
+  // Sets "name" on a gear entry. Empty slots have no class and so get no name.
+  OCAP_recorder_client_setDisplayName = {
+    params ["_entry", ["_className", "", [""]]];
+    private _name = [_className] call OCAP_recorder_client_gearDisplayName;
+    if (_name isNotEqualTo "") then {_entry set ["name", _name]};
+    _entry
   };
 
   OCAP_recorder_client_buildInventorySnapshot = {
     params ["_unit", "_reason"];
 
+    // The category only reaches the UI for the lists it groups: container cargo
+    // and magazines. Weapons, attachments and assigned items get their own
+    // sections, so paying for a category there would be waste.
     private _describeItems = {
-      params ["_items"];
+      params ["_items", ["_withCategory", false]];
       private _result = [];
       {
         private _className = _x;
-        private _entry = [_className] call OCAP_recorder_client_getItemDescriptor;
-        _entry set ["count", {_x isEqualTo _className} count _items];
+        private _entry = [createHashMapFromArray [
+          ["class", _className],
+          ["count", {_x isEqualTo _className} count _items]
+        ], _className] call OCAP_recorder_client_setDisplayName;
+        if (_withCategory) then {
+          private _category = [_className] call OCAP_recorder_client_getItemCategory;
+          if (_category isNotEqualTo "items") then {_entry set ["cat", _category]};
+        };
         _result pushBack _entry;
       } forEach (_items arrayIntersect _items);
       _result
@@ -124,19 +281,27 @@ call GVAR(publishPlayerTrackingSettings);
 
     private _describeContainer = {
       params ["_className", "_items"];
-      private _container = [_className] call OCAP_recorder_client_getItemDescriptor;
-      _container set ["items", [_items] call _describeItems];
-      _container
+      [createHashMapFromArray [
+        ["class", _className],
+        ["items", [_items, true] call _describeItems]
+      ], _className] call OCAP_recorder_client_setDisplayName
+    };
+
+    private _describeWorn = {
+      params ["_className"];
+      [createHashMapFromArray [["class", _className]], _className] call
+        OCAP_recorder_client_setDisplayName
     };
 
     private _weapons = [];
     {
       _x params ["_slot", "_className", "_attachments"];
       if (_className isNotEqualTo "") then {
-        private _weapon = [_className] call OCAP_recorder_client_getItemDescriptor;
-        _weapon set ["slot", _slot];
-        _weapon set ["attachments", [_attachments select {_x isNotEqualTo ""}] call _describeItems];
-        _weapons pushBack _weapon;
+        _weapons pushBack ([createHashMapFromArray [
+          ["class", _className],
+          ["slot", _slot],
+          ["attachments", [_attachments select {_x isNotEqualTo ""}] call _describeItems]
+        ], _className] call OCAP_recorder_client_setDisplayName);
       };
     } forEach [
       ["primary", primaryWeapon _unit, primaryWeaponItems _unit],
@@ -154,10 +319,15 @@ call GVAR(publishPlayerTrackingSettings);
       private _matching = _magazinesFull select {(_x param [0, ""]) isEqualTo _className};
       private _totalRounds = 0;
       {_totalRounds = _totalRounds + (_x param [1, 0])} forEach _matching;
-      private _entry = [_className] call OCAP_recorder_client_getItemDescriptor;
-      _entry set ["count", count _matching];
-      _entry set ["totalRounds", _totalRounds];
-      _entry set ["loadedCount", {_x param [2, false]} count _matching];
+      private _entry = createHashMapFromArray [
+        ["class", _className],
+        ["count", count _matching],
+        ["totalRounds", _totalRounds],
+        ["loadedCount", {_x param [2, false]} count _matching]
+      ];
+      [_entry, _className] call OCAP_recorder_client_setDisplayName;
+      private _category = [_className] call OCAP_recorder_client_getItemCategory;
+      if (_category isNotEqualTo "items") then {_entry set ["cat", _category]};
       _magazines pushBack _entry;
     } forEach (_magazineClasses arrayIntersect _magazineClasses);
 
@@ -169,8 +339,8 @@ call GVAR(publishPlayerTrackingSettings);
       ["uniform", [uniform _unit, uniformItems _unit] call _describeContainer],
       ["vest", [vest _unit, vestItems _unit] call _describeContainer],
       ["backpack", [backpack _unit, backpackItems _unit] call _describeContainer],
-      ["headgear", [headgear _unit] call OCAP_recorder_client_getItemDescriptor],
-      ["goggles", [goggles _unit] call OCAP_recorder_client_getItemDescriptor],
+      ["headgear", [headgear _unit] call _describeWorn],
+      ["goggles", [goggles _unit] call _describeWorn],
       ["weapons", _weapons],
       ["magazines", _magazines],
       ["assignedItems", [assignedItems _unit] call _describeItems]
@@ -328,7 +498,7 @@ call GVAR(publishPlayerTrackingSettings);
           if (_partIndex >= 0) then {
             private _name = _fluid;
             if (_itemClass isNotEqualTo "") then {
-              _name = ([_itemClass] call OCAP_recorder_client_getItemDescriptor) getOrDefault ["name", _fluid];
+              _name = [_itemClass] call OCAP_recorder_client_gearDisplayName;
             };
             _result pushBack [_partIndex, ["iv", _name, 0, format ["%1 ml left", round _volume]] call OCAP_recorder_client_partItem];
           };
@@ -454,7 +624,7 @@ call GVAR(publishPlayerTrackingSettings);
           format ["ACE_%1", _x]
         };
         if (isClass (configFile >> "CfgWeapons" >> _itemClass)) then {
-          _name = ([_itemClass] call OCAP_recorder_client_getItemDescriptor) getOrDefault ["name", _x];
+          _name = [_itemClass] call OCAP_recorder_client_gearDisplayName;
         };
         private _detail = "";
         if ((_y select 1) > 0) then {_detail = format ["%1 s left", round (_y select 1)]};
@@ -747,7 +917,8 @@ call GVAR(publishPlayerTrackingSettings);
     if (!isNil "TFAR_fnc_getAdditionalSwChannel") then {
       _additional = _sw call TFAR_fnc_getAdditionalSwChannel;
     };
-    private _entry = [_sw] call OCAP_recorder_client_getItemDescriptor;
+    private _entry = [createHashMapFromArray [["class", _sw]], _sw] call
+      OCAP_recorder_client_setDisplayName;
     _entry set ["mod", "TFAR"];
     _entry set ["type", "SW"];
     _entry set ["channel", _channel + 1];
@@ -805,7 +976,8 @@ call GVAR(publishPlayerTrackingSettings);
         private _additional = _lr call TFAR_fnc_getAdditionalLrChannel;
         private _radioObject = _lr select 0;
         private _className = if (_radioObject isEqualType "") then {_radioObject} else {typeOf _radioObject};
-        private _entry = [_className] call OCAP_recorder_client_getItemDescriptor;
+        private _entry = [createHashMapFromArray [["class", _className]], _className] call
+          OCAP_recorder_client_setDisplayName;
         _entry set ["mod", "TFAR"];
         _entry set ["type", "LR"];
         _entry set ["channel", _channel + 1];
@@ -842,13 +1014,11 @@ call GVAR(publishPlayerTrackingSettings);
         if (!isNil "acre_api_fnc_getBaseRadio") then {
           _baseClass = [_radioId] call acre_api_fnc_getBaseRadio;
         };
-        private _entry = [_baseClass] call OCAP_recorder_client_getItemDescriptor;
-        if (!isNil "acre_api_fnc_getDisplayName") then {
-          private _displayName = [_radioId] call acre_api_fnc_getDisplayName;
-          if (_displayName isEqualType "" && {_displayName isNotEqualTo ""}) then {
-            _entry set ["name", _displayName];
-          };
-        };
+        // ACRE's own getDisplayName resolves through the client's stringtable,
+        // so it is not asked; the name comes from config the same way as any
+        // other item, which keeps it out of the server's language.
+        private _entry = [createHashMapFromArray [["class", _baseClass]], _baseClass] call
+          OCAP_recorder_client_setDisplayName;
         private _isPack = getNumber (configFile >> "CfgAcreComponents" >> _baseClass >> "isPackRadio") == 1;
         _entry set ["mod", "ACRE"];
         _entry set ["type", ["SR", "LR"] select _isPack];
@@ -919,7 +1089,24 @@ call GVAR(publishPlayerTrackingSettings);
           case "stamina": {[_unit, _reason] call OCAP_recorder_client_buildStaminaSnapshot};
           case "radio": {[_unit, _reason] call OCAP_recorder_client_buildRadioSnapshot};
         };
-        [_x, _unit, _payload] remoteExecCall [QFUNC(submitPlayerSnapshot), 2];
+
+        // TFAR and ACRE finish initialising after the first snapshot window, so an
+        // empty radio list at the start of a recording is a sampler that is not
+        // ready yet, not a player without a radio. Write nothing until the unit has
+        // actually carried one; after that an empty list is a real change and is
+        // recorded, because putting the radio down is worth seeing.
+        private _write = true;
+        if (_x isEqualTo "radio") then {
+          if ((_payload getOrDefault ["radios", []]) isEqualTo []) then {
+            _write = OCAP_recorder_client_radioSeen;
+          } else {
+            OCAP_recorder_client_radioSeen = true;
+          };
+        };
+
+        if (_write) then {
+          [_x, _unit, _payload] remoteExecCall [QFUNC(submitPlayerSnapshot), 2];
+        };
       };
     } forEach _kinds;
   };
@@ -1036,6 +1223,7 @@ call GVAR(publishPlayerTrackingSettings);
   ];
   OCAP_recorder_client_playerTrackingFingerprint = createHashMap;
   OCAP_recorder_client_playerTrackingSession = -1;
+  OCAP_recorder_client_radioSeen = false;
 
   OCAP_recorder_client_playerTrackingPFH = [{
     private _startTime = missionNamespace getVariable [QEGVAR(recorder,startTime), -1];
@@ -1053,6 +1241,7 @@ call GVAR(publishPlayerTrackingSettings);
       OCAP_recorder_client_playerTrackingSession = _startTime;
       {OCAP_recorder_client_playerTrackingLast set [_x, -1e10]} forEach (keys OCAP_recorder_client_playerTrackingLast);
       OCAP_recorder_client_playerTrackingFingerprint = createHashMap;
+      OCAP_recorder_client_radioSeen = false;
     };
 
     private _now = CBA_missionTime;

@@ -56,7 +56,9 @@ GVAR(recordServerFps) = {
   if !(SHOULDSAVEEVENTS) exitWith {};
   if !(EGVAR(settings,trackServerFps)) exitWith {};
   [":EVENT:GENERAL:", [
-    GVAR(captureFrameNo),
+    // The PFH fires once before the capture loop has produced a frame, and a
+    // sample stamped -1 is invisible to a frame-scoped lookup in the web UI.
+    GVAR(captureFrameNo) max 0,
     "serverFps",
     [createHashMapFromArray [["fps", diag_fps]]] call CBA_fnc_encodeJSON
   ]] call EFUNC(extension,sendData);

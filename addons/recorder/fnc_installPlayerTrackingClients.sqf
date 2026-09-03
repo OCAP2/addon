@@ -163,23 +163,39 @@ call GVAR(publishPlayerTrackingSettings);
     } forEach OCAP_recorder_client_displayNamePrefixes;
 
     // "ItemMap", "ItemGPS": the Item prefix is engine bookkeeping, not a name.
-    if (_base regexMatch "Item[A-Z].*") then {_base = _base select [4]};
+    // Code-point check, not regex: Arma regexMatch is case-insensitive by default.
+    private _itemCodes = toArray _base;
+    if (
+      count _itemCodes > 4 &&
+      {(_itemCodes select 0) == 73} &&
+      {(_itemCodes select 1) == 116} &&
+      {(_itemCodes select 2) == 101} &&
+      {(_itemCodes select 3) == 109} &&
+      {(_itemCodes select 4) >= 65 && (_itemCodes select 4) <= 90}
+    ) then {
+      _base = _base select [4];
+    };
 
     // Split on separators and at every lowercase-to-uppercase step, but never
     // between a digit and a letter, so L85A2 stays a single word.
+    //
+    // Use toArray code points, not regexMatch. Arma regex is case-insensitive
+    // unless (?-i) is set, so [A-Z] and [a-z] both match every letter and
+    // "CableTie" was recorded as "C A B L E T I E".
     private _words = [];
     private _word = "";
+    private _lastCode = 0;
     {
-      private _char = toString [_x];
-      if (_char in ["_", " ", "-"]) then {
+      if (_x == 32 || {_x == 45} || {_x == 95}) then {
         if (_word isNotEqualTo "") then {_words pushBack _word; _word = ""};
+        _lastCode = 0;
       } else {
-        if (_word isNotEqualTo "" && {_char regexMatch "[A-Z]"} &&
-          {(_word select [count _word - 1]) regexMatch "[a-z]"}) then {
+        if (_word isNotEqualTo "" && {_x >= 65 && _x <= 90} && {_lastCode >= 97 && _lastCode <= 122}) then {
           _words pushBack _word;
           _word = "";
         };
-        _word = _word + _char;
+        _word = _word + toString [_x];
+        _lastCode = _x;
       };
     } forEach toArray _base;
     if (_word isNotEqualTo "") then {_words pushBack _word};

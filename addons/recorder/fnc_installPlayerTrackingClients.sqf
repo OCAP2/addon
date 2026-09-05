@@ -49,7 +49,8 @@ if (isNil QGVAR(playerTrackingSettingNames)) then {
     QEGVAR(settings,radioShortRangeMeters),
     QEGVAR(settings,radioLongRangeMeters),
     QEGVAR(settings,trackZeus),
-    QEGVAR(settings,zeusCameraInterval)
+    QEGVAR(settings,zeusCameraInterval),
+    QEGVAR(settings,trackZeusPings)
   ];
 
   GVAR(publishPlayerTrackingSettings) = {
@@ -1316,13 +1317,33 @@ call GVAR(publishPlayerTrackingSettings);
   // virtual curator slot — this sampler must stay independent of that.
   if (isNil "OCAP_recorder_client_zeusCameraPFH") then {
     OCAP_recorder_client_zeusCameraLast = -1e10;
+    OCAP_recorder_client_zeusPingedLogics = [];
     OCAP_recorder_client_zeusCameraPFH = [{
+      if (isNull player) exitWith {};
+
+      // CuratorPinged only ever fires where the curator logic is local, which is
+      // the Zeus's own machine — the server never sees it. Attach once per logic:
+      // assignment can happen long after the bootstrap ran, and this must not sit
+      // behind the recording or curatorCamera guards below, because a Zeus with the
+      // interface closed still receives pings.
+      private _logic = getAssignedCuratorLogic player;
+      if (!isNull _logic && {!(_logic in OCAP_recorder_client_zeusPingedLogics)}) then {
+        OCAP_recorder_client_zeusPingedLogics pushBack _logic;
+        _logic addEventHandler ["CuratorPinged", {
+          params ["_curator", "_pinger"];
+          if (isNull _pinger) exitWith {};
+          if !(missionNamespace getVariable [QEGVAR(settings,trackZeus), true]) exitWith {};
+          if !(missionNamespace getVariable [QEGVAR(settings,trackZeusPings), true]) exitWith {};
+          [getAssignedCuratorUnit _curator, _pinger] remoteExecCall [QFUNC(submitZeusPing), 2];
+        }];
+      };
+
       private _startTime = missionNamespace getVariable [QEGVAR(recorder,startTime), -1];
       private _isRecording = (missionNamespace getVariable [QEGVAR(recorder,recording), false]) && {_startTime > -1};
-      if (!_isRecording || {isNull player}) exitWith {};
+      if (!_isRecording) exitWith {};
       if !(missionNamespace getVariable [QEGVAR(settings,trackZeus), true]) exitWith {};
       if (isNull curatorCamera) exitWith {};
-      if (isNull (getAssignedCuratorLogic player)) exitWith {};
+      if (isNull _logic) exitWith {};
 
       private _now = CBA_missionTime;
       private _interval = missionNamespace getVariable [QEGVAR(settings,zeusCameraInterval), 1];

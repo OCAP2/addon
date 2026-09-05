@@ -296,6 +296,14 @@
                 <Original>Track Zeus Remote Control</Original>
                 <English>Track Zeus Remote Control</English>
             </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackZeusPings">
+                <Original>Track Zeus Pings</Original>
+                <English>Track Zeus Pings</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackZeusPings_Desc">
+                <Original>Record when a player pings Zeus. Reported by the Zeus client, since the server never sees the ping. Requires Track Zeus. Default: Yes</Original>
+                <English>Record when a player pings Zeus. Reported by the Zeus client, since the server never sees the ping. Requires Track Zeus. Default: Yes</English>
+            </Key>
             <Key ID="STR_OCAP_recorder_Settings_TrackZeus_Desc">
                 <Original>Record when Zeus remote-controls a unit, and sample the curator camera while the Zeus interface is open. Default: true</Original>
                 <English>Record when Zeus remote-controls a unit, and sample the curator camera while the Zeus interface is open. Default: true</English>
@@ -307,6 +315,14 @@
             <Key ID="STR_OCAP_recorder_Settings_ZeusCameraInterval_Desc">
                 <Original>Seconds between curator-camera samples while Zeus is flying the map. Default: 1</Original>
                 <English>Seconds between curator-camera samples while Zeus is flying the map. Default: 1</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ZeusPingMinInterval">
+                <Original>Zeus Ping Minimum Interval</Original>
+                <English>Zeus Ping Minimum Interval</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ZeusPingMinInterval_Desc">
+                <Original>Seconds a player must wait before another of their pings is recorded. Also collapses the duplicate reports a single ping produces when several Zeuses can edit that player. Default: 2</Original>
+                <English>Seconds a player must wait before another of their pings is recorded. Also collapses the duplicate reports a single ping produces when several Zeuses can edit that player. Default: 2</English>
             </Key>
         </Container>
     </Package>

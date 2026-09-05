@@ -53,6 +53,7 @@ PREP(diffSnapshotPayload);
 PREP(ensureZeusEntity);
 PREP(trackZeus);
 PREP(submitZeusCamera);
+PREP(submitZeusPing);
 PREP(recordRadioPropagation);
 
 PREP(exportData);

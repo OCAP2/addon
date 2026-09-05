@@ -628,6 +628,28 @@ GVAR(allSettings) = [
     false
   ],
 
+  [
+    QEGVAR(settings,trackZeusPings),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackZeusPings), LSTRING(Settings_TrackZeusPings_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Zeus)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,zeusPingMinInterval),
+    "SLIDER",
+    [LSTRING(Settings_ZeusPingMinInterval), LSTRING(Settings_ZeusPingMinInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Zeus)],
+    [0, 10, 2, 1, false],
+    true,
+    {},
+    false
+  ],
+
 
 
   // Section: Save/Export Settings

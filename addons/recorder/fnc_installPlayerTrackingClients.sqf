@@ -756,6 +756,20 @@ call GVAR(publishPlayerTrackingSettings);
     _result
   };
 
+  // Stance rides along with the stamina snapshot because posture is what the
+  // stamina drain has to be read against. It is written as a small integer enum
+  // so a value that is sampled this often costs one number instead of a string:
+  // 0 unknown (in a vehicle, or an animation with no stance), 1 stand, 2 crouch, 3 prone.
+  OCAP_recorder_client_stanceCode = {
+    params ["_unit"];
+    switch (toUpper stance _unit) do {
+      case "STAND": {1};
+      case "CROUCH": {2};
+      case "PRONE": {3};
+      default {0};
+    };
+  };
+
   OCAP_recorder_client_buildStaminaSnapshot = {
     params ["_unit", "_reason"];
 
@@ -772,7 +786,8 @@ call GVAR(publishPlayerTrackingSettings);
         ["staminaMax", _staminaDuration * ((1 - _load) max 0)],
         ["fatigue", getFatigue _unit],
         ["load", _load],
-        ["massUnits", loadAbs _unit]
+        ["massUnits", loadAbs _unit],
+        ["stance", [_unit] call OCAP_recorder_client_stanceCode]
       ]]
     ];
 
@@ -1157,7 +1172,7 @@ call GVAR(publishPlayerTrackingSettings);
 
   OCAP_recorder_client_staminaFingerprint = {
     params ["_unit"];
-    [loadAbs _unit, load _unit]
+    [loadAbs _unit, load _unit, [_unit] call OCAP_recorder_client_stanceCode]
   };
 
   OCAP_recorder_client_radioFingerprint = {

@@ -148,6 +148,7 @@ call FUNC(addEventMission);
 // Add integration event handlers (chat, ACE, TFAR)
 call FUNC(addEventIntegrations);
 call FUNC(eh_fired_server);
+call FUNC(trackTrenches);
 call FUNC(telemetryLoop);
 [] spawn FUNC(getStaticObjects);
 

@@ -288,9 +288,21 @@
             </Key>
         </Container>
         <Container name="Settings_Zeus">
+            <Key ID="STR_OCAP_recorder_Settings_Category_Trenches">
+                <Original>Trench Tracking</Original>
+                <English>Trench Tracking</English>
+            </Key>
             <Key ID="STR_OCAP_recorder_Settings_Category_Zeus">
                 <Original>Zeus Tracking</Original>
                 <English>Zeus Tracking</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackTrenches">
+                <Original>Track Trenches</Original>
+                <English>Track Trenches</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackTrenches_Desc">
+                <Original>Record ACE3 and GRAD trenches once they are fully dug. Each one becomes an oriented map icon labelled with the trench type, who dug it, and the mission time. No effect without ACE trenches. Default: Yes</Original>
+                <English>Record ACE3 and GRAD trenches once they are fully dug. Each one becomes an oriented map icon labelled with the trench type, who dug it, and the mission time. No effect without ACE trenches. Default: Yes</English>
             </Key>
             <Key ID="STR_OCAP_recorder_Settings_TrackZeus">
                 <Original>Track Zeus Remote Control</Original>

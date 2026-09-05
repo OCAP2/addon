@@ -40,6 +40,7 @@ PREP(entityMonitors);
 PREP(telemetryLoop);
 
 PREP(aceExplosives);
+PREP(trackTrenches);
 
 PREP(addEventIntegrations);
 PREP(getStaticObjects);

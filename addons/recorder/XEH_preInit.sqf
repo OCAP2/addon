@@ -650,6 +650,30 @@ GVAR(allSettings) = [
     false
   ],
 
+  /*
+    CBA Setting: OCAP_settings_trackTrenches
+    Description:
+      Records ACE3 and GRAD trenches as placed objects once they are fully dug,
+      so they appear on the playback map as an oriented icon labelled with the
+      trench type, who dug it, and the mission time. Has no effect when ACE
+      trenches is not loaded. Default: Yes
+
+    Setting Name:
+      Track Trenches
+
+    Value Type: Boolean
+  */
+  [
+    QEGVAR(settings,trackTrenches),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackTrenches), LSTRING(Settings_TrackTrenches_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Trenches)],
+    true,
+    true,
+    {},
+    false
+  ],
+
 
 
   // Section: Save/Export Settings

@@ -119,6 +119,13 @@ GVAR(trackedPlacedObjects) = createHashMap;
   GVAR(trackedPlacedObjects) set [_placedId, _projectile];
 }] call CBA_fnc_addEventHandler;
 
+// Handle blast reports from projectile and placed-object detonations. The
+// reporting machine knows only what exploded and where; radius, damage, firer
+// and side are all resolved server-side in FUNC(recordExplosion).
+[QGVARMAIN(handleExplosion), {
+  _this call FUNC(recordExplosion);
+}] call CBA_fnc_addEventHandler;
+
 // Handle placed object lifecycle events (detonation, deletion)
 [QGVARMAIN(handlePlacedEvent), {
   params ["_data"];
@@ -208,6 +215,13 @@ GVAR(trackedPlacedObjects) = createHashMap;
           [QGVARMAIN(handlePlacedEvent), [[
             GVAR(captureFrameNo), _placedId, "detonated", _pos joinString ","
           ]]] call CBA_fnc_localEvent;
+
+          private _placedData = _projectile getVariable [QGVARMAIN(projectileData), []];
+          private _placerId = _projectile getVariable [QGVARMAIN(placerId), -1];
+          if (_placerId isEqualTo -1 && {count _placedData > 2}) then {_placerId = _placedData select 2};
+          [
+            GVAR(captureFrameNo), _pos joinString ",", typeOf _projectile, _placerId, "", "explosive"
+          ] call FUNC(recordExplosion);
         }];
 
         _obj addEventHandler ["Deleted", {

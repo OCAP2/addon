@@ -149,6 +149,10 @@ call FUNC(addEventMission);
 call FUNC(addEventIntegrations);
 call FUNC(eh_fired_server);
 call FUNC(trackTrenches);
+
+call FUNC(trackServicing);
+
+call FUNC(trackConstructions);
 call FUNC(telemetryLoop);
 [] spawn FUNC(getStaticObjects);
 

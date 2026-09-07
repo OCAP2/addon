@@ -50,7 +50,8 @@ if (isNil QGVAR(playerTrackingSettingNames)) then {
     QEGVAR(settings,radioLongRangeMeters),
     QEGVAR(settings,trackZeus),
     QEGVAR(settings,zeusCameraInterval),
-    QEGVAR(settings,trackZeusPings)
+    QEGVAR(settings,trackZeusPings),
+    QEGVAR(settings,trackConstructions)
   ];
 
   GVAR(publishPlayerTrackingSettings) = {
@@ -1375,5 +1376,52 @@ call GVAR(publishPlayerTrackingSettings);
         ["pitch", _dirVec select 2]
       ]] remoteExecCall [QFUNC(submitZeusCamera), 2];
     }, 0.25] call CBA_fnc_addPerFrameHandler;
+  };
+
+  // Static weapons. Both signals are local to the machine that builds the gun,
+  // and neither is visible to the server:
+  //
+  //   - "WeaponAssembled" and "WeaponDisassembled" are unit event handlers that
+  //     fire only where the unit is local. The server registers the same pair
+  //     for its own AI in <OCAP_recorder_fnc_addUnitEventHandlers>.
+  //   - ACE3 CSW never uses the engine command. It builds the gun with
+  //     createVehicle and raises ace_csw_deployWeaponSucceeded as a *local*
+  //     event on the deploying client, so the local player is the builder.
+  //
+  // The handlers are re-attached whenever the player's unit changes, which
+  // covers respawn and team switch; CBA_fnc_addPlayerEventHandler also runs it
+  // once for the unit the player already has.
+  if (isNil "OCAP_recorder_client_staticWeaponInit") then {
+    OCAP_recorder_client_staticWeaponInit = true;
+
+    ["unit", {
+      params ["_unit"];
+      if (isNull _unit) exitWith {};
+      if (!isNil {_unit getVariable "OCAP_recorder_client_staticWeaponEH"}) exitWith {};
+
+      _unit setVariable ["OCAP_recorder_client_staticWeaponEH", _unit addEventHandler ["WeaponAssembled", {
+        params ["_unit", "_static"];
+        if (!(missionNamespace getVariable [QEGVAR(settings,trackConstructions), true])) exitWith {};
+        ["assembled", _unit, _static] remoteExecCall [QFUNC(submitStaticWeapon), 2];
+      }]];
+
+      // WeaponDisassembled carries the two bags, not the gun, and the gun is
+      // already deleted -- the server turns this into a claim and matches it
+      // against whichever gun actually disappears.
+      _unit addEventHandler ["WeaponDisassembled", {
+        params ["_unit"];
+        if (!(missionNamespace getVariable [QEGVAR(settings,trackConstructions), true])) exitWith {};
+        ["disassembled", _unit, objNull] remoteExecCall [QFUNC(submitStaticWeapon), 2];
+      }];
+    }, true] call CBA_fnc_addPlayerEventHandler;
+
+    if (isClass (configFile >> "CfgPatches" >> "ace_csw")) then {
+      ["ace_csw_deployWeaponSucceeded", {
+        params ["_csw"];
+        if (isNull _csw) exitWith {};
+        if (!(missionNamespace getVariable [QEGVAR(settings,trackConstructions), true])) exitWith {};
+        ["assembled", player, _csw] remoteExecCall [QFUNC(submitStaticWeapon), 2];
+      }] call CBA_fnc_addEventHandler;
+    };
   };
 } remoteExec ["call", [0, -2] select isDedicated, QGVAR(playerTrackingBootstrapJip)];

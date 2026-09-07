@@ -40,7 +40,11 @@ PREP(entityMonitors);
 PREP(telemetryLoop);
 
 PREP(aceExplosives);
+PREP(recordExplosion);
 PREP(trackTrenches);
+PREP(trackServicing);
+PREP(trackConstructions);
+PREP(submitStaticWeapon);
 
 PREP(addEventIntegrations);
 PREP(getStaticObjects);

@@ -288,6 +288,14 @@
             </Key>
         </Container>
         <Container name="Settings_Zeus">
+            <Key ID="STR_OCAP_recorder_Settings_Category_Explosions">
+                <Original>Explosion Tracking</Original>
+                <English>Explosion Tracking</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_Category_Support">
+                <Original>Support &amp; Construction Tracking</Original>
+                <English>Support &amp; Construction Tracking</English>
+            </Key>
             <Key ID="STR_OCAP_recorder_Settings_Category_Trenches">
                 <Original>Trench Tracking</Original>
                 <English>Trench Tracking</English>
@@ -295,6 +303,46 @@
             <Key ID="STR_OCAP_recorder_Settings_Category_Zeus">
                 <Original>Zeus Tracking</Original>
                 <English>Zeus Tracking</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ExplosionMinRadius">
+                <Original>Minimum Explosion Radius</Original>
+                <English>Minimum Explosion Radius</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ExplosionMinRadius_Desc">
+                <Original>Smallest blast radius worth recording, in metres. Keeps HE cannon bursts out of the event feed while still catching hand grenades. Default: 2</Original>
+                <English>Smallest blast radius worth recording, in metres. Keeps HE cannon bursts out of the event feed while still catching hand grenades. Default: 2</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ServiceSampleInterval">
+                <Original>Servicing Sample Interval</Original>
+                <English>Servicing Sample Interval</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ServiceSampleInterval_Desc">
+                <Original>How often vehicle fuel and damage are sampled, in seconds. Each job is written as one event spanning the whole thing, not one per sample. Default: 5</Original>
+                <English>How often vehicle fuel and damage are sampled, in seconds. Each job is written as one event spanning the whole thing, not one per sample. Default: 5</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackConstructions">
+                <Original>Track Fortifications and Static Weapons</Original>
+                <English>Track Fortifications and Static Weapons</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackConstructions_Desc">
+                <Original>Record ACE3 Fortify placements as labelled map objects, and static weapons assembled or taken apart as events. Default: Yes</Original>
+                <English>Record ACE3 Fortify placements as labelled map objects, and static weapons assembled or taken apart as events. Default: Yes</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackExplosions">
+                <Original>Track Explosions</Original>
+                <English>Track Explosions</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackExplosions_Desc">
+                <Original>Record every detonation as an event carrying the blast radius from CfgAmmo, so playback can draw the area it covered. Default: Yes</Original>
+                <English>Record every detonation as an event carrying the blast radius from CfgAmmo, so playback can draw the area it covered. Default: Yes</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackServicing">
+                <Original>Track Vehicle Servicing</Original>
+                <English>Track Vehicle Servicing</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackServicing_Desc">
+                <Original>Record vehicles being repaired, refuelled and rearmed. Repair and refuel are read from the vehicle's own state and work with any mod; rearm requires ACE Rearm. Default: Yes</Original>
+                <English>Record vehicles being repaired, refuelled and rearmed. Repair and refuel are read from the vehicle's own state and work with any mod; rearm requires ACE Rearm. Default: Yes</English>
             </Key>
             <Key ID="STR_OCAP_recorder_Settings_TrackTrenches">
                 <Original>Track Trenches</Original>

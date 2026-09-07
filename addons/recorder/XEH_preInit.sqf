@@ -674,6 +674,124 @@ GVAR(allSettings) = [
     false
   ],
 
+  /*
+    CBA Setting: OCAP_settings_trackExplosions
+    Description:
+      Records every detonation big enough to matter as an `explosion` event
+      carrying the blast radius read from CfgAmmo, so playback can draw the area
+      a shell or charge actually covered instead of a bare impact dot.
+      Default: Yes
+
+    Setting Name:
+      Track Explosions
+
+    Value Type: Boolean
+  */
+  [
+    QEGVAR(settings,trackExplosions),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackExplosions), LSTRING(Settings_TrackExplosions_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Explosions)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_explosionMinRadius
+    Description:
+      Smallest blast radius worth recording, in metres. This is what keeps a
+      30 mm HE burst from writing an event per round while still catching hand
+      grenades, which sit around 5 m. Default: 2
+
+    Setting Name:
+      Minimum Explosion Radius
+
+    Value Type: Number
+  */
+  [
+    QEGVAR(settings,explosionMinRadius),
+    "SLIDER",
+    [LSTRING(Settings_ExplosionMinRadius), LSTRING(Settings_ExplosionMinRadius_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Explosions)],
+    [0, 50, 2, 1, false],
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_trackServicing
+    Description:
+      Records vehicles being repaired, refuelled and rearmed. Repair and refuel
+      are detected from the vehicle's own synced state, so they work with ACE,
+      vanilla support vehicles and Zeus alike; rearm needs ACE Rearm, which is
+      the only source that reports turret ammo to the server. Default: Yes
+
+    Setting Name:
+      Track Vehicle Servicing
+
+    Value Type: Boolean
+  */
+  [
+    QEGVAR(settings,trackServicing),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackServicing), LSTRING(Settings_TrackServicing_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Support)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_serviceSampleInterval
+    Description:
+      How often vehicle fuel and damage are sampled, in seconds. A longer
+      interval costs less and still catches the job, because each repair or
+      refuel is written as one event spanning the whole thing rather than one
+      per sample. Default: 5
+
+    Setting Name:
+      Servicing Sample Interval
+
+    Value Type: Number
+  */
+  [
+    QEGVAR(settings,serviceSampleInterval),
+    "SLIDER",
+    [LSTRING(Settings_ServiceSampleInterval), LSTRING(Settings_ServiceSampleInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Support)],
+    [1, 60, 5, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_trackConstructions
+    Description:
+      Records ACE3 Fortify placements as labelled map objects, and static
+      weapons assembled from bags or taken apart again as events pointing at the
+      gun's own entity record. Default: Yes
+
+    Setting Name:
+      Track Fortifications and Static Weapons
+
+    Value Type: Boolean
+  */
+  [
+    QEGVAR(settings,trackConstructions),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackConstructions), LSTRING(Settings_TrackConstructions_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Support)],
+    true,
+    true,
+    {},
+    false
+  ],
+
 
 
   // Section: Save/Export Settings

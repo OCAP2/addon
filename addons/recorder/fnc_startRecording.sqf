@@ -39,6 +39,9 @@ if (GVAR(recording) && GVAR(captureFrameNo) > 10) exitWith {
   ] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
 };
 
+// Any explicit or automatic start consumes a pending empty-server restart.
+GVAR(autoRestartAfterEmptyPending) = false;
+
 GVAR(recording) = true;
 publicVariable QGVAR(recording);
 
@@ -71,12 +74,14 @@ if (GVAR(captureFrameNo) == 0) then {
     call EFUNC(extension,newMission);
     // Wait for extension to confirm new mission before starting capture
     [{EGVAR(extension,sessionReady)}, {
+      call FUNC(flushPlayerConnectionEvents);
       call FUNC(captureLoop);
     }, [], 30, {
       ERROR("Timeout waiting for new mission confirmation from extension. Recording will not start.");
       ["OCAP failed to start recording: extension did not respond", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
     }] call CBA_fnc_waitUntilAndExecute;
   } else {
+    call FUNC(flushPlayerConnectionEvents);
     call FUNC(captureLoop);
   };
 };

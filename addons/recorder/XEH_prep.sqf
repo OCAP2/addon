@@ -6,6 +6,8 @@ PREP(updateTime);
 
 PREP(startRecording);
 PREP(stopRecording);
+PREP(autoRestartMonitor);
+PREP(getAutoStartPlayerCount);
 PREP(captureLoop);
 PREP(isKindOfApc);
 PREP(getClass);
@@ -18,6 +20,8 @@ PREP(addUnitEventHandlers);
 
 PREP(eh_connected);
 PREP(eh_disconnected);
+PREP(recordPlayerConnectionEvent);
+PREP(flushPlayerConnectionEvents);
 PREP(eh_onUserAdminStateChanged);
 PREP(eh_onUserSelectedPlayer);
 PREP(adminUIcontrol);

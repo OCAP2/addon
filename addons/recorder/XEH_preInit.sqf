@@ -62,6 +62,86 @@ GVAR(allSettings) = [
     false // requires restart to apply
   ],
 
+  /*
+    CBA Setting: OCAP_settings_excludeHeadlessClientsFromAutoStart
+    Description:
+      Exclude headless clients when counting players for automatic recording start and restart. Default: true
+
+    Setting Name:
+      Exclude Headless Clients
+
+    Value Type:
+      Boolean
+  */
+  [
+    QEGVAR(settings,excludeHeadlessClientsFromAutoStart),
+    "CHECKBOX",
+    [
+      "Exclude Headless Clients",
+      "Exclude headless clients when counting players for automatic recording start and restart. Default: true"
+    ],
+    [COMPONENT_NAME, "Auto-start Settings"],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_autoRestartAfterEmpty
+    Description:
+      Automatically start a new recording after an empty-server auto-save once the minimum player count is reached again. Default: true
+
+    Setting Name:
+      Auto-Restart After Empty Server
+
+    Value Type:
+      Boolean
+  */
+  [
+    QEGVAR(settings,autoRestartAfterEmpty),
+    "CHECKBOX",
+    [
+      "Auto-Restart After Empty Server",
+      "Automatically start a new recording after an empty-server auto-save once the minimum player count is reached again. Default: true"
+    ],
+    [COMPONENT_NAME, "Auto-start Settings"],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_bufferPlayerConnectionEvents
+    Description:
+      Buffer player connect and disconnect events before a recording starts, then replay them at frame 0. Default: true
+
+    Setting Name:
+      Buffer Player Connection Events
+
+    Value Type:
+      Boolean
+  */
+  [
+    QEGVAR(settings,bufferPlayerConnectionEvents),
+    "CHECKBOX",
+    [
+      "Buffer Player Connection Events",
+      "Buffer player connect and disconnect events before a recording starts, then replay them at frame 0. Default: true"
+    ],
+    [COMPONENT_NAME, "Auto-start Settings"],
+    true,
+    true,
+    {
+      params ["_value"];
+      if (!_value && {!isNil QGVAR(connectedPlayerNamesBuffer)}) then {
+        GVAR(connectedPlayerNamesBuffer) = [];
+      };
+    },
+    false
+  ],
+
 
   // Section: Core
 
@@ -240,6 +320,31 @@ GVAR(allSettings) = [
   ],
 
   // Section: Extra Tracking
+
+  /*
+    CBA Setting: OCAP_settings_includeSteamIdInPlayerConnectionEvents
+    Description:
+      Include the player's Steam ID as the fourth value in connected and disconnected events. Default: true
+
+    Setting Name:
+      Include Steam ID in Connection Events
+
+    Value Type:
+      Boolean
+  */
+  [
+    QEGVAR(settings,includeSteamIdInPlayerConnectionEvents),
+    "CHECKBOX",
+    [
+      "Include Steam ID in Connection Events",
+      "Include the player's Steam ID as the fourth value in connected and disconnected events: [frame, action, name, id]. Default: true"
+    ],
+    [COMPONENT_NAME, "Extra Tracking"],
+    true,
+    true,
+    {},
+    false
+  ],
 
   /*
     CBA Setting: OCAP_settings_trackTickets

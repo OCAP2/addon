@@ -54,6 +54,15 @@ publicVariable QGVAR(captureFrameNo);
 */
 GVAR(nextId) = 0;
 
+/*
+  Connection events which occur before the extension is ready to receive a
+  recording are replayed at frame 0 when that recording starts.
+*/
+GVAR(connectedPlayerNamesBuffer) = [];
+
+// Only an empty-server auto-save may arm the automatic restart path.
+GVAR(autoRestartAfterEmptyPending) = false;
+
 
 
 // save static setting values so changes during a mission don't interrupt timeline
@@ -225,12 +234,18 @@ call EFUNC(extension,initSession);
   Start recording AFTER Briefing screen, so the beginning of the recording matches the start of the actual mission session.
 */
 [
-  {(getClientStateNumber > 9 && (count allPlayers) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
+  {(getClientStateNumber > 9 && (call FUNC(getAutoStartPlayerCount)) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
   {
     call FUNC(startRecording);
     [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
   }
 ] call CBA_fnc_waitUntilAndExecute;
+
+// Periodically re-arm auto-start after an empty-server auto-save. Unlike the
+// initial waiter above, this handler remains active for the whole mission.
+[{
+  call FUNC(autoRestartMonitor);
+}, 10] call CBA_fnc_addPerFrameHandler;
 
 
 if (isNil QGVAR(entityMonitorsInitialized)) then {

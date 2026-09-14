@@ -182,6 +182,26 @@
                 <German>Erfasst Inventar und medizinischen Zustand sofort beim Tod, unabhängig von den Timern. Standard: ja</German>
                 <Finnish>Tallentaa varusteet ja lääkintätilan heti kuolemassa, ajastimista riippumatta. Oletus: kyllä</Finnish>
             </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerTraits">
+                <Original>Track Player Traits</Original>
+                <English>Track Player Traits</English>
+                <Czech>Sledovat vlastnosti hráčů</Czech>
+                <French>Suivre les traits des joueurs</French>
+                <Italian>Traccia i tratti dei giocatori</Italian>
+                <Russian>Записывать навыки игроков</Russian>
+                <German>Spielerfähigkeiten erfassen</German>
+                <Finnish>Tallenna pelaajien taidot</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerTraits_Desc">
+                <Original>Record each player's engine traits (medic, engineer, explosive specialist, UAV hacker, coefficients, custom traits) and ACE training levels (medic/doctor, engineer/advanced, EOD) with their inventory snapshot. Default: true</Original>
+                <English>Record each player's engine traits (medic, engineer, explosive specialist, UAV hacker, coefficients, custom traits) and ACE training levels (medic/doctor, engineer/advanced, EOD) with their inventory snapshot. Default: true</English>
+                <Czech>Zaznamená vlastnosti hráče (zdravotník, ženista, pyrotechnik, UAV operátor, koeficienty, vlastní) a úrovně výcviku ACE (zdravotník/doktor, ženista/pokročilý, EOD) spolu se snímkem inventáře. Výchozí: ano</Czech>
+                <French>Enregistre les traits du joueur (médecin, ingénieur, démineur, pilote de drone, coefficients, traits personnalisés) et les niveaux de formation ACE (médecin/docteur, ingénieur/avancé, EOD) avec l'instantané d'inventaire. Défaut : oui</French>
+                <Italian>Registra i tratti del giocatore (medico, ingegnere, artificiere, hacker UAV, coefficienti, tratti personalizzati) e i livelli di addestramento ACE (medico/dottore, ingegnere/avanzato, EOD) con lo snapshot dell'inventario. Predefinito: sì</Italian>
+                <Russian>Записывает навыки игрока (медик, инженер, сапёр, оператор БПЛА, коэффициенты, пользовательские) и уровни подготовки ACE (медик/врач, инженер/продвинутый, EOD) вместе со снимком инвентаря. По умолчанию: да</Russian>
+                <German>Erfasst die Fähigkeiten des Spielers (Sanitäter, Pionier, Sprengstoffexperte, UAV-Hacker, Koeffizienten, eigene) und ACE-Ausbildungsstufen (Sanitäter/Arzt, Pionier/erweitert, EOD) zusammen mit dem Inventar. Standard: ja</German>
+                <Finnish>Tallentaa pelaajan taidot (lääkintämies, pioneeri, räjähdeasiantuntija, UAV-hakkeri, kertoimet, mukautetut) ja ACE-koulutustasot (lääkintämies/lääkäri, pioneeri/edistynyt, EOD) varustetallenteen mukana. Oletus: kyllä</Finnish>
+            </Key>
             <Key ID="STR_OCAP_recorder_Settings_TrackPlayerInventory_Desc">
                 <Original>Record a structured gear snapshot for every player. Default: true</Original>
                 <English>Record a structured gear snapshot for every player. Default: true</English>

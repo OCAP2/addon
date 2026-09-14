@@ -486,6 +486,17 @@ GVAR(allSettings) = [
   ],
 
   [
+    QEGVAR(settings,trackPlayerTraits),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerTraits), LSTRING(Settings_TrackPlayerTraits_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
     QEGVAR(settings,trackPlayerMedical),
     "CHECKBOX",
     [LSTRING(Settings_TrackPlayerMedical), LSTRING(Settings_TrackPlayerMedical_Desc)],

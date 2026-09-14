@@ -38,6 +38,7 @@ if (isNil QGVAR(playerTrackingSettingNames)) then {
     QEGVAR(settings,trackPlayerInventory),
     QEGVAR(settings,playerInventoryInterval),
     QEGVAR(settings,trackPlayerInventoryOnDeath),
+    QEGVAR(settings,trackPlayerTraits),
     QEGVAR(settings,trackPlayerMedical),
     QEGVAR(settings,playerMedicalInterval),
     QEGVAR(settings,playerMedicalCriticalInterval),
@@ -78,6 +79,77 @@ call GVAR(publishPlayerTrackingSettings);
   OCAP_recorder_client_hasAceFatigue = isClass (configFile >> "CfgPatches" >> "ace_advanced_fatigue");
   OCAP_recorder_client_hasTfar = isClass (configFile >> "CfgPatches" >> "tfar_core");
   OCAP_recorder_client_hasAcre = isClass (configFile >> "CfgPatches" >> "acre_api");
+  // The three ACE components that layer their own training level on top of an
+  // engine trait. Each is optional on its own, so they are checked one by one.
+  OCAP_recorder_client_hasAceMedicalTreatment = isClass (configFile >> "CfgPatches" >> "ace_medical_treatment");
+  OCAP_recorder_client_hasAceRepair = isClass (configFile >> "CfgPatches" >> "ace_repair");
+  OCAP_recorder_client_hasAceExplosives = isClass (configFile >> "CfgPatches" >> "ace_explosives");
+
+  // getAllUnitTraits reports the engine traits with its own capitalisation
+  // ("Medic", "UavHacker", "CamouflageCoef"), so they are matched lowercased and
+  // written under one fixed key each. Anything else is a custom trait a mission
+  // or mod added with setUnitTrait and is kept under its own name.
+  OCAP_recorder_client_traitKeys = createHashMapFromArray [
+    ["medic", "medic"],
+    ["engineer", "engineer"],
+    ["explosivespecialist", "explosiveSpecialist"],
+    ["uavhacker", "uavHacker"],
+    ["camouflagecoef", "camouflageCoef"],
+    ["audiblecoef", "audibleCoef"],
+    ["loadcoef", "loadCoef"]
+  ];
+
+  // Everything that decides what a unit is allowed to do: the engine traits and,
+  // where ACE is loaded, the graded training ACE reads instead of them. The ACE
+  // values are read exactly the way ace_medical_treatment_fnc_isMedic,
+  // ace_repair_fnc_isEngineer and ace_common_fnc_isEOD read them, including the
+  // fall-through to the engine trait when the ACE variable was never set, so the
+  // recording shows the level the mod actually acted on.
+  //
+  // Traits ride inside the inventory snapshot: they are assigned with the
+  // loadout, change about as often, and the server's diff then carries them only
+  // when they change.
+  OCAP_recorder_client_buildTraits = {
+    params ["_unit"];
+
+    private _traits = createHashMap;
+    private _custom = createHashMap;
+    {
+      _x params [["_name", "", [""]], "_value"];
+      if (_name isEqualTo "" || {isNil "_value"}) then {continue};
+      // A custom trait can hold anything; only what JSON can carry is recorded.
+      if (!(_value isEqualType "" || {_value isEqualType 0} || {_value isEqualType false})) then {continue};
+      private _key = OCAP_recorder_client_traitKeys get (toLower _name);
+      if (isNil "_key") then {
+        _custom set [_name, _value];
+      } else {
+        _traits set [_key, _value];
+      };
+    } forEach getAllUnitTraits _unit;
+    if (count _custom > 0) then {_traits set ["custom", _custom]};
+
+    private _ace = createHashMap;
+    if (OCAP_recorder_client_hasAceMedicalTreatment) then {
+      // 0 none, 1 medic, 2 doctor.
+      private _level = _unit getVariable ["ace_medical_medicClass", parseNumber (_unit getUnitTrait "medic")];
+      if (_level isEqualType false) then {_level = parseNumber _level};
+      if (!(_level isEqualType 0)) then {_level = 0};
+      _ace set ["medic", _level];
+    };
+    if (OCAP_recorder_client_hasAceRepair) then {
+      // 0 none, 1 engineer, 2 advanced engineer. ACE writes `true` for 1.
+      private _level = _unit getVariable ["ACE_IsEngineer", _unit getUnitTrait "engineer"];
+      if (_level isEqualType false) then {_level = parseNumber _level};
+      if (!(_level isEqualType 0)) then {_level = 0};
+      _ace set ["engineer", _level];
+    };
+    if (OCAP_recorder_client_hasAceExplosives) then {
+      _ace set ["eod", (_unit getVariable ["ACE_isEOD", _unit getUnitTrait "explosiveSpecialist"]) in [1, true]];
+    };
+    if (count _ace > 0) then {_traits set ["ace", _ace]};
+
+    _traits
+  };
 
   // ACE body part order. Every per-part array in ACE and KAT is indexed by this.
   OCAP_recorder_client_bodyParts = ["head", "body", "leftarm", "rightarm", "leftleg", "rightleg"];
@@ -351,7 +423,7 @@ call GVAR(publishPlayerTrackingSettings);
       _magazines pushBack _entry;
     } forEach (_magazineClasses arrayIntersect _magazineClasses);
 
-    createHashMapFromArray [
+    private _result = createHashMapFromArray [
       ["reason", _reason],
       // loadAbs is in engine mass units (a tenth of a pound each), not kilograms.
       ["massUnits", loadAbs _unit],
@@ -364,7 +436,13 @@ call GVAR(publishPlayerTrackingSettings);
       ["weapons", _weapons],
       ["magazines", _magazines],
       ["assignedItems", [assignedItems _unit] call _describeItems]
-    ]
+    ];
+
+    if (missionNamespace getVariable [QEGVAR(settings,trackPlayerTraits), true]) then {
+      _result set ["traits", [_unit] call OCAP_recorder_client_buildTraits];
+    };
+
+    _result
   };
 
   OCAP_recorder_client_aceWoundTypes = [
@@ -1150,7 +1228,19 @@ call GVAR(publishPlayerTrackingSettings);
   // wake-up, or a new ACE activity / quick-view line is written within one PFH tick.
   OCAP_recorder_client_inventoryFingerprint = {
     params ["_unit"];
+    // Traits are part of the inventory snapshot, so a Zeus promoting someone to
+    // medic mid-mission has to trip the same diff a loadout change does.
+    private _traits = [];
+    if (missionNamespace getVariable [QEGVAR(settings,trackPlayerTraits), true]) then {
+      _traits = [
+        getAllUnitTraits _unit,
+        _unit getVariable ["ace_medical_medicClass", -1],
+        _unit getVariable ["ACE_IsEngineer", -1],
+        _unit getVariable ["ACE_isEOD", -1]
+      ];
+    };
     [
+      _traits,
       loadAbs _unit,
       uniform _unit,
       vest _unit,

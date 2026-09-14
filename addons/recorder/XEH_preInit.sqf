@@ -618,6 +618,17 @@ GVAR(allSettings) = [
   ],
 
   [
+    QEGVAR(settings,trackWeather),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackWeather), LSTRING(Settings_TrackWeather_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Weather)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
     QEGVAR(settings,trackZeus),
     "CHECKBOX",
     [LSTRING(Settings_TrackZeus), LSTRING(Settings_TrackZeus_Desc)],

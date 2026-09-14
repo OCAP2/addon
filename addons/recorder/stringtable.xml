@@ -307,6 +307,20 @@
                 <English>Record the server FPS at mission start and every 10 seconds. Default: true</English>
             </Key>
         </Container>
+        <Container name="Settings_Weather">
+            <Key ID="STR_OCAP_recorder_Settings_Category_Weather">
+                <Original>Weather</Original>
+                <English>Weather</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackWeather">
+                <Original>Track Weather</Original>
+                <English>Track Weather</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackWeather_Desc">
+                <Original>Record vanilla weather (overcast, rain, fog, wind, humidity, moon phase) at recording start and every 60 seconds. ACE Weather temperature and humidity replace the vanilla readings when ACE Weather is enabled. Default: true</Original>
+                <English>Record vanilla weather (overcast, rain, fog, wind, humidity, moon phase) at recording start and every 60 seconds. ACE Weather temperature and humidity replace the vanilla readings when ACE Weather is enabled. Default: true</English>
+            </Key>
+        </Container>
         <Container name="Settings_Zeus">
             <Key ID="STR_OCAP_recorder_Settings_Category_Explosions">
                 <Original>Explosion Tracking</Original>

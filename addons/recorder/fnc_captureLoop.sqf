@@ -37,6 +37,10 @@ if (!isNil QGVAR(serverFpsPFH)) then {
   [GVAR(serverFpsPFH)] call CBA_fnc_removePerFrameHandler;
   GVAR(serverFpsPFH) = nil;
 };
+if (!isNil QGVAR(weatherPFH)) then {
+  [GVAR(weatherPFH)] call CBA_fnc_removePerFrameHandler;
+  GVAR(weatherPFH) = nil;
+};
 if (isNil QGVAR(startTime)) then {
   GVAR(startTime) = time;
   publicVariable QGVAR(startTime);
@@ -64,6 +68,7 @@ GVAR(recordServerFps) = {
   ]] call EFUNC(extension,sendData);
 };
 GVAR(serverFpsPFH) = [GVAR(recordServerFps), 10] call CBA_fnc_addPerFrameHandler;
+GVAR(weatherPFH) = [{ call FUNC(recordWeather) }, 60] call CBA_fnc_addPerFrameHandler;
 
 // Variable: OCAP_PFHObject
 // The CBA PerFrameHandler object that is created and used to run the capture loop.
@@ -83,9 +88,10 @@ GVAR(PFHObject) = [
     };
 
     // Capture immediately so the Stats panel has a value from the start.
-    // The dedicated CBA PFH records subsequent samples every 10 seconds.
+    // The dedicated CBA PFHs record subsequent FPS / weather samples.
     if (GVAR(captureFrameNo) == 1) then {
       call GVAR(recordServerFps);
+      call FUNC(recordWeather);
     };
 
     if (GVAR(captureFrameNo) == 10 || (GVAR(captureFrameNo) > 10 && EGVAR(settings,trackTimes) && GVAR(captureFrameNo) % EGVAR(settings,trackTimeInterval) == 0)) then {

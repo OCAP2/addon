@@ -59,12 +59,21 @@ force OCAP_settings_trackPlayerSnapshotDiffs = true;
 force OCAP_settings_radioShortRangeMeters = 5000;
 force OCAP_settings_radioLongRangeMeters = 20000;
 force OCAP_settings_trackServerFps = true;
+force OCAP_settings_trackWeather = true;
 ```
 
 ### Server Performance
 
 `OCAP_settings_trackServerFps` defaults to `true`. It records server `diag_fps`
 at recording start and every 10 seconds for the web playback Stats panel.
+
+### Weather
+
+`OCAP_settings_trackWeather` defaults to `true`. It records vanilla weather
+(overcast, rain, fog, wind, humidity, moon phase) at recording start and every
+60 seconds. When ACE Weather is loaded and `ace_weather_enabled` is on, ACE air
+temperature and humidity replace the vanilla readings. The Stats panel shows
+the sample at the playhead.
 
 ## License
 

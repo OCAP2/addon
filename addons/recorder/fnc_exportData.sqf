@@ -114,6 +114,10 @@ if (!isNil QGVAR(serverFpsPFH)) then {
   [GVAR(serverFpsPFH)] call CBA_fnc_removePerFrameHandler;
   GVAR(serverFpsPFH) = nil;
 };
+if (!isNil QGVAR(weatherPFH)) then {
+  [GVAR(weatherPFH)] call CBA_fnc_removePerFrameHandler;
+  GVAR(weatherPFH) = nil;
+};
 
 private _winSide = if (isNil "_side") then {""} else {if (_side isEqualTo sideUnknown) then {""} else {str _side}};
 private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mission ended"} else {""}} else {_message};

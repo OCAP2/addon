@@ -60,6 +60,7 @@ PREP(trackZeus);
 PREP(submitZeusCamera);
 PREP(submitZeusPing);
 PREP(recordRadioPropagation);
+PREP(recordWeather);
 
 PREP(exportData);
 

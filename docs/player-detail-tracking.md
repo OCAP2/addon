@@ -59,6 +59,7 @@ force OCAP_settings_trackPlayerSnapshotDiffs = true;
 force OCAP_settings_radioShortRangeMeters = 5000;
 force OCAP_settings_radioLongRangeMeters = 20000;
 force OCAP_settings_trackServerFps = true;
+force OCAP_settings_trackWeather = true;
 ```
 
 If a deployment restricts `CfgRemoteExec`, whitelist

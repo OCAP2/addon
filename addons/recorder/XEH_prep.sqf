@@ -59,6 +59,7 @@ PREP(ensureZeusEntity);
 PREP(trackZeus);
 PREP(submitZeusCamera);
 PREP(submitZeusPing);
+PREP(submitZeusModule);
 PREP(recordRadioPropagation);
 PREP(recordWeather);
 

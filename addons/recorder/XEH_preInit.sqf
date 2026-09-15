@@ -662,6 +662,17 @@ GVAR(allSettings) = [
   ],
 
   [
+    QEGVAR(settings,trackZeusModules),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackZeusModules), LSTRING(Settings_TrackZeusModules_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Zeus)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
     QEGVAR(settings,zeusPingMinInterval),
     "SLIDER",
     [LSTRING(Settings_ZeusPingMinInterval), LSTRING(Settings_ZeusPingMinInterval_Desc)],

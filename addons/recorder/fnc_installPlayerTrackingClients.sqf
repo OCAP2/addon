@@ -52,6 +52,7 @@ if (isNil QGVAR(playerTrackingSettingNames)) then {
     QEGVAR(settings,trackZeus),
     QEGVAR(settings,zeusCameraInterval),
     QEGVAR(settings,trackZeusPings),
+    QEGVAR(settings,trackZeusModules),
     QEGVAR(settings,trackConstructions)
   ];
 
@@ -1418,6 +1419,329 @@ call GVAR(publishPlayerTrackingSettings);
     };
   }, 5] call CBA_fnc_addPerFrameHandler;
 
+  // English Zeus-module labels. `getText` would freeze the Zeus client's
+  // language into the recording; there is no SQF "localize as English". A
+  // baked map covers ZEN / ACE / common vanilla classes, getTextRaw is used
+  // when the config holds a literal, and unknown classes are split from the
+  // classname the same way gear names are.
+  OCAP_recorder_client_zeusModuleNames = createHashMapFromArray [
+    ["zen_modules_moduleaddfullarsenal", "Add Full Arsenal"],
+    ["zen_modules_moduleambientanim", "Ambient Animation"],
+    ["zen_modules_moduleambientflyby", "Ambient Flyby"],
+    ["zen_modules_moduleanimationviewer", "Animation Viewer"],
+    ["zen_modules_modulearsenal", "Arsenal"],
+    ["zen_modules_moduleassignzeus", "Promote To Zeus"],
+    ["zen_modules_moduleattacheffect", "Attach/Detach Effect"],
+    ["zen_modules_moduleattachflag", "Attach Flag"],
+    ["zen_modules_modulebindvariable", "Bind Variable To Object"],
+    ["zen_modules_modulecasgun", "CAS Gun"],
+    ["zen_modules_modulecasmissile", "CAS Missiles"],
+    ["zen_modules_modulecasgunmissile", "CAS Gun and Missiles"],
+    ["zen_modules_modulecasbomb", "CAS Bomb"],
+    ["zen_modules_modulechangeheight", "Change Height"],
+    ["zen_modules_modulechatter", "Chatter"],
+    ["zen_modules_moduleconvoyparameters", "Convoy Parameters"],
+    ["zen_modules_modulecreateied", "Create IED"],
+    ["zen_modules_modulecreateintel", "Create/Edit Intel"],
+    ["zen_modules_modulecreatelz", "Create LZ"],
+    ["zen_modules_modulecreateminefield", "Create Minefield"],
+    ["zen_modules_modulecreaterp", "Create RP"],
+    ["zen_modules_modulecreatetarget", "Create Target"],
+    ["zen_modules_modulecreateteleporter", "Create Teleporter"],
+    ["zen_modules_modulecrewtogunner", "Crew To Gunner"],
+    ["zen_modules_moduledamagebuildings", "Damage Buildings"],
+    ["zen_modules_moduleearthquake", "Earthquake"],
+    ["zen_modules_moduleeditableobjects", "Update Editable Objects"],
+    ["zen_modules_moduleeffectfire", "Custom Fire"],
+    ["zen_modules_moduleequipwithecm", "Equip With ECM"],
+    ["zen_modules_moduleexportmissionsqf", "Export Mission SQF"],
+    ["zen_modules_moduleexecutecode", "Execute Code"],
+    ["zen_modules_modulefiremission", "Artillery Fire Mission"],
+    ["zen_modules_moduleflyheight", "Fly Height"],
+    ["zen_modules_modulefunctionsviewer", "Functions Viewer"],
+    ["zen_modules_modulegarrison", "Garrison Group"],
+    ["zen_modules_moduleglobalaiskill", "Global AI Skill"],
+    ["zen_modules_moduleglobalhint", "Global Hint"],
+    ["zen_modules_modulegroupside", "Group Side"],
+    ["zen_modules_moduleheal", "Heal"],
+    ["zen_modules_modulehideterrainobjects", "Hide Terrain Objects"],
+    ["zen_modules_modulehidezeus", "Hide Zeus"],
+    ["zen_modules_modulelightsource", "Light Source"],
+    ["zen_modules_modulemakeinvincible", "Make Invincible"],
+    ["zen_modules_modulenuke", "Atomic Bomb"],
+    ["zen_modules_modulepatrolarea", "Patrol Area"],
+    ["zen_modules_moduleremovearsenal", "Remove Arsenal"],
+    ["zen_modules_modulerotateobject", "Rotate Object"],
+    ["zen_modules_modulescaleobject", "Scale Object"],
+    ["zen_modules_modulesearchbuilding", "Search Building"],
+    ["zen_modules_modulesetdate", "Set Date"],
+    ["zen_modules_moduleshowinconfig", "Show In Config Viewer"],
+    ["zen_modules_modulesiderelations", "Side Relations"],
+    ["zen_modules_modulesimulation", "Toggle Simulation"],
+    ["zen_modules_modulesitonchair", "Sit On Chair"],
+    ["zen_modules_modulesmokepillar", "Smoke Pillar"],
+    ["zen_modules_modulespawncarrier", "USS Freedom"],
+    ["zen_modules_modulespawndestroyer", "USS Liberty"],
+    ["zen_modules_modulespawnreinforcements", "Spawn Reinforcements"],
+    ["zen_modules_modulesuicidebomber", "Suicide Bomber"],
+    ["zen_modules_modulesuppressivefire", "Suppressive Fire"],
+    ["zen_modules_moduleteleportplayers", "Teleport Players"],
+    ["zen_modules_moduletoggleflashlights", "Toggle Flashlights"],
+    ["zen_modules_moduletoggleirlasers", "Toggle IR Lasers"],
+    ["zen_modules_moduletogglelamps", "Toggle Lamps"],
+    ["zen_modules_moduletracers", "Tracers"],
+    ["zen_modules_moduleturretoptics", "Vehicle Turret Optics"],
+    ["zen_modules_moduleungarrison", "Un-Garrison Group"],
+    ["zen_modules_modulevisibility", "Toggle Visibility"],
+    ["zen_modules_moduleweather", "Change Weather"],
+    ["zen_remote_control_module", "Remote Control"],
+    ["zen_doors_module", "Configure Doors"],
+    ["zen_cover_map_module", "Cover Map"],
+    ["zen_attached_objects_module", "Attach To"],
+    ["zen_tasks_module", "Task"],
+    ["ace_zeus_moduleaddsparetrack", "Add Spare Track"],
+    ["ace_zeus_moduleaddsparewheel", "Add Spare Wheel"],
+    ["ace_zeus_modulesetengineer", "Set Engineer"],
+    ["ace_zeus_modulesetrepairfacility", "Set Repair Facility"],
+    ["ace_zeus_modulesetrepairvehicle", "Set Repair Vehicle"],
+    ["ace_zeus_moduleaddorremovefries", "Add/Remove FRIES"],
+    ["ace_zeus_modulecaptive", "Captive"],
+    ["ace_zeus_moduleconfigurepylons", "Configure Pylons"],
+    ["ace_zeus_moduledefendarea", "Defend Area"],
+    ["ace_zeus_moduleeditableobjects", "Editable Objects"],
+    ["ace_zeus_moduleglobalsetskill", "Global AI Skill"],
+    ["ace_zeus_modulegroupside", "Group Side"],
+    ["ace_zeus_moduleheal", "Heal"],
+    ["ace_zeus_modulelaytrench", "Lay Trench"],
+    ["ace_zeus_moduleloadintocargo", "Load Into Cargo"],
+    ["ace_zeus_moduleunloadfromcargo", "Unload From Cargo"],
+    ["ace_zeus_modulecargoparadrop", "Cargo Paradrop"],
+    ["ace_zeus_modulepatrolarea", "Patrol Area"],
+    ["ace_zeus_modulesearcharea", "Search Area"],
+    ["ace_zeus_modulesearchnearby", "Search Nearby"],
+    ["ace_zeus_modulesuppressivefire", "Suppressive Fire"],
+    ["ace_zeus_modulesetmedic", "Set Medic"],
+    ["ace_zeus_modulesetmedicalfacility", "Set Medical Facility"],
+    ["ace_zeus_modulesetmedicalvehicle", "Set Medical Vehicle"],
+    ["ace_zeus_modulesimulation", "Toggle Simulation"],
+    ["ace_zeus_modulespectator", "Spectator"],
+    ["ace_zeus_modulesuicidebomber", "Suicide Bomber"],
+    ["ace_zeus_modulesurrender", "Surrender"],
+    ["ace_zeus_moduleteleportplayers", "Teleport Players"],
+    ["ace_zeus_moduleunconscious", "Unconscious"],
+    ["ace_zeus_modulegarrison", "Garrison"],
+    ["ace_zeus_moduleungarrison", "Un-Garrison"],
+    ["ace_zeus_moduletogglenvg", "Toggle NVG"],
+    ["ace_zeus_moduletoggleflashlight", "Toggle Flashlight"],
+    ["ace_zeus_addfullarsenal", "Add Full Arsenal"],
+    ["ace_zeus_removefullarsenal", "Remove Arsenal"],
+    ["ace_zeus_addfullacearsenal", "Add Full ACE Arsenal"],
+    ["ace_zeus_removefullacearsenal", "Remove ACE Arsenal"],
+    ["ace_zeus_moduleburn", "Burn"],
+    ["ace_zeus_modulemedicalmenu", "Medical Menu"],
+    ["modulelightning_f", "Lightning Bolt"],
+    ["modulecas_f", "CAS"],
+    ["modulecasgun_f", "CAS Gun"],
+    ["modulecasmissile_f", "CAS Missiles"],
+    ["modulecasgunmissile_f", "CAS Gun and Missiles"],
+    ["modulecasbomb_f", "CAS Bomb"],
+    ["modulearsenal_f", "Arsenal"],
+    ["moduleremotecontrol_f", "Remote Control"],
+    ["moduletracers_f", "Tracers"],
+    ["modulepostprocess_f", "Postprocess"],
+    ["moduleskiptime_f", "Skip Time"],
+    ["moduleweather_f", "Weather"],
+    ["moduleflare_f", "Flare"],
+    ["modulechemlight_f", "Chemlight"],
+    ["moduleordnance_f", "Ordnance"],
+    ["moduleordnancehowitzer_f", "Howitzer"],
+    ["moduleordnancemortar_f", "Mortar"],
+    ["moduleordnancerocket_f", "Rocket"],
+    ["modulemine_f", "Mine"],
+    ["modulecovermap_f", "Cover Map"],
+    ["moduleobjective_f", "Objective"],
+    ["moduleobjectivemove_f", "Move"],
+    ["moduleobjectivesector_f", "Sector"],
+    ["moduleobjectiveattackdefend_f", "Attack / Defend"],
+    ["moduleobjectiveneutralize_f", "Neutralize"],
+    ["moduleobjectiveprotect_f", "Protect"],
+    ["moduleobjectivegetin_f", "Get In"],
+    ["moduleobjectiveracestart_f", "Race Start"],
+    ["moduleobjectiveracecp_f", "Race Checkpoint"],
+    ["moduleobjectiveracefinish_f", "Race Finish"],
+    ["modulecuratoraddaddons_f", "Add Addons"],
+    ["modulecuratoraddeditableobjects_f", "Add Editable Objects"],
+    ["modulecuratorsetcamera_f", "Set Camera"]
+  ];
+  OCAP_recorder_client_zeusModuleCategories = createHashMapFromArray [
+    ["zen_modules_ai", "AI"],
+    ["zen_modules_buildings", "Buildings"],
+    ["zen_modules_devtools", "Dev Tools"],
+    ["zen_modules_equipment", "Equipment"],
+    ["zen_modules_inventory", "Inventory"],
+    ["zen_modules_objects", "Objects"],
+    ["zen_modules_players", "Players"],
+    ["zen_modules_reinforcements", "Reinforcements"],
+    ["zen_modules_spawn", "Spawn"],
+    ["ace_zeus_repair", "Repair"],
+    ["ace_zeus_captive", "Captive"],
+    ["ace_zeus_utility", "Utility"],
+    ["ace_zeus_ai", "AI"],
+    ["ace_zeus_medical", "Medical"],
+    ["ace_zeus_arsenal", "Arsenal"],
+    ["curator", "Zeus"],
+    ["ordnance", "Ordnance"],
+    ["environment", "Environment"],
+    ["effects", "Effects"],
+    ["missionflow", "Mission Flow"],
+    ["objectives", "Objectives"],
+    ["ace", "ACE"],
+    ["chemlights", "Chemlights"]
+  ];
+  OCAP_recorder_client_zeusModulePrefixes = [
+    "zen_custom_modules_",
+    "zen_modules_module",
+    "zen_modules_",
+    "zen_remote_control_",
+    "zen_doors_",
+    "zen_cover_map_",
+    "zen_attached_objects_",
+    "zen_tasks_",
+    "ace_zeus_module",
+    "ace_zeus_"
+  ];
+  OCAP_recorder_client_zeusModuleAcronyms = [
+    "cas", "ied", "lz", "rp", "ecm", "sqf", "ir", "nvg", "ai", "fries", "uss", "hq", "gps", "ace"
+  ];
+
+  OCAP_recorder_client_isEnglishText = {
+    params [["_text", "", [""]]];
+    if (_text isEqualTo "") exitWith {false};
+    private _ok = true;
+    {
+      private _pass = _x == 32 || {_x == 45} || {_x == 47} || {_x == 38} || {_x == 39} || {_x == 40} || {_x == 41} || {_x == 43} || {_x == 44} || {_x == 46} || {_x >= 48 && _x <= 57} || {_x >= 65 && _x <= 90} || {_x >= 97 && _x <= 122};
+      if (!_pass) then {_ok = false};
+    } forEach toArray _text;
+    _ok && {((toUpper _text) select [0, 4]) isNotEqualTo "STR_"}
+  };
+
+  OCAP_recorder_client_humanizeZeusModuleClass = {
+    params [["_className", "", [""]]];
+    if (_className isEqualTo "") exitWith {""};
+
+    private _base = _className;
+    private _lower = toLower _base;
+    {
+      if ((_lower find _x) == 0 && {count _base > count _x}) exitWith {
+        _base = _base select [count _x];
+        _lower = toLower _base;
+      };
+    } forEach OCAP_recorder_client_zeusModulePrefixes;
+
+    if ((_lower select [count _lower - 2, 2]) isEqualTo "_f") then {
+      _base = _base select [0, count _base - 2];
+      _lower = toLower _base;
+    };
+    if ((_lower select [0, 6]) isEqualTo "module" && {count _base > 6}) then {
+      _base = _base select [6];
+    };
+
+    private _name = [_base] call OCAP_recorder_client_deriveNameFromClass;
+    if (_name isEqualTo "" || {_name isEqualTo _base && {_base regexMatch "^\d+$"}}) then {
+      _name = "Custom Module";
+    };
+    (_name splitString " " apply {
+      if ((toLower _x) in OCAP_recorder_client_zeusModuleAcronyms) then {toUpper _x} else {_x}
+    }) joinString " "
+  };
+
+  OCAP_recorder_client_zeusModuleDisplayName = {
+    params ["_object", ["_className", "", [""]]];
+    if (_className isEqualTo "") then {_className = typeOf _object};
+
+    private _cached = OCAP_recorder_client_zeusModuleNames get toLower _className;
+    if (!isNil "_cached") exitWith {_cached};
+
+    if (((toLower _className) find "zen_custom_modules_") == 0) exitWith {
+      private _index = getNumber (configOf _object >> "zen_custom_modules_id") - 1;
+      private _entry = missionNamespace getVariable ["zen_custom_modules_list", []] param [_index, []];
+      private _customName = _entry param [1, ""];
+      if ([_customName] call OCAP_recorder_client_isEnglishText) then {_customName} else {"Custom Module"}
+    };
+
+    private _raw = getTextRaw (configOf _object >> "displayName");
+    if (_raw isEqualType []) then {_raw = _raw param [0, ""]};
+    if (!(_raw isEqualType "")) then {_raw = ""};
+    _raw = trim _raw;
+    if (_raw isNotEqualTo "" && {(_raw select [0, 1]) isNotEqualTo "$"} && {[_raw] call OCAP_recorder_client_isEnglishText}) then {
+      _raw
+    } else {
+      [_className] call OCAP_recorder_client_humanizeZeusModuleClass
+    }
+  };
+
+  OCAP_recorder_client_zeusModuleCategory = {
+    params ["_object"];
+    private _raw = getTextRaw (configOf _object >> "category");
+    if (_raw isEqualType []) then {_raw = _raw param [0, ""]};
+    if (!(_raw isEqualType "")) then {_raw = ""};
+    if (_raw isEqualTo "" || {_raw isEqualTo "NO_CATEGORY"}) exitWith {""};
+    private _mapped = OCAP_recorder_client_zeusModuleCategories get toLower _raw;
+    if (!isNil "_mapped") exitWith {_mapped};
+    if ([_raw] call OCAP_recorder_client_isEnglishText && {(_raw select [0, 1]) isNotEqualTo "$"}) exitWith {_raw};
+    [_raw] call OCAP_recorder_client_humanizeZeusModuleClass
+  };
+
+  OCAP_recorder_client_zeusModuleSource = {
+    params [["_className", "", [""]]];
+    private _lower = toLower _className;
+    if ((_lower select [0, 20]) isEqualTo "zen_custom_modules_") exitWith {"zenCustom"};
+    if ((_lower select [0, 4]) isEqualTo "zen_") exitWith {"zen"};
+    if ((_lower select [0, 9]) isEqualTo "ace_zeus_") exitWith {"ace"};
+    if ((_lower select [0, 6]) isEqualTo "module") exitWith {"vanilla"};
+    "other"
+  };
+
+  OCAP_recorder_client_reportZeusModule = {
+    params ["_curator", "_object"];
+    if (isNull _object) exitWith {};
+    if !(_object isKindOf "Module_F") exitWith {};
+    if (typeOf _object isEqualTo "ModuleCurator_F") exitWith {};
+    if !(missionNamespace getVariable [QEGVAR(settings,trackZeus), true]) exitWith {};
+    if !(missionNamespace getVariable [QEGVAR(settings,trackZeusModules), true]) exitWith {};
+
+    private _className = typeOf _object;
+    private _pos = getPosATL _object;
+    private _attached = attachedTo _object;
+    if (isNull _attached) then {
+      curatorMouseOver params ["_kind", "_entity"];
+      if (_kind isEqualTo "OBJECT") then {_attached = _entity};
+    };
+
+    private _attachedName = "";
+    if (!isNull _attached) then {
+      if (_attached isKindOf "CAManBase") then {
+        _attachedName = name _attached;
+      } else {
+        _attachedName = [typeOf _attached] call OCAP_recorder_client_gearDisplayName;
+      };
+    };
+
+    [
+      getAssignedCuratorUnit _curator,
+      _attached,
+      createHashMapFromArray [
+        ["className", _className],
+        ["displayName", [_object, _className] call OCAP_recorder_client_zeusModuleDisplayName],
+        ["category", [_object] call OCAP_recorder_client_zeusModuleCategory],
+        ["source", [_className] call OCAP_recorder_client_zeusModuleSource],
+        ["x", _pos select 0],
+        ["y", _pos select 1],
+        ["attachedName", _attachedName]
+      ]
+    ] remoteExecCall [QFUNC(submitZeusModule), 2];
+  };
+
   // curatorCamera exists only on the Zeus client. The player-detail PFH above
   // also exits when the body has no OCAP id, which is the normal case for a
   // virtual curator slot — this sampler must stay independent of that.
@@ -1441,6 +1765,10 @@ call GVAR(publishPlayerTrackingSettings);
           if !(missionNamespace getVariable [QEGVAR(settings,trackZeus), true]) exitWith {};
           if !(missionNamespace getVariable [QEGVAR(settings,trackZeusPings), true]) exitWith {};
           [getAssignedCuratorUnit _curator, _pinger] remoteExecCall [QFUNC(submitZeusPing), 2];
+        }];
+        // Same locality as pings: the dedicated server never sees this.
+        _logic addEventHandler ["CuratorObjectPlaced", {
+          _this call OCAP_recorder_client_reportZeusModule;
         }];
       };
 

@@ -29,6 +29,5 @@ params ["_id", "_uid", "_name", "_jip", "_owner", "_idstr"];
 // skip for server 'connected' message
 if (_owner isEqualTo 2) exitWith {};
 
-// Log immediately during an active session, otherwise preserve the event for
-// frame 0 of the next recording.
+// Log during an active session. Recording start snapshots current players.
 ["connected", _name, _uid] call FUNC(recordPlayerConnectionEvent);

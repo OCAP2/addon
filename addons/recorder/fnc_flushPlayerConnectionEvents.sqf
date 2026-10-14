@@ -4,8 +4,8 @@ FILE: fnc_flushPlayerConnectionEvents.sqf
 FUNCTION: OCAP_recorder_fnc_flushPlayerConnectionEvents
 
 Description:
-  Replays buffered player connection events into the newly registered recording
-  at frame 0, then clears the buffer.
+  Records a snapshot of currently connected human players at the first recorded
+  frame. No connection history is retained between recordings.
 
 Returns:
   Nothing
@@ -16,23 +16,8 @@ Public:
 
 #include "script_component.hpp"
 
+if (!EGVAR(settings,bufferPlayerConnectionEvents)) exitWith {};
+
 {
-  _x params ["_eventType", "_name", "_uid"];
-
-  private _extraData = createHashMap;
-
-  if (EGVAR(settings,includeSteamIdInPlayerConnectionEvents)) then {
-    _extraData set ["playerUid", _uid];
-  };
-
-  private _eventData = [
-    0,
-    _eventType,
-    _name,
-    [_extraData] call CBA_fnc_encodeJSON
-  ];
-
-  [":EVENT:GENERAL:", _eventData] call EFUNC(extension,sendData);
-} forEach GVAR(connectedPlayerNamesBuffer);
-
-GVAR(connectedPlayerNamesBuffer) = [];
+  ["connected", name _x, getPlayerUID _x, 1] call FUNC(recordPlayerConnectionEvent);
+} forEach (allPlayers - (entities "HeadlessClient_F"));

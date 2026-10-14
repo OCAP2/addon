@@ -16,7 +16,7 @@ Public:
 
 #include "script_component.hpp"
 
-if (!EGVAR(settings,autoRestartAfterEmpty)) exitWith {};
+if (!GVAR(autoStart) || {!EGVAR(settings,autoRestartAfterEmpty)}) exitWith {};
 if (!GVAR(autoRestartAfterEmptyPending)) exitWith {};
 if (GVAR(recording) || {!isNil QGVAR(startTime)}) exitWith {};
 if (getClientStateNumber <= 9) exitWith {};

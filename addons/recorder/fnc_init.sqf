@@ -54,12 +54,6 @@ publicVariable QGVAR(captureFrameNo);
 */
 GVAR(nextId) = 0;
 
-/*
-  Connection events which occur before the extension is ready to receive a
-  recording are replayed at frame 0 when that recording starts.
-*/
-GVAR(connectedPlayerNamesBuffer) = [];
-
 // Only an empty-server auto-save may arm the automatic restart path.
 GVAR(autoRestartAfterEmptyPending) = false;
 

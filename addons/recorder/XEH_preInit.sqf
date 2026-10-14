@@ -65,7 +65,7 @@ GVAR(allSettings) = [
   /*
     CBA Setting: OCAP_settings_excludeHeadlessClientsFromAutoStart
     Description:
-      Exclude headless clients when counting players for automatic recording start and restart. Default: true
+      Exclude headless clients when counting players for automatic recording start and restart. If disabled, headless clients alone can meet the threshold, including after an empty-server save. Default: true
 
     Setting Name:
       Exclude Headless Clients
@@ -78,7 +78,7 @@ GVAR(allSettings) = [
     "CHECKBOX",
     [
       "Exclude Headless Clients",
-      "Exclude headless clients when counting players for automatic recording start and restart. Default: true"
+      "Exclude headless clients when counting players for automatic recording start and restart. If disabled, headless clients alone can meet the threshold, including after an empty-server save. Default: true"
     ],
     [COMPONENT_NAME, "Auto-start Settings"],
     true,
@@ -90,7 +90,7 @@ GVAR(allSettings) = [
   /*
     CBA Setting: OCAP_settings_autoRestartAfterEmpty
     Description:
-      Automatically start a new recording after an empty-server auto-save once the minimum player count is reached again. Default: true
+      With Auto Start Recording enabled at mission initialization, automatically start a new recording after an empty-server auto-save once the minimum player count is reached again. Default: true
 
     Setting Name:
       Auto-Restart After Empty Server
@@ -103,7 +103,7 @@ GVAR(allSettings) = [
     "CHECKBOX",
     [
       "Auto-Restart After Empty Server",
-      "Automatically start a new recording after an empty-server auto-save once the minimum player count is reached again. Default: true"
+      "With Auto Start Recording enabled at mission initialization, automatically start a new recording after an empty-server auto-save once the minimum player count is reached again. Default: true"
     ],
     [COMPONENT_NAME, "Auto-start Settings"],
     true,
@@ -115,10 +115,10 @@ GVAR(allSettings) = [
   /*
     CBA Setting: OCAP_settings_bufferPlayerConnectionEvents
     Description:
-      Buffer player connect and disconnect events before a recording starts, then replay them at frame 0. Default: true
+      Include currently connected human players at the first recorded frame. Connections and disconnections before recording are not retained. Default: true
 
     Setting Name:
-      Buffer Player Connection Events
+      Include Connected Players at Recording Start
 
     Value Type:
       Boolean
@@ -127,18 +127,13 @@ GVAR(allSettings) = [
     QEGVAR(settings,bufferPlayerConnectionEvents),
     "CHECKBOX",
     [
-      "Buffer Player Connection Events",
-      "Buffer player connect and disconnect events before a recording starts, then replay them at frame 0. Default: true"
+      "Include Connected Players at Recording Start",
+      "Include currently connected human players at the first recorded frame. Connections and disconnections before recording are not retained. Default: true"
     ],
     [COMPONENT_NAME, "Auto-start Settings"],
     true,
     true,
-    {
-      params ["_value"];
-      if (!_value && {!isNil QGVAR(connectedPlayerNamesBuffer)}) then {
-        GVAR(connectedPlayerNamesBuffer) = [];
-      };
-    },
+    {},
     false
   ],
 

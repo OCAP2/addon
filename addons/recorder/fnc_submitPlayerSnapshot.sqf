@@ -104,4 +104,4 @@ private _command = switch (_kind) do {
   case "radio": {":PLAYER:RADIO:"};
 };
 
-[_command, [_frame, _eventType, [_outgoing] call CBA_fnc_encodeJSON]] call EFUNC(extension,sendData);
+[_command, [_frame, _eventType, [_outgoing] call FUNC(encodeJSON)]] call EFUNC(extension,sendData);

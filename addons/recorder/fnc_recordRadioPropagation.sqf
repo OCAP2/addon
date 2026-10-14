@@ -69,7 +69,7 @@ if (isNil "_rangeCoef" || {!(_rangeCoef isEqualType 0)}) then {
     ["globalRadioRangeCoef", _rangeCoef],
     ["tfarLoaded", _tfarLoaded],
     ["source", _tfarSource]
-  ]] call CBA_fnc_encodeJSON
+  ]] call FUNC(encodeJSON)
 ]] call EFUNC(extension,sendData);
 
 // ACRE's live `acre_sys_signal_terrainScaling` is written only on clients
@@ -112,5 +112,5 @@ if (isNil "_ignoreAntenna" || {!(_ignoreAntenna isEqualType true)}) then {
     ["ignoreAntennaDirection", _ignoreAntenna],
     ["acreLoaded", _acreLoaded],
     ["source", _acreSource]
-  ]] call CBA_fnc_encodeJSON
+  ]] call FUNC(encodeJSON)
 ]] call EFUNC(extension,sendData);

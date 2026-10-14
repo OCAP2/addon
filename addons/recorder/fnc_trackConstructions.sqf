@@ -157,6 +157,12 @@ GVAR(submitFortification) = {
     OCAPEXTLOG(ARR3("CONSTRUCTIONS: recording fortification",_class,_label));
   };
 
+  // Keep the placed-object locality poll from arming mine handlers on this. A
+  // fortification is not a projectile, "Explode" on it is a script error that
+  // aborts the poll for every mine after it, and the record never had a
+  // detonation or removal to report.
+  _object setVariable [QGVARMAIN(serverPlacedEHs), true];
+
   // handlePlacedData is registered server-side in fnc_eh_fired_server.sqf and
   // assigns the placed id there, because GVAR(nextId) only exists on the server.
   [QGVARMAIN(handlePlacedData), [_placedData, _object]] call CBA_fnc_localEvent;
@@ -204,8 +210,11 @@ GVAR(staticWeaponSnapshot) = createHashMap;
 
   // Wrecks stay in the snapshot, flagged dead. Dropping them here instead would
   // make a destroyed gun's later cleanup look exactly like a disassembly.
+  //
+  // `entities` does the StaticWeapon filter in the engine and, with excludeDead
+  // false, still returns the wrecks. Walking `vehicles` instead ran a scripted
+  // isKindOf over every vehicle and weapon holder on the map every sweep.
   {
-    if !(_x isKindOf "StaticWeapon") then {continue};
     private _id = _x getVariable [QGVARMAIN(id), -1];
     if (_id isEqualTo -1) then {continue};
 
@@ -220,7 +229,7 @@ GVAR(staticWeaponSnapshot) = createHashMap;
     };
 
     _current set [_id, [typeOf _x, getPosASL _x, _name, alive _x]];
-  } forEach vehicles;
+  } forEach (entities [["StaticWeapon"], [], false, false]);
 
   // Drop claims nobody can match any more before looking for one.
   if (isNil QGVAR(staticDisassembleClaims)) then {GVAR(staticDisassembleClaims) = []};
@@ -286,7 +295,7 @@ GVAR(staticWeaponSnapshot) = createHashMap;
         ["name", _name],
         ["x", round (_lastPos select 0)],
         ["y", round (_lastPos select 1)]
-      ]] call CBA_fnc_encodeJSON
+      ]] call FUNC(encodeJSON)
     ]] call EFUNC(extension,sendData);
 
     if (GVARMAIN(isDebug)) then {

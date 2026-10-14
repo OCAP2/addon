@@ -72,6 +72,7 @@ GVAR(autoRestartAfterEmptyPending) = false;
 GVAR(playerSnapshotState) = createHashMap;
 GVAR(zeusByUid) = createHashMap;
 GVAR(zeusLastCamera) = createHashMap;
+GVAR(zeusControlledUnits) = createHashMap;
 
 
 

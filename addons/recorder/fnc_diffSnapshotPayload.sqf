@@ -88,6 +88,10 @@ private _diffKeyedArray = {
     if (isNil "_base") then {
       _put pushBack _entry;
     } else {
+      // Most entries are untouched between two samples (one magazine lost a
+      // round, the other twenty did not). A native comparison settles those
+      // without walking them key by key.
+      if (_entry isEqualTo _base) then {continue};
       private _mark = count _removed;
       private _child = [_base, _entry, ""] call _walk;
       if (count _removed > _mark) then {
@@ -140,6 +144,8 @@ private _walk = {
       _changed set [_key, _newValue];
     } else {
       private _oldValue = _old get _key;
+      // Identical values, nested HashMaps included, need no walk at all.
+      if (_newValue isEqualTo _oldValue) then {continue};
       if (_newValue isEqualType _hashMapType && {_oldValue isEqualType _hashMapType}) then {
         private _child = [_oldValue, _newValue, _prefix + _key + "."] call _walk;
         if (count _child > 0) then {_changed set [_key, _child]};

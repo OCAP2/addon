@@ -92,5 +92,5 @@ if (!isNull _attached) then {
 [":EVENT:GENERAL:", [
   GVAR(captureFrameNo) max 0,
   "zeusModule",
-  [_event] call CBA_fnc_encodeJSON
+  [_event] call FUNC(encodeJSON)
 ]] call EFUNC(extension,sendData);

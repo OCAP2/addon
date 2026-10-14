@@ -143,7 +143,7 @@ private _emit = {
       ["name", _name],
       ["x", round (_pos select 0)],
       ["y", round (_pos select 1)]
-    ]] call CBA_fnc_encodeJSON
+    ]] call FUNC(encodeJSON)
   ]] call EFUNC(extension,sendData);
 
   if (GVARMAIN(isDebug)) then {

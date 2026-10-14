@@ -211,6 +211,13 @@ private _fnc_submitTrench = {
     OCAPEXTLOG(ARR3("TRENCHES: recording",_class,_label));
   };
 
+  // The placed-object pipeline also polls its objects for a locality change so it
+  // can re-arm mine handlers on the server, and "Explode" is a projectile-only
+  // event: on a trench it throws "Unknown enum value" and aborts that poll for
+  // every mine after it. A trench never explodes and its removal is deliberately
+  // not tracked (see above), so mark it as already handled.
+  _trench setVariable [QGVARMAIN(serverPlacedEHs), true];
+
   // handlePlacedData is registered server-side in fnc_eh_fired_server.sqf and
   // assigns the placed id there, because GVAR(nextId) only exists on the server.
   [QGVARMAIN(handlePlacedData), [_placedData, _trench]] call CBA_fnc_localEvent;

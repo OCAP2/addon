@@ -64,7 +64,7 @@ GVAR(recordServerFps) = {
     // sample stamped -1 is invisible to a frame-scoped lookup in the web UI.
     GVAR(captureFrameNo) max 0,
     "serverFps",
-    [createHashMapFromArray [["fps", diag_fps]]] call CBA_fnc_encodeJSON
+    [createHashMapFromArray [["fps", diag_fps]]] call FUNC(encodeJSON)
   ]] call EFUNC(extension,sendData);
 };
 GVAR(serverFpsPFH) = [GVAR(recordServerFps), 10] call CBA_fnc_addPerFrameHandler;

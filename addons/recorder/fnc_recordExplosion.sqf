@@ -165,7 +165,7 @@ if (_firerId > -1) then {
     ["vehicleId", _vehicleId],
     ["side", _side],
     ["source", _source]
-  ]] call CBA_fnc_encodeJSON
+  ]] call FUNC(encodeJSON)
 ]] call EFUNC(extension,sendData);
 
 if (GVARMAIN(isDebug)) then {

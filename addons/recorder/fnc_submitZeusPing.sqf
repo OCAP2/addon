@@ -67,5 +67,5 @@ private _pos = getPosATL _pinger;
     ["side", str (side group _pinger)],
     ["x", round (_pos select 0)],
     ["y", round (_pos select 1)]
-  ]] call CBA_fnc_encodeJSON
+  ]] call FUNC(encodeJSON)
 ]] call EFUNC(extension,sendData);

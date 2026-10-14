@@ -174,6 +174,7 @@ publicVariable QGVAR(startTime);
 GVAR(playerSnapshotState) = createHashMap;
 GVAR(zeusByUid) = createHashMap;
 GVAR(zeusLastCamera) = createHashMap;
+GVAR(zeusControlledUnits) = createHashMap;
 {
   _x setVariable [QGVARMAIN(isInitialized), nil];
   _x setVariable [QGVARMAIN(exclude), nil];

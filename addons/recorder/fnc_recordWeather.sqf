@@ -75,5 +75,5 @@ if (_aceWeather) then {
   // stamped -1 wraps past the end of the recording and never shows in Stats.
   GVAR(captureFrameNo) max 0,
   "weather",
-  [createHashMapFromArray _pairs] call CBA_fnc_encodeJSON
+  [createHashMapFromArray _pairs] call FUNC(encodeJSON)
 ]] call EFUNC(extension,sendData);

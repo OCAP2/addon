@@ -60,7 +60,7 @@ private _bodyId = _unit getVariable [QGVARMAIN(id), -1];
     ["name", name _unit],
     ["playerUid", _uid],
     ["bodyUnitId", _bodyId]
-  ]] call CBA_fnc_encodeJSON
+  ]] call FUNC(encodeJSON)
 ]] call EFUNC(extension,sendData);
 
 _id

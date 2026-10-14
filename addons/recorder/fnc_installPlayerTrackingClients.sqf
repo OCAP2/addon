@@ -356,20 +356,29 @@ call GVAR(publishPlayerTrackingSettings);
     // sections, so paying for a category there would be waste.
     private _describeItems = {
       params ["_items", ["_withCategory", false]];
-      private _result = [];
+
+      // One counting pass, in first-seen order -- the order arrayIntersect
+      // gives. Counting with `{...} count _items` once per class re-walked the
+      // whole container for every distinct item in it.
+      private _counts = createHashMap;
+      private _order = [];
       {
-        private _className = _x;
+        private _seen = _counts getOrDefault [_x, 0];
+        if (_seen == 0) then {_order pushBack _x};
+        _counts set [_x, _seen + 1];
+      } forEach _items;
+
+      _order apply {
         private _entry = [createHashMapFromArray [
-          ["class", _className],
-          ["count", {_x isEqualTo _className} count _items]
-        ], _className] call OCAP_recorder_client_setDisplayName;
+          ["class", _x],
+          ["count", _counts get _x]
+        ], _x] call OCAP_recorder_client_setDisplayName;
         if (_withCategory) then {
-          private _category = [_className] call OCAP_recorder_client_getItemCategory;
+          private _category = [_x] call OCAP_recorder_client_getItemCategory;
           if (_category isNotEqualTo "items") then {_entry set ["cat", _category]};
         };
-        _result pushBack _entry;
-      } forEach (_items arrayIntersect _items);
-      _result
+        _entry
+      }
     };
 
     private _describeContainer = {
@@ -403,26 +412,38 @@ call GVAR(publishPlayerTrackingSettings);
       ["binocular", binocular _unit, []]
     ];
 
-    // magazinesAmmoFull entries are [class, ammoCount, isLoaded, ...].
-    private _magazinesFull = magazinesAmmoFull _unit;
-    private _magazines = [];
-    private _magazineClasses = (_magazinesFull apply {_x param [0, ""]}) select {_x isNotEqualTo ""};
+    // magazinesAmmoFull entries are [class, ammoCount, isLoaded, ...]. Totalled
+    // per class in one pass, in first-seen order; selecting the matching
+    // magazines out of the full list once per class re-walked it every time.
+    private _magazineStats = createHashMap;
+    private _magazineOrder = [];
     {
-      private _className = _x;
-      private _matching = _magazinesFull select {(_x param [0, ""]) isEqualTo _className};
-      private _totalRounds = 0;
-      {_totalRounds = _totalRounds + (_x param [1, 0])} forEach _matching;
+      private _className = _x param [0, ""];
+      if (_className isEqualTo "") then {continue};
+      private _stats = _magazineStats get _className;
+      if (isNil "_stats") then {
+        _stats = [0, 0, 0];
+        _magazineStats set [_className, _stats];
+        _magazineOrder pushBack _className;
+      };
+      _stats set [0, (_stats select 0) + 1];
+      _stats set [1, (_stats select 1) + (_x param [1, 0])];
+      if (_x param [2, false]) then {_stats set [2, (_stats select 2) + 1]};
+    } forEach magazinesAmmoFull _unit;
+
+    private _magazines = _magazineOrder apply {
+      (_magazineStats get _x) params ["_count", "_totalRounds", "_loadedCount"];
       private _entry = createHashMapFromArray [
-        ["class", _className],
-        ["count", count _matching],
+        ["class", _x],
+        ["count", _count],
         ["totalRounds", _totalRounds],
-        ["loadedCount", {_x param [2, false]} count _matching]
+        ["loadedCount", _loadedCount]
       ];
-      [_entry, _className] call OCAP_recorder_client_setDisplayName;
-      private _category = [_className] call OCAP_recorder_client_getItemCategory;
+      [_entry, _x] call OCAP_recorder_client_setDisplayName;
+      private _category = [_x] call OCAP_recorder_client_getItemCategory;
       if (_category isNotEqualTo "items") then {_entry set ["cat", _category]};
-      _magazines pushBack _entry;
-    } forEach (_magazineClasses arrayIntersect _magazineClasses);
+      _entry
+    };
 
     private _result = createHashMapFromArray [
       ["reason", _reason],
@@ -1351,6 +1372,22 @@ call GVAR(publishPlayerTrackingSettings);
   OCAP_recorder_client_playerTrackingSession = -1;
   OCAP_recorder_client_radioSeen = false;
 
+  // [kind, enable setting, fingerprint function], visited one per tick.
+  OCAP_recorder_client_playerTrackingKinds = [
+    ["inventory", QEGVAR(settings,trackPlayerInventory), OCAP_recorder_client_inventoryFingerprint],
+    ["radio", QEGVAR(settings,trackPlayerRadio), OCAP_recorder_client_radioFingerprint],
+    ["medical", QEGVAR(settings,trackPlayerMedical), OCAP_recorder_client_medicalFingerprint],
+    ["stamina", QEGVAR(settings,trackPlayerStamina), OCAP_recorder_client_staminaFingerprint]
+  ];
+  OCAP_recorder_client_playerTrackingSlot = 0;
+
+  // Every kind is still looked at every 5 seconds, as it always was, but the four
+  // are visited one per 1.25 s tick instead of all in the same frame. Building
+  // and sending an inventory, a radio, a medical and a stamina snapshot back to
+  // back was a hitch on the client every five seconds, and the start of a
+  // recording made every client do it at once and the server take four full
+  // snapshots per player in one burst. A kind's worst-case delay is unchanged:
+  // it is checked at most 5 s after it became due, exactly as before.
   OCAP_recorder_client_playerTrackingPFH = [{
     private _startTime = missionNamespace getVariable [QEGVAR(recorder,startTime), -1];
     private _isRecording = (missionNamespace getVariable [QEGVAR(recorder,recording), false]) && {_startTime > -1};
@@ -1362,7 +1399,8 @@ call GVAR(publishPlayerTrackingSettings);
     // would only be dropped, and must not consume the first-snapshot window.
     if ((player getVariable [QGVARMAIN(id), -1]) < 0) exitWith {};
 
-    // A new recording starts a new snapshot chain, so every tracker samples again at once.
+    // A new recording starts a new snapshot chain, so every tracker samples again
+    // on its next turn.
     if (_startTime isNotEqualTo OCAP_recorder_client_playerTrackingSession) then {
       OCAP_recorder_client_playerTrackingSession = _startTime;
       {OCAP_recorder_client_playerTrackingLast set [_x, -1e10]} forEach (keys OCAP_recorder_client_playerTrackingLast);
@@ -1370,54 +1408,50 @@ call GVAR(publishPlayerTrackingSettings);
       OCAP_recorder_client_radioSeen = false;
     };
 
+    (OCAP_recorder_client_playerTrackingKinds select OCAP_recorder_client_playerTrackingSlot) params ["_kind", "_setting", "_fingerprintFnc"];
+    OCAP_recorder_client_playerTrackingSlot = (OCAP_recorder_client_playerTrackingSlot + 1) mod (count OCAP_recorder_client_playerTrackingKinds);
+
+    if !(missionNamespace getVariable [_setting, true]) exitWith {};
+
     private _now = CBA_missionTime;
-    private _medicalInterval = missionNamespace getVariable [QEGVAR(settings,playerMedicalInterval), 60];
-    if (OCAP_recorder_client_hasAceMedical && {
-      (player getVariable ["ACE_isUnconscious", false]) || {player getVariable ["ace_medical_inCardiacArrest", false]}
-    }) then {
-      _medicalInterval = missionNamespace getVariable [QEGVAR(settings,playerMedicalCriticalInterval), 10];
+    private _interval = switch (_kind) do {
+      case "inventory": {missionNamespace getVariable [QEGVAR(settings,playerInventoryInterval), 120]};
+      case "radio": {missionNamespace getVariable [QEGVAR(settings,playerRadioInterval), 120]};
+      case "stamina": {missionNamespace getVariable [QEGVAR(settings,playerStaminaInterval), 30]};
+      case "medical": {
+        if (OCAP_recorder_client_hasAceMedical && {
+          (player getVariable ["ACE_isUnconscious", false]) || {player getVariable ["ace_medical_inCardiacArrest", false]}
+        }) then {
+          missionNamespace getVariable [QEGVAR(settings,playerMedicalCriticalInterval), 10]
+        } else {
+          missionNamespace getVariable [QEGVAR(settings,playerMedicalInterval), 60]
+        }
+      };
     };
 
-    private _kinds = [];
-    {
-      _x params ["_kind", "_setting", "_interval"];
-      if (missionNamespace getVariable [_setting, true] &&
-        {_now - (OCAP_recorder_client_playerTrackingLast getOrDefault [_kind, -1e10]) >= _interval}) then {
-        _kinds pushBackUnique _kind;
-        OCAP_recorder_client_playerTrackingLast set [_kind, _now];
-      };
-    } forEach [
-      ["inventory", QEGVAR(settings,trackPlayerInventory), missionNamespace getVariable [QEGVAR(settings,playerInventoryInterval), 120]],
-      ["medical", QEGVAR(settings,trackPlayerMedical), _medicalInterval],
-      ["stamina", QEGVAR(settings,trackPlayerStamina), missionNamespace getVariable [QEGVAR(settings,playerStaminaInterval), 30]],
-      ["radio", QEGVAR(settings,trackPlayerRadio), missionNamespace getVariable [QEGVAR(settings,playerRadioInterval), 120]]
-    ];
+    private _capture = false;
+    if (_now - (OCAP_recorder_client_playerTrackingLast getOrDefault [_kind, -1e10]) >= _interval) then {
+      _capture = true;
+      OCAP_recorder_client_playerTrackingLast set [_kind, _now];
+    };
 
     // Inventory, radio, stamina load and medical state sit unchanged for long
     // stretches, so the interval is only the worst-case gap. A loadout, frequency,
-    // wake-up or carried-mass change is written immediately as a diff; the server
-    // drops the payload if it is still identical.
-    {
-      _x params ["_kind", "_setting", "_fingerprintFnc"];
-      if !(missionNamespace getVariable [_setting, true]) then {continue};
-      if (_kind isEqualTo "radio" && {!OCAP_recorder_client_hasTfar && !OCAP_recorder_client_hasAcre}) then {continue};
+    // wake-up or carried-mass change is written on the kind's next turn as a
+    // diff; the server drops the payload if it is still identical.
+    if (_kind isNotEqualTo "radio" || {OCAP_recorder_client_hasTfar || OCAP_recorder_client_hasAcre}) then {
       private _fingerprint = [player] call _fingerprintFnc;
       if (_fingerprint isNotEqualTo (OCAP_recorder_client_playerTrackingFingerprint getOrDefault [_kind, []])) then {
         OCAP_recorder_client_playerTrackingFingerprint set [_kind, _fingerprint];
-        _kinds pushBackUnique _kind;
+        _capture = true;
         OCAP_recorder_client_playerTrackingLast set [_kind, _now];
       };
-    } forEach [
-      ["inventory", QEGVAR(settings,trackPlayerInventory), OCAP_recorder_client_inventoryFingerprint],
-      ["radio", QEGVAR(settings,trackPlayerRadio), OCAP_recorder_client_radioFingerprint],
-      ["medical", QEGVAR(settings,trackPlayerMedical), OCAP_recorder_client_medicalFingerprint],
-      ["stamina", QEGVAR(settings,trackPlayerStamina), OCAP_recorder_client_staminaFingerprint]
-    ];
-
-    if (_kinds isNotEqualTo []) then {
-      ["periodic", _kinds, player] call OCAP_recorder_client_capturePlayerState;
     };
-  }, 5] call CBA_fnc_addPerFrameHandler;
+
+    if (_capture) then {
+      ["periodic", [_kind], player] call OCAP_recorder_client_capturePlayerState;
+    };
+  }, 1.25] call CBA_fnc_addPerFrameHandler;
 
   // English Zeus-module labels. `getText` would freeze the Zeus client's
   // language into the recording; there is no SQF "localize as English". A
@@ -1747,6 +1781,9 @@ call GVAR(publishPlayerTrackingSettings);
   // virtual curator slot — this sampler must stay independent of that.
   if (isNil "OCAP_recorder_client_zeusCameraPFH") then {
     OCAP_recorder_client_zeusCameraLast = -1e10;
+    OCAP_recorder_client_zeusCameraSent = [];
+    OCAP_recorder_client_zeusCameraSentAt = -1e10;
+    OCAP_recorder_client_zeusCameraSession = -1;
     OCAP_recorder_client_zeusPingedLogics = [];
     OCAP_recorder_client_zeusCameraPFH = [{
       if (isNull player) exitWith {};
@@ -1785,13 +1822,32 @@ call GVAR(publishPlayerTrackingSettings);
       OCAP_recorder_client_zeusCameraLast = _now;
 
       private _pos = getPosASL curatorCamera;
-      private _dirVec = vectorDir curatorCamera;
+      private _dir = getDir curatorCamera;
+      private _fov = getObjectFOV curatorCamera;
+      private _pitch = (vectorDir curatorCamera) select 2;
+
+      // The server keeps a camera sample only when it differs from the last one
+      // after this exact rounding (OCAP_recorder_fnc_submitZeusCamera), so a
+      // parked camera used to cost one network message a second for nothing --
+      // on the client that already sends the most traffic. Skip those here.
+      // A new recording resets the server's copy, so it resets this one too; the
+      // periodic resend only bounds how long the two could ever disagree, and the
+      // server still drops it if nothing moved.
+      if (_startTime isNotEqualTo OCAP_recorder_client_zeusCameraSession) then {
+        OCAP_recorder_client_zeusCameraSession = _startTime;
+        OCAP_recorder_client_zeusCameraSent = [];
+      };
+      private _rounded = [round (_pos select 0), round (_pos select 1), round _dir, parseNumber (_fov toFixed 3), parseNumber (_pitch toFixed 2)];
+      if (_rounded isEqualTo OCAP_recorder_client_zeusCameraSent && {_now - OCAP_recorder_client_zeusCameraSentAt < 30}) exitWith {};
+      OCAP_recorder_client_zeusCameraSent = _rounded;
+      OCAP_recorder_client_zeusCameraSentAt = _now;
+
       [player, createHashMapFromArray [
         ["x", _pos select 0],
         ["y", _pos select 1],
-        ["dir", getDir curatorCamera],
-        ["fov", getObjectFOV curatorCamera],
-        ["pitch", _dirVec select 2]
+        ["dir", _dir],
+        ["fov", _fov],
+        ["pitch", _pitch]
       ]] remoteExecCall [QFUNC(submitZeusCamera), 2];
     }, 0.25] call CBA_fnc_addPerFrameHandler;
   };

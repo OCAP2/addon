@@ -169,7 +169,7 @@ GVAR(submitServiceEvent) = {
   [":EVENT:GENERAL:", [
     GVAR(captureFrameNo) max 0,
     "serviceEvent",
-    [_payload] call CBA_fnc_encodeJSON
+    [_payload] call FUNC(encodeJSON)
   ]] call EFUNC(extension,sendData);
 
   if (GVARMAIN(isDebug)) then {
@@ -258,6 +258,10 @@ GVAR(servicingPFH) = [{
 
     _baseline params ["_lastFuel", "_lastDamage"];
 
+    // Nearly every vehicle is unchanged on nearly every pass. Skip it before any
+    // further work or allocation; the baseline it would rewrite is identical.
+    if (_fuel isEqualTo _lastFuel && {_damage isEqualTo _lastDamage}) then {continue};
+
     if (alive _vehicle) then {
       if (_fuel - _lastFuel >= SERVICE_MIN_STEP) then {
         [_vehicle, _vehicleId, "refuel", _lastFuel, _fuel, _now] call GVAR(noteServiceProgress);
@@ -267,7 +271,8 @@ GVAR(servicingPFH) = [{
       };
     };
 
-    GVAR(serviceBaseline) set [_vehicleId, [_fuel, _damage]];
+    _baseline set [0, _fuel];
+    _baseline set [1, _damage];
   } forEach vehicles;
 
   // Close out anything that has stopped progressing, and anything whose vehicle

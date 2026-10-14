@@ -64,5 +64,5 @@ _payload set ["pitch", _pitch];
 [":EVENT:GENERAL:", [
   GVAR(captureFrameNo) max 0,
   "zeusCamera",
-  [_payload] call CBA_fnc_encodeJSON
+  [_payload] call FUNC(encodeJSON)
 ]] call EFUNC(extension,sendData);

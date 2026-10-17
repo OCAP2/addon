@@ -62,6 +62,81 @@ GVAR(allSettings) = [
     false // requires restart to apply
   ],
 
+  /*
+    CBA Setting: OCAP_settings_excludeHeadlessClientsFromAutoStart
+    Description:
+      Exclude headless clients when counting players for automatic recording start and restart. If disabled, headless clients alone can meet the threshold, including after an empty-server save. Default: true
+
+    Setting Name:
+      Exclude Headless Clients
+
+    Value Type:
+      Boolean
+  */
+  [
+    QEGVAR(settings,excludeHeadlessClientsFromAutoStart),
+    "CHECKBOX",
+    [
+      "Exclude Headless Clients",
+      "Exclude headless clients when counting players for automatic recording start and restart. If disabled, headless clients alone can meet the threshold, including after an empty-server save. Default: true"
+    ],
+    [COMPONENT_NAME, "Auto-start Settings"],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_autoRestartAfterEmpty
+    Description:
+      With Auto Start Recording enabled at mission initialization, automatically start a new recording after an empty-server auto-save once the minimum player count is reached again. Default: true
+
+    Setting Name:
+      Auto-Restart After Empty Server
+
+    Value Type:
+      Boolean
+  */
+  [
+    QEGVAR(settings,autoRestartAfterEmpty),
+    "CHECKBOX",
+    [
+      "Auto-Restart After Empty Server",
+      "With Auto Start Recording enabled at mission initialization, automatically start a new recording after an empty-server auto-save once the minimum player count is reached again. Default: true"
+    ],
+    [COMPONENT_NAME, "Auto-start Settings"],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_bufferPlayerConnectionEvents
+    Description:
+      Include currently connected human players at the first recorded frame. Connections and disconnections before recording are not retained. Default: true
+
+    Setting Name:
+      Include Connected Players at Recording Start
+
+    Value Type:
+      Boolean
+  */
+  [
+    QEGVAR(settings,bufferPlayerConnectionEvents),
+    "CHECKBOX",
+    [
+      "Include Connected Players at Recording Start",
+      "Include currently connected human players at the first recorded frame. Connections and disconnections before recording are not retained. Default: true"
+    ],
+    [COMPONENT_NAME, "Auto-start Settings"],
+    true,
+    true,
+    {},
+    false
+  ],
+
 
   // Section: Core
 
@@ -240,6 +315,31 @@ GVAR(allSettings) = [
   ],
 
   // Section: Extra Tracking
+
+  /*
+    CBA Setting: OCAP_settings_includeSteamIdInPlayerConnectionEvents
+    Description:
+      Include the player's Steam ID as the fourth value in connected and disconnected events. Default: true
+
+    Setting Name:
+      Include Steam ID in Connection Events
+
+    Value Type:
+      Boolean
+  */
+  [
+    QEGVAR(settings,includeSteamIdInPlayerConnectionEvents),
+    "CHECKBOX",
+    [
+      "Include Steam ID in Connection Events",
+      "Include the player's Steam ID as the fourth value in connected and disconnected events: [frame, action, name, id]. Default: true"
+    ],
+    [COMPONENT_NAME, "Extra Tracking"],
+    true,
+    true,
+    {},
+    false
+  ],
 
   /*
     CBA Setting: OCAP_settings_trackTickets

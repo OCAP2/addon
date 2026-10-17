@@ -27,14 +27,7 @@
 
 params ["_unit", "_id", "_uid", "_name"];
 
-[":EVENT:GENERAL:", [
-  GVAR(captureFrameNo),
-  "disconnected",
-  _name,
-  [createHashMapFromArray [
-    ["playerUid", _uid]
-  ]] call CBA_fnc_encodeJSON
-]] call EFUNC(extension,sendData);
+["disconnected", _name, _uid] call FUNC(recordPlayerConnectionEvent);
 
 if (_unit getVariable [QGVARMAIN(isInitialized), false]) then {
   [":SOLDIER:DELETE:", [
@@ -54,6 +47,7 @@ if (
   {(call CBA_fnc_players) - [_unit] isEqualTo []} &&
   {(GVAR(frameCaptureDelay) * GVAR(captureFrameNo)) / 60 >= GVAR(minMissionTime)}
 ) then {
+  GVAR(autoRestartAfterEmptyPending) = true;
   [nil, "Recording ended due to server being empty"] call FUNC(exportData);
 };
 

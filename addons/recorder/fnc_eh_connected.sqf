@@ -29,12 +29,5 @@ params ["_id", "_uid", "_name", "_jip", "_owner", "_idstr"];
 // skip for server 'connected' message
 if (_owner isEqualTo 2) exitWith {};
 
-// log to timeline
-[":EVENT:GENERAL:", [
-  GVAR(captureFrameNo),
-  "connected",
-  _name,
-  [createHashMapFromArray [
-    ["playerUid", _uid]
-  ]] call CBA_fnc_encodeJSON
-]] call EFUNC(extension,sendData);
+// Log during an active session. Recording start snapshots current players.
+["connected", _name, _uid] call FUNC(recordPlayerConnectionEvent);

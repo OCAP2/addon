@@ -1013,16 +1013,14 @@ call GVAR(publishPlayerTrackingSettings);
         };
       };
     } else {
-      private _className = if (_radio isEqualType "") then {_radio} else {
-        if (_radio isEqualType [] && {count _radio >= 1}) then {
-          private _object = _radio select 0;
-          if (_object isEqualType "") then {_object} else {typeOf _object}
-        } else {
-          if (_radio isEqualType objNull) then {typeOf _radio} else {""}
-        }
+      // The live-code API above takes [object, qualifier], but the property API
+      // takes only the object. Class names still use the config fallback below.
+      private _radioObject = if (_radio isEqualType []) then {_radio param [0, objNull]} else {_radio};
+      private _className = if (_radioObject isEqualType "") then {_radioObject} else {
+        if (_radioObject isEqualType objNull) then {typeOf _radioObject} else {""}
       };
-      if (!isNil "TFAR_fnc_getLrRadioProperty") then {
-        _codeVar = [_radio, "tf_encryptionCode", ""] call TFAR_fnc_getLrRadioProperty;
+      if (!isNil "TFAR_fnc_getLrRadioProperty" && {_radioObject isEqualType objNull} && {!isNull _radioObject}) then {
+        _codeVar = [_radioObject, "tf_encryptionCode", ""] call TFAR_fnc_getLrRadioProperty;
       };
       if (!(_codeVar isEqualType "") || {_codeVar isEqualTo ""}) then {
         _codeVar = [configFile >> "CfgVehicles" >> _className, "tf_encryptionCode"] call OCAP_recorder_client_configTextInherited;

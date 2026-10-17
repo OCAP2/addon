@@ -36,6 +36,13 @@ an unchanged unit must not resend early. The server checks the accepted snapshot
 baselines and emitted full payloads. The client restores the original player and
 sampler afterwards.
 
+The same client subtest exercises the installed TFAR LR-code helper with mocked
+TFAR APIs and an active `[radioObject, qualifier]` tuple. An empty live code with
+codes enabled must query the object's `tf_encryptionCode` and resolve the side
+variable. It checks the complete tuple reaches the live-code API, only the object
+reaches the property API, and empty side codes, non-empty live codes and globally
+disabled codes remain safe. TFAR is not required; mocks are restored afterwards.
+
 The suite also samples 100 successive fuel/damage improvements of `0.005`,
 checks idle closure and whole-session noise suppression, then exports and restarts
 with different static membership and reused vehicle ids. Pending disassembly

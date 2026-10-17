@@ -18,7 +18,8 @@ _this spawn {
     "OCAP_recorder_client_playerTrackingLast", "OCAP_recorder_client_playerTrackingFingerprint",
     "OCAP_recorder_client_playerTrackingSession", "OCAP_recorder_client_playerTrackingUnit",
     "OCAP_recorder_client_playerTrackingUnitId", "OCAP_recorder_client_playerTrackingSlot",
-    "OCAP_recorder_client_radioSeen"
+    "OCAP_recorder_client_radioSeen", "TFAR_radioCodesDisabled",
+    "TFAR_fnc_activeLrRadio", "TFAR_fnc_getLrRadioCode", "TFAR_fnc_getLrRadioProperty"
   ];
   private _saved = createHashMap;
   {_saved set [_x, missionNamespace getVariable _x]} forEach _names;
@@ -104,6 +105,38 @@ _this spawn {
       for "_i" from 1 to 4 do {call _tick};
       [OCAP_test_client_captures isEqualTo [30, 31, 31, 32], "same player object with a new entity id receives initial inventory"] call _assert;
       [CBA_missionTime - _began < 120, "all replacements occurred before the old inventory interval elapsed"] call _assert;
+
+      // Exercise the installed LR helper with an active-radio tuple. These mocks
+      // enforce TFAR's different API contracts; no TFAR mod is needed in the mission.
+      OCAP_test_lrRadioObject = _first;
+      _first setVariable ["tf_encryptionCode", "OCAP_test_lrSideCode"];
+      OCAP_test_lrSideCode = "regression-LR-code";
+      TFAR_radioCodesDisabled = false;
+      TFAR_fnc_activeLrRadio = {[OCAP_test_lrRadioObject, "radio_settings"]};
+      TFAR_fnc_getLrRadioCode = {OCAP_test_lrCodeArgument = +_this; ""};
+      TFAR_fnc_getLrRadioProperty = {
+        params ["_radio", "_property", ["_default", ""]];
+        if !(_radio isEqualType objNull) then {throw "LR property API received a tuple instead of an object"};
+        OCAP_test_lrPropertyArguments = +_this;
+        _radio getVariable [_property, _default]
+      };
+      private _lr = call TFAR_fnc_activeLrRadio;
+      private _code = [_lr, "LR"] call OCAP_recorder_client_getTfarCode;
+      [_code isEqualTo "regression-LR-code", "empty live LR code recovers its configured side code"] call _assert;
+      [OCAP_test_lrCodeArgument isEqualTo _lr, "live LR code API receives the complete active-radio tuple"] call _assert;
+      [OCAP_test_lrPropertyArguments isEqualTo [_first, "tf_encryptionCode", ""], "LR property API receives the radio object and property"] call _assert;
+      OCAP_test_lrSideCode = "";
+      [([_lr, "LR"] call OCAP_recorder_client_getTfarCode) isEqualTo "", "empty configured side code is accepted without a type error"] call _assert;
+      TFAR_fnc_getLrRadioCode = {OCAP_test_lrCodeArgument = +_this; "live-LR-code"};
+      OCAP_test_lrPropertyArguments = nil;
+      [([_lr, "LR"] call OCAP_recorder_client_getTfarCode) isEqualTo "live-LR-code" && {
+        isNil "OCAP_test_lrPropertyArguments"
+      }, "non-empty live LR code bypasses the property fallback"] call _assert;
+      TFAR_radioCodesDisabled = true;
+      OCAP_test_lrCodeArgument = nil;
+      [([_lr, "LR"] call OCAP_recorder_client_getTfarCode) isEqualTo "" && {
+        isNil "OCAP_test_lrCodeArgument" && {isNil "OCAP_test_lrPropertyArguments"}
+      }, "globally disabled codes bypass both LR APIs"] call _assert;
     };
   } catch {
     _error = _exception;

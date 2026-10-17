@@ -35,8 +35,8 @@ Description:
   disappears. That also covers ACE CSW's pickup action, which raises no event at
   all and leaves the sweep to fall back on the nearest unit.
 
-  Identity is never taken from the payload: ids are read here from the objects
-  the caller passed.
+  Remote callers must own the attributed unit; ids are then read here from the
+  objects rather than the payload. Direct server calls still cover server AI.
 
 Parameters:
   _action - "assembled" or "disassembled". [String]
@@ -75,6 +75,7 @@ params [
 
 if !(_action in ["assembled", "disassembled"]) exitWith {};
 if (isNull _unit) exitWith {};
+if (isMultiplayer && {isRemoteExecuted} && {remoteExecutedOwner isNotEqualTo owner _unit}) exitWith {};
 
 private _unitId = _unit getVariable [QGVARMAIN(id), -1];
 private _unitName = name _unit;

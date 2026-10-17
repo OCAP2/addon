@@ -1370,6 +1370,8 @@ call GVAR(publishPlayerTrackingSettings);
   ];
   OCAP_recorder_client_playerTrackingFingerprint = createHashMap;
   OCAP_recorder_client_playerTrackingSession = -1;
+  OCAP_recorder_client_playerTrackingUnit = objNull;
+  OCAP_recorder_client_playerTrackingUnitId = -1;
   OCAP_recorder_client_radioSeen = false;
 
   // [kind, enable setting, fingerprint function], visited one per tick.
@@ -1397,12 +1399,17 @@ call GVAR(publishPlayerTrackingSettings);
     if (!alive player) exitWith {};
     // The server stamps unitId from this variable. Sampling before it exists
     // would only be dropped, and must not consume the first-snapshot window.
-    if ((player getVariable [QGVARMAIN(id), -1]) < 0) exitWith {};
+    private _unitId = player getVariable [QGVARMAIN(id), -1];
+    if (_unitId < 0) exitWith {};
 
-    // A new recording starts a new snapshot chain, so every tracker samples again
-    // on its next turn.
-    if (_startTime isNotEqualTo OCAP_recorder_client_playerTrackingSession) then {
+    // New recordings, respawns and team switches need an initial snapshot even
+    // when the new unit carries exactly the same kit. Keep the staggered turns.
+    if (_startTime isNotEqualTo OCAP_recorder_client_playerTrackingSession ||
+        {player isNotEqualTo OCAP_recorder_client_playerTrackingUnit} ||
+        {_unitId isNotEqualTo OCAP_recorder_client_playerTrackingUnitId}) then {
       OCAP_recorder_client_playerTrackingSession = _startTime;
+      OCAP_recorder_client_playerTrackingUnit = player;
+      OCAP_recorder_client_playerTrackingUnitId = _unitId;
       {OCAP_recorder_client_playerTrackingLast set [_x, -1e10]} forEach (keys OCAP_recorder_client_playerTrackingLast);
       OCAP_recorder_client_playerTrackingFingerprint = createHashMap;
       OCAP_recorder_client_radioSeen = false;

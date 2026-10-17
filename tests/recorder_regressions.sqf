@@ -23,6 +23,11 @@ private _savedFunctions = createHashMap;
 private _vehicle = objNull;
 private _gun = objNull;
 private _newGun = objNull;
+private _authGun = objNull;
+private _serverAi = objNull;
+private _aiGroup = grpNull;
+private _samplerGroup = grpNull;
+private _samplerUnits = [];
 private _error = "";
 private _savedTime = CBA_missionTime;
 
@@ -32,7 +37,7 @@ OCAP_test_commands = [];
 OCAP_extension_fnc_sendData = {
   params ["_command", ["_args", []]];
   // Ignore unrelated telemetry and lifecycle events from the running mission.
-  if (_command isEqualTo ":PLAYER:MEDICAL:" || {
+  if (_command in [":PLAYER:MEDICAL:", ":PLAYER:INVENTORY:"] || {
     _command isEqualTo ":EVENT:GENERAL:" && {(_args param [1, ""]) in [
       "zeusEntity", "zeusCamera", "zeusPing", "zeusModule", "serviceEvent", "staticWeapon"
     ]}
@@ -50,6 +55,13 @@ OCAP_settings_trackZeus = true;
 OCAP_settings_trackZeusPings = true;
 OCAP_settings_trackZeusModules = true;
 OCAP_settings_trackPlayerSnapshotDiffs = true;
+// A listen host shares the server namespace. Keep its real periodic sampler
+// quiet during endpoint tests; the client subtest enables inventory explicitly.
+OCAP_settings_trackPlayerInventory = false;
+OCAP_settings_trackPlayerInventoryOnDeath = false;
+OCAP_settings_trackPlayerMedical = false;
+OCAP_settings_trackPlayerStamina = false;
+OCAP_settings_trackPlayerRadio = false;
 OCAP_recorder_recording = true;
 OCAP_recorder_startTime = 1;
 OCAP_recorder_captureFrameNo = 100;
@@ -75,10 +87,14 @@ try {
   OCAP_recorder_zeusByUid = createHashMap;
   OCAP_recorder_zeusLastCamera = createHashMap;
   OCAP_recorder_zeusPingLast = createHashMap;
+  OCAP_recorder_staticDisassembleClaims = [];
+  OCAP_recorder_staticWeaponSeen = createHashMap;
+  _authGun = createVehicle ["B_HMG_01_F", [140, 140, 0], [], 0, "NONE"];
+  _authGun setVariable ["OCAP_id", 25];
   OCAP_test_commands = [];
   OCAP_test_done = false;
-  [[_client, _curator], {
-    params ["_client", "_curator"];
+  [[_client, _curator, _authGun], {
+    params ["_client", "_curator", "_gun"];
     ["medical", _curator, createHashMapFromArray [["test", "forged"]]] remoteExecCall ["OCAP_recorder_fnc_submitPlayerSnapshot", 2];
     // Both impersonating a curator and claiming curator powers for oneself fail.
     {
@@ -88,13 +104,16 @@ try {
         ["className", "Module_F"], ["displayName", "Test"], ["x", 100], ["y", 200]
       ]] remoteExecCall ["OCAP_recorder_fnc_submitZeusModule", 2];
     } forEach [_curator, _client];
+    ["assembled", _curator, _gun] remoteExecCall ["OCAP_recorder_fnc_submitStaticWeapon", 2];
+    ["disassembled", _curator, objNull] remoteExecCall ["OCAP_recorder_fnc_submitStaticWeapon", 2];
     {OCAP_test_done = true} remoteExecCall ["call", 2];
   }] remoteExecCall ["call", owner _client];
   private _deadline = diag_tickTime + 15;
   waitUntil {sleep 0.05; OCAP_test_done || {diag_tickTime > _deadline}};
   [OCAP_test_done, "spoofing client completed its requests"] call _assert;
   [str OCAP_recorder_playerSnapshotState isEqualTo _before, "spoof cannot replace another player's diff baseline"] call _assert;
-  [OCAP_test_commands isEqualTo [], "spoofed snapshots and Zeus submissions emit nothing"] call _assert;
+  [OCAP_test_commands isEqualTo [], "spoofed snapshots, Zeus and static submissions emit nothing"] call _assert;
+  [count OCAP_recorder_staticWeaponSeen == 0 && {OCAP_recorder_staticDisassembleClaims isEqualTo []}, "static spoofing leaves no assembly dedupe entry or disassembly claim"] call _assert;
   [count OCAP_recorder_zeusByUid == 0 && {count OCAP_recorder_zeusLastCamera == 0} && {count OCAP_recorder_zeusPingLast == 0}, "rejected Zeus submissions leave no entity or dedupe state"] call _assert;
 
   // Positive controls use the same remote endpoint and original client code path.
@@ -121,6 +140,61 @@ try {
   [count OCAP_recorder_zeusPingLast == 1 && {count (OCAP_test_commands select {
     (_x select 0) isEqualTo ":EVENT:GENERAL:" && {((_x select 1) select 1) in ["zeusCamera", "zeusPing", "zeusModule"]}
   }) == 3}, "assigned curator can submit all three Zeus report types"] call _assert;
+
+  OCAP_test_commands = [];
+  OCAP_test_done = false;
+  [[_client, _authGun], {
+    params ["_unit", "_gun"];
+    ["assembled", _unit, _gun] remoteExecCall ["OCAP_recorder_fnc_submitStaticWeapon", 2];
+    ["disassembled", _unit, objNull] remoteExecCall ["OCAP_recorder_fnc_submitStaticWeapon", 2];
+    {OCAP_test_done = true} remoteExecCall ["call", 2];
+  }] remoteExecCall ["call", owner _client];
+  _deadline = diag_tickTime + 15;
+  waitUntil {sleep 0.05; (OCAP_test_done && {count OCAP_test_commands == 1}) || {diag_tickTime > _deadline}};
+  [OCAP_test_done && {count OCAP_test_commands == 1} && {count OCAP_recorder_staticDisassembleClaims == 1}, "legitimate remote owner can submit static assembly and disassembly"] call _assert;
+  [(OCAP_recorder_staticDisassembleClaims select 0 select 0) == 0, "remote owner's disassembly claim retains their unit id"] call _assert;
+  OCAP_recorder_staticDisassembleClaims = [];
+  OCAP_recorder_staticWeaponSeen = createHashMap;
+  OCAP_test_commands = [];
+  _aiGroup = createGroup [west, true];
+  _serverAi = _aiGroup createUnit ["B_Soldier_F", [130, 130, 0], [], 0, "NONE"];
+  _serverAi setVariable ["OCAP_id", 26];
+  [local _serverAi, "positive control AI is server-local"] call _assert;
+  ["assembled", _serverAi, _authGun] call OCAP_recorder_fnc_submitStaticWeapon;
+  ["disassembled", _serverAi, objNull] call OCAP_recorder_fnc_submitStaticWeapon;
+  _deadline = diag_tickTime + 15;
+  waitUntil {sleep 0.05; count OCAP_test_commands == 1 || {diag_tickTime > _deadline}};
+  [count OCAP_test_commands == 1 && {count OCAP_recorder_staticDisassembleClaims == 1}, "direct server AI calls can submit static assembly and disassembly"] call _assert;
+  [(OCAP_recorder_staticDisassembleClaims select 0 select 0) == 26, "direct server claim retains the AI unit id"] call _assert;
+
+  // Replace the client's controlled unit with an identical-kit unit, then change
+  // only its server-issued id. The client runs the actual installed sampler.
+  _samplerGroup = createGroup [west, true];
+  {
+    private _unit = _samplerGroup createUnit ["B_Soldier_F", [110 + _x, 110, 0], [], 0, "NONE"];
+    _unit setVariable ["OCAP_id", _x, true];
+    _unit disableAI "ALL";
+    _samplerUnits pushBack _unit;
+  } forEach [30, 31];
+  _samplerGroup setGroupOwner (owner _client);
+  OCAP_test_commands = [];
+  OCAP_test_done = false;
+  OCAP_test_samplerError = "";
+  [[_samplerUnits select 0, _samplerUnits select 1, OCAP_recorder_startTime],
+    compile preprocessFileLineNumbers "tests\client_sampler_regressions.sqf"
+  ] remoteExecCall ["call", owner _client];
+  _deadline = diag_tickTime + 30;
+  waitUntil {sleep 0.05; OCAP_test_done || {diag_tickTime > _deadline}};
+  [OCAP_test_done, "client unit-replacement regression finished"] call _assert;
+  [OCAP_test_samplerError isEqualTo "", format ["client sampler checks: %1", OCAP_test_samplerError]] call _assert;
+  private _inventories = OCAP_test_commands select {(_x select 0) isEqualTo ":PLAYER:INVENTORY:"};
+  [count _inventories == 3, "server accepts one initial inventory per new id and drops the duplicate"] call _assert;
+  {
+    private _key = format ["%1:inventory", _x];
+    private _state = OCAP_recorder_playerSnapshotState getOrDefault [_key, []];
+    [_state isNotEqualTo [] && {(_state select 2) == 0} && {((_state select 1) get "unitId") == _x}, format ["entity %1 has a full initial inventory", _x]] call _assert;
+  } forEach [30, 31, 32];
+  [{((_x select 1 select 2) find """diffOf""") == -1} count _inventories == 3, "new-id inventory events contain full payloads"] call _assert;
 
   _vehicle = createVehicle ["B_Quadbike_01_F", [100, 100, 0], [], 0, "NONE"];
   _vehicle setVariable ["OCAP_id", 20];
@@ -223,7 +297,8 @@ try {
 OCAP_recorder_recording = false;
 CBA_missionTime = _savedTime;
 {missionNamespace setVariable [_x, _y]} forEach _savedFunctions;
-{if (!isNull _x) then {deleteVehicle _x}} forEach [_vehicle, _gun, _newGun];
+{if (!isNull _x) then {deleteVehicle _x}} forEach ([_vehicle, _gun, _newGun, _authGun, _serverAi] + _samplerUnits);
+{if (!isNull _x) then {deleteGroup _x}} forEach [_aiGroup, _samplerGroup];
 if (_error isNotEqualTo "") then {
   diag_log format ["[OCAP regression] FAIL: %1", _error];
   throw _error;

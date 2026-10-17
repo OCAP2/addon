@@ -1,13 +1,14 @@
 # Recorder regression tests
 
-`recorder_regressions.sqf` exercises the installed addon's actual submission
-functions, sampling callbacks, export reset and restart entry point. It requires
-Arma multiplayer; HEMTT checks/builds do not execute it.
+`recorder_regressions.sqf` and `client_sampler_regressions.sqf` exercise the
+installed addon's actual submission functions, sampling callbacks, export reset
+and restart entry point. They require Arma multiplayer; HEMTT checks/builds do not
+execute them.
 
 Use a **disposable** CBA-only test mission with OCAP on the server only, auto-start
 disabled, and two connected players with different network owners. Give one player
 an assigned Zeus curator. Name the non-curator player `testClient` and the curator
-player `testCurator` in the editor. Copy this script into the mission's `tests/`
+player `testCurator` in the editor. Copy both scripts into the mission's `tests/`
 folder and execute on the server:
 
 ```sqf
@@ -15,14 +16,27 @@ folder and execute on the server:
 ```
 
 Run once on a dedicated server and once on a listen server with `testClient` as
-the host. Allow `call` and the four tested submission endpoints in the test
+the host. Allow `call` and the five tested submission endpoints in the test
 mission's `CfgRemoteExec`; the synchronization barrier also uses `call`.
 
 The RPT must end with `[OCAP regression] ALL TESTS PASSED`, with no script errors.
 The suite checks that a real remote client cannot overwrite another player's
 medical diff baseline, impersonate a curator, or submit Zeus reports without
-curator assignment. Positive controls check legitimate ownership and curator
-submissions. It also samples 100 successive fuel/damage improvements of `0.005`,
+curator assignment. Static-weapon assembly/disassembly spoofing must leave no
+claim or dedupe state. Positive controls cover legitimate static-weapon owners,
+direct server AI calls, snapshot ownership and curator submissions.
+
+The client subtest uses the actual installed sampler callback from CBA's timed
+PFH registry (`CBA_common_PFHhandles` / `CBA_common_perFrameHandlerArray`). It
+switches control between identical-kit units, checks independent object and
+entity-id changes, and verifies that all caches and radio readiness are reset.
+With death snapshots disabled and the inventory interval still at 120 seconds,
+each new id must immediately receive a full initial inventory on its next turn;
+an unchanged unit must not resend early. The server checks the accepted snapshot
+baselines and emitted full payloads. The client restores the original player and
+sampler afterwards.
+
+The suite also samples 100 successive fuel/damage improvements of `0.005`,
 checks idle closure and whole-session noise suppression, then exports and restarts
 with different static membership and reused vehicle ids. Pending disassembly
 claims, dedupe state and an assembly callback from the old recording must not

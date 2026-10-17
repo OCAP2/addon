@@ -33,6 +33,14 @@ if (!isNil QGVAR(PFHObject)) then {
   [GVAR(PFHObject)] call CBA_fnc_deletePerFrameHandlerObject;
   GVAR(PFHObject) = nil;
 };
+if (!isNil QGVAR(serverFpsPFH)) then {
+  [GVAR(serverFpsPFH)] call CBA_fnc_removePerFrameHandler;
+  GVAR(serverFpsPFH) = nil;
+};
+if (!isNil QGVAR(weatherPFH)) then {
+  [GVAR(weatherPFH)] call CBA_fnc_removePerFrameHandler;
+  GVAR(weatherPFH) = nil;
+};
 if (isNil QGVAR(startTime)) then {
   GVAR(startTime) = time;
   publicVariable QGVAR(startTime);
@@ -48,6 +56,20 @@ GVAR(trackedUnits) = createHashMap;
 GVAR(ticketInterval) = round (30 / GVAR(frameCaptureDelay));
 GVAR(diaryInterval) = round (320 / GVAR(frameCaptureDelay));
 
+GVAR(recordServerFps) = {
+  if !(SHOULDSAVEEVENTS) exitWith {};
+  if !(EGVAR(settings,trackServerFps)) exitWith {};
+  [":EVENT:GENERAL:", [
+    // The PFH fires once before the capture loop has produced a frame, and a
+    // sample stamped -1 is invisible to a frame-scoped lookup in the web UI.
+    GVAR(captureFrameNo) max 0,
+    "serverFps",
+    [createHashMapFromArray [["fps", diag_fps]]] call FUNC(encodeJSON)
+  ]] call EFUNC(extension,sendData);
+};
+GVAR(serverFpsPFH) = [GVAR(recordServerFps), 10] call CBA_fnc_addPerFrameHandler;
+GVAR(weatherPFH) = [{ call FUNC(recordWeather) }, 60] call CBA_fnc_addPerFrameHandler;
+
 // Variable: OCAP_PFHObject
 // The CBA PerFrameHandler object that is created and used to run the capture loop.
 GVAR(PFHObject) = [
@@ -58,6 +80,19 @@ GVAR(PFHObject) = [
     // Frame 0 is reserved as sentinel for "not yet recording" (see fnc_init.sqf).
     GVAR(captureFrameNo) = GVAR(captureFrameNo) + 1;
     publicVariable QGVAR(captureFrameNo);
+
+    // Stamp TFAR and ACRE range settings on the first recorded frame so
+    // playback can reuse the mission's values instead of only the baked defaults.
+    if (GVAR(captureFrameNo) == 1) then {
+      call FUNC(recordRadioPropagation);
+    };
+
+    // Capture immediately so the Stats panel has a value from the start.
+    // The dedicated CBA PFHs record subsequent FPS / weather samples.
+    if (GVAR(captureFrameNo) == 1) then {
+      call GVAR(recordServerFps);
+      call FUNC(recordWeather);
+    };
 
     if (GVAR(captureFrameNo) == 10 || (GVAR(captureFrameNo) > 10 && EGVAR(settings,trackTimes) && GVAR(captureFrameNo) % EGVAR(settings,trackTimeInterval) == 0)) then {
       [] call FUNC(updateTime);
@@ -346,6 +381,8 @@ GVAR(PFHObject) = [
       };
     } forEach (keys GVAR(trackedVehicles));
     { GVAR(trackedVehicles) deleteAt _x } forEach _toRemove;
+
+    call FUNC(trackZeus);
 
     if (GVARMAIN(isDebug)) then {
       private _logStr = format["Frame %1 processed in %2ms", GVAR(captureFrameNo), diag_tickTime - _loopStart];

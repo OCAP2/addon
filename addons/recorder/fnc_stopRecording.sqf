@@ -30,6 +30,13 @@ _systemTimeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} 
 private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];
 _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 
+// Write out servicing still in progress while events are still being saved.
+// A repair that was halfway done when the mission ended is worth having, and
+// SHOULDSAVEEVENTS goes false a few lines below.
+if (!isNil QGVAR(flushServiceSessions)) then {
+  call GVAR(flushServiceSessions);
+};
+
 [QGVARMAIN(customEvent), ["generalEvent", "Recording paused."]] call CBA_fnc_serverEvent;
 ["OCAP stopped recording", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
 

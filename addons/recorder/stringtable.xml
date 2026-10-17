@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="ocap">
+    <Package name="recorder">
+        <Container name="Settings_PlayerDetail">
+            <Key ID="STR_OCAP_recorder_Settings_Category_PlayerDetail">
+                <Original>Player Detail Tracking</Original>
+                <English>Player Detail Tracking</English>
+                <Czech>Sledování detailů hráče</Czech>
+                <French>Suivi détaillé des joueurs</French>
+                <Italian>Tracciamento dettagli giocatore</Italian>
+                <Russian>Детальное отслеживание игроков</Russian>
+                <German>Spielerdetail-Erfassung</German>
+                <Finnish>Pelaajatietojen seuranta</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_PlayerInventoryInterval">
+                <Original>Inventory Snapshot Interval</Original>
+                <English>Inventory Snapshot Interval</English>
+                <Czech>Interval snímku inventáře</Czech>
+                <French>Intervalle d'inventaire</French>
+                <Italian>Intervallo snapshot inventario</Italian>
+                <Russian>Интервал снимка инвентаря</Russian>
+                <German>Inventar-Snapshot-Intervall</German>
+                <Finnish>Varustetallenteen väli</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_PlayerInventoryInterval_Desc">
+                <Original>Seconds between inventory snapshots. Unchanged gear costs nothing to sample, so short intervals are cheap. Default: 120</Original>
+                <English>Seconds between inventory snapshots. Unchanged gear costs nothing to sample, so short intervals are cheap. Default: 120</English>
+                <Czech>Sekundy mezi snímky inventáře. Nezměněná výstroj se zahodí, krátké intervaly jsou proto levné. Výchozí: 120</Czech>
+                <French>Secondes entre les instantanés d'inventaire. Un équipement inchangé n'est pas écrit, les intervalles courts restent peu coûteux. Défaut : 120</French>
+                <Italian>Secondi tra gli snapshot dell'inventario. L'equipaggiamento invariato non viene scritto, quindi gli intervalli brevi costano poco. Predefinito: 120</Italian>
+                <Russian>Секунды между снимками инвентаря. Неизменённое снаряжение не пишется, короткие интервалы дёшевы. По умолчанию: 120</Russian>
+                <German>Sekunden zwischen Inventar-Snapshots. Unveränderte Ausrüstung wird verworfen, kurze Intervalle sind daher günstig. Standard: 120</German>
+                <Finnish>Sekunnit varustetallenteiden välillä. Muuttumaton varustus hylätään, joten lyhyet välit ovat edullisia. Oletus: 120</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_PlayerMedicalCriticalInterval">
+                <Original>Critical Medical Snapshot Interval</Original>
+                <English>Critical Medical Snapshot Interval</English>
+                <Czech>Interval kritického zdravotního snímku</Czech>
+                <French>Intervalle médical critique</French>
+                <Italian>Intervallo medico critico</Italian>
+                <Russian>Интервал критического медснимка</Russian>
+                <German>Kritisches Medizin-Intervall</German>
+                <Finnish>Kriittisen lääkintätallenteen väli</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_PlayerMedicalCriticalInterval_Desc">
+                <Original>Seconds between medical snapshots while ACE reports the player unconscious or in cardiac arrest. Default: 10</Original>
+                <English>Seconds between medical snapshots while ACE reports the player unconscious or in cardiac arrest. Default: 10</English>
+                <Czech>Sekundy mezi snímky, když ACE hlásí bezvědomí nebo srdeční zástavu. Výchozí: 10</Czech>
+                <French>Secondes entre les instantanés lorsque ACE signale une inconscience ou un arrêt cardiaque. Défaut : 10</French>
+                <Italian>Secondi tra gli snapshot quando ACE segnala incoscienza o arresto cardiaco. Predefinito: 10</Italian>
+                <Russian>Секунды между снимками, когда ACE сообщает о потере сознания или остановке сердца. По умолчанию: 10</Russian>
+                <German>Sekunden zwischen Snapshots, wenn ACE Bewusstlosigkeit oder Herzstillstand meldet. Standard: 10</German>
+                <Finnish>Sekunnit tallenteiden välillä, kun ACE ilmoittaa tajuttomuudesta tai sydänpysähdyksestä. Oletus: 10</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_PlayerMedicalInterval">
+                <Original>Medical Snapshot Interval</Original>
+                <English>Medical Snapshot Interval</English>
+                <Czech>Interval zdravotního snímku</Czech>
+                <French>Intervalle médical</French>
+                <Italian>Intervallo snapshot medico</Italian>
+                <Russian>Интервал медицинского снимка</Russian>
+                <German>Medizin-Snapshot-Intervall</German>
+                <Finnish>Lääkintätallenteen väli</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_PlayerMedicalInterval_Desc">
+                <Original>Seconds between medical snapshots while the player is healthy. Default: 60</Original>
+                <English>Seconds between medical snapshots while the player is healthy. Default: 60</English>
+                <Czech>Sekundy mezi snímky, když je hráč zdravý. Výchozí: 60</Czech>
+                <French>Secondes entre les instantanés médicaux tant que le joueur est en bonne santé. Défaut : 60</French>
+                <Italian>Secondi tra gli snapshot medici mentre il giocatore è sano. Predefinito: 60</Italian>
+                <Russian>Секунды между снимками, пока игрок здоров. По умолчанию: 60</Russian>
+                <German>Sekunden zwischen medizinischen Snapshots, solange der Spieler gesund ist. Standard: 60</German>
+                <Finnish>Sekunnit lääkintätallenteiden välillä pelaajan ollessa terve. Oletus: 60</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_PlayerRadioInterval">
+                <Original>Radio Snapshot Interval</Original>
+                <English>Radio Snapshot Interval</English>
+                <Czech>Interval snímku vysílačky</Czech>
+                <French>Intervalle radio</French>
+                <Italian>Intervallo snapshot radio</Italian>
+                <Russian>Интервал снимка рации</Russian>
+                <German>Funk-Snapshot-Intervall</German>
+                <Finnish>Radiotallenteen väli</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_PlayerRadioInterval_Desc">
+                <Original>Seconds between radio setting snapshots. Frequencies rarely change, and unchanged snapshots are dropped. Default: 120</Original>
+                <English>Seconds between radio setting snapshots. Frequencies rarely change, and unchanged snapshots are dropped. Default: 120</English>
+                <Czech>Sekundy mezi snímky vysílačky. Frekvence se mění zřídka a nezměněné snímky se zahodí. Výchozí: 120</Czech>
+                <French>Secondes entre les instantanés radio. Les fréquences changent peu, les instantanés identiques sont ignorés. Défaut : 120</French>
+                <Italian>Secondi tra gli snapshot radio. Le frequenze cambiano di rado e gli snapshot identici vengono scartati. Predefinito: 120</Italian>
+                <Russian>Секунды между снимками рации. Частоты меняются редко, одинаковые снимки отбрасываются. По умолчанию: 120</Russian>
+                <German>Sekunden zwischen Funk-Snapshots. Frequenzen ändern sich selten, unveränderte Snapshots werden verworfen. Standard: 120</German>
+                <Finnish>Sekunnit radiotallenteiden välillä. Taajuudet muuttuvat harvoin, muuttumattomat tallenteet hylätään. Oletus: 120</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_PlayerStaminaInterval">
+                <Original>Stamina Snapshot Interval</Original>
+                <English>Stamina Snapshot Interval</English>
+                <Czech>Interval snímku výdrže</Czech>
+                <French>Intervalle d'endurance</French>
+                <Italian>Intervallo snapshot stamina</Italian>
+                <Russian>Интервал снимка выносливости</Russian>
+                <German>Ausdauer-Snapshot-Intervall</German>
+                <Finnish>Kestävyystallenteen väli</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_PlayerStaminaInterval_Desc">
+                <Original>Seconds between stamina snapshots. Default: 30</Original>
+                <English>Seconds between stamina snapshots. Default: 30</English>
+                <Czech>Sekundy mezi snímky výdrže. Výchozí: 30</Czech>
+                <French>Secondes entre les instantanés d'endurance. Défaut : 30</French>
+                <Italian>Secondi tra gli snapshot di stamina. Predefinito: 30</Italian>
+                <Russian>Секунды между снимками выносливости. По умолчанию: 30</Russian>
+                <German>Sekunden zwischen Ausdauer-Snapshots. Standard: 30</German>
+                <Finnish>Sekunnit kestävyystallenteiden välillä. Oletus: 30</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_RadioLongRangeMeters">
+                <Original>Fallback TFAR LR Range</Original>
+                <English>Fallback TFAR LR Range</English>
+                <Czech>Záložní dosah TFAR LR</Czech>
+                <French>Portée TFAR LR de secours</French>
+                <Italian>Raggio TFAR LR di riserva</Italian>
+                <Russian>Резервная дальность TFAR LR</Russian>
+                <German>Fallback TFAR-LR-Reichweite</German>
+                <Finnish>TFAR LR -varakantama</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_RadioLongRangeMeters_Desc">
+                <Original>Map-circle radius in metres used only when a long-range radio's config exposes no tf_range. Default: 20000</Original>
+                <English>Map-circle radius in metres used only when a long-range radio's config exposes no tf_range. Default: 20000</English>
+                <Czech>Poloměr kruhu na mapě v metrech, jen když LR vysílačka nemá tf_range. Výchozí: 20000</Czech>
+                <French>Rayon du cercle carte en mètres, uniquement si la radio LR n'a pas de tf_range. Défaut : 20000</French>
+                <Italian>Raggio del cerchio sulla mappa in metri, solo se la radio LR non ha tf_range. Predefinito: 20000</Italian>
+                <Russian>Радиус круга на карте в метрах, только если у LR-рации нет tf_range. По умолчанию: 20000</Russian>
+                <German>Kartenkreisradius in Metern, nur wenn das LR-Funkgerät kein tf_range hat. Standard: 20000</German>
+                <Finnish>Karttaympyrän säde metreinä, vain jos LR-radiolla ei ole tf_range-arvoa. Oletus: 20000</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_RadioShortRangeMeters">
+                <Original>Fallback TFAR SW Range</Original>
+                <English>Fallback TFAR SW Range</English>
+                <Czech>Záložní dosah TFAR SW</Czech>
+                <French>Portée TFAR SW de secours</French>
+                <Italian>Raggio TFAR SW di riserva</Italian>
+                <Russian>Резервная дальность TFAR SW</Russian>
+                <German>Fallback TFAR-SW-Reichweite</German>
+                <Finnish>TFAR SW -varakantama</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_RadioShortRangeMeters_Desc">
+                <Original>Map-circle radius in metres used only when a short-range radio's config exposes no tf_range. Default: 5000</Original>
+                <English>Map-circle radius in metres used only when a short-range radio's config exposes no tf_range. Default: 5000</English>
+                <Czech>Poloměr kruhu na mapě v metrech, jen když SW vysílačka nemá tf_range. Výchozí: 5000</Czech>
+                <French>Rayon du cercle carte en mètres, uniquement si la radio SW n'a pas de tf_range. Défaut : 5000</French>
+                <Italian>Raggio del cerchio sulla mappa in metri, solo se la radio SW non ha tf_range. Predefinito: 5000</Italian>
+                <Russian>Радиус круга на карте в метрах, только если у SW-рации нет tf_range. По умолчанию: 5000</Russian>
+                <German>Kartenkreisradius in Metern, nur wenn das SW-Funkgerät kein tf_range hat. Standard: 5000</German>
+                <Finnish>Karttaympyrän säde metreinä, vain jos SW-radiolla ei ole tf_range-arvoa. Oletus: 5000</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerInventory">
+                <Original>Track Player Inventories</Original>
+                <English>Track Player Inventories</English>
+                <Czech>Sledovat inventáře hráčů</Czech>
+                <French>Enregistrer les inventaires</French>
+                <Italian>Registra gli inventari</Italian>
+                <Russian>Записывать инвентари игроков</Russian>
+                <German>Spielerinventare erfassen</German>
+                <Finnish>Tallenna pelaajien varusteet</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerInventoryOnDeath">
+                <Original>Snapshot Inventory on Death</Original>
+                <English>Snapshot Inventory on Death</English>
+                <Czech>Snímek inventáře při smrti</Czech>
+                <French>Instantané d'inventaire à la mort</French>
+                <Italian>Snapshot inventario alla morte</Italian>
+                <Russian>Снимок инвентаря при смерти</Russian>
+                <German>Inventar beim Tod erfassen</German>
+                <Finnish>Varustetallenne kuolemassa</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerInventoryOnDeath_Desc">
+                <Original>Immediately record a player's inventory and medical state when they die, independently of the periodic timers. Default: true</Original>
+                <English>Immediately record a player's inventory and medical state when they die, independently of the periodic timers. Default: true</English>
+                <Czech>Okamžitě zaznamená inventář a zdravotní stav hráče při smrti, nezávisle na časovačích. Výchozí: ano</Czech>
+                <French>Enregistre immédiatement l'inventaire et l'état médical à la mort, indépendamment des minuteurs. Défaut : oui</French>
+                <Italian>Registra subito inventario e stato medico alla morte, indipendentemente dai timer. Predefinito: sì</Italian>
+                <Russian>Сразу записывает инвентарь и медсостояние при смерти, независимо от таймеров. По умолчанию: да</Russian>
+                <German>Erfasst Inventar und medizinischen Zustand sofort beim Tod, unabhängig von den Timern. Standard: ja</German>
+                <Finnish>Tallentaa varusteet ja lääkintätilan heti kuolemassa, ajastimista riippumatta. Oletus: kyllä</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerInventory_Desc">
+                <Original>Record a structured gear snapshot for every player. Default: true</Original>
+                <English>Record a structured gear snapshot for every player. Default: true</English>
+                <Czech>Zaznamená strukturovaný snímek výstroje každého hráče. Výchozí: ano</Czech>
+                <French>Enregistre un instantané d'équipement structuré pour chaque joueur. Défaut : oui</French>
+                <Italian>Registra uno snapshot dell'equipaggiamento di ogni giocatore. Predefinito: sì</Italian>
+                <Russian>Записывает структурированный снимок снаряжения каждого игрока. По умолчанию: да</Russian>
+                <German>Speichert einen strukturierten Ausrüstungs-Snapshot für jeden Spieler. Standard: ja</German>
+                <Finnish>Tallentaa rakenteellisen varustetallenteen jokaisesta pelaajasta. Oletus: kyllä</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerMedical">
+                <Original>Track Player Medical State</Original>
+                <English>Track Player Medical State</English>
+                <Czech>Sledovat zdravotní stav hráčů</Czech>
+                <French>Suivre l'état médical</French>
+                <Italian>Registra lo stato medico</Italian>
+                <Russian>Записывать медсостояние игроков</Russian>
+                <German>Medizinischen Zustand erfassen</German>
+                <Finnish>Tallenna pelaajien lääkintätila</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerMedical_Desc">
+                <Original>Record vanilla medical state plus relevant ACE Medical and KAT data when detected. Default: true</Original>
+                <English>Record vanilla medical state plus relevant ACE Medical and KAT data when detected. Default: true</English>
+                <Czech>Zaznamená vanilkový zdravotní stav a data ACE Medical / KAT, pokud jsou načteny. Výchozí: ano</Czech>
+                <French>Enregistre l'état vanilla ainsi que ACE Medical et KAT s'ils sont chargés. Défaut : oui</French>
+                <Italian>Registra lo stato vanilla e i dati ACE Medical / KAT se presenti. Predefinito: sì</Italian>
+                <Russian>Пишет ванильное состояние и данные ACE Medical / KAT при их наличии. По умолчанию: да</Russian>
+                <German>Speichert den Vanilla-Zustand sowie ACE Medical und KAT, sofern geladen. Standard: ja</German>
+                <Finnish>Tallentaa vaniljatilan sekä ACE Medical- ja KAT-tiedot, jos ne on ladattu. Oletus: kyllä</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerRadio">
+                <Original>Track Player Radio Settings</Original>
+                <English>Track Player Radio Settings</English>
+                <Czech>Sledovat nastavení vysílaček</Czech>
+                <French>Suivre les radios</French>
+                <Italian>Registra le radio</Italian>
+                <Russian>Записывать настройки раций</Russian>
+                <German>Funkgeräte erfassen</German>
+                <Finnish>Tallenna pelaajien radiot</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerRadio_Desc">
+                <Original>Record active TFAR or ACRE2 radios, frequencies, channels and encryption codes. Default: true</Original>
+                <English>Record active TFAR or ACRE2 radios, frequencies, channels and encryption codes. Default: true</English>
+                <Czech>Zaznamená aktivní TFAR/ACRE2 vysílačky, frekvence, kanály a kódy. Výchozí: ano</Czech>
+                <French>Enregistre les radios TFAR ou ACRE2 actives, fréquences, canaux et codes. Défaut : oui</French>
+                <Italian>Registra radio TFAR o ACRE2 attive, frequenze, canali e codici. Predefinito: sì</Italian>
+                <Russian>Пишет активные рации TFAR/ACRE2, частоты, каналы и коды. По умолчанию: да</Russian>
+                <German>Speichert aktive TFAR- oder ACRE2-Funkgeräte, Frequenzen, Kanäle und Codes. Standard: ja</German>
+                <Finnish>Tallentaa aktiiviset TFAR- tai ACRE2-radiot, taajuudet, kanavat ja koodit. Oletus: kyllä</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerSnapshotDiffs">
+                <Original>Store Player Snapshots as Diffs</Original>
+                <English>Store Player Snapshots as Diffs</English>
+                <Czech>Ukládat snímky jako rozdíly</Czech>
+                <French>Enregistrer les instantanés en diffs</French>
+                <Italian>Salva gli snapshot come diff</Italian>
+                <Russian>Хранить снимки как различия</Russian>
+                <German>Spieler-Snapshots als Diffs speichern</German>
+                <Finnish>Tallenna pelaajatallenteet eroin</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerSnapshotDiffs_Desc">
+                <Original>Record only what changed since the player's previous snapshot of the same kind, which shrinks recordings dramatically. Turn off to write every snapshot in full for third-party tools that cannot merge diffs. Default: true</Original>
+                <English>Record only what changed since the player's previous snapshot of the same kind, which shrinks recordings dramatically. Turn off to write every snapshot in full for third-party tools that cannot merge diffs. Default: true</English>
+                <Czech>Zaznamená jen změny od předchozího snímku stejného typu, což výrazně zmenší záznam. Vypněte, pokud nástroje třetích stran nedokážou sloučit rozdíly. Výchozí: ano</Czech>
+                <French>N'enregistre que ce qui a changé depuis le précédent instantané du même type. Désactivez si un outil tiers ne sait pas fusionner les diffs. Défaut : oui</French>
+                <Italian>Registra solo ciò che è cambiato rispetto allo snapshot precedente dello stesso tipo. Disattiva se gli strumenti di terze parti non uniscono i diff. Predefinito: sì</Italian>
+                <Russian>Пишет только изменения с прошлого снимка того же типа — записи сильно меньше. Выключите, если сторонние инструменты не умеют сливать различия. По умолчанию: да</Russian>
+                <German>Speichert nur Änderungen seit dem letzten Snapshot derselben Art und verkleinert Aufnahmen stark. Deaktivieren, wenn Dritttools keine Diffs mergen können. Standard: ja</German>
+                <Finnish>Tallentaa vain muutokset edellisestä saman tyypin tallenteesta. Poista käytöstä, jos kolmannen osapuolen työkalut eivät osaa yhdistää eroavaisuuksia. Oletus: kyllä</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerStamina">
+                <Original>Track Player Stamina</Original>
+                <English>Track Player Stamina</English>
+                <Czech>Sledovat výdrž hráčů</Czech>
+                <French>Suivre l'endurance</French>
+                <Italian>Registra la stamina</Italian>
+                <Russian>Записывать выносливость</Russian>
+                <German>Spielerausdauer erfassen</German>
+                <Finnish>Tallenna pelaajien kestävyys</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerStamina_Desc">
+                <Original>Record vanilla stamina, carried weight, and ACE Advanced Fatigue factors when detected. Default: true</Original>
+                <English>Record vanilla stamina, carried weight, and ACE Advanced Fatigue factors when detected. Default: true</English>
+                <Czech>Zaznamená vanilkovou výdrž, nesenou hmotnost a ACE Advanced Fatigue, pokud je načten. Výchozí: ano</Czech>
+                <French>Enregistre l'endurance vanilla, le poids porté et ACE Advanced Fatigue s'il est chargé. Défaut : oui</French>
+                <Italian>Registra stamina vanilla, peso trasportato e ACE Advanced Fatigue se presente. Predefinito: sì</Italian>
+                <Russian>Пишет ванильную выносливость, переносимый вес и ACE Advanced Fatigue при наличии. По умолчанию: да</Russian>
+                <German>Speichert Vanilla-Ausdauer, getragenes Gewicht und ACE Advanced Fatigue, sofern geladen. Standard: ja</German>
+                <Finnish>Tallentaa vaniljakestävyyden, kannetun painon ja ACE Advanced Fatiguen, jos se on ladattu. Oletus: kyllä</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerTraits">
+                <Original>Track Player Traits</Original>
+                <English>Track Player Traits</English>
+                <Czech>Sledovat vlastnosti hráčů</Czech>
+                <French>Suivre les traits des joueurs</French>
+                <Italian>Traccia i tratti dei giocatori</Italian>
+                <Russian>Записывать навыки игроков</Russian>
+                <German>Spielerfähigkeiten erfassen</German>
+                <Finnish>Tallenna pelaajien taidot</Finnish>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackPlayerTraits_Desc">
+                <Original>Record each player's engine traits (medic, engineer, explosive specialist, UAV hacker, coefficients, custom traits) and ACE training levels (medic/doctor, engineer/advanced, EOD) with their inventory snapshot. Default: true</Original>
+                <English>Record each player's engine traits (medic, engineer, explosive specialist, UAV hacker, coefficients, custom traits) and ACE training levels (medic/doctor, engineer/advanced, EOD) with their inventory snapshot. Default: true</English>
+                <Czech>Zaznamená vlastnosti hráče (zdravotník, ženista, pyrotechnik, UAV operátor, koeficienty, vlastní) a úrovně výcviku ACE (zdravotník/doktor, ženista/pokročilý, EOD) spolu se snímkem inventáře. Výchozí: ano</Czech>
+                <French>Enregistre les traits du joueur (médecin, ingénieur, démineur, pilote de drone, coefficients, traits personnalisés) et les niveaux de formation ACE (médecin/docteur, ingénieur/avancé, EOD) avec l'instantané d'inventaire. Défaut : oui</French>
+                <Italian>Registra i tratti del giocatore (medico, ingegnere, artificiere, hacker UAV, coefficienti, tratti personalizzati) e i livelli di addestramento ACE (medico/dottore, ingegnere/avanzato, EOD) con lo snapshot dell'inventario. Predefinito: sì</Italian>
+                <Russian>Записывает навыки игрока (медик, инженер, сапёр, оператор БПЛА, коэффициенты, пользовательские) и уровни подготовки ACE (медик/врач, инженер/продвинутый, EOD) вместе со снимком инвентаря. По умолчанию: да</Russian>
+                <German>Erfasst die Fähigkeiten des Spielers (Sanitäter, Pionier, Sprengstoffexperte, UAV-Hacker, Koeffizienten, eigene) und ACE-Ausbildungsstufen (Sanitäter/Arzt, Pionier/erweitert, EOD) zusammen mit dem Inventar. Standard: ja</German>
+                <Finnish>Tallentaa pelaajan taidot (lääkintämies, pioneeri, räjähdeasiantuntija, UAV-hakkeri, kertoimet, mukautetut) ja ACE-koulutustasot (lääkintämies/lääkäri, pioneeri/edistynyt, EOD) varustetallenteen mukana. Oletus: kyllä</Finnish>
+            </Key>
+        </Container>
+        <Container name="Settings_ServerPerformance">
+            <Key ID="STR_OCAP_recorder_Settings_Category_ServerPerformance">
+                <Original>Server Performance</Original>
+                <English>Server Performance</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackServerFps">
+                <Original>Track Server FPS</Original>
+                <English>Track Server FPS</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackServerFps_Desc">
+                <Original>Record the server FPS at mission start and every 10 seconds. Default: true</Original>
+                <English>Record the server FPS at mission start and every 10 seconds. Default: true</English>
+            </Key>
+        </Container>
+        <Container name="Settings_Weather">
+            <Key ID="STR_OCAP_recorder_Settings_Category_Weather">
+                <Original>Weather</Original>
+                <English>Weather</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackWeather">
+                <Original>Track Weather</Original>
+                <English>Track Weather</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackWeather_Desc">
+                <Original>Record vanilla weather (overcast, rain, fog, wind, humidity, moon phase) at recording start and every 60 seconds. ACE Weather temperature and humidity replace the vanilla readings when ACE Weather is enabled. Default: true</Original>
+                <English>Record vanilla weather (overcast, rain, fog, wind, humidity, moon phase) at recording start and every 60 seconds. ACE Weather temperature and humidity replace the vanilla readings when ACE Weather is enabled. Default: true</English>
+            </Key>
+        </Container>
+        <Container name="Settings_Zeus">
+            <Key ID="STR_OCAP_recorder_Settings_Category_Explosions">
+                <Original>Explosion Tracking</Original>
+                <English>Explosion Tracking</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_Category_Support">
+                <Original>Support &amp; Construction Tracking</Original>
+                <English>Support &amp; Construction Tracking</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_Category_Trenches">
+                <Original>Trench Tracking</Original>
+                <English>Trench Tracking</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_Category_Zeus">
+                <Original>Zeus Tracking</Original>
+                <English>Zeus Tracking</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ExplosionMinRadius">
+                <Original>Minimum Explosion Radius</Original>
+                <English>Minimum Explosion Radius</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ExplosionMinRadius_Desc">
+                <Original>Smallest blast radius worth recording, in metres. Keeps HE cannon bursts out of the event feed while still catching hand grenades. Default: 2</Original>
+                <English>Smallest blast radius worth recording, in metres. Keeps HE cannon bursts out of the event feed while still catching hand grenades. Default: 2</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ServiceSampleInterval">
+                <Original>Servicing Sample Interval</Original>
+                <English>Servicing Sample Interval</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ServiceSampleInterval_Desc">
+                <Original>How often vehicle fuel and damage are sampled, in seconds. Each job is written as one event spanning the whole thing, not one per sample. Default: 5</Original>
+                <English>How often vehicle fuel and damage are sampled, in seconds. Each job is written as one event spanning the whole thing, not one per sample. Default: 5</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackConstructions">
+                <Original>Track Fortifications and Static Weapons</Original>
+                <English>Track Fortifications and Static Weapons</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackConstructions_Desc">
+                <Original>Record ACE3 Fortify placements as labelled map objects, and static weapons assembled or taken apart as events. Default: Yes</Original>
+                <English>Record ACE3 Fortify placements as labelled map objects, and static weapons assembled or taken apart as events. Default: Yes</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackExplosions">
+                <Original>Track Explosions</Original>
+                <English>Track Explosions</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackExplosions_Desc">
+                <Original>Record every detonation as an event carrying the blast radius from CfgAmmo, so playback can draw the area it covered. Default: Yes</Original>
+                <English>Record every detonation as an event carrying the blast radius from CfgAmmo, so playback can draw the area it covered. Default: Yes</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackServicing">
+                <Original>Track Vehicle Servicing</Original>
+                <English>Track Vehicle Servicing</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackServicing_Desc">
+                <Original>Record vehicles being repaired, refuelled and rearmed. Repair and refuel are read from the vehicle's own state and work with any mod; rearm requires ACE Rearm. Default: Yes</Original>
+                <English>Record vehicles being repaired, refuelled and rearmed. Repair and refuel are read from the vehicle's own state and work with any mod; rearm requires ACE Rearm. Default: Yes</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackTrenches">
+                <Original>Track Trenches</Original>
+                <English>Track Trenches</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackTrenches_Desc">
+                <Original>Record ACE3 and GRAD trenches once they are fully dug. Each one becomes an oriented map icon labelled with the trench type, who dug it, and the mission time. No effect without ACE trenches. Default: Yes</Original>
+                <English>Record ACE3 and GRAD trenches once they are fully dug. Each one becomes an oriented map icon labelled with the trench type, who dug it, and the mission time. No effect without ACE trenches. Default: Yes</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackZeus">
+                <Original>Track Zeus Remote Control</Original>
+                <English>Track Zeus Remote Control</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackZeusModules">
+                <Original>Track Zeus Modules</Original>
+                <English>Track Zeus Modules</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackZeusModules_Desc">
+                <Original>Record each Zeus module a curator places, with an English name. Reported by the Zeus client, since fire-and-forget modules never reach the server. Requires Track Zeus. Default: Yes</Original>
+                <English>Record each Zeus module a curator places, with an English name. Reported by the Zeus client, since fire-and-forget modules never reach the server. Requires Track Zeus. Default: Yes</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackZeusPings">
+                <Original>Track Zeus Pings</Original>
+                <English>Track Zeus Pings</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackZeusPings_Desc">
+                <Original>Record when a player pings Zeus. Reported by the Zeus client, since the server never sees the ping. Requires Track Zeus. Default: Yes</Original>
+                <English>Record when a player pings Zeus. Reported by the Zeus client, since the server never sees the ping. Requires Track Zeus. Default: Yes</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_TrackZeus_Desc">
+                <Original>Record when Zeus remote-controls a unit, and sample the curator camera while the Zeus interface is open. Default: true</Original>
+                <English>Record when Zeus remote-controls a unit, and sample the curator camera while the Zeus interface is open. Default: true</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ZeusCameraInterval">
+                <Original>Zeus Camera Interval</Original>
+                <English>Zeus Camera Interval</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ZeusCameraInterval_Desc">
+                <Original>Seconds between curator-camera samples while Zeus is flying the map. Default: 1</Original>
+                <English>Seconds between curator-camera samples while Zeus is flying the map. Default: 1</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ZeusPingMinInterval">
+                <Original>Zeus Ping Minimum Interval</Original>
+                <English>Zeus Ping Minimum Interval</English>
+            </Key>
+            <Key ID="STR_OCAP_recorder_Settings_ZeusPingMinInterval_Desc">
+                <Original>Seconds a player must wait before another of their pings is recorded. Also collapses the duplicate reports a single ping produces when several Zeuses can edit that player. Default: 2</Original>
+                <English>Seconds a player must wait before another of their pings is recorded. Also collapses the duplicate reports a single ping produces when several Zeuses can edit that player. Default: 2</English>
+            </Key>
+        </Container>
+    </Package>
+</Project>

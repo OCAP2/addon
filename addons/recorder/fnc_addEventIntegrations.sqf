@@ -176,8 +176,14 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
       // PRC-343 is a short-range item radio, all others are long-range
       private _typeRadio = ["LR", "SR"] select (_baseRadio == "ACRE_PRC343");
 
-      // round frequency from Hz to MHz with 3 decimal places
-      _freq = (_freq / 1000000) toFixed 3;
+      // ACRE stores frequencyTX in MHz already -- its own descriptive name does
+      // format ["%1 MHz", frequencyTX] -- and the presets bear that out: the
+      // BF-888S runs 400.00-400.63, the PRC-343 2400.00-2402.55, the PRC-152
+      // (950+2i)*0.0625 from 59.375. Dividing by a million here (which this line
+      // used to do, on the assumption the value was in Hz) made every ACRE
+      // transmission read 0.000 and match no radio at all. Three decimals is the
+      // finest step any of those presets uses.
+      _freq = _freq toFixed 3;
 
       // store computed radio info on unit for stop event (acre_stoppedSpeaking doesn't provide it)
       _unit setVariable [QGVAR(acre_lastRadioInfo), [_radioName, _typeRadio, _channel, _freq]];
@@ -226,3 +232,7 @@ if (isClass (configFile >> "CfgPatches" >> "ace_medical_status")) then {
 
   missionNamespace setVariable [QGVARMAIN(radioEventsInitialized), true];
 } remoteExec ["call", [0, -2] select isDedicated, true];
+
+// Player-owned data must be sampled where the player is local. The installer
+// sends self-contained code because OCAP is normally loaded server-side only.
+call FUNC(installPlayerTrackingClients);

@@ -447,6 +447,379 @@ GVAR(allSettings) = [
     false
   ],
 
+  [
+    QEGVAR(settings,trackPlayerInventory),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerInventory), LSTRING(Settings_TrackPlayerInventory_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,playerInventoryInterval),
+    "SLIDER",
+    [LSTRING(Settings_PlayerInventoryInterval), LSTRING(Settings_PlayerInventoryInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [10, 1800, 120, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackPlayerInventoryOnDeath),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerInventoryOnDeath), LSTRING(Settings_TrackPlayerInventoryOnDeath_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackPlayerTraits),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerTraits), LSTRING(Settings_TrackPlayerTraits_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackPlayerMedical),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerMedical), LSTRING(Settings_TrackPlayerMedical_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,playerMedicalInterval),
+    "SLIDER",
+    [LSTRING(Settings_PlayerMedicalInterval), LSTRING(Settings_PlayerMedicalInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [5, 300, 60, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,playerMedicalCriticalInterval),
+    "SLIDER",
+    [LSTRING(Settings_PlayerMedicalCriticalInterval), LSTRING(Settings_PlayerMedicalCriticalInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [1, 120, 10, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackPlayerStamina),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerStamina), LSTRING(Settings_TrackPlayerStamina_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,playerStaminaInterval),
+    "SLIDER",
+    [LSTRING(Settings_PlayerStaminaInterval), LSTRING(Settings_PlayerStaminaInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [5, 300, 30, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackPlayerRadio),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerRadio), LSTRING(Settings_TrackPlayerRadio_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,playerRadioInterval),
+    "SLIDER",
+    [LSTRING(Settings_PlayerRadioInterval), LSTRING(Settings_PlayerRadioInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [10, 1800, 120, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackPlayerSnapshotDiffs),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackPlayerSnapshotDiffs), LSTRING(Settings_TrackPlayerSnapshotDiffs_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,radioShortRangeMeters),
+    "SLIDER",
+    [LSTRING(Settings_RadioShortRangeMeters), LSTRING(Settings_RadioShortRangeMeters_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [100, 20000, 5000, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,radioLongRangeMeters),
+    "SLIDER",
+    [LSTRING(Settings_RadioLongRangeMeters), LSTRING(Settings_RadioLongRangeMeters_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_PlayerDetail)],
+    [1000, 100000, 20000, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackServerFps),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackServerFps), LSTRING(Settings_TrackServerFps_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_ServerPerformance)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackWeather),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackWeather), LSTRING(Settings_TrackWeather_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Weather)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackZeus),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackZeus), LSTRING(Settings_TrackZeus_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Zeus)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,zeusCameraInterval),
+    "SLIDER",
+    [LSTRING(Settings_ZeusCameraInterval), LSTRING(Settings_ZeusCameraInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Zeus)],
+    [0.25, 10, 1, 1, false],
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackZeusPings),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackZeusPings), LSTRING(Settings_TrackZeusPings_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Zeus)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,trackZeusModules),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackZeusModules), LSTRING(Settings_TrackZeusModules_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Zeus)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  [
+    QEGVAR(settings,zeusPingMinInterval),
+    "SLIDER",
+    [LSTRING(Settings_ZeusPingMinInterval), LSTRING(Settings_ZeusPingMinInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Zeus)],
+    [0, 10, 2, 1, false],
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_trackTrenches
+    Description:
+      Records ACE3 and GRAD trenches as placed objects once they are fully dug,
+      so they appear on the playback map as an oriented icon labelled with the
+      trench type, who dug it, and the mission time. Has no effect when ACE
+      trenches is not loaded. Default: Yes
+
+    Setting Name:
+      Track Trenches
+
+    Value Type: Boolean
+  */
+  [
+    QEGVAR(settings,trackTrenches),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackTrenches), LSTRING(Settings_TrackTrenches_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Trenches)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_trackExplosions
+    Description:
+      Records every detonation big enough to matter as an `explosion` event
+      carrying the blast radius read from CfgAmmo, so playback can draw the area
+      a shell or charge actually covered instead of a bare impact dot.
+      Default: Yes
+
+    Setting Name:
+      Track Explosions
+
+    Value Type: Boolean
+  */
+  [
+    QEGVAR(settings,trackExplosions),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackExplosions), LSTRING(Settings_TrackExplosions_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Explosions)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_explosionMinRadius
+    Description:
+      Smallest blast radius worth recording, in metres. This is what keeps a
+      30 mm HE burst from writing an event per round while still catching hand
+      grenades, which sit around 5 m. Default: 2
+
+    Setting Name:
+      Minimum Explosion Radius
+
+    Value Type: Number
+  */
+  [
+    QEGVAR(settings,explosionMinRadius),
+    "SLIDER",
+    [LSTRING(Settings_ExplosionMinRadius), LSTRING(Settings_ExplosionMinRadius_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Explosions)],
+    [0, 50, 2, 1, false],
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_trackServicing
+    Description:
+      Records vehicles being repaired, refuelled and rearmed. Repair and refuel
+      are detected from the vehicle's own synced state, so they work with ACE,
+      vanilla support vehicles and Zeus alike; rearm needs ACE Rearm, which is
+      the only source that reports turret ammo to the server. Default: Yes
+
+    Setting Name:
+      Track Vehicle Servicing
+
+    Value Type: Boolean
+  */
+  [
+    QEGVAR(settings,trackServicing),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackServicing), LSTRING(Settings_TrackServicing_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Support)],
+    true,
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_serviceSampleInterval
+    Description:
+      How often vehicle fuel and damage are sampled, in seconds. A longer
+      interval costs less and still catches the job, because each repair or
+      refuel is written as one event spanning the whole thing rather than one
+      per sample. Default: 5
+
+    Setting Name:
+      Servicing Sample Interval
+
+    Value Type: Number
+  */
+  [
+    QEGVAR(settings,serviceSampleInterval),
+    "SLIDER",
+    [LSTRING(Settings_ServiceSampleInterval), LSTRING(Settings_ServiceSampleInterval_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Support)],
+    [1, 60, 5, 0, false],
+    true,
+    {},
+    false
+  ],
+
+  /*
+    CBA Setting: OCAP_settings_trackConstructions
+    Description:
+      Records ACE3 Fortify placements as labelled map objects, and static
+      weapons assembled from bags or taken apart again as events pointing at the
+      gun's own entity record. Default: Yes
+
+    Setting Name:
+      Track Fortifications and Static Weapons
+
+    Value Type: Boolean
+  */
+  [
+    QEGVAR(settings,trackConstructions),
+    "CHECKBOX",
+    [LSTRING(Settings_TrackConstructions), LSTRING(Settings_TrackConstructions_Desc)],
+    [COMPONENT_NAME, LSTRING(Settings_Category_Support)],
+    true,
+    true,
+    {},
+    false
+  ],
+
 
 
   // Section: Save/Export Settings

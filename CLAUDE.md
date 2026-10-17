@@ -54,6 +54,7 @@ All settings use CBA Settings system (configurable in-game via addon options):
 - `OCAP_settings_minPlayerCount`: Minimum players to start
 - `OCAP_settings_frameCaptureDelay`: Capture interval in seconds
 - `OCAP_settings_excludeClassFromRecord`: Classes to exclude
+- Player Detail Tracking (`OCAP_settings_trackPlayerInventory` / `Medical` / `Stamina` / `Radio` and their intervals): see `docs/player-detail-tracking.md`
 
 ## Code Conventions
 

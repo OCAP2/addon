@@ -40,4 +40,28 @@ if ((_entity call BIS_fnc_objectType) # 0 == "Soldier") then {
       _entity addEventHandler ["FiredMan", { _this call FUNC(eh_firedMan); }]
     ];
   };
+
+  // WEAPONASSEMBLED / WEAPONDISASSEMBLED
+  // Both fire only where the unit is local, so these cover units this machine
+  // owns -- server AI. Players report the same two events through the client
+  // bootstrap in <OCAP_recorder_fnc_installPlayerTrackingClients>, because a
+  // handler added here would never fire on their machine.
+  if (isNil {_entity getVariable QGVARMAIN(staticWeaponEH)}) then {
+    _entity setVariable [
+      QGVARMAIN(staticWeaponEH),
+      _entity addEventHandler ["WeaponAssembled", {
+        params ["_unit", "_static"];
+        ["assembled", _unit, _static] call FUNC(submitStaticWeapon);
+      }]
+    ];
+    // WeaponDisassembled hands over the two bags, not the gun, so this only
+    // files the claim; the event is written when the gun disappears.
+    _entity setVariable [
+      QGVARMAIN(staticWeaponDisassembledEH),
+      _entity addEventHandler ["WeaponDisassembled", {
+        params ["_unit"];
+        ["disassembled", _unit, objNull] call FUNC(submitStaticWeapon);
+      }]
+    ];
+  };
 };

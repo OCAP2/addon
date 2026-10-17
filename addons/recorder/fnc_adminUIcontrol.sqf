@@ -45,7 +45,7 @@ if (!(_userInfo isEqualType []) || {count _userInfo < 11}) exitWith {
 	diag_log text format ["[OCAP] (recorder) WARNING: getUserInfo returned unexpected data for PID %1: type=%2 count=%3 data=%4", _PID, typeName _userInfo, if (_userInfo isEqualType []) then {count _userInfo} else {-1}, _userInfo];
 };
 _userInfo params ["_playerID", "_owner", "_playerUID"];
-private _unit = _userInfo select 10;
+private _unit = _userInfo param [10, objNull, [objNull]];
 if (isNull _unit) exitWith {
 	diag_log text format ["[OCAP] (recorder) WARNING: getUserInfo unit (index 10) is null for PID %1 (UID: %2)", _PID, _playerUID];
 };

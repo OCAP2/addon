@@ -40,12 +40,29 @@ PREP(entityMonitors);
 PREP(telemetryLoop);
 
 PREP(aceExplosives);
+PREP(recordExplosion);
+PREP(trackTrenches);
+PREP(trackServicing);
+PREP(trackConstructions);
+PREP(submitStaticWeapon);
 
 PREP(addEventIntegrations);
 PREP(getStaticObjects);
 PREP(trackSectors);
 PREP(handleChatMessage);
 PREP(radioEvent);
+
+PREP(installPlayerTrackingClients);
+PREP(submitPlayerSnapshot);
+PREP(diffSnapshotPayload);
+PREP(encodeJSON);
+PREP(ensureZeusEntity);
+PREP(trackZeus);
+PREP(submitZeusCamera);
+PREP(submitZeusPing);
+PREP(submitZeusModule);
+PREP(recordRadioPropagation);
+PREP(recordWeather);
 
 PREP(exportData);
 

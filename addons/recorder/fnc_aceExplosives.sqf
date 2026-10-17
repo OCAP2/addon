@@ -75,6 +75,17 @@ _explosive addEventHandler ["Explode", {
     _pos joinString ","                                                   // 3: position
   ];
   [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
+
+  // Blast report. The placer was stamped on the charge below, because the
+  // detonation itself carries nothing but the object and the position.
+  [QGVARMAIN(handleExplosion), [
+    EGVAR(recorder,captureFrameNo),
+    _pos joinString ",",
+    typeOf _explosive,
+    _explosive getVariable [QGVARMAIN(placerId), -1],
+    "",
+    "explosive"
+  ]] call CBA_fnc_serverEvent;
 }];
 
 _explosive addEventHandler ["Deleted", {
@@ -106,6 +117,9 @@ if (!isServer) exitWith {};
   // Get placer's OCAP ID
   private _unitOcapId = _unit getVariable [QGVARMAIN(id), -1];
   if (_unitOcapId isEqualTo -1) exitWith {};
+
+  // Kept for the detonation report, which only ever sees the charge itself.
+  _explosive setVariable [QGVARMAIN(placerId), _unitOcapId, true];
 
   // Resolve explosive metadata from config
   private _explType = typeOf _explosive;

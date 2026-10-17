@@ -77,7 +77,7 @@ _projectile addEventHandler ["Deflected", {
   ]]] call CBA_fnc_serverEvent;
 }];
 
-// Explode — detonation, log position
+// Explode — detonation, log position and report the blast
 _projectile addEventHandler ["Explode", {
   params ["_projectile", "_pos", "_velocity"];
   TRACE_3("Explode",_projectile,_pos,_velocity);
@@ -88,6 +88,18 @@ _projectile addEventHandler ["Explode", {
     EGVAR(recorder,captureFrameNo),
     _pos joinString ","
   ]]] call CBA_fnc_serverEvent;
+
+  // The blast size is a CfgAmmo property the server resolves; all the owner can
+  // add is which class went off and where. Firer and vehicle are recovered from
+  // the tracked projectile entry, so nothing about identity is trusted here.
+  [QGVARMAIN(handleExplosion), [
+    EGVAR(recorder,captureFrameNo),
+    _pos joinString ",",
+    typeOf _projectile,
+    -1,
+    _tempKey,
+    "projectile"
+  ]] call CBA_fnc_serverEvent;
 }];
 
 // Deleted — send done signal to server

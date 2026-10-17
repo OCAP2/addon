@@ -57,6 +57,17 @@ GVAR(nextId) = 0;
 // Only an empty-server auto-save may arm the automatic restart path.
 GVAR(autoRestartAfterEmptyPending) = false;
 
+/*
+  VARIABLE: OCAP_recorder_playerSnapshotState
+  Last full player-detail snapshot per "<ocapId>:<kind>", as
+  [frameNumber, payload, diffsSinceFullSnapshot]. Used to store follow-up
+  snapshots as diffs. [HashMap]
+*/
+GVAR(playerSnapshotState) = createHashMap;
+GVAR(zeusByUid) = createHashMap;
+GVAR(zeusLastCamera) = createHashMap;
+GVAR(zeusControlledUnits) = createHashMap;
+
 
 
 // save static setting values so changes during a mission don't interrupt timeline
@@ -132,6 +143,11 @@ call FUNC(addEventMission);
 // Add integration event handlers (chat, ACE, TFAR)
 call FUNC(addEventIntegrations);
 call FUNC(eh_fired_server);
+call FUNC(trackTrenches);
+
+call FUNC(trackServicing);
+
+call FUNC(trackConstructions);
 call FUNC(telemetryLoop);
 [] spawn FUNC(getStaticObjects);
 
@@ -141,7 +157,13 @@ call FUNC(telemetryLoop);
   private _pid = getPlayerID _x;
   [{
     private _info = getUserInfo _this;
-    !isNil "_info" && {_info isEqualType [] && {count _info >= 11}}
+    !isNil "_info" && {
+      _info isEqualType [] && {
+        count _info >= 11 && {
+          !isNull (_info param [10, objNull, [objNull]])
+        }
+      }
+    }
   }, {
     [_this, "connect"] call FUNC(adminUIcontrol);
   }, _pid, 30] call CBA_fnc_waitUntilAndExecute;

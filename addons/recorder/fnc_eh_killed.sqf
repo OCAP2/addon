@@ -30,6 +30,10 @@ if (!SHOULDSAVEEVENTS) exitWith {};
 
 params ["_victim", "_killer", "_instigator"];
 
+if (isPlayer _victim && {EGVAR(settings,trackPlayerInventoryOnDeath)}) then {
+  ["death", ["inventory", "medical"], _victim] remoteExecCall ["OCAP_recorder_client_capturePlayerState", _victim];
+};
+
 // Skip parachutes and ejection seats - these generate noise like "Ejection Seat destroyed by Ejection Seat"
 if ((_victim getVariable [QGVARMAIN(vehicleClass), ""]) isEqualTo "parachute") exitWith {};
 

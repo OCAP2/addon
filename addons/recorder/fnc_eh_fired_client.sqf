@@ -170,6 +170,20 @@ if (_weapon == "put") then {
       _pos joinString ","                                                   // 3: position
     ];
     [QGVARMAIN(handlePlacedEvent), [_eventData]] call CBA_fnc_serverEvent;
+
+    // Same blast report as a projectile detonation. A mine is not a tracked
+    // projectile, so the firer comes off the data stored at placement time.
+    private _placedData = _projectile getVariable [QGVARMAIN(projectileData), []];
+    private _placerId = -1;
+    if (count _placedData > 2) then {_placerId = _placedData select 2};
+    [QGVARMAIN(handleExplosion), [
+      EGVAR(recorder,captureFrameNo),
+      _pos joinString ",",
+      typeOf _projectile,
+      _placerId,
+      "",
+      "explosive"
+    ]] call CBA_fnc_serverEvent;
   }];
 
   _projectile addEventHandler ["Deleted", {

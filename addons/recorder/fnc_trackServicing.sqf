@@ -63,7 +63,7 @@ Author:
 #include "script_component.hpp"
 
 #define SERVICE_ATTRIBUTION_RANGE 20
-// Ignore engine jitter and the sub-percent trickle a running engine burns back.
+// Ignore sub-percent noise in the completed session, not in each sample.
 #define SERVICE_MIN_STEP 0.01
 // A session is written out once nothing has improved for this long.
 #define SERVICE_IDLE_SECONDS 8
@@ -180,9 +180,8 @@ GVAR(submitServiceEvent) = {
 
 /*
   Function: OCAP_recorder_closeServiceSession (local)
-  Emits a finished session and forgets it. A session whose whole span ended up
-  below the step threshold is dropped, which happens when a single sample
-  crossed the threshold and the next one reversed it.
+  Emits a finished session and forgets it. Apply the noise threshold to the
+  whole job so a succession of small improvements is not lost.
 */
 GVAR(closeServiceSession) = {
   params ["_key"];
@@ -192,7 +191,8 @@ GVAR(closeServiceSession) = {
   GVAR(serviceSessions) deleteAt _key;
 
   _session params ["_vehicle", "_vehicleId", "_kind", "_unitId", "_unitName", "_side", "_from", "_to"];
-  if (abs (_to - _from) < SERVICE_MIN_STEP) exitWith {};
+  private _improvement = if (_kind isEqualTo "refuel") then {_to - _from} else {_from - _to};
+  if (_improvement < SERVICE_MIN_STEP) exitWith {};
 
   [_kind, _vehicle, _vehicleId, _unitId, _unitName, _side, _from, _to] call GVAR(submitServiceEvent);
 };
@@ -263,10 +263,12 @@ GVAR(servicingPFH) = [{
     if (_fuel isEqualTo _lastFuel && {_damage isEqualTo _lastDamage}) then {continue};
 
     if (alive _vehicle) then {
-      if (_fuel - _lastFuel >= SERVICE_MIN_STEP) then {
+      // Every positive step keeps the session alive, however small. The session
+      // retains its original from value and is filtered only when it closes.
+      if (_fuel > _lastFuel) then {
         [_vehicle, _vehicleId, "refuel", _lastFuel, _fuel, _now] call GVAR(noteServiceProgress);
       };
-      if (_lastDamage - _damage >= SERVICE_MIN_STEP) then {
+      if (_damage < _lastDamage) then {
         [_vehicle, _vehicleId, "repair", _lastDamage, _damage, _now] call GVAR(noteServiceProgress);
       };
     };

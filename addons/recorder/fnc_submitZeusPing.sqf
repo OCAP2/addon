@@ -42,7 +42,9 @@ params [
   ["_pinger", objNull, [objNull]]
 ];
 
-if (isNull _pinger) exitWith {};
+if (isNull _zeus || {isNull _pinger}) exitWith {};
+if (isMultiplayer && {isRemoteExecuted} && {remoteExecutedOwner isNotEqualTo owner _zeus}) exitWith {};
+if (isNull getAssignedCuratorLogic _zeus) exitWith {};
 
 private _unitId = _pinger getVariable [QGVARMAIN(id), -1];
 if (_unitId < 0) exitWith {};
@@ -54,7 +56,8 @@ private _window = EGVAR(settings,zeusPingMinInterval);
 if (_now - (GVAR(zeusPingLast) getOrDefault [_unitId, -1e10]) < _window) exitWith {};
 GVAR(zeusPingLast) set [_unitId, _now];
 
-private _curatorId = if (isNull _zeus) then {-1} else {[_zeus] call FUNC(ensureZeusEntity)};
+private _curatorId = [_zeus] call FUNC(ensureZeusEntity);
+if (_curatorId < 0) exitWith {};
 private _pos = getPosATL _pinger;
 
 [":EVENT:GENERAL:", [

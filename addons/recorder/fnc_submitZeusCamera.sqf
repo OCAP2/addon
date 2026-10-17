@@ -38,6 +38,8 @@ params [
 ];
 
 if (isNull _unit) exitWith {};
+if (isMultiplayer && {isRemoteExecuted} && {remoteExecutedOwner isNotEqualTo owner _unit}) exitWith {};
+if (isNull getAssignedCuratorLogic _unit) exitWith {};
 
 private _curatorId = [_unit] call FUNC(ensureZeusEntity);
 if (_curatorId < 0) exitWith {};

@@ -175,6 +175,14 @@ GVAR(playerSnapshotState) = createHashMap;
 GVAR(zeusByUid) = createHashMap;
 GVAR(zeusLastCamera) = createHashMap;
 GVAR(zeusControlledUnits) = createHashMap;
+GVAR(zeusPingLast) = createHashMap;
+// These trackers survive export, but their entity ids belong to this recording.
+GVAR(serviceBaseline) = createHashMap;
+GVAR(serviceSessions) = createHashMap;
+GVAR(serviceRearmSeen) = createHashMap;
+GVAR(staticWeaponSnapshot) = createHashMap;
+GVAR(staticDisassembleClaims) = [];
+GVAR(staticWeaponSeen) = createHashMap;
 {
   _x setVariable [QGVARMAIN(isInitialized), nil];
   _x setVariable [QGVARMAIN(exclude), nil];

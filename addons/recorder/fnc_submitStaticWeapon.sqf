@@ -114,9 +114,11 @@ private _name = getTextRaw (configFile >> "CfgVehicles" >> _class >> "displayNam
 if (_name isEqualTo "" || {(_name select [0, 1]) isEqualTo "$"}) then {_name = _class};
 
 private _emit = {
-  params ["_static", "_unitId", "_unitName", "_side", "_class", "_name"];
+  params ["_static", "_unitId", "_unitName", "_side", "_class", "_name", "_recordingStart"];
 
   if (!SHOULDSAVEEVENTS) exitWith {};
+  // A queued assembly must not carry old entity ids into a new recording.
+  if ((missionNamespace getVariable [QGVAR(startTime), -1]) isNotEqualTo _recordingStart) exitWith {};
 
   private _vehicleId = -1;
   private _pos = [0, 0, 0];
@@ -155,14 +157,14 @@ private _emit = {
 // let the event point at the entity record. On timeout -- an excluded class, or
 // a gun deleted again before it was ever captured -- write it anyway without one.
 private _fnc_run = {
-  private _emit = _this select 6;
+  private _emit = _this select 7;
   _this call _emit;
 };
 
 [
   {(_this select 0) getVariable [QGVARMAIN(id), -1] > -1},
   _fnc_run,
-  [_static, _unitId, _unitName, _side, _class, _name, _emit],
+  [_static, _unitId, _unitName, _side, _class, _name, GVAR(startTime), _emit],
   STATIC_ID_TIMEOUT,
   _fnc_run
 ] call CBA_fnc_waitUntilAndExecute;

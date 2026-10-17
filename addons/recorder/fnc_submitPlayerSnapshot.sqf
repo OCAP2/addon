@@ -53,6 +53,10 @@ private _eventType = switch (_kind) do {
 };
 if (_eventType isEqualTo "" || {isNull _unit}) exitWith {};
 
+// Object-derived ids only identify the subject; authenticate the sender before
+// touching the payload or diff baseline. Keep direct server calls and SP working.
+if (isMultiplayer && {isRemoteExecuted} && {remoteExecutedOwner isNotEqualTo owner _unit}) exitWith {};
+
 private _ocapId = _unit getVariable [QGVARMAIN(id), -1];
 if (_ocapId < 0) exitWith {};
 

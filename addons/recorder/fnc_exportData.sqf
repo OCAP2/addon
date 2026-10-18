@@ -137,7 +137,7 @@ INFO_3("Saving recording — mission: %1 | frames: %2 | tag: %3",GVAR(missionNam
 // The final success/failure notification is driven from that callback in
 // fnc_initSession.sqf.
 INFO_2("Mission save queued — mission: %1 | frames: %2",GVAR(missionName),_endFrameNumber);
-[":MISSION:SAVE:", []] call EFUNC(extension,sendData);
+[":MISSION:SAVE:", [_saveTag]] call EFUNC(extension,sendData);
 OCAPEXTLOG(ARR4("Queued recording of mission",GVAR(missionName),"with tag",_saveTag));
 
 // Interim "saving..." toast; the final result comes from :MISSION:SAVED:

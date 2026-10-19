@@ -290,6 +290,46 @@ try {
   (OCAP_test_wait select 2) call (OCAP_test_wait select 1);
   (OCAP_test_wait select 2) call (OCAP_test_wait select 4);
   [OCAP_test_commands isEqualTo [], "export then start with reused ids emits no fictitious servicing, disassembly or queued assembly"] call _assert;
+
+  // Marker type exclusion (OCAP2/OCAP#99): a marker of an excluded type is
+  // never recorded; a marker of another type still is. The type list is read
+  // at event time, so assigning it directly is enough.
+  OCAP_recorder_excludeMarkerTypeList = ["Empty"];
+  OCAP_test_marker_commands = [];
+  private _origMarkerSend = OCAP_extension_fnc_sendData;
+  OCAP_extension_fnc_sendData = {
+    params ["_command", ["_args", []]];
+    private _result = call _origMarkerSend;
+    if (_command in [":MARKER:CREATE:", ":MARKER:DELETE:"]) then {
+      OCAP_test_marker_commands pushBack +_this;
+    };
+    _result
+  };
+  createMarker ["Empty", [500, 500, 0], "mk_type_excluded"];
+  createMarker ["mil_dot", [510, 510, 0], "mk_type_kept"];
+  // Marker creations are forwarded after a two second delay.
+  private _markerDeadline = diag_tickTime + 15;
+  waitUntil {
+    sleep 0.1;
+    ({"mk_type_kept" in str _x} count OCAP_test_marker_commands) > 0 || {diag_tickTime > _markerDeadline};
+  };
+  [({"mk_type_kept" in str _x} count OCAP_test_marker_commands) == 1, "marker of a non-excluded type is recorded"] call _assert;
+  [({"mk_type_excluded" in str _x} count OCAP_test_marker_commands) == 0, "marker of an excluded type is not recorded"] call _assert;
+  [("mk_type_kept" in OCAP_recorder_trackedMarkers) && {!("mk_type_excluded" in OCAP_recorder_trackedMarkers)}, "tracked marker list reflects the type exclusion"] call _assert;
+  // Deletions carry no type information; the server drops deletions of markers
+  // it never tracked, so both deletions are accepted as no-ops where needed.
+  deleteMarker "mk_type_kept";
+  deleteMarker "mk_type_excluded";
+  _markerDeadline = diag_tickTime + 5;
+  waitUntil {
+    sleep 0.05;
+    ({"mk_type_kept" in str _x} count OCAP_test_marker_commands) > 1 || {diag_tickTime > _markerDeadline};
+  };
+  [({"mk_type_kept" in str _x} count OCAP_test_marker_commands) == 2, "deletion of a tracked marker is recorded"] call _assert;
+  [!("mk_type_excluded" in OCAP_recorder_trackedMarkers), "deleted excluded marker stays untracked"] call _assert;
+  OCAP_extension_fnc_sendData = _origMarkerSend;
+  OCAP_recorder_excludeMarkerTypeList = [];
+  OCAP_test_marker_commands = [];
 } catch {
   _error = _exception;
 };

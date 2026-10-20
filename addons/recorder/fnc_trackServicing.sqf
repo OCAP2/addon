@@ -123,9 +123,9 @@ GVAR(serviceAttribution) = {
 
 /*
   Function: OCAP_recorder_submitServiceEvent (local)
-  Writes one serviceEvent. The vehicle display name is resolved with getTextRaw
-  and cached on the object, because getText would write the recording server's
-  locale into a file read in eight languages (see AGENTS.md).
+  Writes one serviceEvent. The vehicle display name is resolved with
+  FUNC(getConfigDisplayName) and cached on the object, because getText would
+  write the recording server's locale into a file read in eight languages.
 */
 GVAR(submitServiceEvent) = {
   params ["_kind", "_vehicle", "_vehicleId", "_unitId", "_unitName", "_side", "_from", "_to", ["_extra", []]];
@@ -140,8 +140,8 @@ GVAR(submitServiceEvent) = {
     _pos = getPosASL _vehicle;
     _vehicleName = _vehicle getVariable [QGVAR(serviceDisplayName), ""];
     if (_vehicleName isEqualTo "") then {
-      _vehicleName = getTextRaw (configOf _vehicle >> "displayName");
-      if (_vehicleName isEqualTo "" || {(_vehicleName select [0, 1]) isEqualTo "$"}) then {
+      _vehicleName = [configOf _vehicle] call FUNC(getConfigDisplayName);
+      if (_vehicleName isEqualTo "") then {
         _vehicleName = typeOf _vehicle;
       };
       _vehicle setVariable [QGVAR(serviceDisplayName), _vehicleName];
@@ -316,8 +316,8 @@ if (isClass (configFile >> "CfgPatches" >> "ace_rearm")) then {
       _side = str (side group _unit);
     };
 
-    private _magazineName = getTextRaw (configFile >> "CfgMagazines" >> _magazineClass >> "displayName");
-    if (_magazineName isEqualTo "" || {(_magazineName select [0, 1]) isEqualTo "$"}) then {
+    private _magazineName = [configFile >> "CfgMagazines" >> _magazineClass] call FUNC(getConfigDisplayName);
+    if (_magazineName isEqualTo "") then {
       _magazineName = _magazineClass;
     };
 

@@ -110,9 +110,9 @@ private _stale = [];
 {GVAR(staticWeaponSeen) deleteAt _x} forEach _stale;
 
 private _class = typeOf _static;
-// Never store a localized string in a recording -- see AGENTS.md.
-private _name = getTextRaw (configFile >> "CfgVehicles" >> _class >> "displayName");
-if (_name isEqualTo "" || {(_name select [0, 1]) isEqualTo "$"}) then {_name = _class};
+// Never store a localized string in a recording -- see FUNC(getConfigDisplayName).
+private _name = [configFile >> "CfgVehicles" >> _class] call FUNC(getConfigDisplayName);
+if (_name isEqualTo "") then {_name = _class};
 
 private _emit = {
   params ["_static", "_unitId", "_unitName", "_side", "_class", "_name", "_recordingStart"];

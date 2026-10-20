@@ -79,18 +79,17 @@ if (isNil "_info") then {
   private _radius = getNumber (_cfg >> "indirectHitRange");
   private _damage = getNumber (_cfg >> "indirectHit");
 
-  // Never store a localized string in a recording: getText resolves in the
-  // recording server's language, getTextRaw returns the literal the mod author
-  // typed. A class whose name is only a $STR_ reference falls back to the class
-  // name, which is English by construction. See AGENTS.md.
-  private _name = getTextRaw (_cfg >> "displayName");
+  // Never store a localized string in a recording, see FUNC(getConfigDisplayName).
+  // An ammo without a usable name tries its default magazine, then falls back
+  // to the class name, which is English by construction.
+  private _name = [_cfg] call FUNC(getConfigDisplayName);
   if (_name isEqualTo "") then {
     private _mag = getText (_cfg >> "defaultMagazine");
     if (_mag isNotEqualTo "") then {
-      _name = getTextRaw (configFile >> "CfgMagazines" >> _mag >> "displayName");
+      _name = [configFile >> "CfgMagazines" >> _mag] call FUNC(getConfigDisplayName);
     };
   };
-  if (_name isEqualTo "" || {(_name select [0, 1]) isEqualTo "$"}) then {_name = _ammo};
+  if (_name isEqualTo "") then {_name = _ammo};
 
   _info = [_radius, _damage, _name];
   GVAR(explosionConfigCache) set [_ammo, _info];

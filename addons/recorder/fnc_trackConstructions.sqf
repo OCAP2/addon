@@ -132,9 +132,9 @@ GVAR(submitFortification) = {
   };
 
   private _class = typeOf _object;
-  // Never store a localized string in a recording -- see AGENTS.md.
-  private _name = getTextRaw (configFile >> "CfgVehicles" >> _class >> "displayName");
-  if (_name isEqualTo "" || {(_name select [0, 1]) isEqualTo "$"}) then {_name = _class};
+  // Never store a localized string in a recording -- see FUNC(getConfigDisplayName).
+  private _name = [configFile >> "CfgVehicles" >> _class] call FUNC(getConfigDisplayName);
+  if (_name isEqualTo "") then {_name = _class};
 
   private _clock = [daytime, "HH:MM"] call BIS_fnc_timeToString;
   private _label = format ["%1 - %2 - %3", _name, name _unit, _clock];
@@ -221,9 +221,9 @@ GVAR(staticWeaponSnapshot) = createHashMap;
     private _known = _previous getOrDefault [_id, []];
     private _name = "";
     if (_known isEqualTo []) then {
-      // Never store a localized string in a recording -- see AGENTS.md.
-      _name = getTextRaw (configOf _x >> "displayName");
-      if (_name isEqualTo "" || {(_name select [0, 1]) isEqualTo "$"}) then {_name = typeOf _x};
+      // Never store a localized string in a recording -- see FUNC(getConfigDisplayName).
+      _name = [configOf _x] call FUNC(getConfigDisplayName);
+      if (_name isEqualTo "") then {_name = typeOf _x};
     } else {
       _name = _known select 2;
     };

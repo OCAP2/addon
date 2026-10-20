@@ -35,6 +35,7 @@ PREP(eh_killed);
 PREP(getInstigator);
 PREP(getEventWeaponText);
 PREP(getWeaponDisplayData);
+PREP(getConfigDisplayName);
 
 PREP(entityMonitors);
 PREP(telemetryLoop);

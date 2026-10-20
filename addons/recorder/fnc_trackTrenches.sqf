@@ -161,8 +161,9 @@ private _fnc_submitTrench = {
   private _name = "";
   private _icon = "trench";
   if (_info isEqualTo []) then {
-    // Unlisted class -- fall back to the server's locale and the generic icon.
-    _name = getText (configFile >> "CfgVehicles" >> _class >> "displayName");
+    // Unlisted class -- fall back to the config name and the generic icon. Never
+    // store a localized string in a recording, see FUNC(getConfigDisplayName).
+    _name = [configFile >> "CfgVehicles" >> _class] call FUNC(getConfigDisplayName);
     if (_name isEqualTo "") then {_name = _class};
   } else {
     _info params ["_localName", "_localIcon"];

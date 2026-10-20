@@ -96,10 +96,20 @@ holds:
   from the class instead, which is English by construction: `ACE_elasticBandage`
   becomes "Elastic Bandage" and `ItemMap` becomes "Map". This is what happens for
   vanilla and ACE items.
+- an **`__EVAL(...)` expression** — `getTextRaw` hands back its source, e.g.
+  `format ["%1 [BLUE]", getText (...)]`, and only `getText` runs it. The evaluated
+  name is recorded, unless it came out non-ASCII, which means the expression pulled
+  in a localized name; then the name is built from the class as above.
 
-Either way the recording holds an English name for every item, including the two
-medical labels the recorder resolves itself (IV bags and medications). The web UI
-only derives a name when a recording does not carry one at all.
+The same rule, `OCAP_recorder_fnc_getConfigDisplayName`, names vehicles,
+magazines, explosions, static weapons, fortifications and trenches on the server;
+the server ships it to clients for gear and Zeus modules.
+
+The recording therefore holds an English name for every item, including the two
+medical labels the recorder resolves itself (IV bags and medications), with one
+gap: the non-ASCII test on an expression cannot catch a localized name that is
+plain ASCII, such as German without umlauts. The web UI only derives a name when
+a recording does not carry one at all.
 
 Recordings made before this change are converted by
 `python/convert_recording_gear.py`, which translates a recorded name into English

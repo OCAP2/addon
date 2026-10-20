@@ -72,8 +72,13 @@ if (isNil QGVAR(playerTrackingSettingNames)) then {
 
 call GVAR(publishPlayerTrackingSettings);
 
-{
+[[FUNC(getConfigDisplayName)], {
+  params ["_getConfigDisplayName"];
   if (!hasInterface || {!isNil "OCAP_recorder_client_playerTrackingPFH"}) exitWith {};
+
+  // Clients have none of our functions, so the server ships the one config-name
+  // rule along with this block instead of the sampler keeping its own copy.
+  OCAP_recorder_client_getConfigDisplayName = _getConfigDisplayName;
 
   OCAP_recorder_client_hasAceMedical = isClass (configFile >> "CfgPatches" >> "ace_medical_engine");
   OCAP_recorder_client_hasKatMedical = isClass (configFile >> "CfgPatches" >> "kat_main");
@@ -202,11 +207,11 @@ call GVAR(publishPlayerTrackingSettings);
   // stringtable reference in the *recording server's* language, which froze Czech
   // item names into recordings the web UI then showed to viewers in every locale.
   //
-  // `getTextRaw` hands back what the config actually holds. A mod author who
-  // typed the name in is giving us English, so that is used as-is. A "$STR_..."
-  // reference cannot be read in another language from SQF, so the name is derived
-  // from the class instead, which is English by construction. Either way nothing
-  // localized reaches the recording.
+  // OCAP_recorder_fnc_getConfigDisplayName reads what the config actually holds.
+  // A mod author who typed the name in is giving us English, so that is used
+  // as-is, and an __EVAL(...) name is evaluated. A "$STR_..." reference cannot be
+  // read in another language from SQF, so the name is derived from the class
+  // instead, which is English by construction.
   //
   // Keep the derivation in step with ui/src/data/gearDisplayName.ts and
   // python/convert_recording_gear.py, which derive the same label.
@@ -298,18 +303,21 @@ call GVAR(publishPlayerTrackingSettings);
   //
   // `getText` was the problem: it resolves a stringtable reference in the
   // *recording server's* language, which is how Czech item names reached viewers
-  // in eight locales. `getTextRaw` returns what the config actually holds, and
-  // that answers one of two ways:
+  // in eight locales. OCAP_recorder_fnc_getConfigDisplayName reads what the config
+  // actually holds, and that answers one of three ways:
   //
   //   - a literal, which is the text the mod author typed and so is English. On a
   //     real mission take this covers about 95% of the classes a player carries:
   //     "5.56mm 30rnd Tracer Mag", "40mm HE Grenade Round (L123)".
+  //   - an __EVAL(...) expression, which is evaluated. It is usually a literal
+  //     parent name plus a suffix: "[US] MOLLE Sturmgepak (OCP/Rajio) [BLUE]".
   //   - a "$STR_..." reference, which SQF can only read in the language the game
   //     is running. There is no way to ask for English, so the name is built from
   //     the class instead, which is English by construction: "ACE_elasticBandage"
   //     becomes "Elastic Bandage" and "ItemMap" becomes "Map".
   //
-  // Either way the recording only ever holds English.
+  // An expression is the one way a localized name can still get through; see
+  // that function for the limits.
   OCAP_recorder_client_gearDisplayName = {
     params [["_className", "", [""]]];
     if (_className isEqualTo "") exitWith {""};
@@ -321,16 +329,11 @@ call GVAR(publishPlayerTrackingSettings);
     {
       private _config = configFile >> _x >> _className;
       if (isClass _config) exitWith {
-        _raw = getTextRaw (_config >> "displayName");
+        _raw = [_config] call OCAP_recorder_client_getConfigDisplayName;
       };
     } forEach ["CfgWeapons", "CfgMagazines", "CfgVehicles", "CfgGlasses"];
 
-    // getTextRaw hands back an array for a config entry written as one.
-    if (_raw isEqualType []) then {_raw = _raw param [0, ""]};
-    if (!(_raw isEqualType "")) then {_raw = ""};
-    _raw = trim _raw;
-
-    private _name = if (_raw isEqualTo "" || {(_raw select [0, 1]) isEqualTo "$"}) then {
+    private _name = if (_raw isEqualTo "") then {
       [_className] call OCAP_recorder_client_deriveNameFromClass
     } else {
       _raw
@@ -1708,11 +1711,9 @@ call GVAR(publishPlayerTrackingSettings);
       if ([_customName] call OCAP_recorder_client_isEnglishText) then {_customName} else {"Custom Module"}
     };
 
-    private _raw = getTextRaw (configOf _object >> "displayName");
-    if (_raw isEqualType []) then {_raw = _raw param [0, ""]};
-    if (!(_raw isEqualType "")) then {_raw = ""};
-    _raw = trim _raw;
-    if (_raw isNotEqualTo "" && {(_raw select [0, 1]) isNotEqualTo "$"} && {[_raw] call OCAP_recorder_client_isEnglishText}) then {
+    // Module names get the stricter isEnglishText on top of the shared rule.
+    private _raw = [configOf _object] call OCAP_recorder_client_getConfigDisplayName;
+    if (_raw isNotEqualTo "" && {[_raw] call OCAP_recorder_client_isEnglishText}) then {
       _raw
     } else {
       [_className] call OCAP_recorder_client_humanizeZeusModuleClass
@@ -1903,4 +1904,4 @@ call GVAR(publishPlayerTrackingSettings);
       }] call CBA_fnc_addEventHandler;
     };
   };
-} remoteExec ["call", [0, -2] select isDedicated, QGVAR(playerTrackingBootstrapJip)];
+}] remoteExec ["call", [0, -2] select isDedicated, QGVAR(playerTrackingBootstrapJip)];

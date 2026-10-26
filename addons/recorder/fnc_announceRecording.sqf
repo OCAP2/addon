@@ -11,6 +11,10 @@ Description:
   is only recorded then, and the time state only reaches the extension once the
   mission is registered.
 
+  Raises the server-local CBA event "OCAP_recordingStarted": recording starts
+  asynchronously, so a mission script that records its own events or exports
+  right after <OCAP_record> can wait for it.
+
 Parameters:
   None
 
@@ -19,6 +23,9 @@ Returns:
 
 Public:
   No
+
+Author:
+  Smith
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
@@ -50,3 +57,5 @@ _missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {st
 
 // Log times
 [] call FUNC(updateTime);
+
+[QGVARMAIN(recordingStarted), []] call CBA_fnc_localEvent;

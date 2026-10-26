@@ -16,6 +16,9 @@ Returns:
 
 Public:
   No
+
+Author:
+  Dell, Zealot, IndigoFox, TyroneMF (moved from OCAP_recorder_fnc_exportData)
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 

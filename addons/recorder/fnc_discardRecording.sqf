@@ -28,6 +28,9 @@ Examples:
 
 Public:
   No
+
+Author:
+  Smith
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 

@@ -272,8 +272,13 @@ if (isNil QEGVAR(listener,counterEvent)) then {
   Description:
     Used to start or resume recording. Calls <OCAP_recorder_fnc_startRecording> when triggered.
 
+    A fresh recording starts asynchronously: the mission registers with the extension first.
+    The server-local event "OCAP_recordingStarted" fires once the capture runs, and again on each
+    resume; custom events and exports before then are not recorded.
+
   Example:
     > ["OCAP_record"] call CBA_fnc_serverEvent;
+    > ["OCAP_recordingStarted", {["OCAP_customEvent", ["generalEvent", "Phase 1"]] call CBA_fnc_serverEvent}] call CBA_fnc_addEventHandler;
 */
 if (isNil QEGVAR(listener,record)) then {
   EGVAR(listener,record) = [QGVARMAIN(record), {

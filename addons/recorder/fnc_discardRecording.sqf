@@ -13,7 +13,9 @@ Description:
   drop it instead; it answers with :MISSION:DISCARDED: (see
   <OCAP_extension_fnc_initSession>).
 
-  Does nothing when no recording has started.
+  A mission registered with the extension whose capture never began, for
+  example one paused while it registered, has its registration discarded
+  without telling players. Does nothing when no recording has started.
 
 Parameters:
   _reason - Why the recording is not saved, shown to players [String]
@@ -32,7 +34,18 @@ Public:
 params [["_reason", "", [""]]];
 
 if (isNil QGVAR(startTime)) exitWith {
-  LOG("Discard requested, but recording of this session hasn't started.");
+  if (!EGVAR(extension,sessionReady)) exitWith {
+    LOG("Discard requested, but recording of this session hasn't started.");
+  };
+  // The mission is registered with the extension, but nothing was captured:
+  // drop the registration, players were never told recording started.
+  INFO_1("Discarding the registered mission; nothing was captured: %1",_reason);
+  if (isNil {[":MISSION:DISCARD:", []] call EFUNC(extension,sendData)}) then {
+    WARNING("The extension did not accept the discard; storage may keep the empty recording");
+  };
+  EGVAR(extension,sessionReady) = false;
+  GVAR(recording) = false;
+  publicVariable QGVAR(recording);
 };
 
 call FUNC(stopRecording);

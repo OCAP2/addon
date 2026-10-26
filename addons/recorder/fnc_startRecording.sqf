@@ -43,9 +43,11 @@ if (GVAR(recording) && GVAR(captureFrameNo) > 10) exitWith {
 };
 
 // Another start is registering the mission with the extension; it begins the
-// capture once the extension confirms it.
+// capture once the extension confirms it. A pause meanwhile is undone.
 if (missionNamespace getVariable [QEGVAR(extension,sessionPending), false]) exitWith {
   INFO("Recording start requested while the mission registers with the extension");
+  GVAR(recording) = true;
+  publicVariable QGVAR(recording);
 };
 
 // Any explicit or automatic start consumes a pending empty-server restart.
@@ -74,12 +76,13 @@ if (GVAR(captureFrameNo) == 0 && {!EGVAR(extension,sessionReady)}) exitWith {
         publicVariable QGVAR(recording);
         ["OCAP failed to start recording: the extension could not start the mission", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
       };
+      if (!isNil QGVAR(startTime)) exitWith {}; // a start in the meantime began the capture
       if (missionNamespace getVariable [QGVAR(missionEnded), false]) exitWith {
-        INFO("Mission ended before its recording started; discarding the registered mission");
-        [":MISSION:DISCARD:", []] call EFUNC(extension,sendData);
-        EGVAR(extension,sessionReady) = false;
-        GVAR(recording) = false;
-        publicVariable QGVAR(recording);
+        ["the mission ended before the recording began"] call FUNC(discardRecording);
+      };
+      // Paused meanwhile: the capture begins when recording resumes.
+      if (!GVAR(recording)) exitWith {
+        INFO("Mission registered while recording is paused; the capture begins when it resumes");
       };
       call FUNC(flushPlayerConnectionEvents);
       call FUNC(captureLoop);
@@ -88,6 +91,7 @@ if (GVAR(captureFrameNo) == 0 && {!EGVAR(extension,sessionReady)}) exitWith {
 
     [{EGVAR(extension,sessionReady) || {!EGVAR(extension,sessionPending)}}, {}, [], 30, {
       WARNING("The extension has not confirmed the mission after 30 seconds; recording starts once it does");
+      ["OCAP is waiting for the extension to start recording", 1, [1, 1, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
     }] call CBA_fnc_waitUntilAndExecute;
   }, [], 60, {
     EGVAR(extension,sessionPending) = false;

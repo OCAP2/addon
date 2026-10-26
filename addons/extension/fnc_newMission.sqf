@@ -31,6 +31,7 @@ Author:
 
 if (isNil QGVAR(worldContext) || isNil QGVAR(missionContext)) exitWith {
   ERROR("Cannot register mission: cached world/mission context is nil. Full initSession required.");
+  GVAR(sessionPending) = false; // nothing will answer
 };
 
 INFO("Registering new mission with extension");

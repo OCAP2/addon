@@ -58,7 +58,9 @@ in the release PBOs.
 mission with the extension once, when it starts, and begins the capture and
 announces it only once the extension confirms it, however long that takes; a
 failed start ends the recording; a mission that ends while it registers is
-discarded; a mission that ends before `minMissionTime` is discarded
+discarded; a pause while it registers holds the capture back until recording
+resumes, and a registered mission never captured is discarded at mission end;
+a mission that ends before `minMissionTime` is discarded
 (`:MISSION:DISCARD:`) unless a mission script exports it on the same frame; a
 longer one is saved; `saveMissionEnded` disabled does neither. It needs no
 players and takes about a minute. Execute it on the server once the extension

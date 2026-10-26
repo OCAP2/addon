@@ -33,8 +33,14 @@ recording to the web server while it records:
   events, begins once the extension answers `:MISSION:OK:`. The addon waits
   for that answer, or `:MISSION:FAILED:`, however long the extension takes, for
   example while it still saves the previous recording, and ignores further
-  start requests meanwhile. If the mission ends first, the registered mission
-  is discarded instead.
+  start requests meanwhile; after 30 seconds it notifies players that it is
+  still waiting. A pause meanwhile (`OCAP_pause`) holds the capture back until
+  recording resumes. If the mission ends first, the registered mission is
+  discarded instead, whatever `saveMissionEnded` says.
+- `OCAP_recorder_recording` is true from the start request on, while
+  `OCAP_recorder_startTime` is set once the capture runs. A mission script that
+  starts recording (`OCAP_record`) and records its own events or exports right
+  away should wait for `OCAP_recorder_startTime`.
 - When the mission ends (`MPEnded` with `saveMissionEnded`) before the
   recording reached `minMissionTime`, the recording is discarded with
   `:MISSION:DISCARD:`, one frame later, so a mission script can still save it
@@ -50,8 +56,8 @@ mission did not start keeps waiting.
 
 A recording ended without a save or a discard is still saved by the web server
 as `partial`, whatever its length. That covers an admin changing the mission
-(`#missions`, `#restart`), a crash, and every mission end with
-`saveMissionEnded` disabled.
+(`#missions`, `#restart`), a crash, and a recording that captured anything
+when the mission ends with `saveMissionEnded` disabled.
 
 ## Dedicated-server verification
 
@@ -85,6 +91,7 @@ as the server notifications.
    `Discarded recording dropped by storage` line in the server RPT and that the
    web server keeps no recording of it. End a mission past `minMissionTime` and
    verify it is saved as before. Repeat with the `memory` storage and verify no
-   file is written for the short mission.
+   file is written for the short mission. The discard is sent one frame after
+   `MPEnded`, so this also checks that the server still runs that frame.
 8. With auto-start, verify the saved recording holds the "Recording started."
    and "Mission has started!" events at its start.

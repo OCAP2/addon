@@ -101,6 +101,37 @@ try {
   [[":MISSION:DISCARD:"] call _sent == 1, "a mission that ended while registering is discarded"] call _assert;
   [isNil "OCAP_recorder_startTime" && {!OCAP_recorder_recording} && {!OCAP_extension_sessionReady}, "its capture never begins"] call _assert;
 
+  // A pause while the mission registers holds the capture back until recording resumes.
+  call _registering;
+  call OCAP_recorder_fnc_stopRecording;
+  OCAP_extension_sessionPending = false; // what :MISSION:OK: does
+  OCAP_extension_sessionReady = true;
+  sleep 1;
+  [isNil "OCAP_recorder_startTime" && {OCAP_test_announcedCapturing isEqualTo []}, "a paused registration does not capture"] call _assert;
+  call OCAP_recorder_fnc_startRecording;
+  [!isNil "OCAP_recorder_startTime" && {OCAP_test_announcedCapturing isEqualTo [true]}, "resuming begins the capture"] call _assert;
+
+  // A start request while it registers undoes a pause.
+  call _registering;
+  call OCAP_recorder_fnc_stopRecording;
+  call OCAP_recorder_fnc_startRecording;
+  [OCAP_recorder_recording && {[":MISSION:START:"] call _sent == 1}, "the latest request wins, still one registration"] call _assert;
+  OCAP_extension_sessionPending = false;
+  OCAP_extension_sessionReady = true;
+  sleep 1;
+  [!isNil "OCAP_recorder_startTime", "the capture begins once registered"] call _assert;
+
+  // A registered mission paused before its capture is discarded at mission end.
+  call _registering;
+  call OCAP_recorder_fnc_stopRecording;
+  OCAP_extension_sessionPending = false;
+  OCAP_extension_sessionReady = true;
+  sleep 1;
+  call OCAP_recorder_fnc_handleMissionEnded;
+  OCAP_recorder_missionEnded = nil;
+  [[":MISSION:DISCARD:"] call _sent == 1 && {!OCAP_extension_sessionReady}, "a registered mission never captured is discarded"] call _assert;
+  [OCAP_test_announcedCapturing isEqualTo [], "players are not told about it"] call _assert;
+
   // A mission that ends before the minimum is discarded, not saved.
   [5] call _recordingOf;
   call OCAP_recorder_fnc_handleMissionEnded;
@@ -135,6 +166,7 @@ try {
 
   // Discarding before a recording started does nothing.
   OCAP_recorder_startTime = nil;
+  OCAP_extension_sessionReady = false;
   ["test"] call OCAP_recorder_fnc_discardRecording;
   [OCAP_test_commands isEqualTo [], "no recording, nothing to discard"] call _assert;
 } catch {

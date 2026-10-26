@@ -29,6 +29,12 @@ recording to the web server while it records:
   auto-start conditions, such as `minPlayerCount`, leaves nothing in storage.
   The web server previously listed such missions as empty `partial`
   recordings.
+- The capture, and with it the "Recording started." and "Mission has started!"
+  events, begins once the extension answers `:MISSION:OK:`. The addon waits
+  for that answer, or `:MISSION:FAILED:`, however long the extension takes, for
+  example while it still saves the previous recording, and ignores further
+  start requests meanwhile. If the mission ends first, the registered mission
+  is discarded instead.
 - When the mission ends (`MPEnded` with `saveMissionEnded`) before the
   recording reached `minMissionTime`, the recording is discarded with
   `:MISSION:DISCARD:`, one frame later, so a mission script can still save it
@@ -37,9 +43,15 @@ recording to the web server while it records:
   server still saves it as `partial`), and `postgres`/`sqlite` keep what they
   wrote. A recording that reached `minMissionTime` is saved as before.
 
-A recording ended without either, for example by an admin changing the mission
-(`#missions`, `#restart`) or by a crash, is still saved by the web server as
-`partial`, whatever its length.
+This needs an extension with `:MISSION:DISCARD:` and `:MISSION:FAILED:`
+(OCAP2/extension#217). An older one rejects the discard, which the server RPT
+logs as a warning, and never answers a failed start, so a recording whose
+mission did not start keeps waiting.
+
+A recording ended without a save or a discard is still saved by the web server
+as `partial`, whatever its length. That covers an admin changing the mission
+(`#missions`, `#restart`), a crash, and every mission end with
+`saveMissionEnded` disabled.
 
 ## Dedicated-server verification
 
@@ -74,3 +86,5 @@ as the server notifications.
    web server keeps no recording of it. End a mission past `minMissionTime` and
    verify it is saved as before. Repeat with the `memory` storage and verify no
    file is written for the short mission.
+8. With auto-start, verify the saved recording holds the "Recording started."
+   and "Mission has started!" events at its start.

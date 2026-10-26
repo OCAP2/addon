@@ -49,11 +49,19 @@ with different static membership and reused vehicle ids. Pending disassembly
 claims, dedupe state and an assembly callback from the old recording must not
 produce events in the new one.
 
+Extension writes are intercepted, and the servicing clock is advanced only in an
+unscheduled block. The suite replaces recording state and removes the servicing
+PFH; restart the mission afterwards. It is an opt-in test artifact, not included
+in the release PBOs.
+
 `save_limits_regressions.sqf` checks the save limits: a recording registers the
-mission with the extension once, when it starts; a mission that ends before
-`minMissionTime` is discarded (`:MISSION:DISCARD:`) unless a mission script exports
-it on the same frame; a longer one is saved; `saveMissionEnded` disabled does
-neither. It needs no players. Execute it on the server once the extension
+mission with the extension once, when it starts, and begins the capture and
+announces it only once the extension confirms it, however long that takes; a
+failed start ends the recording; a mission that ends while it registers is
+discarded; a mission that ends before `minMissionTime` is discarded
+(`:MISSION:DISCARD:`) unless a mission script exports it on the same frame; a
+longer one is saved; `saveMissionEnded` disabled does neither. It needs no
+players and takes about a minute. Execute it on the server once the extension
 storage is initialized, with auto-start disabled:
 
 ```sqf
@@ -62,7 +70,8 @@ execVM "tests\save_limits_regressions.sqf";
 
 The RPT must end with `[OCAP save limits] ALL TESTS PASSED`.
 
-Extension writes are intercepted, and the servicing clock is advanced only in an
-unscheduled block. The suite replaces recording state and removes the servicing
-PFH; restart the mission afterwards. It is an opt-in test artifact, not included
-in the release PBOs.
+Lifecycle commands to the extension are intercepted, so nothing is registered
+or saved. The suite replaces recording state and resets per-unit recording
+variables, and a recording start it simulates also satisfies the auto-start
+waiter; restart the mission afterwards. It is an opt-in test artifact, not
+included in the release PBOs.

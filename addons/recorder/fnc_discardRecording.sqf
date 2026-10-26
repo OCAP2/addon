@@ -40,7 +40,10 @@ private _endFrameNumber = GVAR(captureFrameNo);
 call FUNC(removeCaptureHandlers);
 
 INFO_3("Discarding recording — mission: %1 | frames: %2 | reason: %3",GVAR(missionName),_endFrameNumber,_reason);
-[":MISSION:DISCARD:", []] call EFUNC(extension,sendData);
+if (isNil {[":MISSION:DISCARD:", []] call EFUNC(extension,sendData)}) then {
+  // An older extension, or a save still in progress. No :MISSION:DISCARDED: follows.
+  WARNING("The extension did not accept the discard; storage may keep the recording");
+};
 OCAPEXTLOG(ARR4("Discarded recording of mission",GVAR(missionName),"because",_reason));
 
 [format["OCAP did not save %1: %2", briefingName, _reason], 1, [1, 1, 1, 1]] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];

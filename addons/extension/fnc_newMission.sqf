@@ -8,8 +8,8 @@ Description:
   mission context initSession cached once storage was initialized.
 
   The existing ExtensionCallback handler (added during initSession) will process
-  the :MISSION:OK: response and set sessionReady = true. sessionPending is true
-  until then.
+  the :MISSION:OK: response and set sessionReady = true, or :MISSION:FAILED:
+  and leave it false. sessionPending is true until either arrives.
 
   Called from fnc_startRecording when starting a fresh recording with
   sessionReady = false: the first recording of the mission, or one after the

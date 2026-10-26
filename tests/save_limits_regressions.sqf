@@ -13,7 +13,8 @@ private _savedFunctions = createHashMap;
   _savedFunctions set [_x, missionNamespace getVariable _x];
 } forEach [
   "OCAP_extension_fnc_sendData", "OCAP_recorder_fnc_stopRecording",
-  "OCAP_recorder_fnc_captureLoop", "OCAP_recorder_fnc_updateTime"
+  "OCAP_recorder_fnc_captureLoop", "OCAP_recorder_fnc_updateTime",
+  "OCAP_recorder_fnc_announceRecording"
 ];
 private _savedSettings = [
   OCAP_settings_saveMissionEnded, OCAP_recorder_minMissionTime, OCAP_recorder_frameCaptureDelay
@@ -32,6 +33,21 @@ OCAP_extension_fnc_sendData = {
 OCAP_recorder_fnc_stopRecording = {OCAP_recorder_recording = false};
 OCAP_recorder_fnc_captureLoop = {OCAP_recorder_startTime = time};
 OCAP_recorder_fnc_updateTime = {};
+// Its events are recorded only while the capture runs.
+OCAP_test_announcedCapturing = [];
+OCAP_recorder_fnc_announceRecording = {OCAP_test_announcedCapturing pushBack !isNil "OCAP_recorder_startTime"};
+// A fresh recording waiting for the extension to register the mission.
+private _registering = {
+  OCAP_recorder_recording = false;
+  OCAP_recorder_captureFrameNo = 0;
+  OCAP_recorder_startTime = nil;
+  OCAP_extension_sessionReady = false;
+  OCAP_extension_sessionPending = false;
+  OCAP_test_commands = [];
+  OCAP_test_announcedCapturing = [];
+  call OCAP_recorder_fnc_startRecording;
+  sleep 1;
+};
 private _sent = {
   params ["_command"];
   {_x isEqualTo _command} count OCAP_test_commands
@@ -53,20 +69,37 @@ try {
 
   // The mission registers with the extension when recording starts, once,
   // however often a start is requested before the extension confirms it.
-  OCAP_recorder_captureFrameNo = 0;
-  OCAP_recorder_startTime = nil;
-  OCAP_extension_sessionReady = false;
-  OCAP_extension_sessionPending = false;
-  call OCAP_recorder_fnc_startRecording;
+  call _registering;
   call OCAP_recorder_fnc_startRecording;
   sleep 1;
   [[":MISSION:START:"] call _sent == 1, "a start registers the mission once"] call _assert;
   [OCAP_extension_sessionPending, "the registration waits for :MISSION:OK:"] call _assert;
   [isNil "OCAP_recorder_startTime", "capture waits for the extension"] call _assert;
+  [OCAP_test_announcedCapturing isEqualTo [], "nothing is announced before the capture runs"] call _assert;
+  sleep 31;
+  [OCAP_extension_sessionPending && {OCAP_recorder_recording}, "a slow extension is still waited for"] call _assert;
   OCAP_extension_sessionPending = false; // what :MISSION:OK: does
   OCAP_extension_sessionReady = true;
   sleep 1;
   [!isNil "OCAP_recorder_startTime", "capture begins once the extension confirms"] call _assert;
+  [OCAP_test_announcedCapturing isEqualTo [true], "the start is announced once, while capturing"] call _assert;
+
+  // A mission the extension could not start stops the recording.
+  call _registering;
+  OCAP_extension_sessionPending = false; // what :MISSION:FAILED: does
+  sleep 1;
+  [isNil "OCAP_recorder_startTime" && {!OCAP_recorder_recording}, "a failed start ends the recording"] call _assert;
+  [OCAP_test_announcedCapturing isEqualTo [], "a failed start is not announced"] call _assert;
+
+  // A mission that ends while it registers is discarded once registered.
+  call _registering;
+  OCAP_recorder_missionEnded = true;
+  OCAP_extension_sessionPending = false; // what :MISSION:OK: does
+  OCAP_extension_sessionReady = true;
+  sleep 1;
+  OCAP_recorder_missionEnded = nil;
+  [[":MISSION:DISCARD:"] call _sent == 1, "a mission that ended while registering is discarded"] call _assert;
+  [isNil "OCAP_recorder_startTime" && {!OCAP_recorder_recording} && {!OCAP_extension_sessionReady}, "its capture never begins"] call _assert;
 
   // A mission that ends before the minimum is discarded, not saved.
   [5] call _recordingOf;
@@ -110,6 +143,7 @@ try {
 
 OCAP_recorder_recording = false;
 OCAP_recorder_startTime = nil;
+OCAP_recorder_missionEnded = nil;
 OCAP_recorder_captureFrameNo = 0;
 OCAP_extension_sessionReady = false;
 OCAP_extension_sessionPending = false;

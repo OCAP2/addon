@@ -865,7 +865,7 @@ GVAR(allSettings) = [
     "CHECKBOX", // setting type
     [
       "Auto-save on MPEnded Event", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      "If true, automatically save and export the mission when the MPEnded event fires. Default: true"
+      "If true, automatically save and export the mission when the MPEnded event fires, or discard a recording shorter than the required duration to save. Default: true"
     ],
     [COMPONENT_NAME, "Save/Export Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     true, // default enabled
@@ -915,7 +915,7 @@ GVAR(allSettings) = [
     "SLIDER", // setting type
     [
       "Required Duration to Save", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
-      "A recording must be at least this long (in minutes) to auto-save. A shorter recording is discarded when the mission ends. Calling an 'ocap_exportData' CBA server event will override this restriction. Default: 20"
+      "A recording must be at least this long (in minutes) to auto-save. With auto-save on MPEnded, a shorter recording is discarded when the mission ends. Calling an 'ocap_exportData' CBA server event will override this restriction. Default: 20"
     ],
     [COMPONENT_NAME, "Save/Export Settings"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
     [

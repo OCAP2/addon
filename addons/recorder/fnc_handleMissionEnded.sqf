@@ -25,6 +25,10 @@ Public:
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
+// A recording still waiting for the extension to register the mission never
+// starts; see OCAP_recorder_fnc_startRecording.
+GVAR(missionEnded) = true;
+
 if (!EGVAR(settings,saveMissionEnded)) exitWith {};
 
 if ((GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) / 60 >= GVAR(minMissionTime)) exitWith {

@@ -10,6 +10,9 @@ Description:
 
   Will not start recording if <OCAP_recorder_recording> is true and will notify players.
 
+  A fresh recording first registers the mission with the extension (<OCAP_extension_fnc_newMission>)
+  and begins the capture once the extension confirms it. Start requests made meanwhile are ignored.
+
 Parameters:
   None
 
@@ -39,69 +42,64 @@ if (GVAR(recording) && GVAR(captureFrameNo) > 10) exitWith {
   ] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
 };
 
+// Another start is registering the mission with the extension; it begins the
+// capture once the extension confirms it.
+if (missionNamespace getVariable [QEGVAR(extension,sessionPending), false]) exitWith {
+  INFO("Recording start requested while the mission registers with the extension");
+};
+
 // Any explicit or automatic start consumes a pending empty-server restart.
 GVAR(autoRestartAfterEmptyPending) = false;
 
 GVAR(recording) = true;
 publicVariable QGVAR(recording);
 
-private _systemTimeFormat = ["%1-%2-%3T%4:%5:%6.%7"];
-_systemTimeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} else {str _x}});
-private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];
-_missionDateFormat append (date apply {if (_x < 10) then {"0" + str _x} else {str _x}});
+if (GVAR(captureFrameNo) == 0 && {!EGVAR(extension,sessionReady)}) exitWith {
+  EGVAR(extension,sessionPending) = true;
 
-[[format _missionDateFormat, format _systemTimeFormat], { // add diary entry for clients on recording start
-  [{!isNull player}, {
-    private _t = round cba_missionTime;
-    private _elapsedStr = format ["%1:%2", floor (_t / 60), [str (_t mod 60), "0" + str (_t mod 60)] select (_t mod 60 < 10)];
-    player setDiarySubjectPicture [
-      "OCAPInfo",
-      "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
-    ];
-    player createDiaryRecord [
-      "OCAPInfo",
-      [
-        "Status",
-        format["<font color='#33FF33'>OCAP started recording.<br/>In-Mission Time Elapsed: %1<br/>Mission World Time: %2<br/>System Time UTC: %3</font>", _elapsedStr, _this#0, _this#1]
-      ]
-    ];
-  }, _this] call CBA_fnc_waitUntilAndExecute;
-}] remoteExec ["call", [0, -2] select isDedicated, true];
+  // The mission registers with the extension only now, the first time or
+  // after the previous recording was exported or discarded, so a mission
+  // that never starts recording is never stored. Storage initialization
+  // may still be running and provides the mission context.
+  [{!isNil QEGVAR(extension,missionContext)}, {
+    call EFUNC(extension,newMission);
 
-if (GVAR(captureFrameNo) == 0) then {
-  if (!EGVAR(extension,sessionReady)) then {
-    // Another start is already registering the mission; its waiter begins the capture.
-    if (missionNamespace getVariable [QEGVAR(extension,sessionPending), false]) exitWith {};
-    EGVAR(extension,sessionPending) = true;
-
-    // The mission registers with the extension only now, the first time or
-    // after the previous recording was exported or discarded, so a mission
-    // that never starts recording is never stored. Storage initialization
-    // may still be running and provides the mission context.
-    [{!isNil QEGVAR(extension,missionContext)}, {
-      call EFUNC(extension,newMission);
-      // Wait for extension to confirm new mission before starting capture
-      [{EGVAR(extension,sessionReady)}, {
-        call FUNC(flushPlayerConnectionEvents);
-        call FUNC(captureLoop);
-      }, [], 30, {
-        EGVAR(extension,sessionPending) = false;
-        ERROR("Timeout waiting for new mission confirmation from extension. Recording will not start.");
-        ["OCAP failed to start recording: extension did not respond", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
-      }] call CBA_fnc_waitUntilAndExecute;
-    }, [], 60, {
-      EGVAR(extension,sessionPending) = false;
-      ERROR("Timeout waiting for extension storage to initialize. Recording will not start.");
-      ["OCAP failed to start recording: extension storage is not ready", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+    // The extension answers :MISSION:OK: or :MISSION:FAILED:. It may take a
+    // while, for example while it still ends the previous recording, and
+    // the capture waits for it: starting another registration meanwhile
+    // would leave the extension with a mission nothing records.
+    [{EGVAR(extension,sessionReady) || {!EGVAR(extension,sessionPending)}}, {
+      if (!EGVAR(extension,sessionReady)) exitWith {
+        GVAR(recording) = false;
+        publicVariable QGVAR(recording);
+        ["OCAP failed to start recording: the extension could not start the mission", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+      };
+      if (missionNamespace getVariable [QGVAR(missionEnded), false]) exitWith {
+        INFO("Mission ended before its recording started; discarding the registered mission");
+        [":MISSION:DISCARD:", []] call EFUNC(extension,sendData);
+        EGVAR(extension,sessionReady) = false;
+        GVAR(recording) = false;
+        publicVariable QGVAR(recording);
+      };
+      call FUNC(flushPlayerConnectionEvents);
+      call FUNC(captureLoop);
+      call FUNC(announceRecording);
     }] call CBA_fnc_waitUntilAndExecute;
-  } else {
-    call FUNC(flushPlayerConnectionEvents);
-    call FUNC(captureLoop);
-  };
+
+    [{EGVAR(extension,sessionReady) || {!EGVAR(extension,sessionPending)}}, {}, [], 30, {
+      WARNING("The extension has not confirmed the mission after 30 seconds; recording starts once it does");
+    }] call CBA_fnc_waitUntilAndExecute;
+  }, [], 60, {
+    EGVAR(extension,sessionPending) = false;
+    GVAR(recording) = false;
+    publicVariable QGVAR(recording);
+    ERROR("Timeout waiting for extension storage to initialize. Recording will not start.");
+    ["OCAP failed to start recording: extension storage is not ready", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+  }] call CBA_fnc_waitUntilAndExecute;
 };
 
-[QGVARMAIN(customEvent), ["generalEvent", "Recording started."]] call CBA_fnc_serverEvent;
-["OCAP began recording", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
-
-// Log times
-[] call FUNC(updateTime);
+if (GVAR(captureFrameNo) == 0) then {
+  call FUNC(flushPlayerConnectionEvents);
+  call FUNC(captureLoop);
+};
+call FUNC(announceRecording);

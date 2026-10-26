@@ -5,6 +5,7 @@ PREP(init);
 PREP(updateTime);
 
 PREP(startRecording);
+PREP(announceRecording);
 PREP(stopRecording);
 PREP(removeCaptureHandlers);
 PREP(resetRecording);

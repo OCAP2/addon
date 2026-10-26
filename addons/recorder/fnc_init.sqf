@@ -253,7 +253,12 @@ call EFUNC(extension,initSession);
   {(getClientStateNumber > 9 && (call FUNC(getAutoStartPlayerCount)) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
   {
     call FUNC(startRecording);
-    [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
+    // Events are recorded once the capture runs, which waits for the
+    // extension to register the mission.
+    [{!isNil QGVAR(startTime) || {!GVAR(recording)}}, {
+      if (isNil QGVAR(startTime)) exitWith {}; // the recording did not start
+      [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
+    }] call CBA_fnc_waitUntilAndExecute;
   }
 ] call CBA_fnc_waitUntilAndExecute;
 

@@ -153,10 +153,17 @@ addMissionEventHandler ["ExtensionCallback", {
   };
 
   if (_function isEqualTo ":MISSION:OK:") exitWith {
-    INFO_1("Mission registered in %1ms",diag_tickTime - GVAR(initTimer));
+    INFO_1("Mission registered in %1 s",diag_tickTime - GVAR(initTimer));
     INFO("Mission registered. Starting data send.");
     GVAR(sessionPending) = false;
     GVAR(sessionReady) = true;
+  };
+
+  if (_function isEqualTo ":MISSION:FAILED:") exitWith {
+    // Payload shape: [error]
+    private _error = _data param [0, "", [""]];
+    ERROR_1("The extension could not start the mission; recording will not start: %1",_error);
+    GVAR(sessionPending) = false;
   };
 
   if (_function isEqualTo ":MISSION:DISCARDED:") exitWith {

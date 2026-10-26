@@ -18,6 +18,29 @@ between recordings cannot accumulate or appear in a later recording. Active and
 paused recordings still receive live connection events. The Steam ID setting and
 `playerUid` payload format are unchanged.
 
+## Save limits and storage
+
+`minPlayerCount` and `minMissionTime` are enforced by the addon, so they must
+hold for every storage, including the `websocket` storage that streams a
+recording to the web server while it records:
+
+- The mission registers with the extension (`:MISSION:START:`) only when a
+  recording starts, not at mission load. A mission that never reaches the
+  auto-start conditions, such as `minPlayerCount`, leaves nothing in storage.
+  The web server previously listed such missions as empty `partial`
+  recordings.
+- When the mission ends (`MPEnded` with `saveMissionEnded`) before the
+  recording reached `minMissionTime`, the recording is discarded with
+  `:MISSION:DISCARD:`, one frame later, so a mission script can still save it
+  through `OCAP_exportData`. The `memory` storage drops it, the `websocket`
+  storage tells the web server to drop it (web protocol version 3; an older web
+  server still saves it as `partial`), and `postgres`/`sqlite` keep what they
+  wrote. A recording that reached `minMissionTime` is saved as before.
+
+A recording ended without either, for example by an admin changing the mission
+(`#missions`, `#restart`) or by a crash, is still saved by the web server as
+`partial`, whatever its length.
+
 ## Dedicated-server verification
 
 These scenarios require Arma 3 and the recorder extension; HEMTT checks and builds
@@ -41,3 +64,13 @@ as the server notifications.
 5. With headless-client exclusion enabled, verify headless clients do not help
    reach the start/restart threshold. With it disabled, verify the configured
    counting behavior, including the documented headless-only restart case.
+6. With the `websocket` storage, load a mission and stay below `minPlayerCount`.
+   Verify the web server shows no recording, live or saved, until the threshold
+   is reached, and that the extension log has no `WebSocket mission started`
+   before then.
+7. With the `websocket` storage, record and end the mission (`endMission`)
+   before `minMissionTime`. Verify the "was not saved" notification, a
+   `Discarded recording dropped by storage` line in the server RPT and that the
+   web server keeps no recording of it. End a mission past `minMissionTime` and
+   verify it is saved as before. Repeat with the `memory` storage and verify no
+   file is written for the short mission.

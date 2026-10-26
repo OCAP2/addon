@@ -49,6 +49,19 @@ with different static membership and reused vehicle ids. Pending disassembly
 claims, dedupe state and an assembly callback from the old recording must not
 produce events in the new one.
 
+`save_limits_regressions.sqf` checks the save limits: a recording registers the
+mission with the extension once, when it starts; a mission that ends before
+`minMissionTime` is discarded (`:MISSION:DISCARD:`) unless a mission script exports
+it on the same frame; a longer one is saved; `saveMissionEnded` disabled does
+neither. It needs no players. Execute it on the server once the extension
+storage is initialized, with auto-start disabled:
+
+```sqf
+execVM "tests\save_limits_regressions.sqf";
+```
+
+The RPT must end with `[OCAP save limits] ALL TESTS PASSED`.
+
 Extension writes are intercepted, and the servicing clock is advanced only in an
 unscheduled block. The suite replaces recording state and removes the servicing
 PFH; restart the mission afterwards. It is an opt-in test artifact, not included

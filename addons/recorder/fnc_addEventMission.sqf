@@ -103,22 +103,18 @@ if (isNil QEGVAR(EH,EntityRespawned)) then {
 
 if (isNil QEGVAR(EH,MPEnded)) then {
   // Event Handler: OCAP_EH_MPEnded
-  // Handle for the "MPEnded" mission event handler. Fired on the MPEnded mission event. This is used to automatically save and export if <OCAP_settings_saveMissionEnded> is true and <OCAP_settings_minMissionTime> was reached.
+  // Handle for the "MPEnded" mission event handler. Fired on the MPEnded mission event. When <OCAP_settings_saveMissionEnded> is true, this saves and exports the recording if <OCAP_settings_minMissionTime> was reached and discards it otherwise. See <OCAP_recorder_fnc_handleMissionEnded>.
   EGVAR(EH,MPEnded) = addMissionEventHandler ["MPEnded", {
-    if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) / 60 >= GVAR(minMissionTime)) then {
-      ["Mission ended automatically"] call FUNC(exportData);
-    };
+    call FUNC(handleMissionEnded);
   }];
   OCAPEXTLOG(["Initialized MPEnded EH"]);
 };
 
 if (isNil QEGVAR(EH,Ended)) then {
   // Event Handler: OCAP_EH_Ended
-  // Handle for the "Ended" mission event handler. Fired on the singleplayer Ended mission event. This is used to automatically save and export if <OCAP_settings_saveMissionEnded> is true and <OCAP_settings_minMissionTime> was reached. Kept in just in case this event triggers.
+  // Handle for the "Ended" mission event handler. Fired on the singleplayer Ended mission event. Handled like <OCAP_EH_MPEnded>. Kept in just in case this event triggers.
   EGVAR(EH,Ended) = addMissionEventHandler ["Ended", {
-    if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) / 60 >= GVAR(minMissionTime)) then {
-      ["Mission ended automatically"] call FUNC(exportData);
-    };
+    call FUNC(handleMissionEnded);
   }];
   OCAPEXTLOG(["Initialized Ended EH"]);
 };

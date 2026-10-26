@@ -4,15 +4,16 @@ FILE: fnc_newMission.sqf
 FUNCTION: OCAP_extension_fnc_newMission
 
 Description:
-  Re-registers a new mission session with the extension after a previous
-  recording was exported via fnc_exportData. Reuses the cached world and
-  mission context from the initial initSession call (same mission is still running).
+  Registers a recording of the mission with the extension. Uses the world and
+  mission context initSession cached once storage was initialized.
 
   The existing ExtensionCallback handler (added during initSession) will process
-  the :MISSION:OK: response and set sessionReady = true.
+  the :MISSION:OK: response and set sessionReady = true. sessionPending is true
+  until then.
 
   Called from fnc_startRecording when starting a fresh recording with
-  sessionReady = false.
+  sessionReady = false: the first recording of the mission, or one after the
+  previous recording was exported or discarded.
 
 Parameters:
   None
@@ -29,9 +30,10 @@ Author:
 #include "script_component.hpp"
 
 if (isNil QGVAR(worldContext) || isNil QGVAR(missionContext)) exitWith {
-  ERROR("Cannot re-register mission: cached world/mission context is nil. Full initSession required.");
+  ERROR("Cannot register mission: cached world/mission context is nil. Full initSession required.");
 };
 
-INFO("Re-registering new mission with extension");
+INFO("Registering new mission with extension");
 GVAR(initTimer) = diag_tickTime;
+GVAR(sessionPending) = true;
 [":MISSION:START:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData);

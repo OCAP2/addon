@@ -4,6 +4,7 @@ INFO("Module enabled. Starting up...");
 
 // Initialize session
 GVAR(sessionReady) = false;
+GVAR(sessionPending) = false;
 
 
 // when the extension is ready, it'll send a callback which will set sessionReady to true and let the other functions being sending data
@@ -143,16 +144,30 @@ addMissionEventHandler ["ExtensionCallback", {
       ]]
     ]] call CBA_fnc_encodeJSON;
 
-    // Save mission and world context
-    INFO("Saving mission and world context");
+    // The mission is registered with the extension only when recording
+    // starts (OCAP_extension_fnc_newMission), so a mission that never meets
+    // the auto-start conditions leaves nothing behind in storage. The
+    // websocket storage would otherwise publish it on the web server.
+    INFO("Mission and world context ready; the mission registers when recording starts");
     TRACE_2("World and mission context",GVAR(worldContext),GVAR(missionContext));
-    [":MISSION:START:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData);
   };
 
   if (_function isEqualTo ":MISSION:OK:") exitWith {
-    INFO_1("Initialization completed in %1ms",diag_tickTime - GVAR(initTimer));
+    INFO_1("Mission registered in %1ms",diag_tickTime - GVAR(initTimer));
     INFO("Mission registered. Starting data send.");
+    GVAR(sessionPending) = false;
     GVAR(sessionReady) = true;
+  };
+
+  if (_function isEqualTo ":MISSION:DISCARDED:") exitWith {
+    // Payload shapes: ["ok"], ["kept"] (the storage keeps what it recorded), ["error", error]
+    private _status = _data param [0, "", [""]];
+    private _error = _data param [1, "", [""]];
+    switch (_status) do {
+      case "ok": {INFO("Discarded recording dropped by storage")};
+      case "kept": {INFO("Discarded recording kept by storage, which cannot drop it")};
+      default {WARNING_1("Storage could not drop the discarded recording: %1",_error)};
+    };
   };
 
   if (_function isEqualTo ":MISSION:SAVED:") exitWith {

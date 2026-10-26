@@ -106,18 +106,7 @@ if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {
 call FUNC(stopRecording);
 private _endFrameNumber = GVAR(captureFrameNo);
 
-if (!isNil QGVAR(PFHObject)) then {
-  [GVAR(PFHObject)] call CBA_fnc_deletePerFrameHandlerObject;
-  GVAR(PFHObject) = nil;
-};
-if (!isNil QGVAR(serverFpsPFH)) then {
-  [GVAR(serverFpsPFH)] call CBA_fnc_removePerFrameHandler;
-  GVAR(serverFpsPFH) = nil;
-};
-if (!isNil QGVAR(weatherPFH)) then {
-  [GVAR(weatherPFH)] call CBA_fnc_removePerFrameHandler;
-  GVAR(weatherPFH) = nil;
-};
+call FUNC(removeCaptureHandlers);
 
 private _winSide = if (isNil "_side") then {""} else {if (_side isEqualTo sideUnknown) then {""} else {str _side}};
 private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mission ended"} else {""}} else {_message};
@@ -166,30 +155,4 @@ OCAPEXTLOG(ARR4("Queued recording of mission",GVAR(missionName),"with tag",_save
 }] remoteExec ["call", [0, -2] select isDedicated, true];
 
 // reset vars in case a new recording is started
-GVAR(captureFrameNo) = 0;
-publicVariable QGVAR(captureFrameNo);
-GVAR(startTime) = nil;
-// Clients watch startTime to know a new recording began and their snapshot chain restarted.
-publicVariable QGVAR(startTime);
-GVAR(playerSnapshotState) = createHashMap;
-GVAR(zeusByUid) = createHashMap;
-GVAR(zeusLastCamera) = createHashMap;
-GVAR(zeusControlledUnits) = createHashMap;
-GVAR(zeusPingLast) = createHashMap;
-// These trackers survive export, but their entity ids belong to this recording.
-GVAR(serviceBaseline) = createHashMap;
-GVAR(serviceSessions) = createHashMap;
-GVAR(serviceRearmSeen) = createHashMap;
-GVAR(staticWeaponSnapshot) = createHashMap;
-GVAR(staticDisassembleClaims) = [];
-GVAR(staticWeaponSeen) = createHashMap;
-{
-  _x setVariable [QGVARMAIN(isInitialized), nil];
-  _x setVariable [QGVARMAIN(exclude), nil];
-  _x setVariable [QGVARMAIN(id), nil];
-  _x setVariable [QGVARMAIN(unitType), nil];
-  _x setVariable [QGVAR(lastZeusCuratorId), nil];
-  _x setVariable [QGVAR(zeusId), nil];
-} count (allUnits + allDeadMen + vehicles);
-GVAR(nextId) = 0;
-EGVAR(extension,sessionReady) = false;
+call FUNC(resetRecording);

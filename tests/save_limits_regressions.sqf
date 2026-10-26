@@ -16,7 +16,7 @@ private _savedFunctions = createHashMap;
 {
   _savedFunctions set [_x, missionNamespace getVariable _x];
 } forEach [
-  "OCAP_extension_fnc_sendData", "OCAP_recorder_fnc_stopRecording",
+  "OCAP_extension_fnc_sendData",
   "OCAP_recorder_fnc_captureLoop", "OCAP_recorder_fnc_updateTime",
   "OCAP_recorder_fnc_announceRecording"
 ];
@@ -34,7 +34,6 @@ OCAP_extension_fnc_sendData = {
   };
   ""
 };
-OCAP_recorder_fnc_stopRecording = {OCAP_recorder_recording = false};
 OCAP_recorder_fnc_captureLoop = {OCAP_recorder_startTime = time};
 OCAP_recorder_fnc_updateTime = {};
 // Its events are recorded only while the capture runs.

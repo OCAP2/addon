@@ -34,7 +34,10 @@ recording to the web server while it records:
   for that answer, or `:MISSION:FAILED:`, however long the extension takes, for
   example while it still saves the previous recording, and ignores further
   start requests meanwhile; after 30 seconds it notifies players that it is
-  still waiting. A pause meanwhile (`OCAP_pause`) holds the capture back until
+  still waiting. Each registration carries a token the extension echoes, so a
+  late answer to an earlier mission's registration is ignored. Without a
+  running extension (no `:SYS:VERSION:` after 60 seconds) the recording gives
+  up. A pause meanwhile (`OCAP_pause`) holds the capture back until
   recording resumes. If the mission ends first, the registered mission is
   discarded instead, whatever `saveMissionEnded` says. If the mission unloads
   before the extension answers, the extension drops that empty mission when

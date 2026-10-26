@@ -153,7 +153,18 @@ addMissionEventHandler ["ExtensionCallback", {
     TRACE_2("World and mission context",GVAR(worldContext),GVAR(missionContext));
   };
 
+  // :MISSION:OK: and :MISSION:FAILED: answer the pending registration only
+  // when they carry its token. An older extension sends none.
+  private _answersRegistration = {
+    params ["_token"];
+    if (_token isEqualTo (missionNamespace getVariable [QGVAR(registrationToken), ""]) && {GVAR(sessionPending)}) exitWith {true};
+    WARNING_1("Ignoring an answer to an earlier mission registration: %1",_function);
+    false
+  };
+
   if (_function isEqualTo ":MISSION:OK:") exitWith {
+    // Payload shape: ["OK", token]
+    if !([_data param [1, missionNamespace getVariable [QGVAR(registrationToken), ""], [""]]] call _answersRegistration) exitWith {};
     INFO_1("Mission registered in %1 s",diag_tickTime - GVAR(initTimer));
     INFO("Mission registered. Starting data send.");
     GVAR(sessionPending) = false;
@@ -161,7 +172,8 @@ addMissionEventHandler ["ExtensionCallback", {
   };
 
   if (_function isEqualTo ":MISSION:FAILED:") exitWith {
-    // Payload shape: [error]
+    // Payload shape: [error, token]
+    if !([_data param [1, missionNamespace getVariable [QGVAR(registrationToken), ""], [""]]] call _answersRegistration) exitWith {};
     private _error = _data param [0, "", [""]];
     ERROR_1("The extension could not start the mission; recording will not start: %1",_error);
     GVAR(sessionPending) = false;

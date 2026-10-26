@@ -49,6 +49,7 @@ if (missionNamespace getVariable [QEGVAR(extension,sessionPending), false]) exit
   INFO("Recording start requested while the mission registers with the extension");
   GVAR(recording) = true;
   publicVariable QGVAR(recording);
+  ["OCAP starts recording once the mission is registered", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
 };
 
 // Any explicit or automatic start consumes a pending empty-server restart.
@@ -114,6 +115,12 @@ if (GVAR(captureFrameNo) == 0 && {!EGVAR(extension,sessionReady)}) exitWith {
   }] call CBA_fnc_waitUntilAndExecute;
 
   [{!isNil QEGVAR(extension,missionContext) || {!EGVAR(extension,sessionPending)}}, {}, [], 60, {
+    // An extension that never reported its version is not running: nothing
+    // will initialize storage.
+    if (isNil QEGVAR(extension,dllVersion)) exitWith {
+      ERROR("The extension is not running. Recording will not start.");
+      EGVAR(extension,storageFailed) = true;
+    };
     WARNING("Extension storage is not initialized after 60 seconds; recording starts once it is");
     ["OCAP is waiting for its storage to start recording", 1, [1, 1, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
   }] call CBA_fnc_waitUntilAndExecute;

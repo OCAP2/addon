@@ -37,7 +37,10 @@ if (isNil QGVAR(worldContext) || isNil QGVAR(missionContext)) exitWith {
 INFO("Registering new mission with extension");
 GVAR(initTimer) = diag_tickTime;
 GVAR(sessionPending) = true;
-if (isNil {[":MISSION:START:", [GVAR(worldContext), GVAR(missionContext)], 'ocap_recorder'] call FUNC(sendData)}) then {
+// Echoed in :MISSION:OK: and :MISSION:FAILED:, so a late answer to an earlier
+// mission's start is not taken for this one's.
+GVAR(registrationToken) = format ["%1-%2", round (diag_tickTime * 1000), floor random 1e6];
+if (isNil {[":MISSION:START:", [GVAR(worldContext), GVAR(missionContext), GVAR(registrationToken)], 'ocap_recorder'] call FUNC(sendData)}) then {
   ERROR("The extension did not accept the mission; recording will not start.");
   GVAR(sessionPending) = false; // nothing will answer
 };

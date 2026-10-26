@@ -902,7 +902,7 @@ GVAR(allSettings) = [
   /*
     CBA Setting: OCAP_settings_minMissionTime
     Description:
-      A recording must be at least this long (in minutes) to auto-save. A shorter recording is discarded when the mission ends, so storage that already holds it (such as the websocket storage) drops it. Calling an <OCAP_exportData> CBA server event will override this restriction. Default: 20
+      A recording must be at least this long (in minutes) to auto-save. With <OCAP_settings_saveMissionEnded>, a shorter recording is discarded when the mission ends, so storage that already holds it (such as the websocket storage) drops it. Calling an <OCAP_exportData> CBA server event will override this restriction. Default: 20
 
     Setting Name:
       Required Duration to Sav

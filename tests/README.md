@@ -12,7 +12,7 @@ replace addon functions with stubs, which CBA compiles final by default: set
 otherwise enable CBA function recompiling. `save_limits_regressions.sqf` stops
 with an error when its functions are final. Give one player
 an assigned Zeus curator. Name the non-curator player `testClient` and the curator
-player `testCurator` in the editor. Copy both scripts into the mission's `tests/`
+player `testCurator` in the editor. Copy the scripts into the mission's `tests/`
 folder and execute on the server:
 
 ```sqf

@@ -36,7 +36,13 @@ recording to the web server while it records:
   start requests meanwhile; after 30 seconds it notifies players that it is
   still waiting. A pause meanwhile (`OCAP_pause`) holds the capture back until
   recording resumes. If the mission ends first, the registered mission is
-  discarded instead, whatever `saveMissionEnded` says.
+  discarded instead, whatever `saveMissionEnded` says. If the mission unloads
+  before the extension answers, the extension drops that empty mission when
+  the next one starts. Storage that is still initializing is waited for too,
+  until the extension reports `:STORAGE:ERROR:`; players are notified after
+  60 seconds.
+- A pause before the capture began only holds it back: players were not told
+  recording started, so they are not told it stopped.
 - `OCAP_recorder_recording` is true from the start request on, while
   `OCAP_recorder_startTime` is set once the capture runs. A mission script that
   starts recording (`OCAP_record`) and records its own events or exports right
@@ -49,10 +55,10 @@ recording to the web server while it records:
   server still saves it as `partial`), and `postgres`/`sqlite` keep what they
   wrote. A recording that reached `minMissionTime` is saved as before.
 
-This needs an extension with `:MISSION:DISCARD:` and `:MISSION:FAILED:`
-(OCAP2/extension#217). An older one rejects the discard, which the server RPT
-logs as a warning, and never answers a failed start, so a recording whose
-mission did not start keeps waiting.
+This needs an extension with `:MISSION:DISCARD:`, `:MISSION:FAILED:` and
+`:STORAGE:ERROR:` (OCAP2/extension#217). An older one rejects the discard,
+which the server RPT logs as a warning, and never answers a failed start or a
+failed storage, so such a recording keeps waiting.
 
 A recording ended without a save or a discard is still saved by the web server
 as `partial`, whatever its length. That covers an admin changing the mission

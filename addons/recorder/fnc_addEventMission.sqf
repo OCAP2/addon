@@ -103,7 +103,7 @@ if (isNil QEGVAR(EH,EntityRespawned)) then {
 
 if (isNil QEGVAR(EH,MPEnded)) then {
   // Event Handler: OCAP_EH_MPEnded
-  // Handle for the "MPEnded" mission event handler. Fired on the MPEnded mission event. When <OCAP_settings_saveMissionEnded> is true, this saves and exports the recording if <OCAP_settings_minMissionTime> was reached and discards it otherwise. See <OCAP_recorder_fnc_handleMissionEnded>.
+  // Handle for the "MPEnded" mission event handler. Fired on the MPEnded mission event. When <OCAP_settings_saveMissionEnded> is true, this saves and exports the recording if <OCAP_settings_minMissionTime> was reached and discards it otherwise. A mission registered with the extension but never captured is discarded regardless. See <OCAP_recorder_fnc_handleMissionEnded>.
   EGVAR(EH,MPEnded) = addMissionEventHandler ["MPEnded", {
     call FUNC(handleMissionEnded);
   }];

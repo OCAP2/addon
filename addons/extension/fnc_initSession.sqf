@@ -65,6 +65,7 @@ addMissionEventHandler ["ExtensionCallback", {
 
   if (_function isEqualTo ":STORAGE:ERROR:") exitWith {
     private _error = _data#0;
+    GVAR(storageFailed) = true; // a recording waiting for storage gives up
     ERROR_MSG_1("Storage initialization error: %1",_error);
   };
 

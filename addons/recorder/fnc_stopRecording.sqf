@@ -25,6 +25,14 @@ Author:
 ---------------------------------------------------------------------------- */
 #include "script_component.hpp"
 
+// Nothing captures yet, for example while the mission registers with the
+// extension: only hold the capture back, players were not told it started.
+if (isNil QGVAR(startTime)) exitWith {
+  INFO("Recording paused before its capture began");
+  GVAR(recording) = false;
+  publicVariable QGVAR(recording);
+};
+
 private _systemTimeFormat = ["%1-%2-%3T%4:%5:%6.%7"];
 _systemTimeFormat append (systemTimeUTC apply {if (_x < 10) then {"0" + str _x} else {str _x}});
 private _missionDateFormat = ["%1-%2-%3T%4:%5:00"];

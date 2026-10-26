@@ -2,6 +2,10 @@
 if (!isServer || {!canSuspend}) exitWith {throw "Run the tests with server-side execVM"};
 if (missionNamespace getVariable ["OCAP_recorder_recording", false]) exitWith {throw "Disable auto-start and stop recording first"};
 if (isNil "OCAP_extension_missionContext") exitWith {throw "Wait for the extension storage to initialize first"};
+// The stubs below replace addon functions, which CBA compiles final unless the
+// mission allows recompiling them; otherwise real lifecycle commands would reach
+// the extension.
+if (isFinal OCAP_extension_fnc_sendData) exitWith {throw "Set allowFunctionsRecompile = 1 in the test mission's description.ext"};
 
 private _assert = {
   params ["_condition", "_description"];

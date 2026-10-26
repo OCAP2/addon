@@ -11,7 +11,8 @@ Description:
   Will not start recording if <OCAP_recorder_recording> is true and will notify players.
 
   A fresh recording first registers the mission with the extension (<OCAP_extension_fnc_newMission>)
-  and begins the capture once the extension confirms it. Start requests made meanwhile are ignored.
+  and begins the capture once the extension confirms it. Start requests made meanwhile register
+  nothing more, but undo a pause.
 
 Parameters:
   None
@@ -62,8 +63,23 @@ if (GVAR(captureFrameNo) == 0 && {!EGVAR(extension,sessionReady)}) exitWith {
   // The mission registers with the extension only now, the first time or
   // after the previous recording was exported or discarded, so a mission
   // that never starts recording is never stored. Storage initialization
-  // may still be running and provides the mission context.
-  [{!isNil QEGVAR(extension,missionContext)}, {
+  // may still be running and provides the mission context; it may take
+  // long, for example a database connection that falls back to SQLite.
+  [{
+    !isNil QEGVAR(extension,missionContext) ||
+    {missionNamespace getVariable [QEGVAR(extension,storageFailed), false]} ||
+    {missionNamespace getVariable [QGVAR(missionEnded), false]}
+  }, {
+    private _ended = missionNamespace getVariable [QGVAR(missionEnded), false];
+    if (_ended || {isNil QEGVAR(extension,missionContext)}) exitWith {
+      EGVAR(extension,sessionPending) = false;
+      GVAR(recording) = false;
+      publicVariable QGVAR(recording);
+      if (!_ended) then {
+        ERROR("Extension storage could not be initialized. Recording will not start.");
+        ["OCAP failed to start recording: extension storage is not ready", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+      };
+    };
     call EFUNC(extension,newMission);
 
     // The extension answers :MISSION:OK: or :MISSION:FAILED:. It may take a
@@ -71,14 +87,16 @@ if (GVAR(captureFrameNo) == 0 && {!EGVAR(extension,sessionReady)}) exitWith {
     // the capture waits for it: starting another registration meanwhile
     // would leave the extension with a mission nothing records.
     [{EGVAR(extension,sessionReady) || {!EGVAR(extension,sessionPending)}}, {
+      if (!isNil QGVAR(startTime)) exitWith {}; // a start in the meantime began the capture
+      if (missionNamespace getVariable [QGVAR(missionEnded), false]) exitWith {
+        ["the mission ended before the recording began"] call FUNC(discardRecording);
+        GVAR(recording) = false;
+        publicVariable QGVAR(recording);
+      };
       if (!EGVAR(extension,sessionReady)) exitWith {
         GVAR(recording) = false;
         publicVariable QGVAR(recording);
         ["OCAP failed to start recording: the extension could not start the mission", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
-      };
-      if (!isNil QGVAR(startTime)) exitWith {}; // a start in the meantime began the capture
-      if (missionNamespace getVariable [QGVAR(missionEnded), false]) exitWith {
-        ["the mission ended before the recording began"] call FUNC(discardRecording);
       };
       // Paused meanwhile: the capture begins when recording resumes.
       if (!GVAR(recording)) exitWith {
@@ -93,12 +111,11 @@ if (GVAR(captureFrameNo) == 0 && {!EGVAR(extension,sessionReady)}) exitWith {
       WARNING("The extension has not confirmed the mission after 30 seconds; recording starts once it does");
       ["OCAP is waiting for the extension to start recording", 1, [1, 1, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
     }] call CBA_fnc_waitUntilAndExecute;
-  }, [], 60, {
-    EGVAR(extension,sessionPending) = false;
-    GVAR(recording) = false;
-    publicVariable QGVAR(recording);
-    ERROR("Timeout waiting for extension storage to initialize. Recording will not start.");
-    ["OCAP failed to start recording: extension storage is not ready", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+  }] call CBA_fnc_waitUntilAndExecute;
+
+  [{!isNil QEGVAR(extension,missionContext) || {!EGVAR(extension,sessionPending)}}, {}, [], 60, {
+    WARNING("Extension storage is not initialized after 60 seconds; recording starts once it is");
+    ["OCAP is waiting for its storage to start recording", 1, [1, 1, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
   }] call CBA_fnc_waitUntilAndExecute;
 };
 

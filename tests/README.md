@@ -6,7 +6,11 @@ and restart entry point. They require Arma multiplayer; HEMTT checks/builds do n
 execute them.
 
 Use a **disposable** CBA-only test mission with OCAP on the server only, auto-start
-disabled, and two connected players with different network owners. Give one player
+disabled, and two connected players with different network owners. The suites
+replace addon functions with stubs, which CBA compiles final by default: set
+`allowFunctionsRecompile = 1;` in the test mission's `description.ext`, or
+otherwise enable CBA function recompiling. `save_limits_regressions.sqf` stops
+with an error when its functions are final. Give one player
 an assigned Zeus curator. Name the non-curator player `testClient` and the curator
 player `testCurator` in the editor. Copy both scripts into the mission's `tests/`
 folder and execute on the server:

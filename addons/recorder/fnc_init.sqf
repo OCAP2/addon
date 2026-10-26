@@ -252,8 +252,9 @@ call EFUNC(extension,initSession);
 [
   {(getClientStateNumber > 9 && (call FUNC(getAutoStartPlayerCount)) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
   {
-    // Recording started some other way already captures.
-    if (isNil QGVAR(startTime)) then {
+    // Recording started some other way already captures, or registers the
+    // mission; a start now would undo an admin's pause.
+    if (isNil QGVAR(startTime) && {!(missionNamespace getVariable [QEGVAR(extension,sessionPending), false])}) then {
       call FUNC(startRecording);
     };
     // Events are recorded once the capture runs, which waits for the

@@ -11,7 +11,7 @@ Description:
   server already holds the streamed recording and would save it as partial
   once the game server moves on. :MISSION:DISCARD: tells the extension to
   drop it instead; it answers with :MISSION:DISCARDED: (see
-  <OCAP_extension_fnc_initSession>).
+  <OCAP_extension_fnc_handleCallback>).
 
   A mission registered with the extension whose capture never began, for
   example one paused while it registered, has its registration discarded

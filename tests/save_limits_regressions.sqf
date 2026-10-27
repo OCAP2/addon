@@ -135,6 +135,27 @@ try {
   sleep 1;
   [!isNil "OCAP_recorder_startTime", "the capture begins once registered"] call _assert;
 
+  // A start a minute after an unanswered registration registers again; the
+  // first registration's late answers, even before the new start goes out,
+  // change nothing (the real callback handler).
+  waitUntil {sleep 1; diag_tickTime > 62}; // a negative send time reads as not sent
+  call _registering;
+  private _first = OCAP_extension_registrationToken;
+  OCAP_extension_registrationSentAt = diag_tickTime - 61;
+  isNil {
+    call OCAP_recorder_fnc_startRecording; // registers again in a later frame
+    ["ocap_recorder", ":MISSION:OK:", str ["OK", _first]] call OCAP_extension_fnc_handleCallback;
+  };
+  [OCAP_extension_sessionPending && {!OCAP_extension_sessionReady}, "a late OK of the given-up registration is ignored"] call _assert;
+  sleep 1;
+  [[":MISSION:START:"] call _sent == 2 && {OCAP_extension_registrationToken isNotEqualTo _first}, "the mission registers again with a new token"] call _assert;
+  ["ocap_recorder", ":MISSION:FAILED:", str ["late", _first]] call OCAP_extension_fnc_handleCallback;
+  sleep 1;
+  [OCAP_extension_sessionPending && {OCAP_recorder_recording} && {isNil "OCAP_recorder_startTime"}, "nor is its late failure, and nothing captures yet"] call _assert;
+  ["ocap_recorder", ":MISSION:OK:", str ["OK", OCAP_extension_registrationToken]] call OCAP_extension_fnc_handleCallback;
+  sleep 1;
+  [!isNil "OCAP_recorder_startTime" && {OCAP_test_announcedCapturing isEqualTo [true]}, "the new registration's OK begins the capture, announced once"] call _assert;
+
   // A registered mission paused before its capture is discarded at mission end.
   call _registering;
   call OCAP_recorder_fnc_stopRecording;

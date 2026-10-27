@@ -7,7 +7,7 @@ Description:
   Registers a recording of the mission with the extension. Uses the world and
   mission context initSession cached once storage was initialized.
 
-  The existing ExtensionCallback handler (added during initSession) will process
+  The ExtensionCallback handler (OCAP_extension_fnc_handleCallback) will process
   the :MISSION:OK: response and set sessionReady = true, or :MISSION:FAILED:
   and leave it false. sessionPending is true until either arrives.
 

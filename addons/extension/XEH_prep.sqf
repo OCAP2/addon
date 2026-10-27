@@ -2,4 +2,5 @@
 
 PREP(sendData);
 PREP(initSession);
+PREP(handleCallback);
 PREP(newMission);

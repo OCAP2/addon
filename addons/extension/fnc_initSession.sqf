@@ -7,7 +7,8 @@ GVAR(sessionReady) = false;
 GVAR(sessionPending) = false;
 
 
-// when the extension is ready, it'll send a callback which will set sessionReady to true and let the other functions being sending data
+// The extension answers through callbacks: storage readiness builds the mission context, and
+// :MISSION:OK: for the pending registration sets sessionReady, which lets the recorder send data.
 addMissionEventHandler ["ExtensionCallback", {
   params ["_name", "_function", "_dataArr"];
 

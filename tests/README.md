@@ -9,6 +9,12 @@ with an error, and the stubs of the others fail. Build a test copy with
 `addons/main/script_macros.hpp`, which makes `PREP` use plain `compile`, then
 `hemtt build`. Never ship that build.
 
+`recorder_regressions.sqf` and `client_sampler_regressions.sqf` also stub CBA's
+own functions (`CBA_fnc_addPerFrameHandler`, `CBA_fnc_waitUntilAndExecute`),
+which stay final in any CBA build. Their servicing and client sampler parts
+therefore fail with "Attempt to override final function", on `main` as well;
+the server-side submission checks run.
+
 ## Suites
 
 `recorder_regressions.sqf` and `client_sampler_regressions.sqf` exercise the

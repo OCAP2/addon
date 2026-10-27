@@ -274,7 +274,8 @@ if (isNil QEGVAR(listener,counterEvent)) then {
 
     A fresh recording starts asynchronously: the mission registers with the extension first.
     The server-local event "OCAP_recordingStarted" fires once the capture runs, and again on each
-    resume; custom events and exports before then are not recorded.
+    resume. Custom events before then are not recorded, and an export before then is refused
+    ("recording hasn't started yet").
 
   Example:
     > ["OCAP_record"] call CBA_fnc_serverEvent;

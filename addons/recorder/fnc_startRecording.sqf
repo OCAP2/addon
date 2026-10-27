@@ -44,12 +44,13 @@ if (GVAR(recording) && {!isNil QGVAR(startTime)}) exitWith {
 };
 
 // Another start is registering the mission with the extension; it begins the
-// capture once the extension confirms it. A pause meanwhile is undone. One
-// the extension has not answered for a minute (an older extension, or a lost
-// callback) is given up and registered again: its token makes a late answer
-// harmless.
+// capture once the extension confirms it. A pause meanwhile is undone. A
+// :MISSION:START: the extension has not answered for a minute (a lost
+// callback) is given up and sent again: its token makes a late answer
+// harmless. Waiting for storage, nothing was sent yet, so nothing is resent.
 private _pending = missionNamespace getVariable [QEGVAR(extension,sessionPending), false];
-private _pendingFor = diag_tickTime - (missionNamespace getVariable [QGVAR(registrationRequestedAt), diag_tickTime]);
+private _sentAt = missionNamespace getVariable [QEGVAR(extension,registrationSentAt), -1];
+private _pendingFor = [0, diag_tickTime - _sentAt] select (_sentAt >= 0);
 if (_pending && {_pendingFor >= 60}) then {
   WARNING_1("The extension has not answered the mission registration for %1 s; registering again",round _pendingFor);
   EGVAR(extension,sessionPending) = false;
@@ -72,7 +73,7 @@ publicVariable QGVAR(recording);
 
 if (isNil QGVAR(startTime) && {!EGVAR(extension,sessionReady)}) exitWith {
   EGVAR(extension,sessionPending) = true;
-  GVAR(registrationRequestedAt) = diag_tickTime;
+  EGVAR(extension,registrationSentAt) = -1; // set by newMission once sent
 
   // The mission registers with the extension only now, the first time or
   // after the previous recording was exported or discarded, so a mission

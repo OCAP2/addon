@@ -45,8 +45,9 @@ recording to the web server while it records:
   ends first, the registered mission is discarded instead, whatever
   `saveMissionEnded` says. If the mission unloads before the extension
   answers, the extension refuses that start, or, if the start already reached
-  its storage, drops the empty mission when the next one loads. A start
-  request after a minute without an answer registers the mission again.
+  its storage, drops the empty mission when the next one loads (a web server
+  older than protocol 3 saves it as an empty `partial` instead). A start
+  request a minute after an unanswered `:MISSION:START:` sends it again.
   Storage that is still initializing is waited for too, until the extension
   reports `:STORAGE:ERROR:`; players are notified after 60 seconds.
 - A pause before the capture began only holds it back: players were not told

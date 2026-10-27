@@ -41,7 +41,11 @@ GVAR(sessionPending) = true;
 // mission's start is not taken for this one's.
 GVAR(registrationToken) = format ["%1-%2", floor random 1e6, floor random 1e6];
 GVAR(registrationSentAt) = diag_tickTime;
-if (isNil {[":MISSION:START:", [GVAR(worldContext), GVAR(missionContext), GVAR(registrationToken)], 'ocap_recorder'] call FUNC(sendData)}) then {
+// Until the recording reaches OCAP_settings_minMissionTime (:MISSION:KEEP:,
+// sent by the capture loop), the extension drops it if the game moves on
+// without a save or discard, e.g. after #missions or #restart.
+GVAR(recordingKept) = EGVAR(recorder,minMissionTime) <= 0;
+if (isNil {[":MISSION:START:", [GVAR(worldContext), GVAR(missionContext), GVAR(registrationToken), ["discard", "keep"] select GVAR(recordingKept)], 'ocap_recorder'] call FUNC(sendData)}) then {
   ERROR("The extension did not accept the mission; recording will not start.");
   GVAR(sessionPending) = false; // nothing will answer
 };

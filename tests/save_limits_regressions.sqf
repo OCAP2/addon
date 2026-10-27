@@ -30,11 +30,13 @@ private _error = "";
 
 // Intercept the lifecycle commands, never register or upload a test recording.
 OCAP_test_commands = [];
+OCAP_test_startModes = [];
 OCAP_extension_fnc_sendData = {
-  params ["_command"];
-  if (_command in [":MISSION:START:", ":MISSION:SAVE:", ":MISSION:DISCARD:"]) then {
+  params ["_command", "_args"];
+  if (_command in [":MISSION:START:", ":MISSION:SAVE:", ":MISSION:DISCARD:", ":MISSION:KEEP:"]) then {
     OCAP_test_commands pushBack _command;
   };
+  if (_command isEqualTo ":MISSION:START:") then {OCAP_test_startModes pushBack (_args param [3, ""])};
   ""
 };
 OCAP_recorder_fnc_captureLoop = {OCAP_recorder_startTime = time};
@@ -86,6 +88,7 @@ try {
   call OCAP_recorder_fnc_startRecording;
   sleep 1;
   [[":MISSION:START:"] call _sent == 1, "a start registers the mission once"] call _assert;
+  [OCAP_test_startModes isEqualTo ["discard"] && {!OCAP_extension_recordingKept}, "a recording the game moves on from is dropped until it is long enough"] call _assert;
   [OCAP_extension_sessionPending, "the registration waits for :MISSION:OK:"] call _assert;
   [isNil "OCAP_recorder_startTime", "capture waits for the extension"] call _assert;
   [OCAP_test_announcedCapturing isEqualTo [], "nothing is announced before the capture runs"] call _assert;

@@ -19,6 +19,7 @@ Public:
 if (!GVAR(autoStart) || {!EGVAR(settings,autoRestartAfterEmpty)}) exitWith {};
 if (!GVAR(autoRestartAfterEmptyPending)) exitWith {};
 if (GVAR(recording) || {!isNil QGVAR(startTime)}) exitWith {};
+if (missionNamespace getVariable [QGVAR(heldByPause), false]) exitWith {}; // an admin paused
 if (getClientStateNumber <= 9) exitWith {};
 
 private _playerCount = call FUNC(getAutoStartPlayerCount);

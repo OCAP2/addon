@@ -44,8 +44,18 @@ if (GVAR(recording) && {!isNil QGVAR(startTime)}) exitWith {
 };
 
 // Another start is registering the mission with the extension; it begins the
-// capture once the extension confirms it. A pause meanwhile is undone.
-if (missionNamespace getVariable [QEGVAR(extension,sessionPending), false]) exitWith {
+// capture once the extension confirms it. A pause meanwhile is undone. One
+// the extension has not answered for a minute (an older extension, or a lost
+// callback) is given up and registered again: its token makes a late answer
+// harmless.
+private _pending = missionNamespace getVariable [QEGVAR(extension,sessionPending), false];
+private _pendingFor = diag_tickTime - (missionNamespace getVariable [QGVAR(registrationRequestedAt), diag_tickTime]);
+if (_pending && {_pendingFor >= 60}) then {
+  WARNING_1("The extension has not answered the mission registration for %1 s; registering again",round _pendingFor);
+  EGVAR(extension,sessionPending) = false;
+  _pending = false;
+};
+if (_pending) exitWith {
   INFO("Recording start requested while the mission registers with the extension");
   GVAR(heldByPause) = false;
   GVAR(recording) = true;
@@ -62,6 +72,7 @@ publicVariable QGVAR(recording);
 
 if (isNil QGVAR(startTime) && {!EGVAR(extension,sessionReady)}) exitWith {
   EGVAR(extension,sessionPending) = true;
+  GVAR(registrationRequestedAt) = diag_tickTime;
 
   // The mission registers with the extension only now, the first time or
   // after the previous recording was exported or discarded, so a mission
@@ -76,12 +87,14 @@ if (isNil QGVAR(startTime) && {!EGVAR(extension,sessionReady)}) exitWith {
     private _ended = missionNamespace getVariable [QGVAR(missionEnded), false];
     if (_ended || {isNil QEGVAR(extension,missionContext)}) exitWith {
       EGVAR(extension,sessionPending) = false;
-      GVAR(recording) = false;
-      publicVariable QGVAR(recording);
       if (!_ended) then {
         ERROR("Extension storage could not be initialized. Recording will not start.");
-        ["OCAP failed to start recording: extension storage is not ready", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+        if (GVAR(recording)) then {
+          ["OCAP failed to start recording: extension storage is not ready", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+        };
       };
+      GVAR(recording) = false;
+      publicVariable QGVAR(recording);
     };
     // Paused while storage initialized: nothing to register yet; the next
     // start does.
@@ -103,9 +116,11 @@ if (isNil QGVAR(startTime) && {!EGVAR(extension,sessionReady)}) exitWith {
         publicVariable QGVAR(recording);
       };
       if (!EGVAR(extension,sessionReady)) exitWith {
+        if (GVAR(recording)) then { // a paused start was never announced either
+          ["OCAP failed to start recording: the extension could not start the mission", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
+        };
         GVAR(recording) = false;
         publicVariable QGVAR(recording);
-        ["OCAP failed to start recording: the extension could not start the mission", 1, [1, 0, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
       };
       // Paused meanwhile: the capture begins when recording resumes.
       if (!GVAR(recording)) exitWith {
@@ -117,7 +132,8 @@ if (isNil QGVAR(startTime) && {!EGVAR(extension,sessionReady)}) exitWith {
     }] call CBA_fnc_waitUntilAndExecute;
 
     [{EGVAR(extension,sessionReady) || {!EGVAR(extension,sessionPending)}}, {}, [], 30, {
-      if (!GVAR(recording)) exitWith {}; // paused meanwhile
+      // Paused, or the mission ended, meanwhile.
+      if (!GVAR(recording) || {missionNamespace getVariable [QGVAR(missionEnded), false]}) exitWith {};
       WARNING("The extension has not confirmed the mission after 30 seconds; recording starts once it does");
       ["OCAP is waiting for the extension to start recording", 1, [1, 1, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
     }] call CBA_fnc_waitUntilAndExecute;

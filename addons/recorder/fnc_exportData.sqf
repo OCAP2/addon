@@ -56,21 +56,24 @@ if (isNil QGVAR(startTime)) exitWith {
   // if recording hasn't started, there's nothing to save
   LOG(["Export data call received, but recording of this session hasn't yet started."]);
 
-  {
+  // A short recording discarded at mission end is gone; say so.
+  private _status = ["OCAP was asked to save, but recording hasn't started yet.", "OCAP was asked to save, but the recording was already discarded when the mission ended."] select (missionNamespace getVariable [QGVAR(discardedAtEnd), false]);
+  [[_status], {
+    params ["_status"];
     [{!isNull player}, {
       player createDiaryRecord [
         "OCAPInfo",
         [
           "Status",
-          "<font color='#33FF33'>OCAP was asked to save, but recording hasn't started yet.</font>"
+          format ["<font color='#33FF33'>%1</font>", _this]
         ], taskNull, "", false
       ];
       player setDiarySubjectPicture [
         "OCAPInfo",
         "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
       ];
-    }] call CBA_fnc_waitUntilAndExecute;
-  } remoteExecCall ["call", 0, true];
+    }, _status] call CBA_fnc_waitUntilAndExecute;
+  }] remoteExecCall ["call", 0, true];
 };
 
 

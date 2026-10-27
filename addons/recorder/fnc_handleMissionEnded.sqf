@@ -50,4 +50,5 @@ if ((GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) / 60 >= GVAR(minMissionTime
 [{
   if (isNil QGVAR(startTime)) exitWith {}; // saved meanwhile, or never started
   [format ["the mission ended before the recording reached %1 minutes", GVAR(minMissionTime)]] call FUNC(discardRecording);
+  GVAR(discardedAtEnd) = true; // a later OCAP_exportData says so
 }] call CBA_fnc_execNextFrame;

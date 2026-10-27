@@ -278,7 +278,7 @@ if (isNil QEGVAR(listener,counterEvent)) then {
 
   Example:
     > ["OCAP_record"] call CBA_fnc_serverEvent;
-    > ["OCAP_recordingStarted", {["OCAP_customEvent", ["generalEvent", "Phase 1"]] call CBA_fnc_serverEvent}] call CBA_fnc_addEventHandler;
+    > ["OCAP_recordingStarted", {diag_log "OCAP records"}] call CBA_fnc_addEventHandler;
 */
 if (isNil QEGVAR(listener,record)) then {
   EGVAR(listener,record) = [QGVARMAIN(record), {
@@ -294,6 +294,10 @@ if (isNil QEGVAR(listener,record)) then {
   CBA Event: OCAP_pause
   Description:
     Used to pause recording. Calls <OCAP_recorder_fnc_stopRecording> when triggered.
+
+    Before the capture began (for example while the mission registers), it silently holds the
+    recording back: auto-start and the empty-server auto-restart leave it alone until
+    <OCAP_record> is raised.
 
   Example:
     > ["OCAP_pause"] call CBA_fnc_serverEvent;
@@ -314,6 +318,11 @@ if (isNil QEGVAR(listener,pause)) then {
     Used to stop recording & signal the extension to save and upload it to the web component. Calls <OCAP_recorder_fnc_exportData> when triggered.
 
     *Will always bypass <OCAP_settings_minMissionTime>*.
+
+    At mission end (MPEnded, with <OCAP_settings_saveMissionEnded>), a recording shorter than
+    the minimum is discarded one frame later. To save it anyway, raise this event on the server
+    before the mission ends or in the same frame (e.g. from your own MPEnded handler without
+    suspending); a later one finds the recording already discarded.
 
   Parameters:
     0 - Event name [String]

@@ -74,10 +74,19 @@ This needs an extension with `:MISSION:DISCARD:`, `:MISSION:FAILED:` and
 which the server RPT logs as a warning, and never answers a failed start or a
 failed storage, so such a recording keeps waiting.
 
-A recording ended without a save or a discard is still saved by the web server
-as `partial`, whatever its length. That covers an admin changing the mission
-(`#missions`, `#restart`), a crash, and a recording that captured anything
-when the mission ends with `saveMissionEnded` disabled.
+When an admin changes the mission (`#missions`, `#restart`), the addon gets no
+event: the extension ends the recording when the next mission loads. Each
+registration asks it to drop the recording then (`:MISSION:START:` with
+`discard`) until the recording reaches `minMissionTime`; from that frame the
+capture loop sends `:MISSION:KEEP:`, and such a recording is saved by the web
+server as `partial`, as before. This holds for the `websocket` storage, with a
+web server at protocol 3; an older extension ignores the request, and logs the
+unknown `:MISSION:KEEP:` once per recording.
+
+A recording ended otherwise without a save or a discard is still saved by the
+web server as `partial`, whatever its length: after a crash, after a server
+shut down with `#shutdown` or from the mission list, and one that captured
+anything when the mission ends with `saveMissionEnded` disabled.
 
 ## Dedicated-server verification
 
@@ -115,3 +124,9 @@ as the server notifications.
    `MPEnded`, so this also checks that the server still runs that frame.
 8. With auto-start, verify the saved recording holds the "Recording started."
    and "Mission has started!" events at its start.
+9. With the `websocket` storage, record less than `minMissionTime`, then change
+   the mission with `#missions` and load another one (or `#restart`). Verify
+   the extension log has `abandoned before it met the addon's save limits;
+   discarding it` and the web server keeps no recording of it. Record past
+   `minMissionTime` (the extension log has `Received :MISSION:KEEP:`), change
+   the mission again and verify it is saved as `partial`.

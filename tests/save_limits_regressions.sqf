@@ -191,6 +191,7 @@ try {
   // Discarding before a recording started does nothing.
   OCAP_recorder_startTime = nil;
   OCAP_extension_sessionReady = false;
+  OCAP_test_commands = [];
   ["test"] call OCAP_recorder_fnc_discardRecording;
   [OCAP_test_commands isEqualTo [], "no recording, nothing to discard"] call _assert;
 } catch {

@@ -74,19 +74,25 @@ This needs an extension with `:MISSION:DISCARD:`, `:MISSION:FAILED:` and
 which the server RPT logs as a warning, and never answers a failed start or a
 failed storage, so such a recording keeps waiting.
 
-When an admin changes the mission (`#missions`, `#restart`), the addon gets no
-event: the extension ends the recording when the next mission loads. Each
-registration asks it to drop the recording then (`:MISSION:START:` with
-`discard`) until the recording reaches `minMissionTime`; from that frame the
-capture loop sends `:MISSION:KEEP:`, and such a recording is saved by the web
-server as `partial`, as before. This holds for the `websocket` storage, with a
-web server at protocol 3; an older extension ignores the request, and logs the
-unknown `:MISSION:KEEP:` once per recording.
+When an admin changes the mission, `MPEnded` fires, with `#missions` and with
+`#restart`. After `#missions` the discard above runs on the next frame. After
+`#restart` the next mission loads first, so it never runs. The extension ends
+a recording still open when the next mission loads. Each registration asks it
+to drop the recording then (`:MISSION:START:` with `discard`) until the
+recording reaches `minMissionTime`. From that frame the capture loop sends
+`:MISSION:KEEP:`, and such a recording is kept: the web server saves it as
+`partial`. So a recording below `minMissionTime` leaves nothing on the web
+either way. This holds for the `websocket` storage, with a web server at
+protocol 3. An older extension ignores the request, and the server RPT logs
+its rejection of `:MISSION:KEEP:` once per recording.
 
-A recording ended otherwise without a save or a discard is still saved by the
-web server as `partial`, whatever its length: after a crash, after a server
-shut down with `#shutdown` or from the mission list, and one that captured
-anything when the mission ends with `saveMissionEnded` disabled.
+With `saveMissionEnded` disabled, a recording is neither saved nor discarded at
+mission end. When the next mission loads, the extension drops it if it is
+below `minMissionTime` and keeps it as `partial` otherwise.
+
+A recording still open when the game server process exits is saved by the web
+server as `partial`, whatever its length, once its resume grace expires. That
+happens after a crash, and with `#shutdown`, which fires no `MPEnded`.
 
 ## Dedicated-server verification
 
@@ -125,8 +131,9 @@ as the server notifications.
 8. With auto-start, verify the saved recording holds the "Recording started."
    and "Mission has started!" events at its start.
 9. With the `websocket` storage, record less than `minMissionTime`, then change
-   the mission with `#missions` and load another one (or `#restart`). Verify
-   the extension log has `abandoned before it met the addon's save limits;
-   discarding it` and the web server keeps no recording of it. Record past
+   the mission with `#missions` and load another one. Verify that the server
+   RPT has `Discarding recording` and that the web server keeps no recording
+   of it. Repeat with `#restart`: the extension's output has `abandoned before
+   it met the addon's save limits; discarding it` instead. Record past
    `minMissionTime` (the extension log has `Received :MISSION:KEEP:`), change
-   the mission again and verify it is saved as `partial`.
+   the mission again and verify it is saved.

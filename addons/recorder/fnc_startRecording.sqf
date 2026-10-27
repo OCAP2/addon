@@ -8,7 +8,7 @@ Description:
 
   Called via <OCAP_record> via direct CBA event or the administrative diary entry, or by a waiter in <OCAP_recorder_fnc_init> (see <OCAP_settings_autoStart>).
 
-  Will not start recording if <OCAP_recorder_recording> is true and will notify players.
+  Will not start recording again while the capture runs, and will notify players.
 
   A fresh recording first registers the mission with the extension (<OCAP_extension_fnc_newMission>)
   and begins the capture once the extension confirms it. Start requests made meanwhile register
@@ -47,6 +47,7 @@ if (GVAR(recording) && {!isNil QGVAR(startTime)}) exitWith {
 // capture once the extension confirms it. A pause meanwhile is undone.
 if (missionNamespace getVariable [QEGVAR(extension,sessionPending), false]) exitWith {
   INFO("Recording start requested while the mission registers with the extension");
+  GVAR(heldByPause) = false;
   GVAR(recording) = true;
   publicVariable QGVAR(recording);
   ["OCAP starts recording once the mission is registered", 1, [1, 1, 1, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
@@ -55,6 +56,7 @@ if (missionNamespace getVariable [QEGVAR(extension,sessionPending), false]) exit
 // Any explicit or automatic start consumes a pending empty-server restart.
 GVAR(autoRestartAfterEmptyPending) = false;
 
+GVAR(heldByPause) = false;
 GVAR(recording) = true;
 publicVariable QGVAR(recording);
 
@@ -128,6 +130,7 @@ if (isNil QGVAR(startTime) && {!EGVAR(extension,sessionReady)}) exitWith {
       ERROR("The extension is not running. Recording will not start.");
       EGVAR(extension,storageFailed) = true;
     };
+    if (!GVAR(recording)) exitWith {}; // paused meanwhile
     WARNING("Extension storage is not initialized after 60 seconds; recording starts once it is");
     ["OCAP is waiting for its storage to start recording", 1, [1, 1, 0, 1]] remoteExecCall ["CBA_fnc_notify", [0, -2] select isDedicated];
   }] call CBA_fnc_waitUntilAndExecute;

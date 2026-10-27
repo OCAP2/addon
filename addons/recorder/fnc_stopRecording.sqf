@@ -31,6 +31,8 @@ if (isNil QGVAR(startTime)) exitWith {
   INFO("Recording paused before its capture began");
   GVAR(recording) = false;
   publicVariable QGVAR(recording);
+  // Auto-start leaves a held pause alone; the next start request lifts it.
+  GVAR(heldByPause) = true;
 };
 
 private _systemTimeFormat = ["%1-%2-%3T%4:%5:%6.%7"];

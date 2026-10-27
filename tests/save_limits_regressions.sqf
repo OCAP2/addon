@@ -1,11 +1,14 @@
 /* Run on the server in a disposable multiplayer mission; see tests/README.md. */
 if (!isServer || {!canSuspend}) exitWith {throw "Run the tests with server-side execVM"};
-if (missionNamespace getVariable ["OCAP_recorder_recording", false]) exitWith {throw "Disable auto-start and stop recording first"};
+if (
+  missionNamespace getVariable ["OCAP_recorder_recording", false] ||
+  {!isNil "OCAP_recorder_startTime"} ||
+  {missionNamespace getVariable ["OCAP_extension_sessionPending", false]}
+) exitWith {throw "Disable auto-start, and run the tests before any recording started"};
 if (isNil "OCAP_extension_missionContext") exitWith {throw "Wait for the extension storage to initialize first"};
-// The stubs below replace addon functions, which CBA compiles final unless the
-// mission allows recompiling them; otherwise real lifecycle commands would reach
-// the extension.
-if (isFinal OCAP_extension_fnc_sendData) exitWith {throw "Set allowFunctionsRecompile = 1 in the test mission's description.ext"};
+// The stubs below replace addon functions, which CBA compiles final; otherwise
+// real lifecycle commands would reach the extension.
+if (isFinal OCAP_extension_fnc_sendData) exitWith {throw "Use a test build of the addon (DISABLE_COMPILE_CACHE); see tests/README.md"};
 
 private _assert = {
   params ["_condition", "_description"];
@@ -171,6 +174,20 @@ try {
   sleep 1;
   [OCAP_test_commands isEqualTo [], "saveMissionEnded disabled neither saves nor discards"] call _assert;
 
+  // A pause before anything started is held: auto-start leaves it alone
+  // (OCAP_recorder_fnc_init), and the next start request lifts it.
+  OCAP_recorder_missionEnded = nil; // set by the mission end checks above
+  OCAP_recorder_recording = false;
+  OCAP_recorder_startTime = nil;
+  OCAP_extension_sessionReady = false;
+  OCAP_extension_sessionPending = false;
+  call OCAP_recorder_fnc_stopRecording;
+  [OCAP_recorder_heldByPause, "a pause before the capture is held"] call _assert;
+  call _registering;
+  [!OCAP_recorder_heldByPause && {OCAP_extension_sessionPending}, "a start request lifts it and registers"] call _assert;
+  call _confirm;
+  sleep 1;
+
   // Discarding before a recording started does nothing.
   OCAP_recorder_startTime = nil;
   OCAP_extension_sessionReady = false;
@@ -183,6 +200,7 @@ try {
 OCAP_recorder_recording = false;
 OCAP_recorder_startTime = nil;
 OCAP_recorder_missionEnded = nil;
+OCAP_recorder_heldByPause = nil;
 OCAP_recorder_captureFrameNo = 0;
 OCAP_extension_sessionReady = false;
 OCAP_extension_sessionPending = false;

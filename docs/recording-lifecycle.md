@@ -36,19 +36,20 @@ recording to the web server while it records:
   meanwhile register nothing more, but undo a pause and tell players recording
   starts once the mission is registered; after 30 seconds it notifies players
   that it is still waiting. A start request while the capture runs only
-  reports that OCAP is already recording. Each registration carries a token the extension echoes, so a
-  late answer to an earlier mission's registration is ignored. Without a
-  running extension (no `:SYS:VERSION:` after 60 seconds) the recording gives
-  up. A pause meanwhile (`OCAP_pause`) holds the capture back until
-  recording resumes; a pause while storage still initializes does not
-  register the mission at all until then. If the mission ends first, the registered mission is
-  discarded instead, whatever `saveMissionEnded` says. If the mission unloads
-  before the extension answers, the extension drops that empty mission when
-  the next one starts. Storage that is still initializing is waited for too,
-  until the extension reports `:STORAGE:ERROR:`; players are notified after
-  60 seconds.
+  reports that OCAP is already recording. Each registration carries a token
+  the extension echoes, so a late answer to an earlier mission's registration
+  is ignored. Without a running extension (no `:SYS:VERSION:` after 60
+  seconds) the recording gives up. A pause meanwhile (`OCAP_pause`) holds the
+  capture back until recording resumes; a pause while storage still
+  initializes does not register the mission at all until then. If the mission
+  ends first, the registered mission is discarded instead, whatever
+  `saveMissionEnded` says. If the mission unloads before the extension
+  answers, the extension drops that empty mission when the next one loads.
+  Storage that is still initializing is waited for too, until the extension
+  reports `:STORAGE:ERROR:`; players are notified after 60 seconds.
 - A pause before the capture began only holds it back: players were not told
-  recording started, so they are not told it stopped.
+  recording started, so they are not told it stopped. Auto-start leaves such a
+  pause alone; the next start request lifts it.
 - `OCAP_recorder_recording` is true from the start request on, while
   `OCAP_recorder_startTime` is set once the capture runs, and the server-local
   CBA event `OCAP_recordingStarted` fires then. A mission script that starts
@@ -58,7 +59,9 @@ recording to the web server while it records:
 - When the mission ends (`MPEnded` with `saveMissionEnded`) before the
   recording reached `minMissionTime`, the recording is discarded with
   `:MISSION:DISCARD:`, one frame later, so a mission script can still save it
-  through `OCAP_exportData`. The `memory` storage drops it, the `websocket`
+  through `OCAP_exportData` on the server in the same frame (before `MPEnded`,
+  or from its own `MPEnded` handler without suspending). A later export, for
+  example one a client raises, finds the recording already discarded. The `memory` storage drops it, the `websocket`
   storage tells the web server to drop it (web protocol version 3; an older web
   server still saves it as `partial`). A recording that reached
   `minMissionTime` is saved as before.

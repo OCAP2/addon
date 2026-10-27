@@ -253,22 +253,26 @@ call EFUNC(extension,initSession);
   {(getClientStateNumber > 9 && (call FUNC(getAutoStartPlayerCount)) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
   {
     // Recording started some other way already captures, registers the
-    // mission, or holds a registered mission paused; a start now would undo
-    // an admin's pause.
+    // mission, or is held by a pause; a start now would undo an admin's
+    // pause.
+    private _held = missionNamespace getVariable [QGVAR(heldByPause), false];
     if (
       isNil QGVAR(startTime) &&
       {!(missionNamespace getVariable [QEGVAR(extension,sessionPending), false])} &&
-      {!EGVAR(extension,sessionReady)}
+      {!EGVAR(extension,sessionReady)} &&
+      {!_held}
     ) then {
       call FUNC(startRecording);
     };
     // Events are recorded once the capture runs, which waits for the
-    // extension to register the mission. Give up when that failed.
+    // extension to register the mission, or for a pause to be lifted.
+    // Give up when that failed.
     [{
       !isNil QGVAR(startTime) || {
         !GVAR(recording) &&
         {!(missionNamespace getVariable [QEGVAR(extension,sessionPending), false])} &&
-        {!EGVAR(extension,sessionReady)}
+        {!EGVAR(extension,sessionReady)} &&
+        {!(missionNamespace getVariable [QGVAR(heldByPause), false])}
       }
     }, {
       if (isNil QGVAR(startTime)) exitWith {};

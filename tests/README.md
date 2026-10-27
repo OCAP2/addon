@@ -1,16 +1,23 @@
 # Recorder regression tests
 
+## Test build
+
+The suites replace addon functions with stubs. CBA compiles `PREP`ed functions
+final, so a release build cannot run them: `save_limits_regressions.sqf` stops
+with an error, and the stubs of the others fail. Build a test copy with
+`#define DISABLE_COMPILE_CACHE` above the CBA include in
+`addons/main/script_macros.hpp`, which makes `PREP` use plain `compile`, then
+`hemtt build`. Never ship that build.
+
+## Suites
+
 `recorder_regressions.sqf` and `client_sampler_regressions.sqf` exercise the
 installed addon's actual submission functions, sampling callbacks, export reset
 and restart entry point. They require Arma multiplayer; HEMTT checks/builds do not
 execute them.
 
 Use a **disposable** CBA-only test mission with OCAP on the server only, auto-start
-disabled, and two connected players with different network owners. The suites
-replace addon functions with stubs, which CBA compiles final by default: set
-`allowFunctionsRecompile = 1;` in the test mission's `description.ext`, or
-otherwise enable CBA function recompiling. `save_limits_regressions.sqf` stops
-with an error when its functions are final. Give one player
+disabled, and two connected players with different network owners. Give one player
 an assigned Zeus curator. Name the non-curator player `testClient` and the curator
 player `testCurator` in the editor. Copy the scripts into the mission's `tests/`
 folder and execute on the server:

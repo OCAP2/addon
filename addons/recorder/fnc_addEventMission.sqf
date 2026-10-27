@@ -103,22 +103,18 @@ if (isNil QEGVAR(EH,EntityRespawned)) then {
 
 if (isNil QEGVAR(EH,MPEnded)) then {
   // Event Handler: OCAP_EH_MPEnded
-  // Handle for the "MPEnded" mission event handler. Fired on the MPEnded mission event. This is used to automatically save and export if <OCAP_settings_saveMissionEnded> is true and <OCAP_settings_minMissionTime> was reached.
+  // Handle for the "MPEnded" mission event handler. Fired on the MPEnded mission event. When <OCAP_settings_saveMissionEnded> is true, this saves and exports the recording if <OCAP_settings_minMissionTime> was reached and discards it otherwise. A mission registered with the extension but never captured is discarded regardless. See <OCAP_recorder_fnc_handleMissionEnded>.
   EGVAR(EH,MPEnded) = addMissionEventHandler ["MPEnded", {
-    if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) / 60 >= GVAR(minMissionTime)) then {
-      ["Mission ended automatically"] call FUNC(exportData);
-    };
+    call FUNC(handleMissionEnded);
   }];
   OCAPEXTLOG(["Initialized MPEnded EH"]);
 };
 
 if (isNil QEGVAR(EH,Ended)) then {
   // Event Handler: OCAP_EH_Ended
-  // Handle for the "Ended" mission event handler. Fired on the singleplayer Ended mission event. This is used to automatically save and export if <OCAP_settings_saveMissionEnded> is true and <OCAP_settings_minMissionTime> was reached. Kept in just in case this event triggers.
+  // Handle for the "Ended" mission event handler. Fired on the singleplayer Ended mission event. Handled like <OCAP_EH_MPEnded>. Kept in just in case this event triggers.
   EGVAR(EH,Ended) = addMissionEventHandler ["Ended", {
-    if (EGVAR(settings,saveMissionEnded) && (GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) / 60 >= GVAR(minMissionTime)) then {
-      ["Mission ended automatically"] call FUNC(exportData);
-    };
+    call FUNC(handleMissionEnded);
   }];
   OCAPEXTLOG(["Initialized Ended EH"]);
 };
@@ -276,8 +272,14 @@ if (isNil QEGVAR(listener,counterEvent)) then {
   Description:
     Used to start or resume recording. Calls <OCAP_recorder_fnc_startRecording> when triggered.
 
+    A fresh recording starts asynchronously: the mission registers with the extension first.
+    The server-local event "OCAP_recordingStarted" fires once the capture runs, and again on each
+    resume. Custom events before then are not recorded, and an export before then is refused
+    ("recording hasn't started yet").
+
   Example:
     > ["OCAP_record"] call CBA_fnc_serverEvent;
+    > ["OCAP_recordingStarted", {diag_log "OCAP records"}] call CBA_fnc_addEventHandler;
 */
 if (isNil QEGVAR(listener,record)) then {
   EGVAR(listener,record) = [QGVARMAIN(record), {
@@ -293,6 +295,10 @@ if (isNil QEGVAR(listener,record)) then {
   CBA Event: OCAP_pause
   Description:
     Used to pause recording. Calls <OCAP_recorder_fnc_stopRecording> when triggered.
+
+    Before the capture began (for example while the mission registers), it silently holds the
+    recording back: auto-start and the empty-server auto-restart leave it alone until
+    <OCAP_record> is raised.
 
   Example:
     > ["OCAP_pause"] call CBA_fnc_serverEvent;
@@ -313,6 +319,11 @@ if (isNil QEGVAR(listener,pause)) then {
     Used to stop recording & signal the extension to save and upload it to the web component. Calls <OCAP_recorder_fnc_exportData> when triggered.
 
     *Will always bypass <OCAP_settings_minMissionTime>*.
+
+    At mission end (MPEnded, with <OCAP_settings_saveMissionEnded>), a recording shorter than
+    the minimum is discarded one frame later. To save it anyway, raise this event on the server
+    before the mission ends or in the same frame (e.g. from your own MPEnded handler without
+    suspending); a later one finds the recording already discarded.
 
   Parameters:
     0 - Event name [String]

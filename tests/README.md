@@ -1,5 +1,22 @@
 # Recorder regression tests
 
+## Test build
+
+The suites replace addon functions with stubs. CBA compiles `PREP`ed functions
+final, so a release build cannot run them: `save_limits_regressions.sqf` stops
+with an error, and the stubs of the others fail. Build a test copy with
+`#define DISABLE_COMPILE_CACHE` above the CBA include in
+`addons/main/script_macros.hpp`, which makes `PREP` use plain `compile`, then
+`hemtt build`. Never ship that build.
+
+`recorder_regressions.sqf` and `client_sampler_regressions.sqf` also stub CBA's
+own functions (`CBA_fnc_addPerFrameHandler`, `CBA_fnc_waitUntilAndExecute`),
+which stay final in any CBA build. Their servicing and client sampler parts
+therefore fail with "Attempt to override final function", on `main` as well;
+the server-side submission checks run.
+
+## Suites
+
 `recorder_regressions.sqf` and `client_sampler_regressions.sqf` exercise the
 installed addon's actual submission functions, sampling callbacks, export reset
 and restart entry point. They require Arma multiplayer; HEMTT checks/builds do not
@@ -8,7 +25,7 @@ execute them.
 Use a **disposable** CBA-only test mission with OCAP on the server only, auto-start
 disabled, and two connected players with different network owners. Give one player
 an assigned Zeus curator. Name the non-curator player `testClient` and the curator
-player `testCurator` in the editor. Copy both scripts into the mission's `tests/`
+player `testCurator` in the editor. Copy the scripts into the mission's `tests/`
 folder and execute on the server:
 
 ```sqf
@@ -53,3 +70,27 @@ Extension writes are intercepted, and the servicing clock is advanced only in an
 unscheduled block. The suite replaces recording state and removes the servicing
 PFH; restart the mission afterwards. It is an opt-in test artifact, not included
 in the release PBOs.
+
+`save_limits_regressions.sqf` checks the save limits: a recording registers the
+mission with the extension once, when it starts, and begins the capture and
+announces it only once the extension confirms it, however long that takes; a
+failed start ends the recording; a mission that ends while it registers is
+discarded; a pause while it registers holds the capture back until recording
+resumes, and a registered mission never captured is discarded at mission end;
+a mission that ends before `minMissionTime` is discarded
+(`:MISSION:DISCARD:`) unless a mission script exports it on the same frame; a
+longer one is saved; `saveMissionEnded` disabled does neither. It needs no
+players and takes about a minute. Execute it on the server once the extension
+storage is initialized, with auto-start disabled:
+
+```sqf
+execVM "tests\save_limits_regressions.sqf";
+```
+
+The RPT must end with `[OCAP save limits] ALL TESTS PASSED`.
+
+Lifecycle commands to the extension are intercepted, so nothing is registered
+or saved. The suite replaces recording state and resets per-unit recording
+variables, and a recording start it simulates also satisfies the auto-start
+waiter; restart the mission afterwards. It is an opt-in test artifact, not
+included in the release PBOs.

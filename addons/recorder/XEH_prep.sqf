@@ -5,7 +5,12 @@ PREP(init);
 PREP(updateTime);
 
 PREP(startRecording);
+PREP(announceRecording);
 PREP(stopRecording);
+PREP(removeCaptureHandlers);
+PREP(resetRecording);
+PREP(discardRecording);
+PREP(handleMissionEnded);
 PREP(autoRestartMonitor);
 PREP(getAutoStartPlayerCount);
 PREP(captureLoop);

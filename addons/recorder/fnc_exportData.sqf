@@ -56,21 +56,24 @@ if (isNil QGVAR(startTime)) exitWith {
   // if recording hasn't started, there's nothing to save
   LOG(["Export data call received, but recording of this session hasn't yet started."]);
 
-  {
+  // A short recording discarded at mission end is gone; say so.
+  private _status = ["OCAP was asked to save, but recording hasn't started yet.", "OCAP was asked to save, but the recording was already discarded when the mission ended."] select (missionNamespace getVariable [QGVAR(discardedAtEnd), false]);
+  [[_status], {
+    params ["_status"];
     [{!isNull player}, {
       player createDiaryRecord [
         "OCAPInfo",
         [
           "Status",
-          "<font color='#33FF33'>OCAP was asked to save, but recording hasn't started yet.</font>"
+          format ["<font color='#33FF33'>%1</font>", _this]
         ], taskNull, "", false
       ];
       player setDiarySubjectPicture [
         "OCAPInfo",
         "\A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa"
       ];
-    }] call CBA_fnc_waitUntilAndExecute;
-  } remoteExecCall ["call", 0, true];
+    }, _status] call CBA_fnc_waitUntilAndExecute;
+  }] remoteExecCall ["call", 0, true];
 };
 
 
@@ -106,18 +109,7 @@ if (_frameTimeDuration < GVAR(minMissionTime) && !_overrideLimits) exitWith {
 call FUNC(stopRecording);
 private _endFrameNumber = GVAR(captureFrameNo);
 
-if (!isNil QGVAR(PFHObject)) then {
-  [GVAR(PFHObject)] call CBA_fnc_deletePerFrameHandlerObject;
-  GVAR(PFHObject) = nil;
-};
-if (!isNil QGVAR(serverFpsPFH)) then {
-  [GVAR(serverFpsPFH)] call CBA_fnc_removePerFrameHandler;
-  GVAR(serverFpsPFH) = nil;
-};
-if (!isNil QGVAR(weatherPFH)) then {
-  [GVAR(weatherPFH)] call CBA_fnc_removePerFrameHandler;
-  GVAR(weatherPFH) = nil;
-};
+call FUNC(removeCaptureHandlers);
 
 private _winSide = if (isNil "_side") then {""} else {if (_side isEqualTo sideUnknown) then {""} else {str _side}};
 private _endMessage = if (isNil "_message") then {if (_winSide == "") then {"Mission ended"} else {""}} else {_message};
@@ -135,7 +127,7 @@ INFO_3("Saving recording — mission: %1 | frames: %2 | tag: %3",GVAR(missionNam
 // Save is now asynchronous — the extension returns immediately and will fire
 // a :MISSION:SAVED: ExtensionCallback when the write + upload finishes.
 // The final success/failure notification is driven from that callback in
-// fnc_initSession.sqf.
+// fnc_handleCallback.sqf.
 INFO_2("Mission save queued — mission: %1 | frames: %2",GVAR(missionName),_endFrameNumber);
 [":MISSION:SAVE:", [_saveTag]] call EFUNC(extension,sendData);
 OCAPEXTLOG(ARR4("Queued recording of mission",GVAR(missionName),"with tag",_saveTag));
@@ -144,7 +136,7 @@ OCAPEXTLOG(ARR4("Queued recording of mission",GVAR(missionName),"with tag",_save
 [format["OCAP saving %1 (%2 frames) — upload will follow", briefingName, _endFrameNumber], 1, [1, 1, 1, 1]] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
 // Interim diary record. The final "exported successfully" / "upload failed"
 // record is appended from the :MISSION:SAVED: ExtensionCallback handler in
-// fnc_initSession.sqf once the async save completes.
+// fnc_handleCallback.sqf once the async save completes.
 [[GVAR(missionName), GVAR(captureFrameNo)], {
   params ["_missionName", "_endFrame"];
 
@@ -166,30 +158,4 @@ OCAPEXTLOG(ARR4("Queued recording of mission",GVAR(missionName),"with tag",_save
 }] remoteExec ["call", [0, -2] select isDedicated, true];
 
 // reset vars in case a new recording is started
-GVAR(captureFrameNo) = 0;
-publicVariable QGVAR(captureFrameNo);
-GVAR(startTime) = nil;
-// Clients watch startTime to know a new recording began and their snapshot chain restarted.
-publicVariable QGVAR(startTime);
-GVAR(playerSnapshotState) = createHashMap;
-GVAR(zeusByUid) = createHashMap;
-GVAR(zeusLastCamera) = createHashMap;
-GVAR(zeusControlledUnits) = createHashMap;
-GVAR(zeusPingLast) = createHashMap;
-// These trackers survive export, but their entity ids belong to this recording.
-GVAR(serviceBaseline) = createHashMap;
-GVAR(serviceSessions) = createHashMap;
-GVAR(serviceRearmSeen) = createHashMap;
-GVAR(staticWeaponSnapshot) = createHashMap;
-GVAR(staticDisassembleClaims) = [];
-GVAR(staticWeaponSeen) = createHashMap;
-{
-  _x setVariable [QGVARMAIN(isInitialized), nil];
-  _x setVariable [QGVARMAIN(exclude), nil];
-  _x setVariable [QGVARMAIN(id), nil];
-  _x setVariable [QGVARMAIN(unitType), nil];
-  _x setVariable [QGVAR(lastZeusCuratorId), nil];
-  _x setVariable [QGVAR(zeusId), nil];
-} count (allUnits + allDeadMen + vehicles);
-GVAR(nextId) = 0;
-EGVAR(extension,sessionReady) = false;
+call FUNC(resetRecording);

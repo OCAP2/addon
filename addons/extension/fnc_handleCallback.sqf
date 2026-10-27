@@ -1,0 +1,279 @@
+/* ----------------------------------------------------------------------------
+FILE: fnc_handleCallback.sqf
+
+FUNCTION: OCAP_extension_fnc_handleCallback
+
+Description:
+  Handles the extension's callbacks, from the ExtensionCallback mission event
+  handler that <OCAP_extension_fnc_initSession> adds: storage readiness builds
+  the mission context, and :MISSION:OK: for the pending registration sets
+  sessionReady, which lets the recorder send data.
+
+Parameters:
+  _name - The extension's name [String]
+  _function - The callback's function, such as ":MISSION:OK:" [String]
+  _dataArr - Its data, as an array in a string [String]
+
+Returns:
+  Nothing
+
+Public:
+  No
+
+Author:
+  Fank
+---------------------------------------------------------------------------- */
+#include "script_component.hpp"
+
+params ["_name", "_function", "_dataArr"];
+
+if (_name != "ocap_recorder") exitWith {};
+
+private _data = parseSimpleArray _dataArr;
+
+TRACE_3("ExtensionCallback",_name,_function,_data);
+
+if (_function isEqualTo ":SYS:VERSION:") exitWith {
+  // version return is automatic during extension init process
+  private _ver = _data#0;
+  GVAR(dllVersion) = _ver;
+  publicVariable QGVAR(dllVersion);
+  INFO_1("Extension version: %1",str _ver);
+};
+
+if (_function isEqualTo ":SYS:DIR:ARMA:") exitWith {
+  // arma dir return is automatic during extension init process
+  private _dir = _data#0;
+  GVAR(armaDir) = _dir;
+  INFO_1("Arma directory: %1",_dir);
+};
+
+if (_function isEqualTo ":SYS:DIR:MODULE:") exitWith {
+  // module dir return is automatic during extension init process
+  private _dir = _data#0;
+  GVAR(addonDir) = _dir;
+  INFO_1("Addon directory: %1",_dir);
+};
+
+if (_function isEqualTo ":SYS:DIR:LOG:") exitWith {
+  // logging dir return is automatic during extension init process
+  private _dir = _data#0;
+  GVAR(logPath) = _dir;
+  INFO_1("Extension logging path: %1",_dir);
+};
+
+if (_function isEqualTo ":SYS:READY:") exitWith {
+  INFO("Extension ready.");
+  // extension is ready, send version
+  [":SYS:ADDON_VERSION:", [QUOTE(VERSION_STR)], 'ocap_recorder'] call FUNC(sendData);
+
+  // get arma dir and module dir
+  [":SYS:DIR:ARMA:", [], 'ocap_recorder'] call FUNC(sendData);
+  [":SYS:DIR:MODULE:", [], 'ocap_recorder'] call FUNC(sendData);
+
+  // get logging dir
+  [":SYS:DIR:LOG:", [], 'ocap_recorder'] call FUNC(sendData);
+
+  INFO("Initializing storage...");
+  [":STORAGE:INIT:", [], 'ocap_recorder'] call FUNC(sendData);
+};
+
+
+if (_function isEqualTo ":STORAGE:ERROR:") exitWith {
+  private _error = _data#0;
+  GVAR(storageFailed) = true; // a recording waiting for storage gives up
+  ERROR_MSG_1("Storage initialization error: %1",_error);
+};
+
+
+if (_function isEqualTo ":STORAGE:OK:") exitWith {
+  private _engine = _data#0;
+  INFO_1("Storage initialized: %1",_engine);
+  if (toLower _engine isEqualTo "sqlite") then {
+    WARNING("SQLite is used as a local fallback due to Postgres connection error -- the 'migratebackups' command will need to be used to centralize your data!");
+  };
+  if (toLower _engine isEqualTo "memory") then {
+    INFO("Memory-only mode active - data will be exported to JSON file");
+  };
+
+  // send mission data
+  // Write mission and world to DB
+
+  // WORLD
+  _world = ( configfile >> "CfgWorlds" >> worldName );
+  _author = getText( _world >> "author" );
+  _name = getText ( _world >> "description" );
+  _source = configSourceMod ( _world );
+  _workshopID = '';
+  {
+    if ( ( _x#1 ) == _source ) then	{
+      _workshopID = _x#7;
+      break;
+    };
+  } foreach getLoadedModsInfo;
+
+  GVAR(worldContext) = [createHashMapFromArray [
+    ["author", _author],
+    ["workshopID", _workshopID],
+    ["displayName", _name],
+    ["worldName", toLower worldName],
+    ["worldNameOriginal", worldName],
+    ["worldSize", getNumber(configFile >> "CfgWorlds" >> worldName >> "worldSize")],
+    ["latitude", 1 - getNumber(configFile >> "CfgWorlds" >> worldName >> "latitude")],
+    ["longitude", getNumber(configFile >> "CfgWorlds" >> worldName >> "longitude")]
+  ]] call CBA_fnc_encodeJSON;
+
+  // MISSION
+  private _loadedMods = getLoadedModsInfo;
+  private _addons = [];
+  {
+    _addons pushBack [_x#0, _x#7]; // name, workshop id
+  } forEach _loadedMods;
+  GVAR(missionContext) = [createHashMapFromArray [
+    ["missionName", missionName],
+    ["briefingName", briefingName],
+    ["missionNameSource", missionNameSource],
+    ["onLoadName", getMissionConfigValue ["onLoadName", ""]],
+    ["author", getMissionConfigValue ["author", ""]],
+    ["serverName", serverName],
+    ["serverProfile", profileName],
+    ["missionStart", nil],
+    ["worldName", toLower worldName],
+    ["tag", EGVAR(settings,saveTag)],
+    ["captureDelay", EGVAR(settings,frameCaptureDelay)],
+    ["addons", _addons],
+    ["extensionBuildVersion", EGVAR(extension,version) # 0],
+    ["extensionBuildCommit", EGVAR(extension,version) # 1],
+    ["extensionBuildDate", EGVAR(extension,version) # 2],
+    ["ocapRecorderExtensionVersion", GVAR(dllVersion)],
+    ["playableSlots", [
+        playableSlotsNumber east,
+        playableSlotsNumber west,
+        playableSlotsNumber independent,
+        playableSlotsNumber civilian,
+        playableSlotsNumber sideLogic
+      ]
+    ],
+    ["sideFriendly", [
+        [east, west] call BIS_fnc_sideIsFriendly,
+        [east, independent] call BIS_fnc_sideIsFriendly,
+        [west, independent] call BIS_fnc_sideIsFriendly
+    ]]
+  ]] call CBA_fnc_encodeJSON;
+
+  // The mission is registered with the extension only when recording
+  // starts (OCAP_extension_fnc_newMission), so a mission that never meets
+  // the auto-start conditions leaves nothing behind in storage. The
+  // websocket storage would otherwise publish it on the web server.
+  INFO("Mission and world context ready; the mission registers when recording starts");
+  TRACE_2("World and mission context",GVAR(worldContext),GVAR(missionContext));
+};
+
+// :MISSION:OK: and :MISSION:FAILED: answer the pending registration only
+// when they carry its token. An older extension sends none.
+private _answersRegistration = {
+  params ["_token"];
+  if (_token isEqualTo (missionNamespace getVariable [QGVAR(registrationToken), ""]) && {GVAR(sessionPending)}) exitWith {true};
+  WARNING_1("Ignoring an answer to an earlier mission registration: %1",_function);
+  false
+};
+
+if (_function isEqualTo ":MISSION:OK:") exitWith {
+  // Payload shape: ["OK", token]
+  if !([_data param [1, missionNamespace getVariable [QGVAR(registrationToken), ""], [""]]] call _answersRegistration) exitWith {};
+  INFO_1("Mission registered in %1 s",diag_tickTime - GVAR(initTimer));
+  INFO("Mission registered. Starting data send.");
+  GVAR(sessionPending) = false;
+  GVAR(sessionReady) = true;
+};
+
+if (_function isEqualTo ":MISSION:FAILED:") exitWith {
+  // Payload shape: [error, token]
+  if !([_data param [1, missionNamespace getVariable [QGVAR(registrationToken), ""], [""]]] call _answersRegistration) exitWith {};
+  private _error = _data param [0, "", [""]];
+  ERROR_1("The extension could not start the mission; recording will not start: %1",_error);
+  GVAR(sessionPending) = false;
+};
+
+if (_function isEqualTo ":MISSION:DISCARDED:") exitWith {
+  // Payload shapes: ["ok"], ["kept"] (the storage keeps what it recorded), ["error", error]
+  private _status = _data param [0, "", [""]];
+  private _error = _data param [1, "", [""]];
+  switch (_status) do {
+    case "ok": {INFO("Discarded recording dropped by storage")};
+    case "kept": {INFO("Discarded recording kept by storage, which cannot drop it")};
+    default {WARNING_1("Storage could not drop the discarded recording: %1",_error)};
+  };
+};
+
+if (_function isEqualTo ":MISSION:SAVED:") exitWith {
+  // Payload shapes:
+  //   ["ok", path]
+  //   ["partial", path, error]
+  //   ["error", error]
+  // Type-check each field: if the extension ever sends something
+  // unexpected, fall back to an empty string rather than crashing
+  // the callback handler with a type error in the switch below.
+  private _status = _data param [0, "", [""]];
+  private _detail = _data param [1, "", [""]];
+  private _extra  = _data param [2, "", [""]];
+
+  // finalDiary appends a final status entry to the OCAPInfo diary
+  // subject so the interim "being saved" record from fnc_exportData.sqf
+  // is followed by the authoritative outcome.
+  private _finalDiary = {
+    params ["_diaryHtml"];
+    [[_diaryHtml], {
+      params ["_html"];
+      player createDiaryRecord [
+        "OCAPInfo",
+        ["Status", _html]
+      ];
+    }] remoteExec ["call", [0, -2] select isDedicated, true];
+  };
+
+  switch (_status) do {
+    case "ok": {
+      INFO_1("Mission save complete — path: %1",_detail);
+      GVAR(lastSaveResult) = ["ok", _detail];
+      [
+        format["OCAP saved %1 successfully", briefingName],
+        2,
+        [0, 0.8, 0, 1]
+      ] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+      [format[
+        "<font color='#33FF33'>OCAP capture of %1 has been exported and uploaded successfully.</font>",
+        briefingName
+      ]] call _finalDiary;
+    };
+    case "partial": {
+      WARNING_2("Mission save complete but upload failed — path: %1 error: %2",_detail,_extra);
+      GVAR(lastSaveResult) = ["partial", _detail, _extra];
+      [
+        format["OCAP saved locally (%1) but upload failed: %2", _detail, _extra],
+        2,
+        [1, 0.8, 0, 1]
+      ] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+      [format[
+        "<font color='#FFCC00'>OCAP capture of %1 was saved locally to %2, but the upload to the web server failed:</font><br/>%3",
+        briefingName, _detail, _extra
+      ]] call _finalDiary;
+    };
+    case "error": {
+      ERROR_MSG_1("Mission save failed: %1",_detail);
+      GVAR(lastSaveResult) = ["error", _detail];
+      [
+        format["OCAP save failed: %1", _detail],
+        2,
+        [1, 0, 0, 1]
+      ] remoteExec ["CBA_fnc_notify", [0, -2] select isDedicated];
+      [format[
+        "<font color='#FF3333'>OCAP save of %1 failed:</font><br/>%2",
+        briefingName, _detail
+      ]] call _finalDiary;
+    };
+    default {
+      WARNING_1("Unknown :MISSION:SAVED: status: %1",_status);
+    };
+  };
+};

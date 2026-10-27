@@ -246,14 +246,38 @@ call EFUNC(extension,initSession);
   Conditional Start Recording
   We'll wait to see if auto-start is enabled and minPlayercount setting is met. This covers scenarios where someone changes the autostart setting during the mission as well, and excludes cases where autostart is disabled.
   If recording hasn't started already, we'll initialize it here assuming the above conditions are met.
-  The startRecording function checks internally if recording has already started by other means via whether GVAR(startTime) has been declared or not.
+  A recording started by other means, whether it already captures (GVAR(startTime) is set) or still registers or holds its registration paused, is left alone.
   Start recording AFTER Briefing screen, so the beginning of the recording matches the start of the actual mission session.
 */
 [
   {(getClientStateNumber > 9 && (call FUNC(getAutoStartPlayerCount)) >= EGVAR(settings,minPlayerCount) && GVAR(autoStart)) || !isNil QGVAR(startTime)},
   {
-    call FUNC(startRecording);
-    [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
+    // Recording started some other way already captures, registers the
+    // mission, or is held by a pause; a start now would undo an admin's
+    // pause.
+    private _held = missionNamespace getVariable [QGVAR(heldByPause), false];
+    if (
+      isNil QGVAR(startTime) &&
+      {!(missionNamespace getVariable [QEGVAR(extension,sessionPending), false])} &&
+      {!EGVAR(extension,sessionReady)} &&
+      {!_held}
+    ) then {
+      call FUNC(startRecording);
+    };
+    // Events are recorded once the capture runs, which waits for the
+    // extension to register the mission, or for a pause to be lifted.
+    // Give up when that failed.
+    [{
+      !isNil QGVAR(startTime) || {
+        !GVAR(recording) &&
+        {!(missionNamespace getVariable [QEGVAR(extension,sessionPending), false])} &&
+        {!EGVAR(extension,sessionReady)} &&
+        {!(missionNamespace getVariable [QGVAR(heldByPause), false])}
+      }
+    }, {
+      if (isNil QGVAR(startTime)) exitWith {};
+      [QGVARMAIN(customEvent), ["generalEvent", "Mission has started!"]] call CBA_fnc_serverEvent;
+    }] call CBA_fnc_waitUntilAndExecute;
   }
 ] call CBA_fnc_waitUntilAndExecute;
 

@@ -81,6 +81,16 @@ GVAR(PFHObject) = [
     GVAR(captureFrameNo) = GVAR(captureFrameNo) + 1;
     publicVariable QGVAR(captureFrameNo);
 
+    // Long enough to save: if the game now moves on without a save, e.g. after
+    // #missions, the extension keeps the recording (see OCAP_extension_fnc_newMission).
+    if (
+      !(missionNamespace getVariable [QEGVAR(extension,recordingKept), true]) &&
+      {(GVAR(captureFrameNo) * GVAR(frameCaptureDelay)) / 60 >= GVAR(minMissionTime)}
+    ) then {
+      EGVAR(extension,recordingKept) = true;
+      [":MISSION:KEEP:", []] call EFUNC(extension,sendData);
+    };
+
     // Stamp TFAR and ACRE range settings on the first recorded frame so
     // playback can reuse the mission's values instead of only the baked defaults.
     if (GVAR(captureFrameNo) == 1) then {

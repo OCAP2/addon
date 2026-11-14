@@ -287,6 +287,34 @@ GVAR(allSettings) = [
   ],
 
   /*
+    CBA Setting: OCAP_settings_excludeMarkerTypeFromRecord
+    Description:
+      Array of marker type classnames. Any marker whose type matches one of these is excluded from recording. Use single quotes! Default: []
+
+    Setting Name:
+      Marker Types To Exclude
+
+    Value Type:
+      Stringified Array
+
+    Example:
+      > "['Empty']"
+  */
+  [
+    QEGVAR(settings,excludeMarkerTypeFromRecord),
+    "EDITBOX", // setting type
+    [
+      "Marker Types to Exclude", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      "Array of marker type classnames. Any marker with one of these types is excluded from recording. Use single quotes! Default: []"
+    ],
+    [COMPONENT_NAME, "Exclusions"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    "[]", // default string value
+    true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
+    {}, // function that will be executed once on mission start and every time the setting is changed.
+    false // requires restart to apply
+  ],
+
+  /*
     CBA Setting: OCAP_settings_excludeVarNameFromRecord
     Description:
       Array of editor variable names (vehicleVarName). Any unit or vehicle whose variable name matches will be excluded from recording. Matching is case-insensitive. Use single quotes! Default: []

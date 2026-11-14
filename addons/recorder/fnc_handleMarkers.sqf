@@ -12,7 +12,7 @@ Description:
 
   Due to the nature of locality and single-view playback, markers of the same name which exist in different states on different clients may display odd behavior during playback.
 
-  Marker exclusions as configured in <OCAP_settings_excludeMarkerFromRecord> are handled client-side to avoid unnecessary network traffic.
+  Marker exclusions as configured in <OCAP_settings_excludeMarkerFromRecord> and <OCAP_settings_excludeMarkerTypeFromRecord> are handled client-side to avoid unnecessary network traffic.
 
   This will also wait until the mission proceeds past the briefing screen, then gather all existing markers and send them to the server for entry onto the Editor/Briefing Markers layer during playback.
 
@@ -41,6 +41,14 @@ Author:
 GVAR(trackedMarkers) = []; // Markers which we save into replay
 GVAR(trackedMarkerStates) = createHashMap;
 
+// VARIABLE: OCAP_recorder_excludeMarkerTypeList
+// Parsed list of marker type classnames excluded from recording, as configured in <OCAP_settings_excludeMarkerTypeFromRecord>.
+GVAR(excludeMarkerTypeList) = if (!isNil QEGVAR(settings,excludeMarkerTypeFromRecord)) then {
+  parseSimpleArray EGVAR(settings,excludeMarkerTypeFromRecord)
+} else {
+  []
+};
+
 // VARIABLE: OCAP_listener_markers
 // Contains handle for <OCAP_handleMarker> CBA event handler.
 
@@ -63,6 +71,14 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
       if (_mrk_name in GVAR(trackedMarkers)) exitWith {
         if (GVARMAIN(isDebug)) then {
           OCAPEXTLOG(ARR3("MARKER:CREATE: Marker",_mrk_name,"already tracked, exiting"));
+        };
+      };
+
+      // A marker whose type is excluded (for example "Empty" zeus location markers)
+      // is not recorded, so no delete event for it needs to be sent either.
+      if (_type in GVAR(excludeMarkerTypeList)) exitWith {
+        if (GVARMAIN(isDebug)) then {
+          OCAPEXTLOG(ARR4("MARKER:CREATE: Marker",_mrk_name,"excluded by type",_type));
         };
       };
 
@@ -204,6 +220,10 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
         _isExcluded = true;
       };
     } forEach GVAR(excludeMarkerList);
+    // check for an excluded marker type, e.g. the "Empty" type of zeus location markers
+    if ((markerType _marker) in GVAR(excludeMarkerTypeList)) then {
+      _isExcluded = true;
+    };
     if (_isExcluded) exitWith {};
 
     private _event = _this;
@@ -255,6 +275,10 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
         _isExcluded = true;
       };
     } forEach GVAR(excludeMarkerList);
+    // check for an excluded marker type, e.g. the "Empty" type of zeus location markers
+    if ((markerType _marker) in GVAR(excludeMarkerTypeList)) then {
+      _isExcluded = true;
+    };
     if (_isExcluded) exitWith {};
 
     private _pos = ATLToASL (markerPos [_marker, true]);
@@ -327,6 +351,10 @@ EGVAR(listener,markers) = [QGVARMAIN(handleMarker), {
           _isExcluded = true;
         };
       } forEach GVAR(excludeMarkerList);
+      // check for an excluded marker type, e.g. the "Empty" type of zeus location markers
+      if ((markerType _marker) in GVAR(excludeMarkerTypeList)) then {
+        _isExcluded = true;
+      };
       if (_isExcluded) then {continue};
 
 

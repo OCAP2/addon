@@ -8,6 +8,9 @@
 
 	    - <OCAP_recorder_fnc_eh_onUserAdminStateChanged> to add/remove when a player logs in or out as admin on the server
 	    - <OCAP_recorder_fnc_eh_onUserSelectedPlayer> at mission start to determine if a player is in <OCAP_administratorList>
+	    - <OCAP_enabledAdministratorUI> changing during the mission, for every player
+
+	    With <OCAP_enabledAdministratorUI> off, nobody gets the entry and anyone who has it loses it.
 
 	  Parameters:
 	    _PID - PlayerID indicating unique network client on the server [String]
@@ -93,6 +96,13 @@ _fnc_removeControls = {
 	  // Variable: OCAP_hasAdminControls
 	  // Applied on units processed in <OCAP_recorder_fnc_adminUIControl>. Indicates whether or not they have the administrative diary entry available. Server missionNamespace only.
 	_unit setVariable [QGVARMAIN(hasAdminControls), false];
+};
+
+// Administrator UI turned off: nobody gets the entry, and anyone who has it loses it
+if (!GVARMAIN(enabledAdministratorUI)) exitWith {
+	if (_unit getVariable [QGVARMAIN(hasAdminControls), false]) then {
+		[_owner, _unit] call _fnc_removeControls;
+	};
 };
 
 // check if admin

@@ -60,6 +60,37 @@ GVAR(allSettings) = [
   ],
 
   /*
+    CBA Setting: OCAP_enabledAdministratorUI
+    Description:
+      Turns the Administrator UI in the briefing diary on or off. Off is useful for communities with their own recording controls (an AAR framework, a persistence system). Changing it during the mission applies it to every player at once. Default: true
+
+    Setting Name:
+      Administrator UI Enabled
+
+    Value Type:
+      Boolean
+  */
+  [
+    QGVARMAIN(enabledAdministratorUI),
+    "CHECKBOX", // setting type
+    [
+      "Administrator UI Enabled", // Pretty name shown inside the ingame settings menu. Can be stringtable entry.
+      "Turns the Administrator UI in the briefing diary on or off. Off is useful for communities with their own recording controls (an AAR framework, a persistence system). Default: true"
+    ],
+    [COMPONENT_NAME, "Core"], // Pretty name of the category where the setting can be found. Can be stringtable entry.
+    true, // default enabled
+    true, // "_isGlobal" flag. Set this to true to always have this setting synchronized between all clients in multiplayer
+    {
+      // Applied to every player on the server, once the recorder is ready (at mission start the players get it as they connect)
+      if (!isServer || {isNil QEFUNC(recorder,adminUIcontrol)}) exitWith {};
+      {
+        [getPlayerID _x, "connect"] call EFUNC(recorder,adminUIcontrol);
+      } forEach (allPlayers - entities "HeadlessClient_F");
+    }, // function that will be executed once on mission start and every time the setting is changed.
+    false // requires restart to apply
+  ],
+
+  /*
     CBA Setting: OCAP_administratorList
     Description:
       An array or server-visible variable referencing one that is a list of playerUIDs. Additional briefing diary or UI elements may be available for more accessible control over OCAP's features. Takes effect on player server connection. Format: [] OR myAdminPUIDs | Default: []
